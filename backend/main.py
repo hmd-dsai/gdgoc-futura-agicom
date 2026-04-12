@@ -1,5 +1,6 @@
 import json
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from google.genai import types
 
 # Nhập các thành phần từ file khác
@@ -12,6 +13,14 @@ from prompts import CHAT_SYSTEM_PROMPT, STRATEGY_SYSTEM_PROMPT
 from services import analyze_strategy_slow_track, customer_care_fast_track
 
 app = FastAPI(title="Agicom Core Backend")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Cho phép mọi Frontend gọi vào
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/observe-and-think")
 async def process_data_pipeline(input_data: IncomingData):
