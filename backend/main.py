@@ -10,8 +10,22 @@ from models import (
 )
 from prompts import CHAT_SYSTEM_PROMPT, STRATEGY_SYSTEM_PROMPT
 from services import analyze_strategy_slow_track, customer_care_fast_track
+from services import analyze_raw_data_phase1
 
 app = FastAPI(title="Agicom Core Backend")
+
+@app.get("/test-phase1/{sku_id}")
+async def test_data_analyst_agent(sku_id: str):
+    """API dùng để test khả năng đọc Raw Data của LLM Phase 1"""
+    try:
+        result = await analyze_raw_data_phase1(sku_id)
+        return {
+            "status": "success",
+            "message": "Data Analyst đã trích xuất thành công!",
+            "data": result
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/observe-and-think")
 async def process_data_pipeline(input_data: IncomingData):

@@ -1,0 +1,94 @@
+{
+  "search_query": "Samsung Galaxy A56 5G 128GB",
+  "scraping_timestamp": "2026-04-13T10:30:00Z",
+  "internal_data": {
+    "product_id": "SKU-A56",
+    "current_price": 8140000,
+    "stock_level": 85,
+    "cost_price": 7100000,
+    "min_margin_percent": 5,
+    "conversion_rate": 0.01,
+    "rating": 4.8,
+    "rating_count": 36,
+    "promotions": ["Freeship"]
+  },
+  "market_raw_data": [
+    {
+      "shop_name": "NEXTGen Store Việt Nam",
+      "is_mall": true,
+      "price": 8790000,
+      "sold_count": 590,
+      "rating": 4.9,
+      "rating_count": 106,
+      "promotions": ["Freeship", "Voucher 150k"]
+    },
+    {
+      "shop_name": "Clickbuy Official Store",
+      "is_mall": true,
+      "price": 8650000,
+      "sold_count": 5000,
+      "rating": 5.0,
+      "rating_count": 955,
+      "promotions": ["Freeship"]
+    },
+    {
+      "shop_name": "SamCenter Official Store",
+      "is_mall": true,
+      "price": 8640000,
+      "sold_count": 2000,
+      "rating": 5.0,
+      "rating_count": 725,
+      "promotions": ["Freeship", "Voucher 5% max 50k"]
+    },
+    {
+      "shop_name": "Galaxy Zone",
+      "is_mall": true,
+      "price": 8635000,
+      "sold_count": 377,
+      "rating": 4.9,
+      "rating_count": 92,
+      "promotions": ["Freeship"]
+    },
+    {
+      "shop_name": "GALAXY VIETNAM STORE",
+      "is_mall": true,
+      "price": 8790000,
+      "sold_count": 2000,
+      "rating": 4.9,
+      "rating_count": 434,
+      "promotions": ["Freeship"]
+    }
+  ],
+  "customer_reviews": [
+    {
+      "rating": 5,
+      "classification": ["Hồng", "Không kèm củ sạc"],
+      "review": "Hàng chính hãng thì cũng yên tâm, nhìn đẹp, xài sơ cũng mượt mà, trải nghiệm lâu mới biết ưu nhược điểm",
+      "time": "2026-04-07"
+    },
+    {
+      "rating": 5,
+      "classification": ["Xám", "Không kèm củ sạc"],
+      "review": "Sản phẩm nguyên seal sẵn giao đúng màu. Săn được giá tốt so với mua bên ngoài. Máy đã kích trc vài ngày",
+      "time": "2026-04-04"
+    },
+    {
+      "rating": 5,
+      "classification": ["Xám", "Không kèm củ sạc"],
+      "review": "Lần đầu tiên mua đt trên store ở Shopee nhưng mọi thứ trải nghiệm đều tốt.... 👍👍 5 sao ko có nhưng",
+      "time": "2026-04-03"
+    },
+    {
+      "rating": 4,
+      "classification": ["Xám", "Không kèm củ sạc"],
+      "review": "Dùng thì thấy cũng ok, pin tốt màn hình cũng đẹp so với giá tiền. Có cái kích hoạt bảo hành từ 14 tháng 2 tức là sớm hơn 1,5 tháng với thời điểm mình nhận máy. Đơn hàng thì giao lâu quá",
+      "time": "2026-03-27"
+    },
+    {
+      "rating": 5,
+      "classification": ["Xanh", "Không kèm củ sạc"],
+      "review": "Tuyệt vời Hàn Nguyên team và mới chỉ Kích hoạt bảo hành hai hôm trước khi nhận cảm ơn nhiều",
+      "time": "2026-03-27"
+    }
+  ]
+}

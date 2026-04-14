@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import List
 
 class InternalData(BaseModel):
     current_price: float
@@ -14,6 +15,15 @@ class MarketData(BaseModel):
     competitor_rating: float = 4.5  # THÊM MỚI: Rating đối thủ
     our_rating: float = 4.8         # THÊM MỚI: Rating của shop mình
     platform_campaign: str = "None" # THÊM MỚI: Ví dụ "Mega Sale 4.4", "None"
+
+class MarketInsight(BaseModel):
+    competitor_min_price: float
+    competitor_avg_price: float
+    market_trend: str
+    overall_sentiment: str
+    customer_pain_points: List[str] # Các vấn đề khách hay phàn nàn (vd: "giao lâu", "trôi bảo hành")
+    top_frequent_questions: List[str]
+    analyst_summary: str # Một câu tóm tắt ngắn gọn tình hình thị trường
 
 class CustomerContext(BaseModel):
     recent_sentiment: str
