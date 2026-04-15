@@ -84,35 +84,72 @@ export function renderStrategyCardHTML(s) {
   if(s.type === 'pricing') typeBadge = '<div class="badge-type pricing">💰 CẠNH TRANH GIÁ</div>';
   else if(s.type === 'content') typeBadge = '<div class="badge-type content">📝 TỐI ƯU NỘI DUNG</div>';
   else typeBadge = '<div class="badge-type chat_response">💬 XỬ LÝ KHIẾU NẠI</div>';
-  
+
   let statusBadge = '';
   if(s.status === 'pending') statusBadge = '<div class="badge-status pending">● Chờ duyệt</div>';
   else if(s.status === 'approved') statusBadge = '<div class="badge-status approved">● Tự động Duyệt</div>';
   else statusBadge = '<div class="badge-status denied">● Đã từ chối</div>';
-  
-  let currentVal = "250.000đ";
-  let suggestVal = "250.000đ";
-  let reasonText = "Duy trì mức giá hiện tại là 250.000đ dựa trên chiến lược định giá Premium.";
-  let contentText = "Cần cập nhật ngay thông tin về tính năng vào tiêu đề.";
-  
-  if (s.id === 'strat-001') { currentVal = "28.500.000đ"; suggestVal = "27.790.000đ"; }
-  else if (s.id === 'strat-002') { currentVal = "5.450.000đ"; suggestVal = "5.690.000đ"; }
-  
-  return `
-    <div class="strategy-card" id="stratCard-${s.id}">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
-        ${typeBadge}
-        ${statusBadge}
-      </div>
-      
-      <h2 class="strategy-title">Đề xuất: ${s.type === 'pricing' ? suggestVal : s.title}</h2>
-      
-      <div class="strategy-description">
-        <p><b>Lý do:</b> ${s.description || reasonText}</p>
-        <p><b>Nội dung:</b> ${contentText}</p>
-      </div>
-      
-      ${s.type === 'pricing' ? `
+
+  // ---------------------------------------------------------------------------
+  // Bug 1 Fix: Resolve price values from structured fields (_proposedPrice /
+  // _currentPrice) injected by app.js when available, so live API data renders
+  // as formatted numbers – never as a raw JSON dump.
+  // ---------------------------------------------------------------------------
+
+  /** Format a raw number (e.g. 27990000) into a Vietnamese price string */
+  function fmtPrice(num) {
+    if (num == null || isNaN(num)) return null;
+    return Number(num).toLocaleString('vi-VN') + 'đ';
+  }
+
+  // Default values for the two mock strategies (kept for backward-compat)
+  let currentVal = null;
+  let suggestVal = null;
+  let contentText = s._contentSuggestion || 'Cần cập nhật ngay thông tin về tính năng vào tiêu đề.';
+  let reasonText  = s.description || 'Duy trì mức giá hiện tại dựa trên chiến lược định giá hiện hành.';
+
+  if (s.id === 'strat-001') { currentVal = '28.500.000đ'; suggestVal = '27.790.000đ'; }
+  else if (s.id === 'strat-002') { currentVal = '5.450.000đ'; suggestVal = '5.690.000đ'; }
+  else {
+    // Live strategy: use the parsed structured price fields
+    currentVal = fmtPrice(s._currentPrice);
+    suggestVal = fmtPrice(s._proposedPrice);
+  }
+
+  // Final fallback so the heading always shows something
+  const displayPrice = suggestVal || currentVal || '—';
+
+  // ---------------------------------------------------------------------------
+  // Bug 2 Fix: Suppress the price comparison UI when proposed === current
+  // (or within a negligible 0.1% threshold).  Show an "optimal price" notice
+  // instead so the user is never shown a meaningless "change" arrow.
+  // ---------------------------------------------------------------------------
+  let pricingSection = '';
+  if (s.type === 'pricing') {
+    const numCurrent  = Number(s._currentPrice  ?? null);
+    const numProposed = Number(s._proposedPrice ?? null);
+    const hasRealPrices = !isNaN(numCurrent) && !isNaN(numProposed) && numCurrent > 0;
+
+    const priceUnchanged = hasRealPrices &&
+      Math.abs(numProposed - numCurrent) / numCurrent < 0.001; // < 0.1% threshold
+
+    if (priceUnchanged) {
+      // No meaningful price change — show an informational notice, not an arrow
+      pricingSection = `
+      <div class="comparison-box-container" style="justify-content:center;">
+        <div style="
+          text-align:center; padding:12px 20px;
+          background:var(--accent-emerald-bg,rgba(16,185,129,0.1));
+          border:1px solid var(--accent-emerald,#10b981);
+          border-radius:10px; color:var(--accent-emerald,#10b981);
+          font-weight:600; font-size:0.9rem;
+        ">
+          ✅ Giá hiện tại đang tối ưu (${currentVal || displayPrice}) – Không cần thay đổi.
+        </div>
+      </div>`;
+    } else if (currentVal && suggestVal) {
+      // Prices differ meaningfully – show the standard comparison arrow
+      pricingSection = `
       <div class="comparison-box-container">
         <div class="comp-col">
           <div class="comp-label">HIỆN TẠI</div>
@@ -123,21 +160,76 @@ export function renderStrategyCardHTML(s) {
           <div class="comp-label">ĐỀ XUẤT (AI)</div>
           <div class="comp-val suggest">${suggestVal}</div>
         </div>
-      </div>` : ''}
-      
+      </div>`;
+    }
+    // If neither price could be resolved (both null), omit the block entirely.
+  }
+
+  // ---------------------------------------------------------------------------
+  // Bug 1 Fix: Product name chip – shown for ALL card types.
+  // Priority: _productName (structured field) → title (always present).
+  // ---------------------------------------------------------------------------
+  const productLabel = s._productName || s.title || '';
+
+  // ---------------------------------------------------------------------------
+  // Bug 2 Fix: Dynamic AI reasoning per card type.
+  // Priority: _aiReasoning (real AI text) → smart per-type fallback.
+  // ---------------------------------------------------------------------------
+  let aiReasoningText = s._aiReasoning;
+  if (!aiReasoningText) {
+    // Intelligent per-type fallback – never the same generic sentence
+    if (s.type === 'pricing') {
+      const change = (s._currentPrice && s._proposedPrice)
+        ? (s._proposedPrice < s._currentPrice ? 'giảm' : 'tăng')
+        : 'điều chỉnh';
+      aiReasoningText = `AI phân tích dữ liệu thị trường và đề xuất ${change} giá dựa trên biến động cạnh tranh và chỉ thị quản lý. Dựa trên xu hướng hiện tại và phân tích chỉ số tài chính.`;
+    } else if (s.type === 'content') {
+      aiReasoningText = 'AI phân tích listing đối thủ top 5 Shopee và phát hiện thiếu từ khóa quan trọng. Cập nhật tiêu đề và mô tả dự kiến cải thiện ranking tìm kiếm tự nhiên và CTR của sản phẩm.';
+    } else {
+      aiReasoningText = 'AI phân tích lịch sử tương tác và xếp loại yêu cầu này cần xử lý ưu tiên cao. Phản hồi nhanh trong khung giờ vàng có thể chuyển trải nghiệm tiêu cực thành review tích cực.';
+    }
+  }
+
+  return `
+    <div class="strategy-card" id="stratCard-${s.id}">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+        ${typeBadge}
+        ${statusBadge}
+      </div>
+
+      ${productLabel ? `
+      <div style="
+        display:inline-flex; align-items:center; gap:6px;
+        background:var(--bg-secondary,rgba(255,255,255,0.05));
+        border:1px solid var(--border-primary,rgba(255,255,255,0.1));
+        border-radius:20px; padding:4px 12px;
+        font-size:0.78rem; font-weight:600;
+        color:var(--text-secondary); letter-spacing:0.02em;
+        margin-bottom:14px;
+      ">📦 ${productLabel}</div>` : ''}
+
+      <h2 class="strategy-title">Đề xuất: ${s.type === 'pricing' ? displayPrice : s.title}</h2>
+
+      <div class="strategy-description">
+        <p><b>Lý do:</b> ${reasonText}</p>
+        <p><b>Nội dung:</b> ${contentText}</p>
+      </div>
+
+      ${pricingSection}
+
       <div class="confidence-row">
         <span class="conf-label">Độ tin cậy AI:</span>
         <div class="conf-progress"><div class="conf-fill" style="width: ${s.confidence}%"></div></div>
         <span class="conf-value">${s.confidence}%</span>
       </div>
-      
+
       <div class="reasoning-toggle" onclick="this.nextElementSibling.classList.toggle('open')">
         🔍 Giải thích Lý do (AI) ▲
       </div>
       <div class="reasoning-content open">
-        <p><b style="color: #ca8a04">✨ Thực thi chiến lược do Giám đốc ủy quyền:</b> Hệ thống phát hiện biến động chỉ số dựa trên dữ liệu mua sắm theo yêu cầu của bạn.</p>
+        <p><b style="color: #ca8a04">✨ Phân tích AI:</b> ${aiReasoningText}</p>
       </div>
-      
+
       ${s.status === 'pending' ? `
       <div class="action-buttons">
         <button class="btn-approve" onclick="window.approveStrategy('${s.id}')">✅ Duyệt ngay</button>

@@ -250,7 +250,22 @@ function setupGuidanceToolbar() {
                 };
                 const result = await observeAndThink(payload);
 
-                // Build a new strategy card from the live response
+                // Bug 1 Fix: data.details is a raw JSON string from the backend;
+                // parse it so we can extract structured fields instead of dumping text.
+                let parsedDetails = {};
+                const rawDetails = result?.data?.details ?? result?.data?.strategy ?? '';
+                if (rawDetails && typeof rawDetails === 'string') {
+                    try {
+                        parsedDetails = JSON.parse(rawDetails);
+                    } catch (_) {
+                        // Not valid JSON – treat as plain text description
+                        parsedDetails = { pricing_reasoning: rawDetails };
+                    }
+                } else if (rawDetails && typeof rawDetails === 'object') {
+                    parsedDetails = rawDetails;
+                }
+
+                // Build a new strategy card from the live response with structured data
                 const liveStrategy = {
                     id: 'strat-live-' + Date.now(),
                     type: 'pricing',
@@ -258,10 +273,28 @@ function setupGuidanceToolbar() {
                     confidence: 90,
                     impact: 'high',
                     title: 'Phản hồi chỉ thị (Live AI)',
+                    // Bug 1 (product name): Try to get product name from parsed AI response;
+                    // fall back to the competitor context that was sent with the request.
+                    _productName:
+                        parsedDetails.product_name ||
+                        `Phân tích thị trường – ${payload.competitor_name || 'Đa đối thủ'}`,
+                    // Bug 1 (reason text): Use pricing_reasoning as the card summary
                     description:
-                        result?.data?.details ||
-                        result?.data?.strategy ||
+                        parsedDetails.pricing_reasoning ||
                         `AI đã phân tích chỉ thị: "${cmd}".`,
+                    // Bug 2 (dynamic AI reasoning): Full reasoning block for the expandable section
+                    _aiReasoning:
+                        (parsedDetails.pricing_reasoning
+                            ? `Chiến lược: ${parsedDetails.pricing_reasoning}` +
+                              (parsedDetails.urgency_level && parsedDetails.urgency_level !== 'None'
+                                  ? ` | Mức độ khẩn: ${parsedDetails.urgency_level}`
+                                  : '')
+                            : null) ||
+                        `AI tuân thủ chỉ thị quản lý: "${cmd}". Đối thủ tham chiếu: ${payload.competitor_name} (${(payload.competitor_min_price / 1e6).toFixed(2)}M₫). Dựa trên xu hướng thị trường: ${payload.market_trend}.`,
+                    // Structured price fields for comparison section
+                    _proposedPrice:     parsedDetails.proposed_price      ?? null,
+                    _currentPrice:      payload.competitor_min_price       ?? null,
+                    _contentSuggestion: parsedDetails.content_update_suggestion ?? null,
                     _apiResult: result,
                 };
 
