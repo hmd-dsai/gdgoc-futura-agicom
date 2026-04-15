@@ -1,5 +1,6 @@
 import json
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from google.genai import types
 
 # Nhập các thành phần từ file khác
@@ -18,6 +19,24 @@ from services import (
 )
 
 app = FastAPI(title="Agicom Core Backend")
+
+# ---------------------------------------------------------------------------
+# CORS – allow the Vanilla JS frontend served by VS Code Live Server / Vite
+# ---------------------------------------------------------------------------
+ALLOWED_ORIGINS = [
+    "http://localhost:5500",      # VS Code Live Server (default)
+    "http://127.0.0.1:5500",     # Live Server (loopback alias)
+    "http://localhost:3000",      # npm dev server / React / Vite
+    "http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],   # GET, POST, OPTIONS, …
+    allow_headers=["*"],   # Content-Type, Authorization, …
+)
 
 @app.get("/test-phase1/{sku_id}")
 async def test_data_analyst_agent(sku_id: str):
