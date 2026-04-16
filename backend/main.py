@@ -169,25 +169,36 @@ async def process_market_strategy(product: ProductRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/fast-track-chat-v2")
-async def process_chat_v2(chat: ChatMessage, profile: ShopProfile):
+async def process_chat_v2(chat: ChatMessage, profile: ShopProfile, customer_id: str = "guest_user"):
+    # Lưu ý: Tôi thêm customer_id vào tham số. Bạn có thể lấy từ chat object nếu model ChatMessage có trường này.
+    db = SessionLocal()
     try:
-        # Chạy qua bộ não RAG
-        ai_response = await cskh_rag_service(chat.customer_text, profile.brand_tone)
+        # A. LƯU TIN NHẮN KHÁCH VÀO HISTORY
+        from database import save_message
+        save_message(db, customer_id, "user", chat.customer_text)
+
+        # B. CHẠY SERVICE (Bây giờ đã có đọc history)
+        ai_response = await cskh_rag_service(db, customer_id, chat.customer_text, profile.brand_tone)
         
-        # LƯU VÀO DB ĐỂ HỌC VÀ BÁO CÁO
-        db = SessionLocal()
+        suggested_reply = ai_response.get("suggested_reply", "")
+
+        # C. LƯU CÂU TRẢ LỜI AI VÀO HISTORY
+        save_message(db, customer_id, "assistant", suggested_reply)
+
+        # D. LƯU VÀO LOG (Để Daily Summary) - GIỮ NGUYÊN
         new_log = ChatLog(
             customer_q=chat.customer_text,
-            ai_a=ai_response["suggested_reply"],
+            ai_a=suggested_reply,
             insight=ai_response.get("sensor_insight")
         )
         db.add(new_log)
         db.commit()
-        db.close()
         
         return {"status": "success", "data": ai_response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
 
 @app.post("/learn-feedback")
 async def human_feedback(customer_q: str, human_a: str):

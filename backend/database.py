@@ -31,32 +31,28 @@ class CoordinationTask(Base):
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# 1. Định nghĩa Model ChatMessage
+# Thêm vào database.py
 class ChatMessage(Base):
     __tablename__ = "chat_messages"
     id = Column(Integer, primary_key=True, index=True)
     customer_id = Column(String, index=True)
-    role = Column(String)  # 'user' hoặc 'assistant'
+    role = Column(String) # 'user' hoặc 'assistant'
     content = Column(Text)
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
 
-# 2. Hàm lưu tin nhắn vào DB
-def save_message(db, customer_id: str, role: str, content: str):
-    new_msg = ChatMessage(customer_id=customer_id, role=role, content=content)
-    db.add(new_msg)
-    db.commit()
-    db.refresh(new_msg)
-    return new_msg
-
-# 3. Hàm lấy N tin nhắn gần nhất
-def get_chat_history(db, customer_id: str, limit: int = 10):
-    # Lấy ra tin nhắn mới nhất trước, sau đó đảo ngược lại để đúng thứ tự hội thoại
+def get_chat_history(db, customer_id: str, limit: int = 6):
+    from sqlalchemy import desc
     messages = db.query(ChatMessage)\
         .filter(ChatMessage.customer_id == customer_id)\
         .order_by(desc(ChatMessage.timestamp))\
         .limit(limit)\
         .all()
-    return messages[::-1] # Đảo ngược list để trả về theo thứ tự thời gian tăng dần
+    return messages[::-1] # Trả về thứ tự cũ -> mới
+
+def save_message(db, customer_id: str, role: str, content: str):
+    new_msg = ChatMessage(customer_id=customer_id, role=role, content=content)
+    db.add(new_msg)
+    db.commit()
 
 def init_db():
     Base.metadata.create_all(bind=engine)

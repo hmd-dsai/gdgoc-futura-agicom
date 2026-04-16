@@ -88,72 +88,53 @@ async def customer_care_fast_track(data: dict):
     except:
         return {"track": "Fast Track", "status": "Error parsing JSON"}
 
-async def cskh_rag_service(customer_text: str, brand_tone: str):
-    # Kiểm tra nhanh đầu vào (Input Validation)
-    if len(customer_text.strip()) < 3 or customer_text.lower() in ["string", "test", "hello"]:
-        return {
-            "suggested_reply": "Dạ Agicom chào anh/chị, em có thể giúp gì được cho mình ạ?",
-            "confidence_score": 1.0,
-            "is_safe": True,
-            "sentiment_analysis": "bình thường",
-            "identified_product_id": "None",
-            "risk_level": "Thấp",
-            "risk_category": "None",
-            "sensor_insight": "Khách chào hỏi hoặc nhập tin nhắn test"
-        }
+async def cskh_rag_service(db, customer_id: str, customer_text: str, brand_tone: str):
+    # 0. Lấy lịch sử từ SQLite
+    history_data = get_chat_history(db, customer_id, limit=6)
+    history_str = "\n".join([f"{m.role}: {m.content}" for m in history_data])
 
-    # 1. Retrieval
+    # 1. Retrieval (RAG) - GIỮ NGUYÊN
     policy_hits = policy_col.query(query_texts=[customer_text], n_results=1)
     product_hits = product_col.query(query_texts=[customer_text], n_results=1)
     qa_hits = resolved_qa_col.query(query_texts=[customer_text], n_results=1)
     
-    # Một mẹo nhỏ: Chỉ lấy context nếu điểm số (distance) thấp (nghĩa là độ khớp cao)
-    # ChromaDB dùng distance, càng nhỏ càng khớp. Ví dụ: distance < 1.0
     def get_valid_hits(hits):
         if hits and hits.get('documents') and len(hits['documents'][0]) > 0:
-            # Nếu distance > 1.5 thường là kết quả "ép buộc", không liên quan
             if hits.get('distances') and hits['distances'][0][0] > 1.5:
                 return "Không có thông tin liên quan."
             return hits['documents'][0][0]
         return "Không có thông tin cụ thể."
 
-    context = f"""
-    Quy định: {get_valid_hits(policy_hits)}
-    Sản phẩm: {get_valid_hits(product_hits)}
-    Kinh nghiệm: {get_valid_hits(qa_hits)}
-    """
+    context = f"Quy định: {get_valid_hits(policy_hits)}\nSản phẩm: {get_valid_hits(product_hits)}\nKinh nghiệm: {get_valid_hits(qa_hits)}"
 
-    # 2. Generation (Gemini sẽ nhận prompt đã được siết chặt quy tắc)
-    user_prompt = CHAT_RAG_PROMPT.format(context=context, brand_tone=brand_tone)
+    # 2. Generation (Kết hợp History + RAG)
+    user_prompt = CHAT_RAG_PROMPT.format(
+        chat_history=history_str, 
+        context=context, 
+        brand_tone=brand_tone
+    )
     
     response = await client.aio.models.generate_content(
         model="gemini-flash-latest",
-        contents=[user_prompt, f"Tin nhắn khách: {customer_text}"],
+        contents=[user_prompt, f"Tin nhắn khách hiện tại: {customer_text}"],
         config={"response_mime_type": "application/json"}
     )
     
     result = json.loads(response.text)
 
-    # 3. Trích xuất các thông tin AI vừa phân tích
+    # 3. Phân tích Sentiment & Risk - GIỮ NGUYÊN
     sentiment = result.get("sentiment_analysis", "bình thường")
-    product_id = result.get("identified_product_id", "General") # AI tự xác định sản phẩm
+    product_id = result.get("identified_product_id", "General")
     risk_level = result.get("risk_level", "Thấp")
     risk_cat = result.get("risk_category", "None")
     insight = result.get("sensor_insight")
 
-    # 4. Logic Guardrail: Nếu khách tức giận, chặn Auto-Reply
     if sentiment == "tức giận" or risk_level == "Cao":
         result["is_safe"] = False
-        print(f"[!] CẢNH BÁO RỦI RO: Khách {sentiment}, ID sản phẩm: {product_id}")
 
-    # 5. Coordination: Điều phối dựa trên dữ liệu AI cung cấp
+    # 4. Coordination (Điều phối task tự động) - GIỮ NGUYÊN
     if insight and insight != "None":
-        await coordinate_agents(
-            insight_text=insight, 
-            product_id=product_id, 
-            risk_level=risk_level, 
-            risk_category=risk_cat
-        )
+        await coordinate_agents(insight, product_id, risk_level, risk_cat)
 
     return result
 
