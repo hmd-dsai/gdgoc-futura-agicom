@@ -15,8 +15,11 @@ if not API_KEY:
 
 client = genai.Client(api_key=API_KEY)
 
-# Khởi tạo ChromaDB Client (Lưu local)
-chroma_client = chromadb.PersistentClient(path="./chroma_db")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CHROMA_PATH = os.path.join(BASE_DIR, "chroma_db")
+
+# Khởi tạo ChromaDB Client với đường dẫn cố định
+chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)
 
 # Sử dụng Embedding mặc định hoặc Gemini Embedding (nếu muốn tối ưu)
 # Ở đây dùng mặc định của Chroma để đơn giản cho MVP

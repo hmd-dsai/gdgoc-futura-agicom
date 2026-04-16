@@ -1,10 +1,12 @@
-# database.py
+import os
 from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Boolean, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import datetime
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./agicom_system.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "agicom_system.db")
+SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
 Base = declarative_base()
 
 # Lưu Log Chat để báo cáo cuối ngày
