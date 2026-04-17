@@ -4,7 +4,7 @@ import os
 # Thêm đường dẫn root vào sys.path để import được config
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
-from config import policy_col
+from backend.config import policy_col
 
 def seed_policy():
     print("[*] Đang nạp Chính sách sàn AGICOM vào Vector DB...")

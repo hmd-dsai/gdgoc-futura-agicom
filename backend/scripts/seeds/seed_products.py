@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
-from config import product_col
+from backend.config import product_col
 
 def seed_products():
     print("[*] Đang nạp Danh mục sản phẩm mẫu...")

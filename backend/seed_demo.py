@@ -1,7 +1,7 @@
 # seed_demo.py
 import datetime
-from database import SessionLocal, ChatLog, CoordinationTask, init_db
-from config import policy_col, product_col, resolved_qa_col
+from backend.database import SessionLocal, ChatLog, CoordinationTask, init_db
+from backend.config import policy_col, product_col, resolved_qa_col
 
 def seed_everything():
     print("[*] Đang khởi tạo Database SQL...")

@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
-from database import SessionLocal, ChatMessage, init_db
+from backend.database import SessionLocal, ChatMessage, init_db
 
 def seed_chat_history():
     print("[*] Đang tạo lịch sử hội thoại giả lập cho khách 'customer_001'...")

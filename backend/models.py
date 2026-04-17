@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field
-from typing import List, Literal, Optional
+from pydantic import BaseModel
+from typing import List
 
 class ShopProfile(BaseModel):
     target_customers: str = "Khách hàng phổ thông"
@@ -90,61 +90,3 @@ class ReviewExtractedInsight(BaseModel):
     key_issue: str       # Vấn đề cốt lõi (vd: "Giao hàng chậm", "Lỗi móp méo")
     action_needed: bool  # Có cần agent khác xử lý không?
     qa_knowledge: str    # Bài học rút ra (ví dụ: "Nếu khách hỏi về móp méo, hãy báo do vận chuyển và xin lỗi")
-
-# ============================================================
-# MODEL MỚI: Chủ shop duyệt / ghi đè / từ chối đề xuất AI
-# ============================================================
-class ChatApprovalRequest(BaseModel):
-    pending_id: int = Field(..., description="ID của bản ghi PendingChatMessage")
-
-    action: Literal["approve", "override", "reject"] = Field(
-        ...,
-        description=(
-            "'approve'  → Dùng đúng câu AI đề xuất, lưu lịch sử\n"
-            "'override' → Chủ shop tự điền nội dung thay thế, AI học từ đó\n"
-            "'reject'   → Hủy hoàn toàn, không gửi gì, AI học lý do từ chối"
-        )
-    )
-
-    # Bắt buộc khi action = "override"
-    custom_message: str = Field(
-        default="",
-        description="Nội dung tin nhắn tự điền của chủ shop (bắt buộc khi action='override')"
-    )
-
-    # Tuỳ chọn — cung cấp thêm context để AI học tốt hơn
-    rejection_reason: str = Field(
-        default="",
-        description="Lý do từ chối / chỉnh sửa (AI sẽ dùng để cải thiện bản thân)"
-    )
-
-# ============================================================
-# MODELS MỚI: Quản trị khủng hoảng
-# ============================================================
-
-class CrisisDetectionRequest(BaseModel):
-    """
-    Yêu cầu quét và phát hiện khủng hoảng.
-    - Nếu product_id được cung cấp: chỉ quét sản phẩm đó.
-    - Nếu để trống: quét TẤT CẢ sản phẩm có tín hiệu rủi ro gần đây.
-    """
-    product_id: Optional[str] = Field(
-        default=None,
-        description="ID sản phẩm cần quét. Để trống = quét tất cả sản phẩm."
-    )
-    lookback_days: int = Field(
-        default=7,
-        ge=1, le=90,
-        description="Số ngày nhìn lại để thu thập tín hiệu (mặc định 7 ngày)"
-    )
-    force_regenerate: bool = Field(
-        default=False,
-        description="True = tái tạo kế hoạch AI dù alert đã tồn tại"
-    )
-
-class CrisisResolveRequest(BaseModel):
-    """Chủ shop đánh dấu khủng hoảng đã được xử lý."""
-    resolution_note: str = Field(
-        default="",
-        description="Ghi chú về cách xử lý (để học cho lần sau)"
-    )

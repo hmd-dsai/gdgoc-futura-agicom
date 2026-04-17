@@ -3,7 +3,7 @@ import os
 import datetime
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
-from database import SessionLocal, ChatLog, CoordinationTask, init_db
+from backend.database import SessionLocal, ChatLog, CoordinationTask, init_db
 
 def seed_system_tasks():
     print("[*] Đang nạp dữ liệu điều phối hệ thống...")
