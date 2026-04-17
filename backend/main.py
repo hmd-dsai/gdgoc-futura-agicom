@@ -9,7 +9,7 @@ from google.genai import types
 from config import client, resolved_qa_col
 from models import (
     IncomingData, ProposalApproval, ProductRequest,
-    GuardrailResponse, StrategyProposal, ShopProfile, ChatSessionInput, ChatMessage, ReviewData
+    GuardrailResponse, StrategyProposal, ShopProfile, ChatSessionInput, ReviewData
 )
 from prompts import CHAT_SYSTEM_PROMPT, STRATEGY_SYSTEM_PROMPT, REVIEW_LEARNING_PROMPT
 from services import (
@@ -17,7 +17,6 @@ from services import (
     customer_care_fast_track,
     analyze_raw_data_phase1,
     learn_from_human_service,
-    cskh_rag_service,
     chat_with_history_service
 )
 from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog
@@ -139,24 +138,6 @@ async def process_market_strategy(product: ProductRequest):
             "proposal_id": f"PROP-{product.product_id}-001",
             "data": strategy_result
         }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/fast-track-chat-v2")
-async def process_chat_v2(chat: ChatMessage, profile: ShopProfile):
-    try:
-        ai_response = await cskh_rag_service(chat.customer_text, profile.brand_tone)
-        db = SessionLocal()
-        new_log = ChatLog(
-            customer_q=chat.customer_text,
-            ai_a=ai_response.get("suggested_reply", ""),
-            insight=ai_response.get("sensor_insight")
-        )
-        db.add(new_log)
-        db.commit()
-        db.close()
-        
-        return {"status": "success", "data": ai_response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
