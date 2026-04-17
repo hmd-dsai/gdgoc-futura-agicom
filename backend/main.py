@@ -8,7 +8,7 @@ from google.genai import types
 # Nhập các thành phần từ file khác
 from config import client, resolved_qa_col
 from models import (
-    IncomingData, ProposalApproval, ChatMessageRequest, ProductRequest,
+    IncomingData, ProposalApproval, ProductRequest,
     GuardrailResponse, StrategyProposal, ShopProfile, ChatSessionInput, ChatMessage, ReviewData
 )
 from prompts import CHAT_SYSTEM_PROMPT, STRATEGY_SYSTEM_PROMPT, REVIEW_LEARNING_PROMPT
@@ -100,53 +100,7 @@ async def human_approval_flow(approval: ProposalApproval):
         print(f"[*] RE-EVALUATE: Gửi feedback '{approval.feedback}' về lại LLM Framework")
         return {"status": "Re-evaluating", "message": "Đang tính toán lại dựa trên phản hồi của bạn"}
 
-@app.post("/fast-track-chat")
-async def process_customer_chat(chat: ChatMessageRequest, profile: ShopProfile): # Assume profile passed from frontend
-    try:
-        # Inject Tone and Target Customers
-        personalized_chat_prompt = CHAT_SYSTEM_PROMPT.format(
-            brand_tone=profile.brand_tone,
-            target_customers=profile.target_customers
-        )
 
-        user_prompt = f"Chính sách shop: {chat.shop_policy}\nTin nhắn của khách: '{chat.customer_text}'"
-
-        response = await client.aio.models.generate_content(
-            model="gemini-flash-latest",
-            contents=[personalized_chat_prompt, user_prompt],
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=GuardrailResponse,
-                http_options={'timeout': 30000} # GIỮ NGUYÊN 30S
-            )
-        )
-
-        if not response.text:
-            raise HTTPException(status_code=500, detail="Lỗi phản hồi từ AI.")
-            
-        clean_text = response.text.replace("```json", "").replace("```", "").strip()
-        guardrail_result = json.loads(clean_text)
-
-        # --- ROUTER LOGIC: Tự động hay Cần người duyệt? ---
-        if guardrail_result["is_safe"] and guardrail_result["confidence_score"] >= 0.7:
-            # AUTO REPLY: Gửi thẳng cho khách
-            action = "Auto-Reply Executed"
-            status_color = "Green"
-        else:
-            # MANUAL REVIEW: Đẩy lên Dashboard cho Chủ shop xem
-            action = "Sent to Dashboard for Human Approval"
-            status_color = "Red/Orange"
-
-        return {
-            "status": "success",
-            "routing_action": action,
-            "system_color": status_color,
-            "ai_evaluation": guardrail_result
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
 @app.post("/slow-track-strategy")
 async def process_market_strategy(product: ProductRequest):
     try:
