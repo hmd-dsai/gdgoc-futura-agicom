@@ -117,3 +117,34 @@ class ChatApprovalRequest(BaseModel):
         default="",
         description="Lý do từ chối / chỉnh sửa (AI sẽ dùng để cải thiện bản thân)"
     )
+
+# ============================================================
+# MODELS MỚI: Quản trị khủng hoảng
+# ============================================================
+
+class CrisisDetectionRequest(BaseModel):
+    """
+    Yêu cầu quét và phát hiện khủng hoảng.
+    - Nếu product_id được cung cấp: chỉ quét sản phẩm đó.
+    - Nếu để trống: quét TẤT CẢ sản phẩm có tín hiệu rủi ro gần đây.
+    """
+    product_id: Optional[str] = Field(
+        default=None,
+        description="ID sản phẩm cần quét. Để trống = quét tất cả sản phẩm."
+    )
+    lookback_days: int = Field(
+        default=7,
+        ge=1, le=90,
+        description="Số ngày nhìn lại để thu thập tín hiệu (mặc định 7 ngày)"
+    )
+    force_regenerate: bool = Field(
+        default=False,
+        description="True = tái tạo kế hoạch AI dù alert đã tồn tại"
+    )
+
+class CrisisResolveRequest(BaseModel):
+    """Chủ shop đánh dấu khủng hoảng đã được xử lý."""
+    resolution_note: str = Field(
+        default="",
+        description="Ghi chú về cách xử lý (để học cho lần sau)"
+    )

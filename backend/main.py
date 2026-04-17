@@ -11,7 +11,7 @@ from config import client, resolved_qa_col
 from models import (
     IncomingData, ProposalApproval, ChatMessageRequest, ProductRequest,
     GuardrailResponse, StrategyProposal, ShopProfile, ChatSessionInput, ChatMessage,
-    ReviewData, ChatApprovalRequest
+    ReviewData, ChatApprovalRequest, CrisisDetectionRequest, CrisisResolveRequest
 )
 from prompts import CHAT_SYSTEM_PROMPT, STRATEGY_SYSTEM_PROMPT, REVIEW_LEARNING_PROMPT
 from services import (
@@ -21,12 +21,14 @@ from services import (
     learn_from_human_service,
     learn_from_rejection_service,
     cskh_rag_service,
-    chat_with_history_service
+    chat_with_history_service,
+    detect_crisis_for_product,
+    detect_crisis_all_products
 )
 from database import (
     SessionLocal, ChatLog, CoordinationTask,
     ChatMessage as DB_ChatMessage,
-    PendingChatMessage,
+    PendingChatMessage, CrisisAlert,
     save_message, init_db,
     DailySummaryArchive, ReviewLog
 )
@@ -730,6 +732,230 @@ async def reset_all_data():
         return {"status": "success", "message": "Hệ thống đã được đưa về trạng thái trắng."}
     finally:
         db.close()
+
+# ============================================================
+# CRISIS MANAGEMENT ENDPOINTS
+# ============================================================
+
+@app.post("/crisis/detect")
+async def run_crisis_detection(req: CrisisDetectionRequest):
+    """
+    🔍 QUÉT VÀ PHÁT HIỆN KHỦNG HOẢNG
+
+    Thu thập tín hiệu từ ReviewLog, CoordinationTask và ChatLog trong
+    {lookback_days} ngày gần nhất, tính crisis_score, và gọi AI tổng hợp
+    kế hoạch xử lý cho từng sản phẩm bị ảnh hưởng.
+
+    - Nếu product_id được cung cấp: chỉ quét sản phẩm đó
+    - Nếu product_id để trống: quét TẤT CẢ sản phẩm có tín hiệu xấu
+
+    Hệ thống tính điểm rủi ro theo quy tắc:
+      Review 1★ = 4đ | Review 2★ = 3đ | Review 3★ = 1đ
+      RiskManager task = 2đ | Phốt/Pháp lý = +5đ bonus
+      Crisis level: 1-3đ = 🟡 Theo dõi | 4-7đ = 🟠 Cảnh báo | 8+đ = 🔴 Nghiêm trọng
+    """
+    db = SessionLocal()
+    try:
+        if req.product_id:
+            # Quét 1 sản phẩm cụ thể
+            result = await detect_crisis_for_product(
+                db, req.product_id, req.lookback_days, req.force_regenerate
+            )
+            return {
+                "status": "success",
+                "scanned_products": 1,
+                "alerts_found": 0 if result.get("status") == "clear" else 1,
+                "results": [result]
+            }
+        else:
+            # Quét toàn bộ
+            results = await detect_crisis_all_products(
+                db, req.lookback_days, req.force_regenerate
+            )
+            critical = [r for r in results if r.get("crisis_level") == "nghiem_trong"]
+            warning  = [r for r in results if r.get("crisis_level") == "canh_bao"]
+            monitor  = [r for r in results if r.get("crisis_level") == "theo_doi"]
+
+            return {
+                "status": "success",
+                "scanned_products": len(results),
+                "alerts_found": len(results),
+                "summary": {
+                    "nghiem_trong": len(critical),
+                    "canh_bao": len(warning),
+                    "theo_doi": len(monitor)
+                },
+                "results": results
+            }
+    except Exception as e:
+        print(f"LỖI /crisis/detect: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
+@app.get("/crisis/alerts")
+async def get_crisis_alerts(
+    status: str = Query(default=None, description="Lọc theo status: active | monitoring | resolved"),
+    limit: int = Query(default=20, ge=1, le=100)
+):
+    """
+    📋 DANH SÁCH CẢNH BÁO KHỦNG HOẢNG
+
+    Trả về danh sách các cảnh báo khủng hoảng cho Dashboard hiển thị.
+    Mặc định trả về tất cả trạng thái, sắp xếp theo mức độ nghiêm trọng
+    và thời gian tạo mới nhất.
+    """
+    db = SessionLocal()
+    try:
+        query = db.query(CrisisAlert)
+        if status:
+            query = query.filter(CrisisAlert.status == status)
+        else:
+            # Mặc định: chỉ show active + monitoring (ẩn resolved)
+            query = query.filter(CrisisAlert.status.in_(["active", "monitoring"]))
+
+        alerts = query.order_by(
+            CrisisAlert.crisis_score.desc(),
+            CrisisAlert.created_at.desc()
+        ).limit(limit).all()
+
+        # Map crisis_level sang màu UI thân thiện
+        level_color = {
+            "nghiem_trong": "🔴 Nghiêm trọng",
+            "canh_bao":     "🟠 Cảnh báo",
+            "theo_doi":     "🟡 Theo dõi"
+        }
+
+        return {
+            "total": len(alerts),
+            "data": [
+                {
+                    "alert_id": a.id,
+                    "product_id": a.product_id,
+                    "crisis_level": a.crisis_level,
+                    "crisis_level_display": level_color.get(a.crisis_level, a.crisis_level),
+                    "crisis_category": a.crisis_category,
+                    "crisis_score": a.crisis_score,
+                    "negative_review_count": a.negative_review_count,
+                    "risk_task_count": a.risk_task_count,
+                    "status": a.status,
+                    "lookback_days": a.lookback_days,
+                    "signals": json.loads(a.signals_summary_json or "[]"),
+                    "crisis_plan": json.loads(a.crisis_plan_json or "{}"),
+                    "created_at": a.created_at.isoformat() if a.created_at else None,
+                    "last_updated": a.last_updated.isoformat() if a.last_updated else None,
+                }
+                for a in alerts
+            ]
+        }
+    finally:
+        db.close()
+
+
+@app.get("/crisis/alerts/{product_id}")
+async def get_crisis_history_by_product(
+    product_id: str,
+    limit: int = Query(default=10, ge=1, le=50)
+):
+    """
+    📌 LỊCH SỬ KHỦNG HOẢNG THEO SẢN PHẨM
+
+    Trả về toàn bộ lịch sử cảnh báo (kể cả đã resolved) của 1 sản phẩm.
+    Hữu ích để xem xu hướng rủi ro lặp lại theo thời gian.
+    """
+    db = SessionLocal()
+    try:
+        alerts = (
+            db.query(CrisisAlert)
+            .filter(CrisisAlert.product_id == product_id)
+            .order_by(CrisisAlert.created_at.desc())
+            .limit(limit)
+            .all()
+        )
+
+        if not alerts:
+            return {
+                "product_id": product_id,
+                "total": 0,
+                "message": "Chưa có cảnh báo khủng hoảng nào cho sản phẩm này.",
+                "data": []
+            }
+
+        return {
+            "product_id": product_id,
+            "total": len(alerts),
+            "data": [
+                {
+                    "alert_id": a.id,
+                    "crisis_level": a.crisis_level,
+                    "crisis_category": a.crisis_category,
+                    "crisis_score": a.crisis_score,
+                    "negative_review_count": a.negative_review_count,
+                    "risk_task_count": a.risk_task_count,
+                    "status": a.status,
+                    "resolution_note": a.resolution_note,
+                    "signals": json.loads(a.signals_summary_json or "[]"),
+                    "crisis_plan": json.loads(a.crisis_plan_json or "{}"),
+                    "created_at": a.created_at.isoformat() if a.created_at else None,
+                    "resolved_at": a.resolved_at.isoformat() if a.resolved_at else None,
+                }
+                for a in alerts
+            ]
+        }
+    finally:
+        db.close()
+
+
+@app.post("/crisis/resolve/{alert_id}")
+async def resolve_crisis_alert(alert_id: int, req: CrisisResolveRequest):
+    """
+    ✅ ĐÁNH DẤU ĐÃ XỬ LÝ KHỦNG HOẢNG
+
+    Chủ shop dùng endpoint này để đánh dấu một cảnh báo đã được xử lý xong.
+    Ghi chú resolution_note sẽ được lưu lại để tham khảo sau.
+
+    Note: Dữ liệu review và chat vẫn còn trong DB. Lần quét tiếp theo nếu
+    vẫn còn tín hiệu xấu sẽ tạo ra alert mới (force=True sẽ tạo ngay).
+    """
+    db = SessionLocal()
+    try:
+        alert = db.query(CrisisAlert).filter(CrisisAlert.id == alert_id).first()
+
+        if not alert:
+            raise HTTPException(status_code=404, detail=f"Không tìm thấy alert_id={alert_id}")
+
+        if alert.status == "resolved":
+            return {
+                "status": "already_resolved",
+                "alert_id": alert_id,
+                "message": "Cảnh báo này đã được đánh dấu xử lý trước đó.",
+                "resolved_at": alert.resolved_at.isoformat() if alert.resolved_at else None
+            }
+
+        alert.status = "resolved"
+        alert.resolution_note = req.resolution_note
+        alert.resolved_at = datetime.utcnow()
+        alert.last_updated = datetime.utcnow()
+        db.commit()
+
+        print(f"[✅ CRISIS RESOLVED] alert_id={alert_id}, product={alert.product_id}")
+
+        return {
+            "status": "success",
+            "alert_id": alert_id,
+            "product_id": alert.product_id,
+            "message": "✅ Đã đánh dấu khủng hoảng được xử lý thành công.",
+            "resolved_at": alert.resolved_at.isoformat()
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
 
 if __name__ == "__main__":
     import uvicorn

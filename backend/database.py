@@ -137,10 +137,62 @@ def init_db():
     # Tự động thêm cột mới vào DB cũ (migration thủ công, an toàn)
     with engine.begin() as conn:
         _safe_add_column(conn, "ALTER TABLE chat_logs ADD COLUMN is_archived BOOLEAN DEFAULT 0")
-        # Migration cho bảng pending_chat_messages nếu DB cũ chưa có
+        # Migration cho bảng pending_chat_messages
         _safe_add_column(conn, "ALTER TABLE pending_chat_messages ADD COLUMN final_reply TEXT DEFAULT ''")
         _safe_add_column(conn, "ALTER TABLE pending_chat_messages ADD COLUMN rejection_reason TEXT DEFAULT ''")
         _safe_add_column(conn, "ALTER TABLE pending_chat_messages ADD COLUMN resolved_at DATETIME")
+        # Migration cho bảng crisis_alerts (phòng khi DB cũ không có)
+        _safe_add_column(conn, "ALTER TABLE crisis_alerts ADD COLUMN resolution_note TEXT DEFAULT ''")
+        _safe_add_column(conn, "ALTER TABLE crisis_alerts ADD COLUMN resolved_at DATETIME")
+        _safe_add_column(conn, "ALTER TABLE crisis_alerts ADD COLUMN last_updated DATETIME")
+
+# ============================================================
+# BẢNG MỚI: Cảnh báo khủng hoảng được phát hiện tự động
+#
+# Mỗi record = 1 sự kiện khủng hoảng được phát hiện cho
+# một sản phẩm trong một khoảng thời gian nhất định.
+#
+# crisis_level:
+#   "theo_doi"    → 1-3 điểm rủi ro  (Monitoring 🟡)
+#   "canh_bao"    → 4-7 điểm rủi ro  (Warning 🟠)
+#   "nghiem_trong"→ 8+ điểm rủi ro   (Critical 🔴)
+#
+# status:
+#   "active"     → Đang xảy ra, cần xử lý
+#   "monitoring" → Đang theo dõi, chưa cần can thiệp
+#   "resolved"   → Đã xử lý xong
+# ============================================================
+class CrisisAlert(Base):
+    __tablename__ = "crisis_alerts"
+    id = Column(Integer, primary_key=True, index=True)
+    product_id = Column(String, index=True)
+
+    # Mức độ khủng hoảng
+    crisis_level = Column(String, default="theo_doi")
+    crisis_category = Column(String, default="None")  # Category chủ đạo
+
+    # Số lượng tín hiệu thu thập được
+    negative_review_count = Column(Integer, default=0)
+    risk_task_count = Column(Integer, default=0)
+    crisis_score = Column(Float, default=0.0)
+
+    # Khoảng thời gian quét (ngày)
+    lookback_days = Column(Integer, default=7)
+
+    # Dữ liệu thô — JSON array chứa các tín hiệu cụ thể
+    signals_summary_json = Column(Text, default="[]")
+
+    # Kế hoạch xử lý do AI tổng hợp — JSON object
+    crisis_plan_json = Column(Text, default="{}")
+
+    # Trạng thái xử lý
+    status = Column(String, default="active")
+    resolution_note = Column(Text, default="")
+
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    last_updated = Column(DateTime, default=datetime.datetime.utcnow)
+    resolved_at = Column(DateTime, nullable=True)
+
 
 def _safe_add_column(conn, alter_sql: str):
     """Chạy ALTER TABLE nhưng bỏ qua nếu cột đã tồn tại."""

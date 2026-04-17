@@ -100,6 +100,51 @@ Trả về ĐÚNG định dạng JSON theo schema yêu cầu.
 # Được gọi khi action = "reject" (có rejection_reason)
 #           hoặc action = "override" (có custom_message)
 # ============================================================
+# ============================================================
+# PROMPT MỚI: Phân tích tổng hợp và tạo kế hoạch xử lý khủng hoảng
+#
+# Input: các tín hiệu rủi ro thu thập từ ChatLog, ReviewLog,
+#        CoordinationTask của một sản phẩm cụ thể
+# Output: JSON chứa bản đánh giá mức độ + kế hoạch hành động
+# ============================================================
+CRISIS_ANALYSIS_PROMPT = """
+Bạn là Chuyên gia Quản trị Rủi ro & Khủng hoảng của hệ thống Agicom.
+
+Tôi sẽ cung cấp các tín hiệu cảnh báo thu thập được từ nhiều nguồn (đánh giá khách hàng, chat CSKH, cảnh báo hệ thống) cho một sản phẩm trong {lookback_days} ngày gần nhất.
+
+TÍN HIỆU THU THẬP ĐƯỢC:
+{signals_data}
+
+NHIỆM VỤ CỦA BẠN:
+1. Phân tích tổng hợp tất cả tín hiệu để xác định vấn đề cốt lõi.
+2. Xác định DANH MỤC KHỦNG HOẢNG chủ đạo (chọn 1):
+   - "Chất lượng sản phẩm": lỗi hàng, hàng giả, không đúng mô tả
+   - "Vận chuyển": giao chậm, thất lạc, hư hỏng khi vận chuyển
+   - "Thái độ phục vụ": CSKH thô lỗ, không phản hồi, giải quyết kém
+   - "Pháp lý/Phốt": vi phạm chính sách sàn, review bóc phốt lan rộng
+   - "Nhiều vấn đề": kết hợp nhiều danh mục trên
+3. Đề xuất kế hoạch hành động CỤ THỂ và THỰC TẾ.
+4. Soạn mẫu tin nhắn xin lỗi / giải quyết để gửi cho khách bị ảnh hưởng.
+
+TRẢ VỀ JSON với cấu trúc CHÍNH XÁC sau:
+{{
+  "crisis_summary": "Tóm tắt tình huống khủng hoảng trong 2-3 câu",
+  "crisis_category": "Một trong các danh mục đã liệt kê",
+  "root_cause": "Nguyên nhân gốc rễ được suy luận từ các tín hiệu",
+  "immediate_actions": [
+    {{"action": "Mô tả hành động cụ thể", "deadline": "0-24h", "owner": "Chủ shop / CSKH / Kho"}},
+    {{"action": "...", "deadline": "...", "owner": "..."}}
+  ],
+  "short_term_plan": [
+    {{"action": "...", "deadline": "1-3 ngày", "owner": "..."}},
+    {{"action": "...", "deadline": "3-7 ngày", "owner": "..."}}
+  ],
+  "customer_response_template": "Mẫu tin nhắn xin lỗi / phản hồi khách hàng bị ảnh hưởng (2-3 câu, lịch sự, cam kết xử lý)",
+  "escalation_needed": true/false,
+  "escalation_reason": "Lý do cần leo thang (để trống nếu không cần)"
+}}
+"""
+
 REJECTION_LEARNING_PROMPT = """
 Bạn là Hệ thống tự học của Agicom AI. Chủ shop vừa từ chối hoặc sửa lại câu trả lời của AI.
 
