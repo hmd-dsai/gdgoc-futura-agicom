@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import List
+from pydantic import BaseModel, Field
+from typing import List, Literal, Optional
 
 class ShopProfile(BaseModel):
     target_customers: str = "Khách hàng phổ thông"
@@ -91,15 +91,29 @@ class ReviewExtractedInsight(BaseModel):
     action_needed: bool  # Có cần agent khác xử lý không?
     qa_knowledge: str    # Bài học rút ra (ví dụ: "Nếu khách hỏi về móp méo, hãy báo do vận chuyển và xin lỗi")
 
-class ChatHumanOverride(BaseModel):
-    customer_id: str
-    customer_q: str        # Câu hỏi gốc của khách
-    ai_proposed_a: str     # Câu trả lời AI đã đề xuất nhưng bị từ chối
-    human_final_a: str     # Câu trả lời do chủ shop tự viết
-    brand_tone: str = "Chuyên nghiệp, nhiệt tình"
+# ============================================================
+# MODEL MỚI: Chủ shop duyệt / ghi đè / từ chối đề xuất AI
+# ============================================================
+class ChatApprovalRequest(BaseModel):
+    pending_id: int = Field(..., description="ID của bản ghi PendingChatMessage")
 
-class ChatProposalApproval(BaseModel):
-    customer_id: str
-    customer_q: str
-    proposed_a: str
-    brand_tone: str = "Chuyên nghiệp"
+    action: Literal["approve", "override", "reject"] = Field(
+        ...,
+        description=(
+            "'approve'  → Dùng đúng câu AI đề xuất, lưu lịch sử\n"
+            "'override' → Chủ shop tự điền nội dung thay thế, AI học từ đó\n"
+            "'reject'   → Hủy hoàn toàn, không gửi gì, AI học lý do từ chối"
+        )
+    )
+
+    # Bắt buộc khi action = "override"
+    custom_message: str = Field(
+        default="",
+        description="Nội dung tin nhắn tự điền của chủ shop (bắt buộc khi action='override')"
+    )
+
+    # Tuỳ chọn — cung cấp thêm context để AI học tốt hơn
+    rejection_reason: str = Field(
+        default="",
+        description="Lý do từ chối / chỉnh sửa (AI sẽ dùng để cải thiện bản thân)"
+    )
