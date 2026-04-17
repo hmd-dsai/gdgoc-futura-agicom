@@ -4,20 +4,98 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AgiCom – AI-Powered E-commerce Dashboard</title>
+    <title>Agicom – AI-Powered E-commerce Dashboard</title>
     <meta name="description"
-        content="AgiCom Dashboard – Hệ thống Agentic AI hỗ trợ chủ shop quản lý giá, nội dung, chat tự động và phân tích thị trường." />
-    <link rel="stylesheet" href="assets/css/main.css" />
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>" />
+        content="Agicom Dashboard – Hệ thống Agentic AI hỗ trợ chủ shop quản lý giá, nội dung, chat tự động và phân tích thị trường." />
+    <link rel="stylesheet" href="index4.css" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg viewBox='0 0 44 44' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23FDE047'/%3E%3Cstop offset='100%25' stop-color='%23EAB308'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='2' y='2' width='40' height='40' rx='12' fill='url(%23g)'/%3E%3Cpath d='M13 33 L22 14 L31 33' stroke='%23451a03' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M16.5 26 L27.5 26' stroke='%23451a03' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E" />
+
+    <style>
+    /* ── Accordion Nav Groups ── */
+    .nav-group { margin-bottom: 2px; }
+
+    .nav-group-header {
+        display: flex; align-items: center; gap: 10px;
+        width: 100%; padding: 9px 16px;
+        background: none; border: none; cursor: pointer;
+        color: var(--text-secondary); font-size: 0.8rem;
+        font-weight: 700; text-align: left;
+        border-radius: var(--radius-sm);
+        transition: background var(--transition-fast), color var(--transition-fast);
+        letter-spacing: 0.1px;
+    }
+    .nav-group-header:hover { background: var(--bg-glass); color: var(--text-primary); }
+    .nav-group-header .nav-item-icon { color: #9CA3AF; flex-shrink:0; }
+    .nav-group-header:hover .nav-item-icon { color: var(--accent-amber); }
+    .nav-group-header > span:nth-child(2) { flex: 1; }
+
+    .nav-group-arrow {
+        color: #9CA3AF; flex-shrink: 0;
+        transition: transform 250ms ease, color 250ms ease;
+    }
+    .nav-group.open .nav-group-arrow { transform: rotate(0deg); }
+    .nav-group:not(.open) .nav-group-arrow { transform: rotate(-90deg); }
+    .nav-group.has-active .nav-group-header { color: var(--accent-amber); }
+    .nav-group.has-active .nav-group-header .nav-item-icon { color: var(--accent-amber); }
+    .nav-group.has-active .nav-group-arrow { color: var(--accent-amber); }
+
+    .nav-group-children {
+        overflow: hidden;
+        max-height: 500px;
+        transition: max-height 280ms ease, opacity 280ms ease;
+        opacity: 1;
+    }
+    .nav-group:not(.open) .nav-group-children {
+        max-height: 0; opacity: 0;
+    }
+
+    .nav-child-item {
+        display: flex; align-items: center; gap: 10px;
+        width: 100%; padding: 7px 16px 7px 36px;
+        background: none; border: none; cursor: pointer;
+        color: var(--text-muted); font-size: 0.8rem;
+        font-weight: 500; text-align: left;
+        border-radius: var(--radius-sm);
+        transition: background var(--transition-fast), color var(--transition-fast);
+    }
+    .nav-child-item:hover { background: var(--bg-glass); color: var(--text-primary); }
+    .nav-child-item.active {
+        color: var(--accent-amber); font-weight: 700;
+        background: var(--accent-indigo-bg);
+    }
+    .nav-child-item.active .nav-child-dot { background: var(--accent-amber); }
+
+    .nav-child-dot {
+        width: 5px; height: 5px; border-radius: 50%;
+        background: #CBD5E1; flex-shrink: 0;
+        transition: background 200ms;
+    }
+
+    .nav-divider {
+        height: 1px; background: var(--border-primary);
+        margin: 8px 16px;
+    }
+
+    /* Override nav-item icon color to use currentColor */
+    .nav-item .nav-item-icon,
+    .nav-group-header .nav-item-icon { transition: color var(--transition-fast); }
+    .nav-item:hover .nav-item-icon,
+    .nav-item.active .nav-item-icon { color: var(--accent-amber) !important; }
+
+    /* Sidebar scrollable */
+    .sidebar-nav { overflow-y: auto; padding-bottom: 12px; }
+    </style>
 </head>
 
 <body>
+
+    <!-- ===== Toast Container ===== -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- ===== Scanning Overlay ===== -->
     <div class="scan-overlay" id="scanOverlay">
         <div class="scan-content">
-            <div class="scan-icon">🔍</div>
+            <div class="scan-icon"><svg viewBox="0 0 24 24" width="48" height="48" stroke="#9CA3AF" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
             <div class="scan-text">Đang phân tích thị trường...</div>
             <div class="scan-subtext">AI đang quét dữ liệu đối thủ và đề xuất chiến lược</div>
             <div class="scan-progress">
@@ -26,6 +104,7 @@
         </div>
     </div>
 
+    <!-- ===== Feedback Modal ===== -->
     <div class="modal-overlay" id="feedbackModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -44,64 +123,190 @@
         </div>
     </div>
 
+    <!-- ===== App Container ===== -->
     <div class="app-container">
 
+        <!-- ===== Sidebar ===== -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="sidebar-logo">
-                    <div class="sidebar-logo-icon">🤖</div>
+                <div class="sidebar-logo" style="gap:10px;align-items:center;">
+                    <!-- Agicom Logo Icon -->
+                    <div style="width:44px;height:44px;flex-shrink:0;">
+                        <svg viewBox="0 0 44 44" width="44" height="44" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="lgMain" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#FDE047"/>
+                                    <stop offset="100%" stop-color="#EAB308"/>
+                                </linearGradient>
+                                <linearGradient id="lgAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#451a03"/>
+                                    <stop offset="100%" stop-color="#78350f"/>
+                                </linearGradient>
+                                <filter id="glow">
+                                    <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+                                    <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                </filter>
+                            </defs>
+                            <!-- Outer rounded square -->
+                            <rect x="2" y="2" width="40" height="40" rx="12" fill="url(#lgMain)" filter="url(#glow)"/>
+                            <!-- Inner shadow layer -->
+                            <rect x="2" y="2" width="40" height="40" rx="12" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+                            <!-- Brain/circuit nodes — top 3 dots -->
+                            <circle cx="13" cy="11" r="2.2" fill="url(#lgAccent)" opacity="0.9"/>
+                            <circle cx="22" cy="9"  r="2.2" fill="url(#lgAccent)" opacity="0.9"/>
+                            <circle cx="31" cy="11" r="2.2" fill="url(#lgAccent)" opacity="0.9"/>
+                            <!-- Connecting lines top -->
+                            <path d="M13 11 Q17.5 7 22 9 Q26.5 7 31 11" stroke="#451a03" stroke-width="1.3" fill="none" opacity="0.7" stroke-linecap="round"/>
+                            <!-- Stylised 'A' body -->
+                            <path d="M13 33 L22 14 L31 33" stroke="#451a03" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16.5 26 L27.5 26" stroke="#451a03" stroke-width="2.4" stroke-linecap="round"/>
+                            <!-- Circuit node left arm -->
+                            <line x1="13" y1="33" x2="10" y2="36" stroke="#451a03" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
+                            <circle cx="9" cy="37" r="1.6" fill="#451a03" opacity="0.6"/>
+                            <!-- Circuit node right arm -->
+                            <line x1="31" y1="33" x2="34" y2="36" stroke="#451a03" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
+                            <circle cx="35" cy="37" r="1.6" fill="#451a03" opacity="0.6"/>
+                            <!-- Small spark dot on crossbar -->
+                            <circle cx="22" cy="26" r="2" fill="#451a03" opacity="0.85"/>
+                        </svg>
+                    </div>
                     <div>
-                        <div class="sidebar-logo-text">AgiCom</div>
-                        <div class="sidebar-logo-badge">Beta v2.0</div>
+                        <div class="sidebar-logo-text" style="font-size:1.15rem;font-weight:800;letter-spacing:-0.3px;">Agicom</div>
+                        <div class="sidebar-logo-badge" style="font-size:0.6rem;">BETA V2.0</div>
                     </div>
                 </div>
             </div>
 
-            <nav class="sidebar-nav">
-                <div class="nav-section-label">Tổng quan</div>
-                <button class="nav-item active" data-page="dashboard" id="nav-dashboard">
-                    <span class="nav-item-icon">📊</span>
+            <nav class="sidebar-nav" id="sidebarNav">
+
+                <!-- ── Tổng quan ── -->
+                <button class="nav-item active" data-page="dashboard">
+                    <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
                     Tổng quan
                 </button>
-                <button class="nav-item" data-page="revenue" id="nav-revenue">
-                    <span class="nav-item-icon">💰</span>
-                    Doanh thu & Chi phí
-                </button>
-                <button class="nav-item" data-page="inventory" id="nav-inventory">
-                    <span class="nav-item-icon">📦</span>
-                    Tồn kho
-                    <span class="nav-item-badge"
-                        style="background:var(--accent-amber-bg);color:var(--accent-amber);">5</span>
-                </button>
 
-                <div class="nav-section-label">Phân tích</div>
-                <button class="nav-item" data-page="competitor" id="nav-competitor">
-                    <span class="nav-item-icon">🎯</span>
-                    Phân tích đối thủ
-                </button>
+                <!-- ── Phân tích thị trường ── -->
+                <div class="nav-group open" data-group="thi-truong">
+                    <button class="nav-group-header">
+                        <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><path d="M2 20h20M5 20V10l7-7 7 7v10"/><path d="M9 20v-5h6v5"/></svg></span>
+                        <span>Phân tích thị trường</span>
+                        <svg class="nav-group-arrow" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="nav-group-children">
+                        <button class="nav-child-item" data-page="market-overview">
+                            <span class="nav-child-dot"></span>Tổng quan ngành hàng
+                        </button>
+                        <button class="nav-child-item" data-page="competitor">
+                            <span class="nav-child-dot"></span>Đối thủ cạnh tranh
+                        </button>
+                    </div>
+                </div>
 
-                <button class="nav-item" data-page="reviews" id="nav-reviews">
-                    <span class="nav-item-icon">⭐</span>
-                    Review sản phẩm
-                    <span class="nav-item-badge">12</span>
-                </button>
-                <button class="nav-item" data-page="media" id="nav-media">
-                    <span class="nav-item-icon">📸</span>
-                    Media & Quảng cáo
-                </button>
+                <!-- ── Phân tích doanh nghiệp ── -->
+                <div class="nav-group open" data-group="doanh-nghiep">
+                    <button class="nav-group-header">
+                        <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><path d="M3 3h18v4H3z"/><path d="M3 10h18v4H3z"/><path d="M3 17h10v4H3z"/></svg></span>
+                        <span>Phân tích doanh nghiệp</span>
+                        <svg class="nav-group-arrow" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="nav-group-children">
+                        <button class="nav-child-item" data-page="revenue">
+                            <span class="nav-child-dot"></span>Doanh thu & Chi phí
+                        </button>
+                        <button class="nav-child-item" data-page="inventory">
+                            <span class="nav-child-dot"></span>Tồn kho
+                            <span class="nav-item-badge" style="background:var(--accent-amber-bg);color:var(--accent-amber);">5</span>
+                        </button>
+                    </div>
+                </div>
 
-                <div class="nav-section-label">Hỗ trợ</div>
-                <button class="nav-item" data-page="chat" id="nav-chat">
-                    <span class="nav-item-icon">💬</span>
-                    Chat AI thông minh
-                    <span class="nav-item-badge"
-                        style="background:var(--accent-emerald-bg);color:var(--accent-emerald);">Auto</span>
-                </button>
+                <!-- ── Divider ── -->
+                <div class="nav-divider"></div>
 
-                <button class="nav-item" data-page="settings" id="nav-settings">
-                    <span class="nav-item-icon">⚙️</span>
+                <!-- ── Chatbot ── -->
+                <div class="nav-group open" data-group="chatbot">
+                    <button class="nav-group-header">
+                        <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                        <span>Chatbot</span>
+                        <svg class="nav-group-arrow" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="nav-group-children">
+                        <button class="nav-child-item" data-page="chat">
+                            <span class="nav-child-dot"></span>Tin nhắn cần duyệt
+                            <span class="nav-item-badge" style="background:var(--accent-amber-bg);color:var(--accent-amber);">3</span>
+                        </button>
+                        <button class="nav-child-item" data-page="chat-sentiment">
+                            <span class="nav-child-dot"></span>Sentiment analysis
+                        </button>
+                        <button class="nav-child-item" data-page="chat-report">
+                            <span class="nav-child-dot"></span>Báo cáo thắc mắc
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── Dynamic Pricing ── -->
+                <div class="nav-group open" data-group="pricing">
+                    <button class="nav-group-header">
+                        <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+                        <span>Dynamic Pricing</span>
+                        <svg class="nav-group-arrow" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="nav-group-children">
+                        <button class="nav-child-item" data-page="ai-suggestions">
+                            <span class="nav-child-dot"></span>Đề xuất thay đổi giá
+                            <span class="nav-item-badge" style="background:var(--accent-amber-bg);color:var(--accent-amber);">3</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── Quản lý chất lượng ── -->
+                <div class="nav-group open" data-group="quality">
+                    <button class="nav-group-header">
+                        <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>
+                        <span>Quản lý chất lượng</span>
+                        <svg class="nav-group-arrow" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="nav-group-children">
+                        <button class="nav-child-item" data-page="reviews">
+                            <span class="nav-child-dot"></span>Review sản phẩm
+                            <span class="nav-item-badge">12</span>
+                        </button>
+                        <button class="nav-child-item" data-page="chat-insights">
+                            <span class="nav-child-dot"></span>Tổng hợp từ Chatbot
+                        </button>
+                        <button class="nav-child-item" data-page="crisis-center">
+                            <span class="nav-child-dot" style="background:var(--accent-rose);"></span>Quản trị khủng hoảng
+                            <span class="nav-item-badge" style="background:var(--accent-rose-bg);color:var(--accent-rose);">1</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── Content ── -->
+                <div class="nav-group open" data-group="content">
+                    <button class="nav-group-header">
+                        <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
+                        <span>Content</span>
+                        <svg class="nav-group-arrow" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="nav-group-children">
+                        <button class="nav-child-item" data-page="content-suggestions">
+                            <span class="nav-child-dot"></span>Đề xuất content
+                        </button>
+                        <button class="nav-child-item" data-page="product-descriptions">
+                            <span class="nav-child-dot"></span>Mô tả sản phẩm
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── Divider ── -->
+                <div class="nav-divider"></div>
+
+                <!-- ── Cài đặt ── -->
+                <button class="nav-item" data-page="settings">
+                    <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/></svg></span>
                     Cài đặt & Hồ sơ
                 </button>
+
             </nav>
 
             <div class="sidebar-footer">
@@ -115,8 +320,10 @@
             </div>
         </aside>
 
+        <!-- ===== Main Content ===== -->
         <main class="main-content">
 
+            <!-- Header -->
             <header class="header">
                 <div class="header-left">
                     <div class="header-title-area">
@@ -126,50 +333,75 @@
                 </div>
                 <div class="header-right">
                     <button class="btn-scan" id="btnScan">
-                        <span class="btn-scan-text">🔍 Quét thị trường</span>
+                        <span class="btn-scan-text"><svg viewBox="0 0 24 24" width="16" height="16" stroke="#451a03" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;margin-right:4px"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg> Quét thị trường</span>
                         <span class="btn-scan-loading"><span class="spinner"></span> Đang quét...</span>
                     </button>
                     <button class="header-icon-btn" id="btnNotification" aria-label="Notifications">
-                        🔔
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#1e293b" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17H3v-2m0 0V5m0 10h2m12-2l.01.01M17.5 4h.5m0 14h-2m6-6l.01.01"/></svg>
                         <span class="notification-dot"></span>
                     </button>
                 </div>
             </header>
 
+            <!-- ===== Strategic Guidance Toolbar ===== -->
             <div class="guidance-toolbar" id="guidanceToolbar">
                 <div class="guidance-inner">
-                    <div class="guidance-icon">🧭</div>
+                    <div class="guidance-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="#9CA3AF" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></div>
                     <input type="text" class="guidance-input" id="guidanceInput"
                         placeholder='Nhập chỉ thị chiến lược... (VD: "Ưu tiên xả kho Galaxy A55 tuần này", "Giữ biên lợi nhuận iPhone ≥ 10%")' />
                     <button class="guidance-send-btn" id="guidanceSendBtn">Gửi cho AI ➜</button>
                 </div>
                 <div class="guidance-tags" id="guidanceTags">
-                    <button class="guidance-tag" data-cmd="Ưu tiên đẩy mạnh xả kho sản phẩm tồn lâu nhất">📦 Xả
-                        kho</button>
-                    <button class="guidance-tag"
-                        data-cmd="Tập trung giữ vững biên lợi nhuận ≥ 10% cho tất cả sản phẩm">💎 Giữ biên LN</button>
-                    <button class="guidance-tag" data-cmd="Tập trung cạnh tranh giá với MobileWorld Store tuần này">🎯
-                        Đấu giá đối thủ</button>
-                    <button class="guidance-tag"
-                        data-cmd="Tối ưu SEO toàn bộ tiêu đề sản phẩm theo keyword Shopee trending">✍️ SEO toàn
-                        bộ</button>
-                    <button class="guidance-tag" data-cmd="Đẩy mạnh Flash Sale cuối tuần cho Samsung">⚡ Flash
-                        Sale</button>
+                    <button class="guidance-tag" data-cmd="Ưu tiên đẩy mạnh xả kho sản phẩm tồn lâu nhất">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="16" rx="2" ry="2"/><path d="M9 9h6M9 15h6"/>
+                        </svg>
+                        Xả kho
+                    </button>
+                    <button class="guidance-tag" data-cmd="Tập trung giữ vững biên lợi nhuận ≥ 10% cho tất cả sản phẩm">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/>
+                        </svg>
+                        Giữ biên LN
+                    </button>
+                    <button class="guidance-tag" data-cmd="Tập trung cạnh tranh giá với MobileWorld Store tuần này">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Đấu giá đối thủ
+                    </button>
+                    <button class="guidance-tag" data-cmd="Tối ưu SEO toàn bộ tiêu đề sản phẩm theo keyword Shopee trending">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                        SEO toàn bộ
+                    </button>
+                    <button class="guidance-tag" data-cmd="Đẩy mạnh Flash Sale cuối tuần cho Samsung">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Flash Sale
+                    </button>
                 </div>
                 <div class="guidance-active-cmd" id="guidanceActiveCmd" style="display:none;">
-                    <span class="guidance-active-label">🤖 AI đang ưu tiên:</span>
+                    <span class="guidance-active-label"><svg viewBox="0 0 24 24" width="16" height="16" stroke="#9CA3AF" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;margin-right:4px"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M8 9h8M8 13h8M8 17h4"/></svg> AI đang ưu tiên:</span>
                     <span class="guidance-active-text" id="guidanceActiveCmdText"></span>
                     <button class="guidance-clear-btn" id="guidanceClearBtn">✕ Hủy</button>
                 </div>
             </div>
 
+            <!-- Page Content (all pages rendered here by JS) -->
             <div class="page-content" id="pageContent">
-                </div>
+                <!-- Dynamic content rendered by app.js -->
+            </div>
 
         </main>
     </div>
 
-    <script type="module" src="assets/js/app.js"></script>
+    <script src="app4.js"></script>
+
+<!-- sidebar logic handled by app4.js -->
+
 </body>
 
 </html>

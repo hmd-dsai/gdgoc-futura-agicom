@@ -1,0 +1,11 @@
+[build]
+  publish = "."
+
+[dev]
+  command = "npm start" # Assuming user might add a package.json later, but for now it's static
+  port = 8888
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
