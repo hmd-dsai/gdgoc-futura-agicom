@@ -43,18 +43,39 @@ def seed_vector_db(policy_col, product_col, resolved_qa_col):
         ids=[f"prod_{i}" for i in range(len(products))]
     )
 
-    # 2. Chính sách Shop
+    # 2. Chính sách sàn
     policies = [
-        "Chính sách bảo hành: Điện thoại bảo hành 12 tháng chính hãng. Phụ kiện bảo hành 6 tháng 1 đổi 1 nếu có lỗi NSX.",
-        "Chính sách vận chuyển: Freeship toàn quốc đơn từ 500k. Nội thành Hà Nội/TP.HCM giao hỏa tốc trong 2h.",
-        "Chính sách đổi trả: Khách được đổi trả trong 7 ngày đầu nếu sản phẩm còn nguyên seal, chưa kích hoạt (với điện thoại).",
-        "Khuyến mãi: Giảm thêm 200k cho khách hàng cũ quay lại mua máy lần 2."
+        "Tổng quan & Nguyên tắc: AGICOM là sàn TMĐT hoạt động theo pháp luật Việt Nam. Nguyên tắc: Minh bạch thông tin, công bằng, bảo vệ người tiêu dùng và tuân thủ pháp luật hiện hành.",
+        
+        "Quy trình giao dịch: Người mua (Tìm kiếm -> Đặt hàng -> Thanh toán -> Nhận hàng -> Xác nhận/Khiếu nại -> Đánh giá). Người bán (Đăng ký -> Xác thực -> Đăng sản phẩm -> Xử lý đơn -> Giao hàng).",
+        
+        "Cơ chế thanh toán: AGICOM giữ tiền trung gian. Người mua hoàn tất thanh toán khi xác nhận nhận hàng. Người bán nhận tiền sau khi đơn hàng hoàn tất và không phát sinh tranh chấp.",
+        
+        "Thời gian đổi trả: Hàng nguyên giá (Đổi/Trả 30 ngày); Hàng khuyến mãi (Đổi/Trả 7 ngày); Hàng tặng (Đổi 7 ngày, không trả hàng). Phụ kiện không áp dụng đổi trả.",
+        
+        "Điều kiện đổi trả: Sản phẩm chưa qua sử dụng, nguyên tem nhãn, có hóa đơn/thông tin đơn hàng, không hư hỏng do người dùng. Chấp nhận lỗi NSX, giao sai, thiếu hàng hoặc sai mô tả.",
+        
+        "Chi phí & Quy trình đổi trả: Người bán chịu phí nếu lỗi sản phẩm; người mua chịu phí nếu đổi theo nhu cầu. Quy trình: Gửi yêu cầu -> Gửi bằng chứng -> Người bán phản hồi -> AGICOM can thiệp nếu cần.",
+        
+        "Địa điểm đổi trả: Đơn offline trả tại cửa hàng; đơn online gửi về địa chỉ người bán hoặc trả tại cửa hàng; đơn sàn thực hiện trực tiếp qua hệ thống AGICOM bằng đơn vị vận chuyển chỉ định.",
+        
+        "Chính sách hàng Outlet: Đổi trả 7 ngày chỉ khi có lỗi, không hỗ trợ đổi tại cửa hàng, không áp dụng bảo hành. Yêu cầu: chưa sử dụng, nguyên tem nhãn.",
+        
+        "Chính sách bảo hành: Thời gian 6 tháng cho lỗi kỹ thuật NSX (khóa kéo, bong keo, đứt quai, chất liệu...). Miễn phí lỗi NSX, các trường hợp khác khách chịu phí.",
+        
+        "Quản lý người bán & Chống gian lận: Người bán phải xác thực thông tin và nguồn gốc hàng hóa. AGICOM giám sát giao dịch, giới hạn rủi ro và tạm khóa tài khoản nếu có dấu hiệu bất thường.",
+        
+        "Giải quyết tranh chấp: Quy trình 3 bước (Khiếu nại -> Phản hồi -> AGICOM xử lý). Thời hạn xử lý từ 3 đến 15 ngày làm việc.",
+        
+        "Xử lý vi phạm: Gian lận, bán hàng giả, lạm dụng chính sách sẽ bị gỡ sản phẩm, hạn chế hoặc khóa tài khoản vĩnh viễn.",
+        
+        "Bảo mật & Pháp lý: Cam kết bảo mật dữ liệu, tuân thủ Nghị định 52/2013/NĐ-CP và Nghị định 85/2021/NĐ-CP. Hỗ trợ qua Email/Hotline với thời gian phản hồi 24-48 giờ."
     ]
+
     policy_col.add(
         documents=policies,
-        ids=[f"pol_{i}" for i in range(len(policies))]
+        ids=[f"agicom_pol_{i}" for i in range(len(policies))]
     )
-
     # 3. Kinh nghiệm đã học (Resolved QA)
     qas = [
         "Q: Shop có trả góp không? A: Dạ shop có trả góp 0% qua thẻ tín dụng của 25 ngân hàng hoặc qua công ty tài chính Home Credit/HD Saison.",
