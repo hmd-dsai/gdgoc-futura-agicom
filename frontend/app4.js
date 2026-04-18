@@ -1402,6 +1402,7 @@ function renderMedia() {
 // ===== Chat Page (Smart Multi-Agent Demo) =====
 let currentChatId = 'c2';
 let chatFilter = 'all';
+let chatDraftEditMode = false;  // true khi đang ở chế độ chỉnh sửa nháp
 
 function sentimentBar(score) {
   const color = score >= 70 ? '#10b981' : score >= 40 ? '#f59e0b' : '#ef4444';
@@ -1548,6 +1549,22 @@ function renderChat() {
               </div>`;
             }
             if (m.from === 'ai_draft') {
+              if (chatDraftEditMode) {
+                // ── CHẾ ĐỘ CHỈNH SỬA ──
+                return `<div style="background:rgba(99,102,241,0.07);padding:14px;border-radius:10px;border-left:3px solid var(--accent-indigo);">
+                  <div style="font-weight:700;font-size:0.78rem;color:var(--accent-indigo);margin-bottom:8px;">
+                    ✏️ Đang chỉnh sửa nháp AI — Sửa xong nhấn Gửi
+                  </div>
+                  <textarea id="chatDraftEditArea" style="width:100%;min-height:90px;border-radius:8px;padding:10px;font-size:0.86rem;
+                    line-height:1.6;border:1px solid var(--accent-indigo);background:var(--bg-card);
+                    color:var(--text-primary);resize:vertical;font-family:inherit;">${m.text}</textarea>
+                  <div style="display:flex;gap:8px;margin-top:10px;">
+                    <button class="btn-chat-send-edited btn-approve" style="flex:1;">✅ Gửi bản đã sửa</button>
+                    <button class="btn-chat-cancel-edit btn-modal-cancel" style="padding:8px 14px;">✕ Hủy</button>
+                  </div>
+                </div>`;
+              }
+              // ── CHẾ ĐỘ XEM THƯỜNG ──
               return `<div style="background:var(--accent-emerald-bg);padding:14px;border-radius:10px;border-left:3px solid var(--accent-emerald);">
                 <div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:0.78rem;color:var(--accent-emerald);margin-bottom:8px;">
                   <span>🤖 NHÁP AI — Chờ duyệt</span>
@@ -1557,8 +1574,22 @@ function renderChat() {
                 <div style="display:flex;gap:8px;">
                   <button class="btn-chat-accept" style="flex:1;">✅ Gửi ngay</button>
                   <button class="btn-chat-edit" style="flex:1;">✏ Sửa nháp</button>
-                  <button class="btn-chat-deny" data-action="deny-chat">❌</button>
+                  <button class="btn-chat-deny" data-action="deny-chat" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border-primary);background:var(--bg-glass);cursor:pointer;font-size:0.85rem;">❌</button>
                 </div>
+              </div>`;
+            }
+            if (m.from === 'ai_sent') {
+              return `<div style="align-self:flex-end;max-width:85%;">
+                <div style="font-size:0.7rem;color:var(--accent-emerald);margin-bottom:4px;text-align:right;">
+                  🤖 AI Agent · ${m.time}${m.edited?' · ✏ Đã chỉnh sửa':''}
+                </div>
+                <div class="chat-bubble" style="background:var(--accent-emerald-bg);padding:10px 14px;border-radius:12px 0 12px 12px;border:1px solid var(--accent-emerald)40;">${m.text}</div>
+              </div>`;
+            }
+            if (m.from === 'shop_owner') {
+              return `<div style="align-self:flex-end;max-width:85%;">
+                <div style="font-size:0.7rem;color:var(--accent-indigo);margin-bottom:4px;text-align:right;">👤 Chủ shop · ${m.time}</div>
+                <div class="chat-bubble" style="background:rgba(99,102,241,0.1);padding:10px 14px;border-radius:12px 0 12px 12px;border:1px solid rgba(99,102,241,0.3);">${m.text}</div>
               </div>`;
             }
             if (m.from === 'system') {
@@ -1571,11 +1602,11 @@ function renderChat() {
         <!-- Input -->
         <div style="padding:12px 14px;border-top:1px solid var(--border-primary);">
           <div style="display:flex;gap:8px;">
-            <input type="text" class="settings-input" style="flex:1;font-size:0.85rem;" placeholder="Nhập tin nhắn hoặc ra lệnh cho AI...">
-            <button class="btn-approve" style="white-space:nowrap;">Gửi →</button>
+            <input type="text" id="chatMsgInput" class="settings-input" style="flex:1;font-size:0.85rem;" placeholder="Nhập tin nhắn hoặc ra lệnh cho AI...">
+            <button class="btn-approve" data-action="chat-send-msg" style="white-space:nowrap;">Gửi →</button>
           </div>
           <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
-            ${['Xin lỗi + hỗ trợ đổi hàng','Gửi link bảo hành','Báo giá sỉ','Xác nhận đơn hàng'].map(t=>`<button class="guidance-tag" style="font-size:0.7rem;padding:4px 8px;">${t}</button>`).join('')}
+            ${['Xin lỗi + hỗ trợ đổi hàng','Gửi link bảo hành','Báo giá sỉ','Xác nhận đơn hàng'].map(t=>`<button class="guidance-tag" data-chattemplate="${t}" style="font-size:0.7rem;padding:4px 8px;">${t}</button>`).join('')}
           </div>
         </div>
       </div>
@@ -2744,6 +2775,31 @@ function renderProductDescriptions() {
 }
 
 
+// ===== Demo Khách Hàng Page =====
+function renderDemoCustomer() {
+  // Nội dung thực (form review + live chat widget) được inject bởi api_integration.js
+  // Hàm này chỉ trả về skeleton để tránh trang trắng trong trường hợp backend chưa tải
+  return `
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <div style="padding:16px 20px;background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(16,185,129,0.06));
+        border-radius:12px;border:1px solid rgba(99,102,241,0.15);">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <span style="font-size:1.6rem;">🧑‍💻</span>
+          <div>
+            <div style="font-weight:800;font-size:1rem;color:var(--text-primary);">Khu vực Demo Khách Hàng</div>
+            <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">
+              Mô phỏng hành trình khách hàng — Gửi đánh giá sản phẩm và nhắn tin trực tiếp với AI Agent
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="demoCustomerPlaceholder" style="text-align:center;padding:32px;color:var(--text-muted);font-size:0.85rem;">
+        ⏳ Đang tải các module...
+      </div>
+    </div>
+  `;
+}
+
 const ROUTES = {
   dashboard: { title: 'Dashboard', subtitle: 'Tổng quan chiến lược AI – Cập nhật lúc 07:31', render: renderDashboard },
   'ai-suggestions': { title: 'Đề xuất AI', subtitle: 'Human-in-the-loop · Phê duyệt chiến lược do AI đề xuất', render: renderAISuggestions },
@@ -2761,7 +2817,8 @@ const ROUTES = {
   'chat-report': { title: 'Báo cáo thắc mắc', subtitle: 'Vấn đề & câu hỏi phổ biến nhất từ khách hàng', render: renderChatReport },
   'chat-insights': { title: 'Tổng hợp từ Chatbot', subtitle: 'Pattern detection — AI phân tích toàn bộ hội thoại', render: renderChatInsights },
   'content-suggestions': { title: 'Đề xuất Content', subtitle: 'AI gợi ý nội dung dựa trên dữ liệu thực', render: renderContentSuggestions },
-  'product-descriptions': { title: 'Mô tả Sản phẩm', subtitle: 'Tối ưu mô tả sản phẩm với AI', render: renderProductDescriptions }
+  'product-descriptions': { title: 'Mô tả Sản phẩm', subtitle: 'Tối ưu mô tả sản phẩm với AI', render: renderProductDescriptions },
+  'demo-customer': { title: 'Demo Khách Hàng', subtitle: 'Thử nghiệm trải nghiệm khách hàng — Gửi Review & Live Chat AI', render: renderDemoCustomer }
 };
 
 let currentPage = 'dashboard';
@@ -2873,6 +2930,65 @@ function activateGuidance(cmd) {
 }
 
 function handlePageClick(e) {
+  // ── Ưu tiên: Các nút dùng class (chat inbox buttons) ──
+  const chatBtn = e.target.closest(
+    '.btn-chat-accept, .btn-chat-edit, .btn-chat-send-edited, .btn-chat-cancel-edit'
+  );
+  if (chatBtn) {
+    // Gửi ngay
+    if (chatBtn.classList.contains('btn-chat-accept')) {
+      const msgs = MOCK.chat_messages[currentChatId] || [];
+      const draftMsg = msgs.find(m => m.from === 'ai_draft');
+      if (draftMsg) {
+        const now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        MOCK.chat_messages[currentChatId] = msgs.filter(m => m.from !== 'ai_draft' && m.from !== 'ai_thinking');
+        MOCK.chat_messages[currentChatId].push({ from: 'ai_sent', time: now, text: draftMsg.text });
+        const conv = MOCK.conversations.find(c => c.id === currentChatId);
+        if (conv) { conv.status = 'auto'; conv.unread = 0; conv.wait_min = 0;
+          conv.preview = draftMsg.text.substring(0, 55) + (draftMsg.text.length > 55 ? '...' : '');
+          conv.time = now; }
+      }
+      chatDraftEditMode = false;
+      showToast('✅ Tin nhắn đã gửi cho khách. AI ghi nhận để học.', 'success');
+      setTimeout(() => navigate('chat'), 200);
+      return;
+    }
+    // Sửa nháp
+    if (chatBtn.classList.contains('btn-chat-edit')) {
+      chatDraftEditMode = true;
+      navigate('chat');
+      setTimeout(() => {
+        const ta = document.getElementById('chatDraftEditArea');
+        if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+      }, 120);
+      return;
+    }
+    // Gửi bản đã sửa
+    if (chatBtn.classList.contains('btn-chat-send-edited')) {
+      const ta = document.getElementById('chatDraftEditArea');
+      const editedText = ta ? ta.value.trim() : '';
+      if (!editedText) { showToast('⚠️ Nội dung không được để trống!', 'warning'); return; }
+      const msgs = MOCK.chat_messages[currentChatId] || [];
+      const now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+      MOCK.chat_messages[currentChatId] = msgs.filter(m => m.from !== 'ai_draft' && m.from !== 'ai_thinking');
+      MOCK.chat_messages[currentChatId].push({ from: 'ai_sent', time: now, text: editedText, edited: true });
+      const conv = MOCK.conversations.find(c => c.id === currentChatId);
+      if (conv) { conv.status = 'auto'; conv.unread = 0; conv.wait_min = 0;
+        conv.preview = editedText.substring(0, 55) + (editedText.length > 55 ? '...' : '');
+        conv.time = now; }
+      chatDraftEditMode = false;
+      showToast('✅ Đã gửi bản nháp đã chỉnh sửa cho khách!', 'success');
+      setTimeout(() => navigate('chat'), 200);
+      return;
+    }
+    // Hủy chỉnh sửa
+    if (chatBtn.classList.contains('btn-chat-cancel-edit')) {
+      chatDraftEditMode = false;
+      navigate('chat');
+      return;
+    }
+  }
+
   const target = e.target.closest('[data-action], [data-nav], [data-tab], [data-type], [data-stab], [data-conv]');
   if (!target) return;
 
@@ -2933,8 +3049,42 @@ function handlePageClick(e) {
       const author = target.dataset.author;
       showToast(`AI đang soạn phản hồi cho ${author}... Sẽ hiển thị trong inbox khi sẵn sàng`, 'info');
     } else if (action === 'deny-chat') {
+      // Xóa nháp AI, thêm thông báo hệ thống, re-render
+      const msgs = MOCK.chat_messages[currentChatId] || [];
+      MOCK.chat_messages[currentChatId] = msgs.filter(m => m.from !== 'ai_draft' && m.from !== 'ai_thinking');
+      MOCK.chat_messages[currentChatId].push({
+        from: 'system',
+        text: '🔄 Nháp bị từ chối — AI đang soạn phản hồi mới...'
+      });
+      chatDraftEditMode = false;
       showToast('Đã từ chối nháp AI. AI sẽ tạo nháp khác.', 'warning');
+      setTimeout(() => navigate('chat'), 300);
+    } else if (action === 'chat-send-msg') {
+      // Gửi tin nhắn từ chủ shop qua ô input
+      const input = document.getElementById('chatMsgInput');
+      const text = input ? input.value.trim() : '';
+      if (!text) return;
+      input.value = '';
+      if (!MOCK.chat_messages[currentChatId]) MOCK.chat_messages[currentChatId] = [];
+      const now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+      MOCK.chat_messages[currentChatId].push({ from: 'shop_owner', time: now, text });
+      const conv = MOCK.conversations.find(c => c.id === currentChatId);
+      if (conv) { conv.preview = text.substring(0, 55) + (text.length > 55 ? '...' : ''); conv.time = now; }
+      navigate('chat');
+      return;
     }
+  }
+
+  // Quick-reply template buttons in chat input area
+  if (target.dataset.chattemplate) {
+    const text = target.dataset.chattemplate;
+    if (!MOCK.chat_messages[currentChatId]) MOCK.chat_messages[currentChatId] = [];
+    const now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    MOCK.chat_messages[currentChatId].push({ from: 'shop_owner', time: now, text });
+    const conv = MOCK.conversations.find(c => c.id === currentChatId);
+    if (conv) { conv.preview = text.substring(0, 55); conv.time = now; }
+    navigate('chat');
+    return;
   }
 
   // Restock button
@@ -2994,12 +3144,6 @@ function handlePageClick(e) {
     return;
   }
 
-  // Generic chat actions
-  if (target.classList.contains('btn-chat-accept')) {
-    showToast('✅ Tin nhắn đã gửi cho khách. AI ghi nhận để học.', 'success');
-  } else if (target.classList.contains('btn-chat-edit')) {
-    showToast('Mở chế độ chỉnh sửa nháp...', 'info');
-  }
 }
 
 /* =====================================================================

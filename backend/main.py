@@ -415,6 +415,124 @@ async def get_all_reviews(product_id: str = None, limit: int = 20):
     finally:
         db.close()
 
+@app.get("/api/crisis-overview")
+async def get_crisis_overview():
+    """
+    Tổng hợp tín hiệu khủng hoảng từ Reviews tiêu cực và CoordinationTasks rủi ro.
+    Dùng để đồng bộ frontend Quản trị Khủng hoảng với dữ liệu thực.
+    """
+    db = SessionLocal()
+    try:
+        # 1. Lấy tất cả task RiskManager đang pending
+        risk_tasks = db.query(CoordinationTask).filter(
+            CoordinationTask.target_agent == "RiskManager",
+            CoordinationTask.status == "pending"
+        ).order_by(CoordinationTask.id.desc()).all()
+
+        # 2. Lấy review tiêu cực (rating <= 3)
+        neg_reviews = db.query(ReviewLog).filter(
+            ReviewLog.rating <= 3
+        ).order_by(ReviewLog.timestamp.desc()).limit(20).all()
+
+        # 3. Lấy chat insights có rủi ro (dùng keyword trong insight)
+        risk_chat_logs = db.query(ChatLog).filter(
+            ChatLog.is_archived == False,
+            ChatLog.insight.isnot(None),
+            ChatLog.insight != ""
+        ).order_by(ChatLog.timestamp.desc()).limit(30).all()
+
+        risk_keywords = ["lỗi", "hỏng", "kém", "tệ", "xấu", "complain", "khiếu nại", "trả hàng", "hoàn tiền", "bức xúc", "tức"]
+        risk_chat_insights = [
+            log for log in risk_chat_logs
+            if any(kw in (log.insight or "").lower() for kw in risk_keywords)
+        ]
+
+        # 4. Gom nhóm tín hiệu tiêu cực theo sản phẩm
+        product_signals: dict = {}
+
+        for r in neg_reviews:
+            pid = r.product_id or "unknown"
+            if pid not in product_signals:
+                product_signals[pid] = {"neg_reviews": [], "risk_tasks": [], "chat_signals": []}
+            product_signals[pid]["neg_reviews"].append({
+                "rating": r.rating,
+                "text": (r.review_text or "")[:120],
+                "insight": r.ai_insight or "",
+                "customer": r.customer_name or "Ẩn danh",
+                "time": r.timestamp.strftime("%H:%M, %d/%m/%Y") if r.timestamp else ""
+            })
+
+        for t in risk_tasks:
+            pid = t.product_id or "unknown"
+            if pid not in product_signals:
+                product_signals[pid] = {"neg_reviews": [], "risk_tasks": [], "chat_signals": []}
+            product_signals[pid]["risk_tasks"].append(t.instruction or "")
+
+        for log in risk_chat_insights:
+            pid = "chat_general"
+            if pid not in product_signals:
+                product_signals[pid] = {"neg_reviews": [], "risk_tasks": [], "chat_signals": []}
+            product_signals[pid]["chat_signals"].append(log.insight or "")
+
+        # 5. Tính severity cho từng sản phẩm
+        crises = []
+        for pid, data in product_signals.items():
+            neg_count = len(data["neg_reviews"])
+            task_count = len(data["risk_tasks"])
+            chat_count = len(data["chat_signals"])
+
+            # Tính severity score (tối đa 100)
+            score = min(100, neg_count * 15 + task_count * 25 + chat_count * 10)
+
+            if score >= 60:
+                severity = "critical"
+            elif score >= 25:
+                severity = "warning"
+            else:
+                severity = "monitoring"
+
+            crises.append({
+                "product_id": pid,
+                "severity": severity,
+                "severity_score": score,
+                "neg_review_count": neg_count,
+                "risk_task_count": task_count,
+                "chat_signal_count": chat_count,
+                "reviews": data["neg_reviews"][:3],
+                "risk_tasks": data["risk_tasks"][:5],
+                "chat_signals": data["chat_signals"][:3],
+                "detected_from": "live_backend"
+            })
+
+        # Sắp xếp theo severity score giảm dần
+        crises.sort(key=lambda x: x["severity_score"], reverse=True)
+
+        # 6. Trạng thái tổng thể
+        if any(c["severity"] == "critical" for c in crises):
+            overall_status = "critical"
+        elif any(c["severity"] == "warning" for c in crises):
+            overall_status = "warning"
+        elif crises:
+            overall_status = "monitoring"
+        else:
+            overall_status = "safe"
+
+        return {
+            "overall_status": overall_status,
+            "total_crisis_products": len(crises),
+            "total_neg_reviews": len(neg_reviews),
+            "total_risk_tasks": len(risk_tasks),
+            "total_chat_signals": len(risk_chat_insights),
+            "crises": crises,
+            "last_updated": datetime.now().isoformat()
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
 @app.post("/chat-v3")
 async def process_chat_with_history(data: ChatSessionInput):
     db = SessionLocal()
@@ -470,7 +588,7 @@ async def reset_all_data():
         db.commit()
 
         # 2. Xóa sạch kiến thức trong Vector DB (ChromaDB)
-        from backend.config import chroma_client
+        from config import chroma_client
         # Lấy danh sách tất cả collections và xóa sạch
         all_cols = ["policy_db", "product_db", "resolved_qa_db"]
         for col in all_cols:

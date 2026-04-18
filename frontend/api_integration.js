@@ -262,9 +262,10 @@ async function loadReviewsFromAPI() {
 
       showToast(`📥 Đã tải ${data.total_fetched} review từ database`, 'info');
 
-      // Re-render nếu đang ở trang reviews
+      // Re-render nếu đang ở trang reviews (dùng _origNavigate để tránh vòng lặp)
       if (typeof currentPage !== 'undefined' && currentPage === 'reviews') {
-        navigate('reviews');
+        _origNavigate('reviews');
+        setTimeout(injectReviewForm, 80);
       }
     } else {
       showToast('Chưa có review nào trong database (dùng form bên dưới để thêm)', 'info');
@@ -276,16 +277,84 @@ async function loadReviewsFromAPI() {
 }
 
 async function submitReviewToAPI(formData) {
+  // Sync ngay vào MOCK để Crisis panel luôn có dữ liệu (kể cả khi backend offline)
+  _syncReviewToMock(formData);
+
   try {
     const result = await apiCall('/learn-from-review', 'POST', formData);
     showToast('✅ Review đã gửi! AI đang phân tích và học hỏi từ dữ liệu này.', 'success');
-    // Tải lại reviews sau 1.5 giây
     setTimeout(loadReviewsFromAPI, 1500);
+    // Nếu review tiêu cực → nhắc chuyển sang Crisis Center
+    if (parseInt(formData.rating) <= 3) {
+      setTimeout(() => _alertCrisisFromReview(formData), 1800);
+    }
     return result;
   } catch (err) {
-    showToast('❌ Lỗi gửi review: ' + err.message, 'danger');
-    throw err;
+    // Kể cả backend offline, MOCK đã được cập nhật — vẫn thông báo thành công cho demo
+    if (parseInt(formData.rating) <= 3) {
+      showToast('🔴 Review tiêu cực đã ghi nhận (Demo) — kiểm tra Quản trị Khủng hoảng!', 'danger');
+      setTimeout(() => _alertCrisisFromReview(formData), 600);
+    } else {
+      showToast('✅ Review đã lưu (Demo Mode — Backend offline)', 'info');
+    }
   }
+}
+
+/** Thêm review vào MOCK.reviews ngay lập tức (không cần backend). */
+function _syncReviewToMock(formData) {
+  if (typeof MOCK === 'undefined') return;
+  const rating = parseInt(formData.rating) || 3;
+  const tagLabel = rating <= 1 ? 'Chất lượng SP'
+                 : rating <= 2 ? 'Phản hồi tiêu cực'
+                 : rating <= 3 ? 'Cần cải thiện'
+                 : 'Phản hồi tích cực';
+  const review = {
+    author: formData.customer_name || 'Khách Demo',
+    date: 'Vừa xong',
+    rating,
+    text: formData.review_text || '',
+    product_id: formData.product_id || 'General',
+    tag: { type: rating <= 3 ? 'neg' : 'pos', label: tagLabel },
+    _isDemo: true
+  };
+  // Thay thế review demo cũ cùng sản phẩm để không trùng lặp
+  MOCK.reviews = MOCK.reviews.filter(r => !(r._isDemo && r.product_id === review.product_id));
+  MOCK.reviews.unshift(review);
+}
+
+/** Hiển thị toast + banner sau khi có review tiêu cực. */
+function _alertCrisisFromReview(formData) {
+  const pid = formData.product_id || 'sản phẩm';
+  // Toast với nút bấm điều hướng
+  const toastId = 'toast_crisis_' + Date.now();
+  const toastEl = document.createElement('div');
+  toastEl.id = toastId;
+  toastEl.style.cssText = `
+    position:fixed;bottom:80px;right:20px;z-index:9999;
+    background:#1e1b4b;border:2px solid #ef4444;border-radius:12px;
+    padding:12px 16px;max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    animation:slideInRight 0.3s ease;`;
+  toastEl.innerHTML = `
+    <div style="font-size:0.8rem;font-weight:700;color:#ef4444;margin-bottom:6px;">
+      🔴 Review tiêu cực đã được ghi nhận!
+    </div>
+    <div style="font-size:0.75rem;color:#c7d2fe;margin-bottom:10px;line-height:1.5;">
+      Sản phẩm <strong>${pid}</strong> nhận đánh giá ⭐${formData.rating}/5 — AI đã phân tích và cập nhật vào hệ thống cảnh báo.
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="navigate('crisis-center');document.getElementById('${toastId}')?.remove();"
+        style="flex:1;font-size:0.75rem;padding:6px;border-radius:8px;background:#ef4444;
+          color:white;border:none;cursor:pointer;font-weight:700;">
+        🛡 Xem Quản trị Khủng hoảng
+      </button>
+      <button onclick="document.getElementById('${toastId}')?.remove();"
+        style="font-size:0.75rem;padding:6px 10px;border-radius:8px;border:1px solid #6366f1;
+          background:transparent;color:#a5b4fc;cursor:pointer;">
+        ✕
+      </button>
+    </div>`;
+  document.body.appendChild(toastEl);
+  setTimeout(() => toastEl?.remove(), 12000);
 }
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -307,10 +376,56 @@ function buildLiveChatWidgetHTML() {
             RAG + lịch sử hội thoại · ChromaDB · Gemini Flash
           </div>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <span style="font-size:0.7rem;background:var(--accent-emerald-bg);color:var(--accent-emerald);padding:3px 10px;border-radius:6px;font-weight:600;">
-            ID: ${liveChatCustomerId}
-          </span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+
+          <!-- ── Khu vực ID khách hàng (có thể chỉnh sửa) ── -->
+          <div id="liveChatIdArea" style="display:flex;align-items:center;gap:6px;">
+
+            <!-- Trạng thái hiển thị (badge + nút sửa) -->
+            <div id="liveChatIdDisplay" style="display:flex;align-items:center;gap:4px;">
+              <span id="liveChatIdBadge"
+                title="Click ✏️ để đổi ID khách hàng"
+                style="font-size:0.7rem;background:var(--accent-emerald-bg);color:var(--accent-emerald);
+                  padding:3px 10px;border-radius:6px;font-weight:600;white-space:nowrap;">
+                🪪 ${liveChatCustomerId}
+              </span>
+              <button id="btnEditLiveChatId"
+                title="Chỉnh sửa ID khách hàng"
+                style="background:none;border:none;cursor:pointer;font-size:0.85rem;
+                  color:var(--text-muted);padding:2px 4px;border-radius:4px;line-height:1;
+                  transition:color 0.15s;"
+                onmouseover="this.style.color='var(--accent-emerald)'"
+                onmouseout="this.style.color='var(--text-muted)'">
+                ✏️
+              </button>
+            </div>
+
+            <!-- Trạng thái chỉnh sửa (input + xác nhận + hủy) — ẩn ban đầu -->
+            <div id="liveChatIdEdit" style="display:none;align-items:center;gap:4px;">
+              <input id="liveChatIdInput" type="text"
+                value="${liveChatCustomerId}"
+                style="font-size:0.72rem;padding:3px 8px;border-radius:6px;
+                  border:1px solid var(--accent-emerald);background:var(--bg-card);
+                  color:var(--text-primary);width:160px;font-family:monospace;"
+                placeholder="Nhập ID khách hàng..."
+              />
+              <button id="btnConfirmLiveChatId"
+                title="Xác nhận"
+                style="font-size:0.72rem;padding:3px 8px;border-radius:6px;
+                  background:var(--accent-emerald);color:white;border:none;cursor:pointer;font-weight:700;">
+                ✓
+              </button>
+              <button id="btnCancelLiveChatId"
+                title="Hủy"
+                style="font-size:0.72rem;padding:3px 8px;border-radius:6px;
+                  border:1px solid var(--border-primary);background:var(--bg-glass);
+                  cursor:pointer;color:var(--text-muted);">
+                ✕
+              </button>
+            </div>
+
+          </div>
+
           <button id="btnClearLiveChat" style="font-size:0.72rem;padding:5px 10px;border-radius:6px;border:1px solid var(--border-primary);background:var(--bg-glass);cursor:pointer;color:var(--text-muted);">
             🗑 Xóa lịch sử
           </button>
@@ -494,18 +609,44 @@ async function sendLiveChatMessage(msg) {
 
       // Refresh the stats panel
       renderChatSessionStats();
+
+      // ── Đồng bộ tin nhắn vào Hộp Thư (Tin nhắn cần duyệt) ──
+      _syncLiveChatToInbox(msg, result.reply, eval_);
+
     } else {
       appendLiveChatBubble('ai', 'Dạ em đang gặp chút trục trặc, anh/chị thử lại nhé ạ 🙏');
     }
   } catch (err) {
     const thinking = document.getElementById('liveChatThinkingBubble');
     if (thinking) thinking.remove();
-    appendLiveChatBubble(
-      'ai',
-      '⚠️ Không thể kết nối backend. Vui lòng kiểm tra server đang chạy tại ' + API_BASE,
-      { is_safe: false, confidence_score: 0 }
-    );
-    console.warn('[Agicom] Chat API lỗi:', err.message);
+
+    // ── Demo Mode: Mô phỏng AI response khi backend offline ──
+    const negKeywords = ['hỏng', 'hư', 'lỗi', 'đổi trả', 'hoàn tiền', 'kém', 'thất vọng',
+                         'chậm', 'bức xúc', 'tức', 'giả', 'fake', 'không sạc', 'tệ', 'dở'];
+    const isNegative = negKeywords.some(k => msg.toLowerCase().includes(k));
+
+    if (isNegative) {
+      const mockReply = 'Dạ em xin lỗi anh/chị về trải nghiệm không tốt này ạ 🙏 Em đã ghi nhận phản hồi của anh/chị và sẽ chuyển ngay cho bộ phận kỹ thuật + CSKH kiểm tra. Anh/chị vui lòng cho em xin số đơn hàng để được hỗ trợ đổi/trả miễn phí ạ.';
+      const mockEval = { is_safe: false, confidence_score: 0.42, sentiment_analysis: 'tức giận', identified_product_id: 'ANKER-100W-CAP', risk_level: 'Cao', risk_category: 'Chất lượng sản phẩm' };
+      appendLiveChatBubble('ai', mockReply + ' <em style="font-size:0.68rem;color:var(--text-muted);">[Demo Mode]</em>', mockEval);
+      _syncLiveChatToInbox(msg, mockReply, mockEval);
+      chatSessionStats.totalAIReplies++;
+      chatSessionStats.totalEscalated++;
+      chatSessionStats.confidenceScores.push(0.42);
+      chatSessionStats.sentiments.push('tức giận');
+      renderChatSessionStats();
+    } else {
+      const mockReply = 'Dạ anh/chị ơi! Shop PhoneMax hân hạnh được phục vụ ạ. Em có thể giúp gì cho anh/chị?';
+      const mockEval = { is_safe: true, confidence_score: 0.88, sentiment_analysis: 'bình thường' };
+      appendLiveChatBubble('ai', mockReply + ' <em style="font-size:0.68rem;color:var(--text-muted);">[Demo Mode]</em>', mockEval);
+      _syncLiveChatToInbox(msg, mockReply, mockEval);
+      chatSessionStats.totalAIReplies++;
+      chatSessionStats.totalSafe++;
+      chatSessionStats.confidenceScores.push(0.88);
+      chatSessionStats.sentiments.push('bình thường');
+      renderChatSessionStats();
+    }
+    console.warn('[Agicom] Chat API offline — Demo mode kích hoạt:', err.message);
   }
 }
 
@@ -871,12 +1012,16 @@ navigate = function (page) {
     if (page === 'dashboard') {
       injectDailySummaryCard();
     } else if (page === 'reviews') {
-      injectReviewForm();
+      // Chỉ tải dữ liệu — form submit đã chuyển sang trang Demo khách hàng
       loadReviewsFromAPI();
     } else if (page === 'chat') {
-      injectLiveChatWidget();
+      // Live Chat widget đã chuyển sang trang Demo khách hàng
     } else if (page === 'settings') {
       injectResetButton();
+    } else if (page === 'crisis-center') {
+      loadCrisisFromBackend();
+    } else if (page === 'demo-customer') {
+      _injectDemoCustomerPage();
     }
   }, 80);
 };
@@ -1031,8 +1176,99 @@ function injectLiveChatWidget() {
     btn.addEventListener('click', () => sendLiveChatMessage(btn.dataset.msg));
   });
 
+  // ── Chỉnh sửa ID khách hàng ──
+  _attachLiveChatIdEditorEvents();
+
   // Load chatbot features & quality data from backend
   loadChatbotFeatures();
+}
+
+/**
+ * Gắn toàn bộ event logic cho khu vực chỉnh sửa ID khách hàng.
+ * Tách ra để dễ gọi lại nếu widget được rebuild.
+ */
+function _attachLiveChatIdEditorEvents() {
+  const display   = document.getElementById('liveChatIdDisplay');
+  const editArea  = document.getElementById('liveChatIdEdit');
+  const badge     = document.getElementById('liveChatIdBadge');
+  const editBtn   = document.getElementById('btnEditLiveChatId');
+  const input     = document.getElementById('liveChatIdInput');
+  const confirmBtn= document.getElementById('btnConfirmLiveChatId');
+  const cancelBtn = document.getElementById('btnCancelLiveChatId');
+  if (!editBtn || !input || !confirmBtn || !cancelBtn) return;
+
+  // Mở chế độ chỉnh sửa
+  function openEdit() {
+    input.value = liveChatCustomerId;
+    display.style.display  = 'none';
+    editArea.style.display = 'flex';
+    input.focus();
+    input.select();
+  }
+
+  // Lưu ID mới và cập nhật phiên làm việc
+  function confirmEdit() {
+    const newId = input.value.trim().replace(/\s+/g, '_');  // dùng _ thay khoảng trắng
+    if (!newId) {
+      input.style.borderColor = '#ef4444';
+      input.placeholder = 'ID không được để trống!';
+      setTimeout(() => { input.style.borderColor = ''; }, 1200);
+      return;
+    }
+
+    const changed = newId !== liveChatCustomerId;
+    liveChatCustomerId = newId;
+
+    // Cập nhật badge
+    if (badge) badge.textContent = '🪪 ' + liveChatCustomerId;
+
+    // Đóng chế độ chỉnh sửa
+    editArea.style.display = 'none';
+    display.style.display  = 'flex';
+
+    if (changed) {
+      // Xóa lịch sử chat cũ trên UI
+      const msgContainer = document.getElementById('liveChatMessages');
+      if (msgContainer) {
+        msgContainer.innerHTML =
+          '<div style="text-align:center;color:var(--text-muted);font-size:0.82rem;padding:20px 0;">' +
+          '🔄 Đã chuyển sang ID mới. Bắt đầu cuộc hội thoại mới.</div>';
+      }
+      // Reset session stats
+      chatSessionStats.reset();
+      const statsPanel = document.getElementById('chatStatsPanel');
+      if (statsPanel) {
+        statsPanel.innerHTML =
+          '<div style="margin-top:16px;border:1px solid var(--border-primary);border-radius:12px;overflow:hidden;">' +
+          '<div style="background:linear-gradient(135deg,#1e1b4b 0%,#312e81 100%);padding:10px 16px;display:flex;align-items:center;gap:8px;">' +
+          '<span style="font-size:1rem;">📊</span>' +
+          '<span style="font-size:0.82rem;font-weight:700;color:#e0e7ff;">Báo Cáo Phiên Chat – Realtime Analytics</span>' +
+          '</div>' +
+          '<div style="padding:20px;background:var(--bg-secondary);text-align:center;color:var(--text-muted);font-size:0.82rem;">' +
+          '💬 Phiên mới — Gửi tin nhắn để bắt đầu theo dõi...</div></div>';
+      }
+      showToast(`🪪 Đã đổi ID khách hàng sang: <strong>${liveChatCustomerId}</strong>`, 'success');
+    } else {
+      closeEdit();
+    }
+  }
+
+  // Hủy chỉnh sửa
+  function closeEdit() {
+    input.value = liveChatCustomerId;
+    editArea.style.display = 'none';
+    display.style.display  = 'flex';
+  }
+
+  editBtn.addEventListener('click', openEdit);
+  badge?.addEventListener('click', openEdit);          // click vào badge cũng mở edit
+  confirmBtn.addEventListener('click', confirmEdit);
+  cancelBtn.addEventListener('click', closeEdit);
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter')  { e.preventDefault(); confirmEdit(); }
+    if (e.key === 'Escape') { e.preventDefault(); closeEdit(); }
+  });
 }
 
 /* ── Load Chatbot Features & Quality từ backend ── */
@@ -1180,6 +1416,807 @@ if (_origHandlePageClick) {
     }
     _origHandlePageClick(e);
   };
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   10b. DEMO KHÁCH HÀNG — Inject review form + live chat widget
+   ────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Xây dựng nội dung trang "Demo Khách Hàng":
+ *  1. Xóa placeholder skeleton
+ *  2. Inject form "Thêm Review Mới → AI Phân tích & Học hỏi"
+ *  3. Inject widget "Live Chat với AI Agent"
+ *  4. Tải sẵn review list từ DB
+ */
+/**
+ * Kịch bản demo: điền sẵn form review + chat input để demo nhanh.
+ * Gọi từ nút trong demo scenario card.
+ */
+function _applyDemoScenario(scenario) {
+  const SCENARIOS = {
+    anker: {
+      product_id: 'ANKER-100W-CAP',
+      customer_name: 'Hoang_Manh_Demo',
+      rating: '1',
+      review_text: 'Cáp Anker 100W xài 1 tuần đã hư rồi, sạc rất chậm, dây nóng ran. Yêu cầu đổi trả! Hàng của shop kém chất lượng quá.',
+      chat_msg: 'Shop ơi cáp Anker 100W tôi mua ở đây bị lỗi rồi! Sạc không vào, dây nóng ran. Tôi muốn đổi trả, có bồi thường không?',
+      label: 'Cáp Anker lỗi hàng loạt'
+    },
+    shipping: {
+      product_id: 'S24-ULTRA-001',
+      customer_name: 'Khach_VIP_Demo',
+      rating: '2',
+      review_text: 'Điện thoại giao đến hộp bị móp nặng, may mà máy không sao. Shop cần đóng gói cẩn thận hơn, tôi rất thất vọng với dịch vụ giao hàng.',
+      chat_msg: 'Shop ơi điện thoại tôi vừa nhận được mà hộp bị móp hết! Tôi rất bức xúc, shop xử lý thế nào đây?',
+      label: 'Vận chuyển hư hỏng'
+    }
+  };
+
+  const s = SCENARIOS[scenario];
+  if (!s) return;
+
+  // Điền form review
+  const fields = {
+    'rev_product_id': s.product_id,
+    'rev_customer_name': s.customer_name,
+    'rev_rating': s.rating,
+    'rev_text': s.review_text
+  };
+  Object.entries(fields).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  });
+
+  // Điền chat input
+  const chatInput = document.getElementById('liveChatInput');
+  if (chatInput) chatInput.value = s.chat_msg;
+
+  // Cập nhật status guide
+  const statusEl = document.getElementById('demoScenarioStatus');
+  if (statusEl) {
+    statusEl.style.display = 'block';
+    statusEl.innerHTML = `
+      ✅ Đã điền kịch bản <strong>"${s.label}"</strong> — Thực hiện theo thứ tự:
+      <span style="color:#ef4444;font-weight:700;">①</span> Nhấn "🤖 Gửi & AI học hỏi" ở phần review →
+      <span style="color:#f59e0b;font-weight:700;">②</span> Nhấn "Gửi ↗" ở khung chat →
+      <span style="color:#6366f1;font-weight:700;">③</span> Nhấn "🛡 Xem Crisis Center" trong popup hoặc từ sidebar`;
+  }
+
+  // Scroll đến form review để tiện điền
+  setTimeout(() => document.getElementById('reviewSubmitForm')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+}
+
+function _injectDemoCustomerPage() {
+  const pageContent = document.getElementById('pageContent');
+  if (!pageContent) return;
+
+  // Xóa placeholder (nếu còn)
+  const ph = document.getElementById('demoCustomerPlaceholder');
+  if (ph) ph.remove();
+
+  // ── Card Kịch bản Demo (luôn ở đầu trang) ──
+  if (!document.getElementById('demoScenarioCard')) {
+    const scenarioCard = document.createElement('div');
+    scenarioCard.id = 'demoScenarioCard';
+    scenarioCard.className = 'content-card';
+    scenarioCard.style.cssText = 'margin-bottom:16px;border:2px solid var(--accent-indigo);background:linear-gradient(135deg,rgba(99,102,241,0.06),rgba(139,92,246,0.03));';
+    scenarioCard.innerHTML = `
+      <div class="content-card-title" style="color:var(--accent-indigo);margin-bottom:6px;">
+        🎬 Kịch bản Demo — Luồng phát hiện & xử lý khủng hoảng
+      </div>
+      <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:12px;line-height:1.6;">
+        Chọn kịch bản để điền sẵn form review + chat. Sau khi gửi, một popup sẽ xuất hiện để chuyển thẳng đến
+        <strong style="color:var(--accent-rose);">Quản trị Khủng hoảng</strong> — nơi AI tự động tổng hợp cảnh báo và lập kế hoạch xử lý.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button onclick="_applyDemoScenario('anker')"
+          style="font-size:0.78rem;padding:7px 14px;border-radius:8px;border:none;cursor:pointer;
+            background:linear-gradient(135deg,#ef4444,#dc2626);color:white;font-weight:700;">
+          🔴 Cáp Anker lỗi hàng loạt
+        </button>
+        <button onclick="_applyDemoScenario('shipping')"
+          style="font-size:0.78rem;padding:7px 14px;border-radius:8px;border:1px solid var(--border-primary);
+            cursor:pointer;background:var(--bg-glass);color:var(--text-secondary);font-weight:600;">
+          📦 Vận chuyển hư hỏng
+        </button>
+        <button onclick="navigate('crisis-center')"
+          style="font-size:0.78rem;padding:7px 14px;border-radius:8px;margin-left:auto;
+            border:1px solid #ef4444;cursor:pointer;background:rgba(239,68,68,0.08);
+            color:#ef4444;font-weight:700;">
+          🛡 Xem Crisis Center →
+        </button>
+      </div>
+      <div id="demoScenarioStatus" style="display:none;margin-top:10px;padding:8px 12px;
+        background:rgba(99,102,241,0.08);border-radius:8px;font-size:0.74rem;
+        color:var(--text-secondary);line-height:1.8;border:1px solid rgba(99,102,241,0.2);">
+      </div>`;
+    pageContent.insertBefore(scenarioCard, pageContent.firstChild);
+  }
+
+  // ── Section 1: Review Form ──
+  if (!document.getElementById('reviewSubmitForm')) {
+    const reviewSection = document.createElement('div');
+    reviewSection.innerHTML = `
+      <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;
+        letter-spacing:0.8px;color:var(--text-muted);margin-bottom:8px;">
+        📋 Gửi đánh giá sản phẩm
+      </div>`;
+
+    const form = document.createElement('div');
+    form.id = 'reviewSubmitForm';
+    form.className = 'content-card';
+    form.style.cssText = 'margin-bottom:8px;border:2px solid var(--accent-amber);';
+    form.innerHTML = `
+      <div class="content-card-title" style="color:var(--accent-amber);">
+        📝 Thêm Review Mới → AI Phân tích & Học hỏi
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div class="settings-field">
+          <label class="settings-label">ID Sản phẩm</label>
+          <input id="rev_product_id" class="settings-input" value="S24-ULTRA-001"
+            placeholder="VD: ANKER-100W-CAP">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Tên khách hàng</label>
+          <input id="rev_customer_name" class="settings-input" placeholder="VD: Nguyễn Văn A">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Số sao</label>
+          <select id="rev_rating" class="settings-input">
+            <option value="5">⭐⭐⭐⭐⭐ 5 sao</option>
+            <option value="4">⭐⭐⭐⭐ 4 sao</option>
+            <option value="3">⭐⭐⭐ 3 sao</option>
+            <option value="2" selected>⭐⭐ 2 sao</option>
+            <option value="1">⭐ 1 sao</option>
+          </select>
+        </div>
+      </div>
+      <div class="settings-field" style="margin-bottom:12px;">
+        <label class="settings-label">Nội dung đánh giá</label>
+        <textarea id="rev_text" class="settings-input" rows="3"
+          placeholder="Nhập nội dung đánh giá của khách hàng...">Sản phẩm giao nhanh nhưng hộp bị móp một chút. Chất lượng ổn.</textarea>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button id="btnSubmitReview" class="btn-approve">
+          🤖 Gửi & AI học hỏi
+        </button>
+        <button id="btnLoadDBReviews" class="btn-modal-cancel">
+          📥 Tải reviews từ Database
+        </button>
+      </div>
+      <div style="margin-top:10px;padding:8px;background:var(--accent-amber-bg);
+        border-radius:8px;font-size:0.75rem;color:var(--accent-amber);">
+        💡 Review được lưu vào SQLite + AI trích xuất insight → lưu vào ChromaDB để chatbot học hỏi
+      </div>`;
+
+    reviewSection.appendChild(form);
+    pageContent.appendChild(reviewSection);
+
+    // Tải ngay danh sách review từ DB
+    loadReviewsFromAPI();
+  }
+
+  // ── Section 2: Live Chat Widget ──
+  if (!document.getElementById('liveChatWidgetContainer')) {
+    const chatSection = document.createElement('div');
+    chatSection.innerHTML = `
+      <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;
+        letter-spacing:0.8px;color:var(--text-muted);margin:20px 0 8px;">
+        💬 Chat trực tiếp với AI Agent
+      </div>`;
+    pageContent.appendChild(chatSection);
+
+    // Dùng lại hàm inject sẵn có (tự xử lý DOM, events)
+    injectLiveChatWidget();
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   11a. SYNC LIVE CHAT → HỘP THƯ (Tin nhắn cần duyệt)
+   ────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Sau mỗi tin nhắn trong Live Chat widget, đưa cặp (câu hỏi khách + nháp AI)
+ * vào MOCK.conversations và MOCK.chat_messages để hiển thị trong Hộp Thư.
+ *
+ * - is_safe === false  → status 'escalate'  (chờ duyệt khẩn)
+ * - is_safe === true   → status 'pending'   (đã tự trả lời, lưu làm log)
+ */
+function _syncLiveChatToInbox(customerMsg, aiReply, evalData) {
+  if (typeof MOCK === 'undefined') return;
+
+  const isEscalated = evalData.is_safe === false;
+  const conf = evalData.confidence_score !== undefined
+    ? Math.round(evalData.confidence_score * 100)
+    : null;
+  const sentiment = evalData.sentiment_analysis || '';
+
+  const now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  const newId = 'live_' + Date.now();
+
+  // Tính sentiment score cho thanh màu trong danh sách (0-100)
+  const sentimentScore = (() => {
+    const s = sentiment.toLowerCase();
+    if (s.includes('tích cực') || s.includes('positive') || s.includes('hài lòng')) return 80;
+    if (s.includes('tiêu cực') || s.includes('negative') || s.includes('bức xúc') || s.includes('tức giận')) return 20;
+    return 55;
+  })();
+
+  // ── Thêm vào đầu danh sách hội thoại ──
+  // Dùng liveChatCustomerId làm tên để đồng bộ với badge trong widget
+  const displayName = (typeof liveChatCustomerId !== 'undefined' && liveChatCustomerId)
+    ? liveChatCustomerId
+    : 'Khách Live Chat';
+  const avatarChar = displayName.charAt(0).toUpperCase();
+
+  MOCK.conversations.unshift({
+    id: newId,
+    name: displayName,
+    avatar: avatarChar,
+    time: now,
+    status: isEscalated ? 'escalate' : 'pending',
+    unread: 1,
+    preview: customerMsg.length > 55 ? customerMsg.substring(0, 55) + '...' : customerMsg,
+    category: isEscalated ? 'Cần duyệt' : 'Live Chat',
+    sentiment: sentimentScore,
+    wait_min: isEscalated ? 1 : 0,
+    priority: isEscalated ? 0 : 2,
+    ltv: 0,
+    orders: 0,
+    platform: 'Live Chat',
+    angry: sentimentScore < 30,
+    customer: {
+      note: `Live Chat · ID: ${displayName} · Confidence: ${conf !== null ? conf + '%' : '—'} · Cảm xúc: ${sentiment || 'bình thường'}`,
+      risk: isEscalated ? 'high' : 'low',
+      churn: '—',
+      purchases: []
+    }
+  });
+
+  // ── Thêm lịch sử tin nhắn ──
+  MOCK.chat_messages[newId] = [
+    { from: 'customer', time: now, text: customerMsg }
+  ];
+
+  if (isEscalated) {
+    // Cần duyệt → hiển thị nháp AI để chủ shop quyết định
+    MOCK.chat_messages[newId].push(
+      { from: 'ai_thinking', text: 'AI phân tích ngữ cảnh và tìm kiếm trong knowledge base...', context: [
+          `Confidence: ${conf !== null ? conf + '%' : '—'}`,
+          `Cảm xúc: ${sentiment || 'bình thường'}`,
+          'is_safe: ❌ Cần duyệt thủ công'
+        ]
+      },
+      { from: 'ai_draft', text: aiReply, confidence: conf }
+    );
+    showToast(`⚠️ Tin nhắn Live Chat cần duyệt — đã chuyển vào Hộp Thư!`, 'warning');
+  } else {
+    // Tự động gửi → lưu làm log
+    MOCK.chat_messages[newId].push({
+      from: 'ai_sent',
+      time: now,
+      text: aiReply
+    });
+  }
+
+  // ── Cập nhật badge số tin nhắn trong sidebar ──
+  const pendingCount = MOCK.conversations.filter(c => c.status === 'escalate' || c.status === 'pending').length;
+  const chatBadge = document.querySelector('.nav-child-item[data-page="chat"] .nav-item-badge');
+  if (chatBadge) chatBadge.textContent = pendingCount;
+
+  // ── Nếu đang ở trang chat → re-render để inbox cập nhật ngay ──
+  if (typeof currentPage !== 'undefined' && currentPage === 'chat' && typeof navigate === 'function') {
+    setTimeout(() => navigate('chat'), 300);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   11b. CRISIS CENTER — /api/crisis-overview
+   ────────────────────────────────────────────────────────────────────── */
+
+/** Render một thẻ sản phẩm có tín hiệu khủng hoảng (dùng chung cho live + mock). */
+function _renderCrisisCard(c) {
+  const csev = c.severity === 'critical' ? { color: '#ef4444', label: '🔴 Khẩn cấp' }
+             : c.severity === 'warning'  ? { color: '#f59e0b', label: '🟡 Cảnh báo' }
+             :                              { color: '#6366f1', label: '🔵 Theo dõi' };
+
+  // Safe array access — tránh lỗi khi backend trả về null
+  const reviews      = Array.isArray(c.reviews)      ? c.reviews      : [];
+  const risk_tasks   = Array.isArray(c.risk_tasks)   ? c.risk_tasks   : [];
+  const chat_signals = Array.isArray(c.chat_signals) ? c.chat_signals : [];
+
+  // Helper tạo HTML cho 1 review item
+  const reviewItemHtml = (r) => `
+    <div style="padding:6px 10px;background:rgba(239,68,68,0.05);border-radius:6px;
+      font-size:0.77rem;margin-bottom:4px;border-left:3px solid #ef4444;">
+      <strong style="color:#ef4444;">${r.rating}⭐ — ${r.customer}</strong>
+      <span style="color:var(--text-muted);font-size:0.7rem;margin-left:6px;">${r.time || ''}</span>
+      <div style="color:var(--text-secondary);margin-top:2px;line-height:1.4;">${r.text}</div>
+      ${r.insight ? `<div style="font-size:0.7rem;color:var(--accent-indigo);margin-top:2px;">💡 ${r.insight}</div>` : ''}
+    </div>`;
+
+  // Chỉ hiện 5 review đầu, còn lại ẩn sau nút "Xem thêm"
+  const PREVIEW_COUNT = 5;
+  const cardId = 'crisis_' + (c.product_id || '').replace(/\W/g, '_') + '_' + Date.now();
+  let reviewsHtml = '';
+  if (reviews.length > 0) {
+    const visible = reviews.slice(0, PREVIEW_COUNT);
+    const hidden  = reviews.slice(PREVIEW_COUNT);
+    reviewsHtml = visible.map(reviewItemHtml).join('');
+    if (hidden.length > 0) {
+      reviewsHtml += `
+        <div id="${cardId}_extra" style="display:none;">
+          ${hidden.map(reviewItemHtml).join('')}
+        </div>
+        <button
+          onclick="
+            var el = document.getElementById('${cardId}_extra');
+            var btn = this;
+            if (el.style.display === 'none') {
+              el.style.display = 'block';
+              btn.textContent = '▲ Ẩn bớt';
+            } else {
+              el.style.display = 'none';
+              btn.textContent = '▼ Xem thêm ${hidden.length} review';
+            }"
+          style="margin-top:4px;margin-bottom:4px;font-size:0.72rem;padding:4px 12px;
+            border:1px solid rgba(239,68,68,0.35);border-radius:6px;background:rgba(239,68,68,0.07);
+            color:#ef4444;cursor:pointer;font-weight:600;">
+          ▼ Xem thêm ${hidden.length} review
+        </button>`;
+    }
+  }
+
+  const tasksHtml = risk_tasks.length
+    ? risk_tasks.map(t => `
+        <div style="padding:6px 10px;background:rgba(245,158,11,0.07);border-radius:6px;
+          font-size:0.76rem;margin-bottom:3px;border-left:3px solid #f59e0b;color:var(--text-secondary);">
+          ⚠️ ${t}
+        </div>`).join('')
+    : '';
+
+  const chatHtml = chat_signals.length
+    ? chat_signals.map(s => `
+        <div style="padding:5px 10px;background:rgba(99,102,241,0.06);border-radius:6px;
+          font-size:0.75rem;margin-bottom:3px;border-left:3px solid #6366f1;color:var(--text-muted);">
+          💬 ${s}
+        </div>`).join('')
+    : '';
+
+  return `
+    <div style="border:1px solid ${csev.color}40;border-radius:10px;overflow:hidden;margin-bottom:12px;">
+      <div style="background:${csev.color}12;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:0.82rem;font-weight:800;color:${csev.color};">${csev.label}</span>
+        <span style="font-size:0.78rem;font-weight:700;color:var(--text-primary);">
+          Sản phẩm: <code style="background:var(--bg-glass);padding:1px 6px;border-radius:4px;">${c.product_id}</code>
+        </span>
+        <span style="margin-left:auto;font-size:0.7rem;background:${csev.color}18;
+          color:${csev.color};padding:2px 8px;border-radius:8px;font-weight:700;">
+          Score: ${c.severity_score}/100
+        </span>
+      </div>
+      <div style="padding:12px 14px;background:var(--bg-secondary);">
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+          ${c.neg_review_count  > 0 ? `<span style="font-size:0.72rem;padding:3px 8px;border-radius:6px;background:rgba(239,68,68,0.1);color:#ef4444;font-weight:700;">📋 ${c.neg_review_count} review xấu</span>` : ''}
+          ${c.risk_task_count   > 0 ? `<span style="font-size:0.72rem;padding:3px 8px;border-radius:6px;background:rgba(245,158,11,0.1);color:#f59e0b;font-weight:700;">⚠️ ${c.risk_task_count} tác vụ rủi ro</span>` : ''}
+          ${c.chat_signal_count > 0 ? `<span style="font-size:0.72rem;padding:3px 8px;border-radius:6px;background:rgba(99,102,241,0.1);color:#6366f1;font-weight:700;">💬 ${c.chat_signal_count} tín hiệu chat</span>` : ''}
+        </div>
+        ${reviewsHtml}${tasksHtml}${chatHtml}
+      </div>
+    </div>`;
+}
+
+/**
+ * Xây dựng cấu trúc dữ liệu crisis từ MOCK data (khi backend offline).
+ * Phân tích: MOCK.reviews (rating ≤ 3), MOCK.chat_clusters (urgent),
+ *            MOCK.conversations (status=escalate hoặc angry=true).
+ */
+function _buildCrisisFromMockData() {
+  const productMap = {};
+
+  const ensureProduct = (pid) => {
+    if (!productMap[pid]) {
+      productMap[pid] = {
+        product_id: pid,
+        neg_review_count: 0, risk_task_count: 0, chat_signal_count: 0,
+        reviews: [], risk_tasks: [], chat_signals: [],
+        severity_score: 0, severity: 'monitoring'
+      };
+    }
+    return productMap[pid];
+  };
+
+  // 1. Reviews tiêu cực
+  if (typeof MOCK !== 'undefined' && Array.isArray(MOCK.reviews)) {
+    MOCK.reviews.filter(r => (r.rating || 5) <= 3).forEach(r => {
+      const pid = r.product_id || r.sku_id || 'General';
+      const entry = ensureProduct(pid);
+      entry.neg_review_count++;
+      entry.reviews.push({
+        rating: r.rating,
+        customer: r.author || 'Khách hàng',
+        time: r.date || r.time || 'Gần đây',
+        text: r.text || r.review || '',
+        insight: (r.tag && r.tag.label) ? r.tag.label : null
+      });
+    });
+  }
+
+  // 2. Chat clusters khẩn cấp
+  if (typeof MOCK !== 'undefined' && Array.isArray(MOCK.chat_clusters)) {
+    MOCK.chat_clusters.filter(cl => cl.urgent).forEach(cl => {
+      const pid = cl.product_id || 'General';
+      const entry = ensureProduct(pid);
+      entry.chat_signal_count++;
+      entry.chat_signals.push(`${cl.label} (${cl.count} cuộc hội thoại)`);
+    });
+  }
+
+  // 3. Conversations leo thang / khách tức giận
+  if (typeof MOCK !== 'undefined' && Array.isArray(MOCK.conversations)) {
+    MOCK.conversations.filter(c => c.status === 'escalate' || c.angry).forEach(c => {
+      const pid = c.product_id || 'General';
+      const entry = ensureProduct(pid);
+      entry.risk_task_count++;
+      const preview = c.last_message || c.preview || 'Tin nhắn chờ xử lý';
+      entry.risk_tasks.push(`Hội thoại với ${c.customer || c.name || 'Khách'}: ${preview}`);
+    });
+  }
+
+  // 4. Tính severity
+  const crises = Object.values(productMap).map(p => {
+    p.severity_score = Math.min(100,
+      p.neg_review_count  * 20 +
+      p.risk_task_count   * 25 +
+      p.chat_signal_count * 15
+    );
+    p.severity = p.severity_score >= 60 ? 'critical'
+               : p.severity_score >= 30 ? 'warning'
+               :                          'monitoring';
+    return p;
+  }).sort((a, b) => b.severity_score - a.severity_score);
+
+  const total_neg_reviews  = crises.reduce((s, p) => s + p.neg_review_count,  0);
+  const total_risk_tasks   = crises.reduce((s, p) => s + p.risk_task_count,   0);
+  const total_chat_signals = crises.reduce((s, p) => s + p.chat_signal_count, 0);
+
+  let overall_status = 'safe';
+  if      (crises.some(p => p.severity === 'critical'))  overall_status = 'critical';
+  else if (crises.some(p => p.severity === 'warning'))   overall_status = 'warning';
+  else if (crises.length > 0)                            overall_status = 'monitoring';
+
+  return { overall_status, total_crisis_products: crises.length,
+           total_neg_reviews, total_risk_tasks, total_chat_signals,
+           crises, last_updated: new Date().toISOString() };
+}
+
+/** Render nội dung panel crisis (dùng chung cho live backend và mock data). */
+function _renderCrisisPanel(contentEl, data, isFromMock) {
+  const statusMap = {
+    critical:   { color: '#ef4444', bg: 'rgba(239,68,68,0.08)',   icon: '🔴', label: 'CẢNH BÁO KHẨN CẤP' },
+    warning:    { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)',  icon: '🟡', label: 'CẦN THEO DÕI' },
+    monitoring: { color: '#6366f1', bg: 'rgba(99,102,241,0.08)', icon: '🔵', label: 'ĐANG QUAN SÁT' },
+    safe:       { color: '#10b981', bg: 'rgba(16,185,129,0.08)', icon: '🟢', label: 'AN TOÀN' },
+  };
+  const st = statusMap[data.overall_status] || statusMap.safe;
+
+  // Cập nhật MOCK.alerts
+  if (data.total_neg_reviews > 0 || data.total_risk_tasks > 0) {
+    const liveAlert = {
+      level: data.overall_status === 'critical' ? 'critical' : 'warning',
+      icon: st.icon,
+      text: `${isFromMock ? '[DEMO] ' : '[LIVE] '}${data.total_neg_reviews} review tiêu cực & ${data.total_risk_tasks} tác vụ rủi ro đang chờ xử lý`,
+      cta: 'Xem ngay', cta_page: 'crisis-center', _fromBackend: !isFromMock
+    };
+    if (typeof MOCK !== 'undefined' && MOCK.alerts) {
+      MOCK.alerts = MOCK.alerts.filter(a => !a._fromBackend);
+      MOCK.alerts.unshift(liveAlert);
+    }
+    // Toast chỉ khi có dữ liệu live thật
+    if (!isFromMock) {
+      if (data.overall_status === 'critical') {
+        showToast(`🔴 Phát hiện ${data.total_neg_reviews} review xấu & ${data.total_risk_tasks} cảnh báo rủi ro — Kiểm tra ngay!`, 'danger');
+      } else if (data.overall_status === 'warning') {
+        showToast(`🟡 ${data.total_neg_reviews} review tiêu cực được ghi nhận — Theo dõi chặt chẽ hơn`, 'warning');
+      }
+    }
+  }
+
+  // Badge nguồn dữ liệu
+  const sourceBadge = isFromMock
+    ? `<span style="font-size:0.65rem;padding:2px 8px;border-radius:6px;background:rgba(245,158,11,0.15);color:#f59e0b;font-weight:700;border:1px solid rgba(245,158,11,0.3);">🟡 Demo Data (Backend offline)</span>`
+    : `<span style="font-size:0.65rem;padding:2px 8px;border-radius:6px;background:rgba(16,185,129,0.12);color:#10b981;font-weight:700;border:1px solid rgba(16,185,129,0.3);">🟢 Live Backend</span>`;
+
+  if (data.crises.length === 0) {
+    contentEl.innerHTML = `
+      <div style="text-align:right;margin-bottom:8px;">${sourceBadge}</div>
+      <div style="text-align:center;padding:20px;background:rgba(16,185,129,0.06);border-radius:10px;border:1px solid rgba(16,185,129,0.2);">
+        <div style="font-size:2rem;margin-bottom:6px;">✅</div>
+        <div style="font-weight:700;color:#10b981;font-size:0.9rem;">Hệ thống ổn định</div>
+        <div style="color:var(--text-muted);font-size:0.78rem;margin-top:4px;">
+          Không phát hiện tín hiệu tiêu cực nào từ reviews & chat trong thời gian gần đây.
+        </div>
+      </div>`;
+    return;
+  }
+
+  const kpiBar = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+      <div>${sourceBadge}</div>
+      <div style="font-size:0.68rem;color:var(--text-muted);">⏱ ${new Date(data.last_updated).toLocaleString('vi-VN')}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">
+      <div style="background:${st.bg};border-radius:8px;padding:10px;text-align:center;border:1px solid ${st.color}30;">
+        <div style="font-size:1.3rem;font-weight:800;color:${st.color};">${st.icon}</div>
+        <div style="font-size:0.68rem;color:${st.color};font-weight:700;margin-top:2px;">${st.label}</div>
+      </div>
+      <div style="background:rgba(239,68,68,0.07);border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(239,68,68,0.2);">
+        <div style="font-size:1.3rem;font-weight:800;color:#ef4444;">${data.total_neg_reviews}</div>
+        <div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px;">Review tiêu cực</div>
+      </div>
+      <div style="background:rgba(245,158,11,0.07);border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(245,158,11,0.2);">
+        <div style="font-size:1.3rem;font-weight:800;color:#f59e0b;">${data.total_risk_tasks}</div>
+        <div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px;">Tác vụ rủi ro</div>
+      </div>
+      <div style="background:rgba(99,102,241,0.07);border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(99,102,241,0.2);">
+        <div style="font-size:1.3rem;font-weight:800;color:#6366f1;">${data.total_chat_signals}</div>
+        <div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px;">Tín hiệu chat</div>
+      </div>
+    </div>`;
+
+  contentEl.innerHTML = kpiBar + data.crises.map(_renderCrisisCard).join('');
+}
+
+/**
+ * Gọi /api/crisis-overview để lấy tín hiệu tiêu cực từ reviews + chat.
+ * Khi backend offline, tự động fallback sang MOCK data để demo vẫn hoạt động.
+ */
+async function loadCrisisFromBackend() {
+  const pageContent = document.getElementById('pageContent');
+  if (!pageContent) return;
+
+  // Xóa panel cũ nếu có để tránh duplicate
+  const existing = document.getElementById('crisisLivePanel');
+  if (existing) existing.remove();
+
+  const panel = document.createElement('div');
+  panel.id = 'crisisLivePanel';
+  panel.className = 'content-card';
+  panel.style.cssText = 'margin-bottom:20px;border:2px solid var(--accent-indigo);';
+  panel.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div class="content-card-title" style="margin:0;color:var(--accent-indigo);">
+          🔴 Phát hiện Khủng hoảng — Dữ liệu Thực từ Backend
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">
+          Tổng hợp từ Reviews tiêu cực + Chat Signals + RiskManager Tasks
+        </div>
+      </div>
+      <button onclick="loadCrisisFromBackend()" class="btn-approve" style="font-size:0.75rem;padding:6px 12px;">
+        🔄 Làm mới
+      </button>
+    </div>
+    <div id="crisisLiveContent" style="color:var(--text-muted);font-size:0.83rem;text-align:center;padding:16px;">
+      ⏳ Đang phân tích tín hiệu...
+    </div>
+  `;
+  pageContent.insertBefore(panel, pageContent.firstChild);
+
+  const contentEl = document.getElementById('crisisLiveContent');
+  if (!contentEl) return;
+
+  // ── Thử backend trước, fallback sang MOCK nếu lỗi ──
+  let data = null;
+  let isFromMock = false;
+
+  try {
+    data = await apiCall('/api/crisis-overview');
+  } catch (err) {
+    console.warn('[Agicom] Backend offline — dùng MOCK data cho Crisis panel:', err.message);
+    try {
+      data = _buildCrisisFromMockData();
+      isFromMock = true;
+    } catch (mockErr) {
+      contentEl.innerHTML = `
+        <div style="color:var(--accent-rose);font-size:0.83rem;padding:10px;
+          background:var(--accent-rose-bg);border-radius:8px;">
+          ❌ Không thể tải dữ liệu khủng hoảng.<br>
+          <small style="color:var(--text-muted);">Backend offline và MOCK data lỗi: ${mockErr.message}</small>
+        </div>`;
+      return;
+    }
+  }
+
+  try {
+    _renderCrisisPanel(contentEl, data, isFromMock);
+    // Sinh kế hoạch xử lý khủng hoảng ngay sau panel cảnh báo
+    if (data.crises.length > 0) {
+      window._lastCrisisData = data;
+      setTimeout(() => _renderCrisisResponsePlan(panel, data), 50);
+    }
+  } catch (renderErr) {
+    contentEl.innerHTML = `
+      <div style="color:var(--accent-rose);font-size:0.83rem;padding:10px;
+        background:var(--accent-rose-bg);border-radius:8px;">
+        ❌ Lỗi hiển thị dữ liệu khủng hoảng.<br>
+        <small style="color:var(--text-muted);">${renderErr.message}</small>
+      </div>`;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   11c. CRISIS RESPONSE PLAN — Kế hoạch xử lý khủng hoảng tự động
+   ────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Sinh kế hoạch xử lý khủng hoảng dựa trên tín hiệu đã phát hiện.
+ * Chèn vào ngay sau crisisLivePanel.
+ * @param {HTMLElement} panelEl - element crisisLivePanel để tính vị trí insert
+ * @param {object} data - dữ liệu crisis (cùng cấu trúc với /api/crisis-overview)
+ */
+function _renderCrisisResponsePlan(panelEl, data) {
+  // Xóa kế hoạch cũ nếu có
+  document.getElementById('crisisResponsePlan')?.remove();
+
+  if (!data || !data.crises || data.crises.length === 0) return;
+
+  const topCrisis = data.crises[0];
+  const affectedProducts = data.crises.map(c => c.product_id).join(', ');
+  const statusColor = topCrisis.severity === 'critical' ? '#ef4444' : '#f59e0b';
+
+  // Phân tích loại vấn đề từ insights trong reviews
+  const allInsights = data.crises.flatMap(c =>
+    (Array.isArray(c.reviews) ? c.reviews : []).map(r => r.insight || '').filter(Boolean)
+  ).join(' ').toLowerCase();
+
+  const hasQuality  = allInsights.includes('chất lượng') || allInsights.includes('hư') || allInsights.includes('lỗi');
+  const hasShipping = allInsights.includes('vận chuyển') || allInsights.includes('đóng gói') || allInsights.includes('móp');
+  const hasChatRisk = data.total_chat_signals > 0 || data.total_risk_tasks > 0;
+
+  // ── Hành động ngay (0–4h) ──
+  const immediateActions = [];
+  if (data.total_neg_reviews > 0)
+    immediateActions.push(`Phản hồi công khai <strong>${data.total_neg_reviews} review tiêu cực</strong> trong 2 giờ tới bằng template bên dưới`);
+  if (hasChatRisk)
+    immediateActions.push(`Chủ động liên hệ lại <strong>${data.total_chat_signals + data.total_risk_tasks} khách</strong> đang bức xúc qua inbox`);
+  if (hasQuality)
+    immediateActions.push(`Tạm dừng quảng cáo sản phẩm <strong>${affectedProducts}</strong> để tránh thêm khách mua hàng lỗi`);
+  if (hasShipping)
+    immediateActions.push('Liên hệ đơn vị vận chuyển — yêu cầu đổi quy trình đóng gói, thêm lớp bảo vệ');
+  if (topCrisis.severity === 'critical')
+    immediateActions.push('Báo cáo khẩn lên quản lý và chuẩn bị phương án <strong>hoàn tiền / đổi hàng</strong> cho khách bị ảnh hưởng');
+  if (immediateActions.length === 0)
+    immediateActions.push(`Theo dõi sát sản phẩm <strong>${affectedProducts}</strong> và chuẩn bị phản hồi nhanh nếu có thêm khiếu nại`);
+
+  // ── Xử lý trung hạn (1–7 ngày) ──
+  const midTermActions = [
+    hasQuality  ? `Liên hệ nhà cung cấp <strong>${affectedProducts}</strong> — yêu cầu kiểm tra QC lô hàng và phương án bảo hành` : `Rà soát quy trình kiểm tra chất lượng đầu vào cho <strong>${affectedProducts}</strong>`,
+    hasShipping ? 'Nâng cấp vật liệu đóng gói (thùng carton 5 lớp) — tăng chi phí ~2.000đ/đơn, giảm rủi ro review xấu' : 'Chuẩn bị tài liệu hướng dẫn đóng gói chuẩn cho nhân viên kho',
+    'Cập nhật Knowledge Base chatbot với Q&A mới từ sự cố này để AI trả lời tốt hơn lần sau',
+    `Theo dõi biến động rating sản phẩm <strong>${affectedProducts}</strong> hàng ngày trong 7 ngày tới`,
+    'Tổng kết sự cố thành case study nội bộ, xây dựng SOP phòng ngừa cho tương lai'
+  ];
+
+  // ── Template phản hồi review ──
+  const replyTemplate = hasQuality
+    ? `"Dạ anh/chị ơi, em xin lỗi về trải nghiệm không tốt này ạ 🙏 Shop đã ghi nhận và phát hiện có thể lô hàng này gặp vấn đề chất lượng. Anh/chị vui lòng inbox để em hỗ trợ đổi sản phẩm mới hoặc hoàn tiền 100% nhé ạ. Cảm ơn anh/chị đã phản hồi để shop cải thiện ạ!"`
+    : hasShipping
+    ? `"Dạ anh/chị ơi, em thành thật xin lỗi vì sự cố đóng gói này ạ 🙏 Shop đã ghi nhận và sẽ báo ngay đơn vị vận chuyển. Nếu sản phẩm bên trong bị ảnh hưởng, anh/chị inbox để em hỗ trợ đổi/hoàn miễn phí nhé. Shop rất trân trọng phản hồi của anh/chị ạ!"`
+    : `"Dạ anh/chị ơi, em xin lỗi về trải nghiệm này ạ 🙏 Shop đã ghi nhận phản hồi và sẽ liên hệ anh/chị trong vòng 24h để hỗ trợ. Xin anh/chị thông cảm ạ!"`;
+
+  const replyTemplateRaw = replyTemplate.replace(/<[^>]+>/g, '');
+
+  // ── Mốc thời gian xử lý ──
+  const now = new Date();
+  const h2 = new Date(now.getTime() + 2*3600000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  const h24 = new Date(now.getTime() + 24*3600000).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+
+  const planEl = document.createElement('div');
+  planEl.id = 'crisisResponsePlan';
+  planEl.className = 'content-card';
+  planEl.style.cssText = `margin-bottom:20px;border:2px solid ${statusColor};`;
+  planEl.innerHTML = `
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div class="content-card-title" style="margin:0;color:${statusColor};">
+          🛡 Kế hoạch Xử lý Khủng hoảng — AI tự động tạo
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:3px;">
+          Dựa trên ${data.total_neg_reviews} review · ${data.total_risk_tasks} tác vụ rủi ro · ${data.total_chat_signals} tín hiệu chat
+          &nbsp;·&nbsp; Tạo lúc ${now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+        </div>
+      </div>
+      <button onclick="window._lastCrisisData && _renderCrisisResponsePlan(document.getElementById('crisisLivePanel'), window._lastCrisisData)"
+        class="btn-modal-cancel" style="font-size:0.72rem;padding:5px 10px;white-space:nowrap;">
+        🔄 Làm mới kế hoạch
+      </button>
+    </div>
+
+    <!-- Tình trạng tổng thể -->
+    <div style="background:${statusColor}10;border:1px solid ${statusColor}30;border-radius:10px;
+      padding:12px 16px;margin-bottom:14px;display:flex;align-items:flex-start;gap:12px;">
+      <span style="font-size:1.5rem;line-height:1;">${topCrisis.severity === 'critical' ? '🚨' : '⚠️'}</span>
+      <div>
+        <div style="font-size:0.82rem;font-weight:800;color:${statusColor};margin-bottom:4px;">
+          ${topCrisis.severity === 'critical' ? 'KHẨN CẤP — Cần hành động trong 2-4 giờ' : 'CẦN THEO DÕI — Xử lý trong ngày hôm nay'}
+        </div>
+        <div style="font-size:0.76rem;color:var(--text-secondary);line-height:1.55;">
+          <strong>${data.crises.length} sản phẩm</strong> có tín hiệu tiêu cực.
+          Nghiêm trọng nhất: <code style="background:var(--bg-glass);padding:1px 6px;border-radius:4px;font-size:0.72rem;">${topCrisis.product_id}</code>
+          (Score: <strong style="color:${statusColor};">${topCrisis.severity_score}/100</strong>).
+          Deadline phản hồi đề xuất: <strong>${h2}</strong> — Hoàn tất xử lý trước: <strong>${h24}</strong>.
+        </div>
+      </div>
+    </div>
+
+    <!-- Bước 1: Hành động ngay -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.78rem;font-weight:800;color:var(--text-primary);margin-bottom:8px;
+        display:flex;align-items:center;gap:8px;">
+        <span style="background:#ef4444;color:white;padding:2px 9px;border-radius:6px;font-size:0.67rem;font-weight:800;">NGAY · 0–4h</span>
+        Hành động ngay lập tức
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        ${immediateActions.map((a, i) => `
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;
+            background:rgba(239,68,68,0.05);border-radius:8px;border-left:3px solid #ef4444;">
+            <span style="min-width:20px;height:20px;background:#ef4444;color:white;border-radius:50%;
+              font-size:0.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">${i+1}</span>
+            <span style="font-size:0.77rem;color:var(--text-secondary);line-height:1.55;">${a}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Bước 2: Trung hạn -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.78rem;font-weight:800;color:var(--text-primary);margin-bottom:8px;
+        display:flex;align-items:center;gap:8px;">
+        <span style="background:#f59e0b;color:white;padding:2px 9px;border-radius:6px;font-size:0.67rem;font-weight:800;">1–7 NGÀY</span>
+        Xử lý trung hạn
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        ${midTermActions.map((a, i) => `
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;
+            background:rgba(245,158,11,0.05);border-radius:8px;border-left:3px solid #f59e0b;">
+            <span style="min-width:20px;height:20px;background:#f59e0b;color:white;border-radius:50%;
+              font-size:0.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">${i+1}</span>
+            <span style="font-size:0.77rem;color:var(--text-secondary);line-height:1.55;">${a}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Template phản hồi review -->
+    <div>
+      <div style="font-size:0.78rem;font-weight:800;color:var(--text-primary);margin-bottom:8px;
+        display:flex;align-items:center;gap:8px;">
+        <span style="background:#6366f1;color:white;padding:2px 9px;border-radius:6px;font-size:0.67rem;font-weight:800;">TEMPLATE</span>
+        Mẫu phản hồi review công khai — sẵn sàng copy
+      </div>
+      <div style="background:var(--bg-secondary);border:1px dashed var(--border-primary);border-radius:10px;padding:14px;position:relative;">
+        <div id="crisisReplyTemplate" style="font-size:0.8rem;color:var(--text-secondary);line-height:1.75;font-style:italic;">
+          ${replyTemplate}
+        </div>
+        <button onclick="navigator.clipboard?.writeText(${JSON.stringify(replyTemplateRaw)}).then(()=>showToast('✅ Đã copy template phản hồi!','success')).catch(()=>showToast('⚠️ Trình duyệt chặn clipboard — hãy copy thủ công','warning'))"
+          style="margin-top:10px;font-size:0.72rem;padding:5px 14px;border-radius:7px;cursor:pointer;
+            border:1px solid var(--accent-indigo);background:rgba(99,102,241,0.08);
+            color:var(--accent-indigo);font-weight:600;">
+          📋 Copy template
+        </button>
+      </div>
+    </div>`;
+
+  // Chèn ngay sau crisisLivePanel
+  const crisisPanel = document.getElementById('crisisLivePanel');
+  if (crisisPanel?.parentElement) {
+    crisisPanel.parentElement.insertBefore(planEl, crisisPanel.nextSibling);
+  } else {
+    // Fallback: chèn vào pageContent
+    const pc = document.getElementById('pageContent');
+    if (pc) pc.insertBefore(planEl, pc.firstChild);
+  }
 }
 
 /* ──────────────────────────────────────────────────────────────────────
