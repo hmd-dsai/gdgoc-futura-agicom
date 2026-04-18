@@ -1,8 +1,8 @@
 import datetime
 import hashlib
 import json
-from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage, ReviewLog, ContentSuggestion, init_db
-from config import policy_col, product_col, resolved_qa_col, chroma_client
+from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage, ReviewLog, ContentSuggestion, CustomerProfile, init_db
+import config as _cfg
 
 def clear_data(db):
     print("[1/5] Đang dọn dẹp dữ liệu cũ...")
@@ -14,18 +14,17 @@ def clear_data(db):
     db.query(ContentSuggestion).delete()
     db.commit()
 
-    # Xóa Vector DB
+    # Xóa Vector DB và recreate — cập nhật đúng module globals để services.py luôn dùng đúng collection
     for col_name in ["policy_db", "product_db", "resolved_qa_db"]:
         try:
-            chroma_client.delete_collection(col_name)
+            _cfg.chroma_client.delete_collection(col_name)
         except:
             pass
-    
-    # Khởi tạo lại collections
-    policy_col = chroma_client.get_or_create_collection(name="policy_db")
-    product_col = chroma_client.get_or_create_collection(name="product_db")
-    resolved_qa_col = chroma_client.get_or_create_collection(name="resolved_qa_db")
-    return policy_col, product_col, resolved_qa_col
+
+    _cfg.policy_col     = _cfg.chroma_client.get_or_create_collection(name="policy_db",     embedding_function=_cfg.default_ef)
+    _cfg.product_col    = _cfg.chroma_client.get_or_create_collection(name="product_db",    embedding_function=_cfg.default_ef)
+    _cfg.resolved_qa_col = _cfg.chroma_client.get_or_create_collection(name="resolved_qa_db", embedding_function=_cfg.default_ef)
+    return _cfg.policy_col, _cfg.product_col, _cfg.resolved_qa_col
 
 def seed_vector_db(policy_col, product_col, resolved_qa_col):
     print("[2/5] Đang nạp kiến thức vào Vector DB (RAG)...")
@@ -43,39 +42,18 @@ def seed_vector_db(policy_col, product_col, resolved_qa_col):
         ids=[f"prod_{i}" for i in range(len(products))]
     )
 
-    # 2. Chính sách sàn
+    # 2. Chính sách Shop
     policies = [
-        "Tổng quan & Nguyên tắc: AGICOM là sàn TMĐT hoạt động theo pháp luật Việt Nam. Nguyên tắc: Minh bạch thông tin, công bằng, bảo vệ người tiêu dùng và tuân thủ pháp luật hiện hành.",
-        
-        "Quy trình giao dịch: Người mua (Tìm kiếm -> Đặt hàng -> Thanh toán -> Nhận hàng -> Xác nhận/Khiếu nại -> Đánh giá). Người bán (Đăng ký -> Xác thực -> Đăng sản phẩm -> Xử lý đơn -> Giao hàng).",
-        
-        "Cơ chế thanh toán: AGICOM giữ tiền trung gian. Người mua hoàn tất thanh toán khi xác nhận nhận hàng. Người bán nhận tiền sau khi đơn hàng hoàn tất và không phát sinh tranh chấp.",
-        
-        "Thời gian đổi trả: Hàng nguyên giá (Đổi/Trả 30 ngày); Hàng khuyến mãi (Đổi/Trả 7 ngày); Hàng tặng (Đổi 7 ngày, không trả hàng). Phụ kiện không áp dụng đổi trả.",
-        
-        "Điều kiện đổi trả: Sản phẩm chưa qua sử dụng, nguyên tem nhãn, có hóa đơn/thông tin đơn hàng, không hư hỏng do người dùng. Chấp nhận lỗi NSX, giao sai, thiếu hàng hoặc sai mô tả.",
-        
-        "Chi phí & Quy trình đổi trả: Người bán chịu phí nếu lỗi sản phẩm; người mua chịu phí nếu đổi theo nhu cầu. Quy trình: Gửi yêu cầu -> Gửi bằng chứng -> Người bán phản hồi -> AGICOM can thiệp nếu cần.",
-        
-        "Địa điểm đổi trả: Đơn offline trả tại cửa hàng; đơn online gửi về địa chỉ người bán hoặc trả tại cửa hàng; đơn sàn thực hiện trực tiếp qua hệ thống AGICOM bằng đơn vị vận chuyển chỉ định.",
-        
-        "Chính sách hàng Outlet: Đổi trả 7 ngày chỉ khi có lỗi, không hỗ trợ đổi tại cửa hàng, không áp dụng bảo hành. Yêu cầu: chưa sử dụng, nguyên tem nhãn.",
-        
-        "Chính sách bảo hành: Thời gian 6 tháng cho lỗi kỹ thuật NSX (khóa kéo, bong keo, đứt quai, chất liệu...). Miễn phí lỗi NSX, các trường hợp khác khách chịu phí.",
-        
-        "Quản lý người bán & Chống gian lận: Người bán phải xác thực thông tin và nguồn gốc hàng hóa. AGICOM giám sát giao dịch, giới hạn rủi ro và tạm khóa tài khoản nếu có dấu hiệu bất thường.",
-        
-        "Giải quyết tranh chấp: Quy trình 3 bước (Khiếu nại -> Phản hồi -> AGICOM xử lý). Thời hạn xử lý từ 3 đến 15 ngày làm việc.",
-        
-        "Xử lý vi phạm: Gian lận, bán hàng giả, lạm dụng chính sách sẽ bị gỡ sản phẩm, hạn chế hoặc khóa tài khoản vĩnh viễn.",
-        
-        "Bảo mật & Pháp lý: Cam kết bảo mật dữ liệu, tuân thủ Nghị định 52/2013/NĐ-CP và Nghị định 85/2021/NĐ-CP. Hỗ trợ qua Email/Hotline với thời gian phản hồi 24-48 giờ."
+        "Chính sách bảo hành: Điện thoại bảo hành 12 tháng chính hãng. Phụ kiện bảo hành 6 tháng 1 đổi 1 nếu có lỗi NSX.",
+        "Chính sách vận chuyển: Freeship toàn quốc đơn từ 500k. Nội thành Hà Nội/TP.HCM giao hỏa tốc trong 2h.",
+        "Chính sách đổi trả: Khách được đổi trả trong 7 ngày đầu nếu sản phẩm còn nguyên seal, chưa kích hoạt (với điện thoại).",
+        "Khuyến mãi: Giảm thêm 200k cho khách hàng cũ quay lại mua máy lần 2."
     ]
-
     policy_col.add(
         documents=policies,
-        ids=[f"agicom_pol_{i}" for i in range(len(policies))]
+        ids=[f"pol_{i}" for i in range(len(policies))]
     )
+
     # 3. Kinh nghiệm đã học (Resolved QA)
     qas = [
         "Q: Shop có trả góp không? A: Dạ shop có trả góp 0% qua thẻ tín dụng của 25 ngân hàng hoặc qua công ty tài chính Home Credit/HD Saison.",
@@ -198,20 +176,106 @@ def seed_content_suggestions(db):
     db.add_all(suggestions)
     db.commit()
 
+def seed_customer_profiles(db):
+    print("[6/6] Đang seed hồ sơ khách hàng (CustomerProfile)...")
+    now = datetime.datetime.utcnow()
+
+    # Xóa dữ liệu cũ
+    db.query(CustomerProfile).delete()
+    db.commit()
+
+    profiles = [
+        # Khách VIP — trung thành cao, cảm xúc tích cực
+        CustomerProfile(
+            customer_id="demo_vip_001",
+            churn_probability=0.05,
+            emotion_index=0.88,
+            customer_segment="vip",
+            total_orders=8,
+            total_spent=42500000.0,
+            last_purchase_date="2026-04-10",
+            purchase_history=json.dumps([
+                {"date": "10/04/2026", "item": "Samsung Galaxy S24 Ultra", "value": 28900000, "status": "Hoàn tất"},
+                {"date": "15/03/2026", "item": "Ốp Spigen S24 Ultra", "value": 350000, "status": "Hoàn tất"},
+                {"date": "02/02/2026", "item": "Cáp Anker 100W (x2)", "value": 700000, "status": "Hoàn tất"},
+            ], ensure_ascii=False),
+            notes="Khách mua bulk Samsung, thường hỏi giá sỉ. Ưu tiên xử lý nhanh.",
+            created_at=now,
+            updated_at=now,
+        ),
+        # Khách có nguy cơ rời bỏ — phàn nàn gần đây
+        CustomerProfile(
+            customer_id="demo_atrisk_001",
+            churn_probability=0.78,
+            emotion_index=0.18,
+            customer_segment="at_risk",
+            total_orders=2,
+            total_spent=5550000.0,
+            last_purchase_date="2026-04-08",
+            purchase_history=json.dumps([
+                {"date": "08/04/2026", "item": "AirPods Pro 2", "value": 5200000, "status": "Khiếu nại"},
+                {"date": "10/03/2026", "item": "Ốp lưng iPhone", "value": 350000, "status": "Hoàn tất"},
+            ], ensure_ascii=False),
+            notes="Phàn nàn AirPods lỗi âm thanh sau 1 tuần. Cần xử lý bảo hành khẩn.",
+            created_at=now,
+            updated_at=now,
+        ),
+        # Khách mới — chưa mua nhiều
+        CustomerProfile(
+            customer_id="demo_new_001",
+            churn_probability=0.30,
+            emotion_index=0.60,
+            customer_segment="new",
+            total_orders=1,
+            total_spent=350000.0,
+            last_purchase_date="2026-04-07",
+            purchase_history=json.dumps([
+                {"date": "07/04/2026", "item": "Cáp Anker 100W", "value": 350000, "status": "Hoàn tất"},
+            ], ensure_ascii=False),
+            notes="Khách mới, hỏi nhiều về bảo hành. Tiềm năng upsell tai nghe.",
+            created_at=now,
+            updated_at=now,
+        ),
+        # Khách quen — trung thành trung bình
+        CustomerProfile(
+            customer_id="demo_regular_001",
+            churn_probability=0.22,
+            emotion_index=0.70,
+            customer_segment="regular",
+            total_orders=4,
+            total_spent=12400000.0,
+            last_purchase_date="2026-04-05",
+            purchase_history=json.dumps([
+                {"date": "05/04/2026", "item": "iPhone 15 Pro Max", "value": 8500000, "status": "Hoàn tất"},
+                {"date": "20/03/2026", "item": "AirPods Pro 2", "value": 3200000, "status": "Hoàn tất"},
+                {"date": "10/02/2026", "item": "Cáp USB-C Anker", "value": 350000, "status": "Hoàn tất"},
+                {"date": "15/01/2026", "item": "Ốp lưng Spigen", "value": 350000, "status": "Hoàn tất"},
+            ], ensure_ascii=False),
+            notes="Mua nhiều Apple ecosystem. Quan tâm đến accessory chính hãng.",
+            created_at=now,
+            updated_at=now,
+        ),
+    ]
+    db.add_all(profiles)
+    db.commit()
+    print(f"  → Đã seed {len(profiles)} customer profiles.")
+
+
 def main():
     print("=== AGICOM DEMO SEEDER ===")
     init_db()
     db = SessionLocal()
-    
+
     try:
         p_col, pr_col, qa_col = clear_data(db)
         seed_vector_db(p_col, pr_col, qa_col)
         seed_sql_db(db)
         seed_content_suggestions(db)
+        seed_customer_profiles(db)
 
         print("\n[SUCCESS] Hệ thống đã sẵn sàng cho Demo!")
         print("- Vector DB: 5 Sản phẩm, 4 Chính sách, 3 QA mẫu.")
-        print("- SQL DB: 3 Logs Insight, 4 Reviews (1 Crisis), 4 Messages History, 3 Tasks, 3 Content Suggestions.")
+        print("- SQL DB: 3 Logs Insight, 4 Reviews (1 Crisis), 4 Messages History, 3 Tasks, 3 Content Suggestions, 4 Customer Profiles.")
     except Exception as e:
         print(f"\n[ERROR] Lỗi trong quá trình seed: {e}")
         db.rollback()

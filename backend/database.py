@@ -117,6 +117,44 @@ class ContentSuggestion(Base):
     updated_at       = Column(DateTime, default=datetime.datetime.utcnow)
 
 
+# Hồ sơ khách hàng — truy vấn theo customer_id, ghép vào prompt LLM
+class CustomerProfile(Base):
+    __tablename__ = "customer_profiles"
+    id                  = Column(Integer, primary_key=True, index=True)
+    customer_id         = Column(String, unique=True, index=True, nullable=False)
+
+    # ── Chỉ số rủi ro ──
+    churn_probability   = Column(Float, default=0.1)   # 0.0 – 1.0 (rời bỏ)
+    emotion_index       = Column(Float, default=0.5)   # 0.0 – 1.0 (0=rất tiêu cực, 1=rất tích cực)
+    customer_segment    = Column(String, default="new") # new | regular | vip | at_risk
+
+    # ── Lịch sử mua hàng ──
+    total_orders        = Column(Integer, default=0)
+    total_spent         = Column(Float, default=0.0)    # VND
+    last_purchase_date  = Column(String)                # ISO date string
+    purchase_history    = Column(Text, default="[]")    # JSON list [{date, item, value, status}]
+
+    # ── Ghi chú thêm ──
+    notes               = Column(Text)
+
+    created_at          = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at          = Column(DateTime, default=datetime.datetime.utcnow,
+                                  onupdate=datetime.datetime.utcnow)
+
+
+def get_or_create_customer_profile(db, customer_id: str) -> "CustomerProfile":
+    """Lấy hồ sơ khách; tự tạo mới nếu chưa có."""
+    profile = db.query(CustomerProfile).filter(
+        CustomerProfile.customer_id == customer_id
+    ).first()
+    if not profile:
+        profile = CustomerProfile(customer_id=customer_id)
+        db.add(profile)
+        db.commit()
+        db.refresh(profile)
+    return profile
+
+
 def init_db():
     Base.metadata.create_all(bind=engine)
     # Tự động thêm cột is_archived nếu DB cũ đang chạy để tránh lỗi

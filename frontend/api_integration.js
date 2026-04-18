@@ -494,6 +494,30 @@ function buildLiveChatWidgetHTML() {
           </div>
         </div>
       </div>
+
+      <!-- Hồ sơ khách hàng panel -->
+      <div id="customerProfilePanel" style="margin-top:14px;">
+        <div style="border:1px solid var(--border-primary);border-radius:12px;overflow:hidden;">
+          <div style="background:linear-gradient(135deg,#064e3b 0%,#065f46 100%);padding:10px 16px;
+            display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:1rem;">👤</span>
+              <span style="font-size:0.82rem;font-weight:700;color:#d1fae5;">Hồ Sơ Khách Hàng</span>
+            </div>
+            <button id="btnRefreshProfile"
+              title="Tải lại hồ sơ"
+              style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
+                border-radius:6px;cursor:pointer;padding:3px 8px;font-size:0.7rem;color:#d1fae5;">
+              ↻ Làm mới
+            </button>
+          </div>
+          <div id="customerProfileContent"
+            style="padding:16px;background:var(--bg-secondary);color:var(--text-muted);
+              font-size:0.82rem;text-align:center;">
+            ⏳ Đang tải hồ sơ khách hàng...
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Chatbot Features & Quality Card (từ backend) -->
@@ -524,33 +548,48 @@ function appendLiveChatBubble(role, text, meta = {}) {
         AI đang phân tích (RAG + Gemini)...
       </div>`;
   } else {
-    const conf = meta.confidence_score !== undefined ? Math.round(meta.confidence_score * 100) : null;
+    const conf = (meta.confidence_score !== undefined && meta.confidence_score !== null)
+      ? Math.round(meta.confidence_score * 100)
+      : null;
     const safe = meta.is_safe;
     const sentiment = meta.sentiment_analysis;
+    const isDemo = !!meta._isDemo;
 
-    const metaBadges =
-      !isUser && conf !== null
-        ? `<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
-            <span style="font-size:0.67rem;padding:2px 6px;border-radius:4px;
-              background:${conf >= 70 ? 'var(--accent-emerald-bg)' : 'var(--accent-rose-bg)'};
-              color:${conf >= 70 ? 'var(--accent-emerald)' : 'var(--accent-rose)'};">
-              Confidence: ${conf}%
-            </span>
-            <span style="font-size:0.67rem;padding:2px 6px;border-radius:4px;
-              background:${safe ? 'var(--accent-emerald-bg)' : 'var(--accent-rose-bg)'};
-              color:${safe ? 'var(--accent-emerald)' : 'var(--accent-rose)'};">
-              ${safe ? '✅ Tự động' : '⚠ Chờ duyệt'}
-            </span>
-            ${
-              sentiment
-                ? `<span style="font-size:0.67rem;padding:2px 6px;border-radius:4px;
-                    background:var(--bg-glass);color:var(--text-muted);">
-                    😶 ${sentiment}
-                  </span>`
-                : ''
-            }
-          </div>`
-        : '';
+    let metaBadges = '';
+    if (!isUser) {
+      if (isDemo) {
+        // Backend offline — hiển thị trạng thái an toàn nhưng không có confidence score thật
+        metaBadges = `<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
+          <span style="font-size:0.67rem;padding:2px 6px;border-radius:4px;
+            background:var(--bg-glass);color:var(--text-muted);border:1px dashed var(--border-primary);">
+            📴 Demo Mode
+          </span>
+          <span style="font-size:0.67rem;padding:2px 6px;border-radius:4px;
+            background:${safe ? 'var(--accent-emerald-bg)' : 'var(--accent-rose-bg)'};
+            color:${safe ? 'var(--accent-emerald)' : 'var(--accent-rose)'};">
+            ${safe ? '✅ Tự động' : '⚠ Chờ duyệt'}
+          </span>
+          ${sentiment ? `<span style="font-size:0.67rem;padding:2px 6px;border-radius:4px;
+              background:var(--bg-glass);color:var(--text-muted);">😶 ${sentiment}</span>` : ''}
+        </div>`;
+      } else if (conf !== null) {
+        // Backend online — hiển thị confidence thật từ Gemini
+        metaBadges = `<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
+          <span style="font-size:0.67rem;padding:2px 6px;border-radius:4px;
+            background:${conf >= 70 ? 'var(--accent-emerald-bg)' : 'var(--accent-rose-bg)'};
+            color:${conf >= 70 ? 'var(--accent-emerald)' : 'var(--accent-rose)'};">
+            🎯 Confidence: ${conf}%
+          </span>
+          <span style="font-size:0.67rem;padding:2px 6px;border-radius:4px;
+            background:${safe ? 'var(--accent-emerald-bg)' : 'var(--accent-rose-bg)'};
+            color:${safe ? 'var(--accent-emerald)' : 'var(--accent-rose)'};">
+            ${safe ? '✅ Tự động' : '⚠ Chờ duyệt'}
+          </span>
+          ${sentiment ? `<span style="font-size:0.67rem;padding:2px 6px;border-radius:4px;
+              background:var(--bg-glass);color:var(--text-muted);">😶 ${sentiment}</span>` : ''}
+        </div>`;
+      }
+    }
 
     div.innerHTML = `
       <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:3px;">
@@ -604,7 +643,17 @@ async function sendLiveChatMessage(msg) {
     if (thinking) thinking.remove();
 
     if (result && result.reply) {
+      // Lấy evaluation từ backend. Đảm bảo confidence_score luôn có giá trị
+      // dựa trên is_safe nếu Gemini trả thiếu trường này.
       const eval_ = result.ai_evaluation || {};
+
+      // Thông báo riêng khi Gemini hết quota (vẫn hiển thị reply nhưng kèm cảnh báo)
+      if (eval_._quota_exhausted) {
+        showToast('Gemini API đã hết quota hôm nay. Vui lòng kiểm tra Google AI Studio hoặc đợi đến 00:00 UTC để reset.', 'warning');
+      }
+      if (eval_.confidence_score === undefined || eval_.confidence_score === null) {
+        eval_.confidence_score = eval_.is_safe === false ? 0.4 : 0.7;
+      }
       appendLiveChatBubble('ai', result.reply, eval_);
 
       // --- Update session stats ---
@@ -640,28 +689,40 @@ async function sendLiveChatMessage(msg) {
                          'chậm', 'bức xúc', 'tức', 'giả', 'fake', 'không sạc', 'tệ', 'dở'];
     const isNegative = negKeywords.some(k => msg.toLowerCase().includes(k));
 
+    // Demo Mode: Backend offline — hiển thị phản hồi mẫu nhưng KHÔNG fake confidence score.
+    // Confidence score CHỈ được lấy từ backend thực tế.
     if (isNegative) {
       const mockReply = 'Dạ em xin lỗi anh/chị về trải nghiệm không tốt này ạ 🙏 Em đã ghi nhận phản hồi của anh/chị và sẽ chuyển ngay cho bộ phận kỹ thuật + CSKH kiểm tra. Anh/chị vui lòng cho em xin số đơn hàng để được hỗ trợ đổi/trả miễn phí ạ.';
-      const mockEval = { is_safe: false, confidence_score: 0.42, sentiment_analysis: 'tức giận', identified_product_id: 'ANKER-100W-CAP', risk_level: 'Cao', risk_category: 'Chất lượng sản phẩm' };
-      appendLiveChatBubble('ai', mockReply + ' <em style="font-size:0.68rem;color:var(--text-muted);">[Demo Mode]</em>', mockEval);
+      // is_safe=false, nhưng confidence_score bị ẩn (undefined) vì không có AI thật phân tích
+      const mockEval = { is_safe: false, confidence_score: undefined, sentiment_analysis: 'tức giận', identified_product_id: 'ANKER-100W-CAP', risk_level: 'Cao', risk_category: 'Chất lượng sản phẩm', _isDemo: true };
+      appendLiveChatBubble('ai', mockReply + ' <em style="font-size:0.68rem;color:var(--text-muted);">[Demo Mode — Confidence N/A]</em>', mockEval);
       _syncLiveChatToInbox(msg, mockReply, mockEval);
       chatSessionStats.totalAIReplies++;
       chatSessionStats.totalEscalated++;
-      chatSessionStats.confidenceScores.push(0.42);
+      // Không push vào confidenceScores — chỉ tính điểm thật từ backend
       chatSessionStats.sentiments.push('tức giận');
       renderChatSessionStats();
     } else {
       const mockReply = 'Dạ anh/chị ơi! Shop PhoneMax hân hạnh được phục vụ ạ. Em có thể giúp gì cho anh/chị?';
-      const mockEval = { is_safe: true, confidence_score: 0.88, sentiment_analysis: 'bình thường' };
-      appendLiveChatBubble('ai', mockReply + ' <em style="font-size:0.68rem;color:var(--text-muted);">[Demo Mode]</em>', mockEval);
+      const mockEval = { is_safe: true, confidence_score: undefined, sentiment_analysis: 'bình thường', _isDemo: true };
+      appendLiveChatBubble('ai', mockReply + ' <em style="font-size:0.68rem;color:var(--text-muted);">[Demo Mode — Confidence N/A]</em>', mockEval);
       _syncLiveChatToInbox(msg, mockReply, mockEval);
       chatSessionStats.totalAIReplies++;
       chatSessionStats.totalSafe++;
-      chatSessionStats.confidenceScores.push(0.88);
+      // Không push vào confidenceScores — chỉ tính điểm thật từ backend
       chatSessionStats.sentiments.push('bình thường');
       renderChatSessionStats();
     }
-    console.warn('[Agicom] Chat API offline — Demo mode kích hoạt:', err.message);
+    // Hiển thị thông tin lỗi thực sự lên chat để dễ debug
+    const errMsg = err.message || String(err);
+    console.warn('[Agicom] Chat API offline — Demo mode kích hoạt:', errMsg);
+
+    // Luôn hiển thị lỗi thực sự để dễ debug (bất kể loại lỗi gì)
+    const debugBubble = document.createElement('div');
+    debugBubble.style.cssText = 'align-self:center;padding:6px 12px;background:#fff3cd;border:1px solid #ffc107;border-radius:8px;font-size:0.72rem;color:#856404;margin:4px 0;max-width:90%;word-break:break-word;';
+    debugBubble.textContent = `⚠️ Lỗi kết nối backend: "${errMsg}" — Đang dùng Demo Mode tạm thời.`;
+    const c = document.getElementById('liveChatMessages');
+    if (c) { c.appendChild(debugBubble); c.scrollTop = c.scrollHeight; }
   }
 }
 
@@ -1394,8 +1455,17 @@ function injectLiveChatWidget() {
   // ── Chỉnh sửa ID khách hàng ──
   _attachLiveChatIdEditorEvents();
 
+  // ── Nút làm mới hồ sơ khách hàng ──
+  const refreshProfileBtn = document.getElementById('btnRefreshProfile');
+  if (refreshProfileBtn) {
+    refreshProfileBtn.addEventListener('click', () => loadCustomerProfile(liveChatCustomerId));
+  }
+
   // Load chatbot features & quality data from backend
   loadChatbotFeatures();
+
+  // Load customer profile lần đầu
+  loadCustomerProfile(liveChatCustomerId);
 }
 
 /**
@@ -1463,6 +1533,8 @@ function _attachLiveChatIdEditorEvents() {
           '💬 Phiên mới — Gửi tin nhắn để bắt đầu theo dõi...</div></div>';
       }
       showToast(`🪪 Đã đổi ID khách hàng sang: <strong>${liveChatCustomerId}</strong>`, 'success');
+      // Tải lại hồ sơ khách hàng mới
+      loadCustomerProfile(liveChatCustomerId);
     } else {
       closeEdit();
     }
@@ -1785,6 +1857,133 @@ function _injectDemoCustomerPage() {
 
     // Dùng lại hàm inject sẵn có (tự xử lý DOM, events)
     injectLiveChatWidget();
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   10b. CUSTOMER PROFILE — Tải và hiển thị hồ sơ khách hàng
+   ────────────────────────────────────────────────────────────────────── */
+
+/** Màu + label theo ngưỡng xác suất rời bỏ */
+function _churnColor(prob) {
+  if (prob >= 0.6) return { color: 'var(--accent-rose)',   bg: 'var(--accent-rose-bg)',   label: 'Nguy cơ cao' };
+  if (prob >= 0.3) return { color: 'var(--accent-amber)',  bg: 'var(--accent-amber-bg)',  label: 'Trung bình' };
+  return              { color: 'var(--accent-emerald)', bg: 'var(--accent-emerald-bg)', label: 'Thấp' };
+}
+
+/** Render thanh màu */
+function _profileBar(value, color) {
+  const pct = Math.round(value * 100);
+  return `<div style="height:6px;background:var(--bg-glass);border-radius:3px;overflow:hidden;margin-top:4px;">
+    <div style="width:${pct}%;height:100%;background:${color};border-radius:3px;transition:width 0.4s;"></div>
+  </div>`;
+}
+
+/** Tải hồ sơ khách từ backend, render vào #customerProfileContent */
+async function loadCustomerProfile(customerId) {
+  const panel = document.getElementById('customerProfileContent');
+  if (!panel) return;
+
+  if (!_backendConnected) {
+    panel.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:0.8rem;padding:8px 0;">
+      📴 Demo Mode — Backend offline<br>Kết nối backend để tải hồ sơ thật
+    </div>`;
+    return;
+  }
+
+  panel.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:0.8rem;padding:8px 0;">⏳ Đang tải...</div>`;
+
+  try {
+    const data = await apiCall(`/api/customer-profile/${encodeURIComponent(customerId)}`);
+    if (!data || data.status !== 'success') throw new Error('No data');
+
+    const churn = data.churn_probability ?? 0.1;
+    const emotion = data.emotion_index ?? 0.5;
+    const churnStyle = _churnColor(churn);
+    const emotionColor = emotion <= 0.3 ? 'var(--accent-rose)' : emotion <= 0.6 ? 'var(--accent-amber)' : 'var(--accent-emerald)';
+    const emotionLabel = emotion <= 0.2 ? 'Rất tiêu cực' : emotion <= 0.4 ? 'Tiêu cực' : emotion <= 0.6 ? 'Bình thường' : emotion <= 0.8 ? 'Tích cực' : 'Rất tích cực';
+
+    const segmentBadge = {
+      vip:      '<span style="background:#7c3aed;color:white;font-size:0.65rem;padding:2px 8px;border-radius:10px;font-weight:800;">👑 VIP</span>',
+      regular:  '<span style="background:#2563eb;color:white;font-size:0.65rem;padding:2px 8px;border-radius:10px;font-weight:700;">⭐ Quen</span>',
+      at_risk:  '<span style="background:#dc2626;color:white;font-size:0.65rem;padding:2px 8px;border-radius:10px;font-weight:700;">⚠️ Rủi ro</span>',
+      new:      '<span style="background:#059669;color:white;font-size:0.65rem;padding:2px 8px;border-radius:10px;font-weight:700;">🆕 Mới</span>',
+    }[data.customer_segment] || '<span style="background:var(--bg-glass);color:var(--text-muted);font-size:0.65rem;padding:2px 8px;border-radius:10px;">Không rõ</span>';
+
+    const purchases = (data.purchase_history || []).slice(0, 4);
+    const purchaseRows = purchases.length
+      ? purchases.map(p => `
+          <div style="display:flex;justify-content:space-between;align-items:center;
+            padding:5px 0;border-bottom:1px solid var(--border-primary);font-size:0.76rem;">
+            <div>
+              <div style="font-weight:600;color:var(--text-primary);">${p.item || '?'}</div>
+              <div style="color:var(--text-muted);font-size:0.68rem;">${p.date || ''}${p.status ? ' · ' + p.status : ''}</div>
+            </div>
+            <div style="font-weight:700;color:var(--accent-indigo);white-space:nowrap;margin-left:8px;">
+              ${p.value ? Number(p.value).toLocaleString('vi-VN') + 'đ' : '—'}
+            </div>
+          </div>`).join('')
+      : `<div style="color:var(--text-muted);font-size:0.78rem;padding:4px 0;">Chưa có lịch sử mua hàng</div>`;
+
+    panel.innerHTML = `
+      <!-- Header: tên + segment -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-weight:700;font-size:0.88rem;color:var(--text-primary);">${customerId}</div>
+        ${segmentBadge}
+      </div>
+
+      <!-- Metrics grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        <!-- Xác suất rời bỏ -->
+        <div style="background:${churnStyle.bg};border-radius:8px;padding:10px;">
+          <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:2px;">Xác suất rời bỏ</div>
+          <div style="font-size:1.15rem;font-weight:800;color:${churnStyle.color};">${Math.round(churn * 100)}%</div>
+          ${_profileBar(churn, churnStyle.color)}
+          <div style="font-size:0.65rem;color:${churnStyle.color};margin-top:3px;">${churnStyle.label}</div>
+        </div>
+        <!-- Chỉ số cảm xúc -->
+        <div style="background:var(--bg-glass);border-radius:8px;padding:10px;">
+          <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:2px;">Chỉ số cảm xúc</div>
+          <div style="font-size:1.15rem;font-weight:800;color:${emotionColor};">${Math.round(emotion * 100)}/100</div>
+          ${_profileBar(emotion, emotionColor)}
+          <div style="font-size:0.65rem;color:${emotionColor};margin-top:3px;">${emotionLabel}</div>
+        </div>
+      </div>
+
+      <!-- Tổng đơn + chi tiêu -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        <div style="background:var(--bg-glass);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:1rem;font-weight:800;color:var(--accent-indigo);">${data.total_orders ?? 0}</div>
+          <div style="font-size:0.68rem;color:var(--text-muted);">Tổng đơn hàng</div>
+        </div>
+        <div style="background:var(--bg-glass);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:0.9rem;font-weight:800;color:var(--accent-amber);">${data.total_spent ? Number(data.total_spent).toLocaleString('vi-VN') : 0}đ</div>
+          <div style="font-size:0.68rem;color:var(--text-muted);">Tổng chi tiêu</div>
+        </div>
+      </div>
+
+      ${data.notes ? `<div style="font-size:0.75rem;padding:8px;background:var(--accent-indigo-bg);border-radius:6px;
+        color:var(--accent-indigo);margin-bottom:12px;line-height:1.5;">
+        🧠 ${data.notes}
+      </div>` : ''}
+
+      <!-- Lịch sử mua hàng -->
+      <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;
+        letter-spacing:0.4px;margin-bottom:6px;">Lịch sử mua hàng</div>
+      ${purchaseRows}
+      ${data.last_purchase_date ? `<div style="font-size:0.68rem;color:var(--text-muted);margin-top:6px;">
+        Lần mua cuối: ${data.last_purchase_date}
+      </div>` : ''}
+    `;
+
+    // Lưu vào biến global để các hàm khác dùng (vd: sendLiveChatMessage)
+    window._currentCustomerProfile = data;
+
+  } catch (err) {
+    panel.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:0.8rem;padding:8px 0;">
+      ⚠️ Không tải được hồ sơ. Hồ sơ mới sẽ được tạo khi gửi tin nhắn đầu tiên.
+    </div>`;
+    window._currentCustomerProfile = null;
   }
 }
 
@@ -2254,7 +2453,15 @@ function _renderCrisisResponsePlan(panelEl, data) {
   if (!data || !data.crises || data.crises.length === 0) return;
 
   const topCrisis = data.crises[0];
-  const affectedProducts = data.crises.map(c => c.product_id).join(', ');
+  // Lọc bỏ ID quá chung chung và dedup trước khi hiển thị
+  const _SKIP_PIDS = new Set(['general', 'none', 'unknown', 'chat_general', '']);
+  const affectedProducts = [
+    ...new Set(
+      data.crises
+        .map(c => c.product_id)
+        .filter(pid => !_SKIP_PIDS.has((pid || '').toLowerCase()))
+    )
+  ].join(', ') || 'sản phẩm liên quan';
   const statusColor = topCrisis.severity === 'critical' ? '#ef4444' : '#f59e0b';
 
   // Phân tích loại vấn đề từ insights trong reviews
@@ -2390,7 +2597,7 @@ function _renderCrisisResponsePlan(panelEl, data) {
         <div id="crisisReplyTemplate" style="font-size:0.8rem;color:var(--text-secondary);line-height:1.75;font-style:italic;">
           ${replyTemplate}
         </div>
-        <button onclick="navigator.clipboard?.writeText(${JSON.stringify(replyTemplateRaw)}).then(()=>showToast('✅ Đã copy template phản hồi!','success')).catch(()=>showToast('⚠️ Trình duyệt chặn clipboard — hãy copy thủ công','warning'))"
+        <button id="crisisCopyTemplateBtn"
           style="margin-top:10px;font-size:0.72rem;padding:5px 14px;border-radius:7px;cursor:pointer;
             border:1px solid var(--accent-indigo);background:rgba(99,102,241,0.08);
             color:var(--accent-indigo);font-weight:600;">
@@ -2407,6 +2614,16 @@ function _renderCrisisResponsePlan(panelEl, data) {
     // Fallback: chèn vào pageContent
     const pc = document.getElementById('pageContent');
     if (pc) pc.insertBefore(planEl, pc.firstChild);
+  }
+
+  // Gắn event listener sau khi đã insert vào DOM (tránh bug inline onclick với dynamic text)
+  const copyBtn = document.getElementById('crisisCopyTemplateBtn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard?.writeText(replyTemplateRaw)
+        .then(() => showToast('✅ Đã copy template phản hồi!', 'success'))
+        .catch(() => showToast('⚠️ Trình duyệt chặn clipboard — hãy copy thủ công', 'warning'));
+    });
   }
 }
 
@@ -2638,7 +2855,7 @@ function generateContentSuggestionsFromSummary(summaryData) {
 
   // Toast thông báo + navigate
   showToast(
-    `✅ Đã tạo <strong>${newSugs.length} đề xuất content</strong>${highCount > 0 ? ` (${highCount} ưu tiên cao)` : ''} từ báo cáo — Đang chuyển sang trang Content...`,
+    `Đã tạo <strong>${newSugs.length} đề xuất content</strong>${highCount > 0 ? ` (${highCount} ưu tiên cao)` : ''} từ báo cáo — Đang chuyển sang trang Content...`,
     'success'
   );
   setTimeout(() => navigate('content-suggestions'), 700);
@@ -2699,7 +2916,7 @@ document.addEventListener('click', async function (e) {
       const sug = MOCK.suggestions.find(s => String(s.id) === String(id));
       if (sug) sug.status = isApprove ? 'approved' : 'rejected';
     }
-    showToast(isApprove ? '✅ Đã duyệt đề xuất AI!' : '❌ Đã từ chối đề xuất', isApprove ? 'success' : 'warning');
+    showToast(isApprove ? 'Đã duyệt đề xuất AI!' : 'Đã từ chối đề xuất', isApprove ? 'success' : 'warning');
     // Gọi backend
     sendApprovalToBackend(id || 'unknown', status).catch(() => {});
     // Re-render trang

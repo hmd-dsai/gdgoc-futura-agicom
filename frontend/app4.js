@@ -3112,7 +3112,7 @@ function handlePageClick(e) {
       openSlideover(sug);
     } else if (action === 'approve' && sug) {
       sug.status = 'approved';
-      showToast(`✅ Đã duyệt: "${sug.title}" — AI đang triển khai...`, 'success');
+      showToast(`Đã duyệt: "${sug.title}" — AI đang triển khai...`, 'success');
       setTimeout(() => navigate(currentPage), 800);
     } else if (action === 'deny' && sug) {
       openFeedbackModal(id);
@@ -3125,10 +3125,10 @@ function handlePageClick(e) {
       MOCK.chat_messages[currentChatId] = msgs.filter(m => m.from !== 'ai_draft' && m.from !== 'ai_thinking');
       MOCK.chat_messages[currentChatId].push({
         from: 'system',
-        text: '🔄 Nháp bị từ chối — AI đang soạn phản hồi mới...'
+        text: 'Nháp bị từ chối'
       });
       chatDraftEditMode = false;
-      showToast('Đã từ chối nháp AI. AI sẽ tạo nháp khác.', 'warning');
+      showToast('Đã từ chối nháp AI.', 'warning');
       setTimeout(() => navigate('chat'), 300);
     } else if (action === 'chat-send-msg') {
       // Gửi tin nhắn từ chủ shop qua ô input

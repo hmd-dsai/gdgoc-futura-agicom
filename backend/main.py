@@ -5,7 +5,6 @@ import os
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from google.genai import types
-from contextlib import asynccontextmanager
 
 # Nhập các thành phần từ file khác
 from config import client, resolved_qa_col
@@ -22,28 +21,22 @@ from services import (
     cskh_rag_service,
     chat_with_history_service
 )
-from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog, ContentSuggestion
+from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog, ContentSuggestion, CustomerProfile, get_or_create_customer_profile
+import config as _cfg
+from seed_demo import seed_vector_db
 
 init_db()
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Khởi động (Startup): Kiểm tra xem ChromaDB có bị Render xóa trắng không
-    from config import policy_col, product_col, resolved_qa_col
-    if policy_col.count() == 0:
-        print("[!] Render vừa khởi động lại, ChromaDB rỗng. Đang tự động nạp lại dữ liệu...")
-        try:
-            import seed_demo
-            # Gọi hàm seed_vector_db từ file seed_demo của bạn
-            seed_demo.seed_vector_db(policy_col, product_col, resolved_qa_col)
-            print("[OK] Đã nạp lại trí nhớ cho RAG thành công!")
-        except Exception as e:
-            print(f"[LỖI] Không thể auto-seed: {e}")
-    yield
-    # Khi server tắt (Shutdown) - không cần làm gì
+# Auto-seed vector DB nếu rỗng (xảy ra sau mỗi cold start của Render vì dùng EphemeralClient)
+try:
+    if _cfg.policy_col.count() == 0:
+        print("[startup] Vector DB trống — đang auto-seed dữ liệu nền...")
+        seed_vector_db(_cfg.policy_col, _cfg.product_col, _cfg.resolved_qa_col)
+        print("[startup] Auto-seed Vector DB hoàn tất.")
+except Exception as _seed_err:
+    print(f"[startup] Cảnh báo: không thể auto-seed Vector DB: {_seed_err}")
 
-# TÌM DÒNG KHAI BÁO APP CŨ VÀ SỬA THÀNH DÒNG NÀY:
-app = FastAPI(title="Agicom Core Backend", lifespan=lifespan)
+app = FastAPI(title="Agicom Core Backend")
 
 # ---------------------------------------------------------------------------
 # CORS – cho phép frontend Netlify và localhost kết nối
@@ -465,11 +458,38 @@ async def get_crisis_overview():
             if any(kw in (log.insight or "").lower() for kw in risk_keywords)
         ]
 
-        # 4. Gom nhóm tín hiệu tiêu cực theo sản phẩm
+        # Bảng chuẩn hóa product_id: nhiều tên khác nhau → 1 ID chính tắc
+        # Thêm alias mới vào đây khi AI tạo ra tên sản phẩm không nhất quán
+        PRODUCT_ALIASES: dict = {
+            "anker-100w-cap":       "ANKER-100W-01",
+            "cáp sạc anker 100w":   "ANKER-100W-01",
+            "cap sac anker 100w":   "ANKER-100W-01",
+            "anker 100w":           "ANKER-100W-01",
+            "cáp anker":            "ANKER-100W-01",
+            "anker":                "ANKER-100W-01",
+            "airpods-p2":           "AIRPODS-P2",
+            "airpods pro 2":        "AIRPODS-P2",
+            "tai nghe airpods pro": "AIRPODS-P2",
+            "s24-ultra-001":        "S24-ULTRA-001",
+            "samsung galaxy s24":   "S24-ULTRA-001",
+            "s24 ultra":            "S24-ULTRA-001",
+        }
+        # IDs quá chung chung, không tạo crisis entry riêng
+        IGNORED_PIDS = {"general", "none", "unknown", "chat_general", ""}
+
+        def normalize_pid(raw_pid: str) -> str:
+            if not raw_pid:
+                return "unknown"
+            key = raw_pid.lower().strip()
+            return PRODUCT_ALIASES.get(key, raw_pid)
+
+        # 4. Gom nhóm tín hiệu tiêu cực theo sản phẩm (sau khi chuẩn hóa ID)
         product_signals: dict = {}
 
         for r in neg_reviews:
-            pid = r.product_id or "unknown"
+            pid = normalize_pid(r.product_id or "unknown")
+            if pid.lower() in IGNORED_PIDS:
+                pid = "unknown"
             if pid not in product_signals:
                 product_signals[pid] = {"neg_reviews": [], "risk_tasks": [], "chat_signals": []}
             product_signals[pid]["neg_reviews"].append({
@@ -481,7 +501,9 @@ async def get_crisis_overview():
             })
 
         for t in risk_tasks:
-            pid = t.product_id or "unknown"
+            pid = normalize_pid(t.product_id or "unknown")
+            if pid.lower() in IGNORED_PIDS:
+                pid = "unknown"
             if pid not in product_signals:
                 product_signals[pid] = {"neg_reviews": [], "risk_tasks": [], "chat_signals": []}
             product_signals[pid]["risk_tasks"].append(t.instruction or "")
@@ -592,6 +614,61 @@ async def delete_chat_history(customer_id: str):
     except Exception as e:
         db.rollback()
         return {"status": "error", "detail": str(e)}
+    finally:
+        db.close()
+
+
+# ── Customer Profile ────────────────────────────────────────────────────────
+
+@app.get("/api/customer-profile/{customer_id}")
+async def get_customer_profile(customer_id: str):
+    """Trả về hồ sơ khách hàng; tự tạo mới nếu chưa tồn tại."""
+    db = SessionLocal()
+    try:
+        profile = get_or_create_customer_profile(db, customer_id)
+        purchase_history = json.loads(profile.purchase_history or "[]")
+        return {
+            "status": "success",
+            "customer_id": profile.customer_id,
+            "churn_probability": profile.churn_probability,
+            "emotion_index": profile.emotion_index,
+            "customer_segment": profile.customer_segment,
+            "total_orders": profile.total_orders,
+            "total_spent": profile.total_spent,
+            "last_purchase_date": profile.last_purchase_date,
+            "purchase_history": purchase_history,
+            "notes": profile.notes,
+            "updated_at": profile.updated_at.isoformat() if profile.updated_at else None,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
+@app.patch("/api/customer-profile/{customer_id}")
+async def update_customer_profile(customer_id: str, payload: dict):
+    """Cập nhật một phần hồ sơ khách hàng (churn_probability, emotion_index, v.v.)."""
+    db = SessionLocal()
+    try:
+        profile = get_or_create_customer_profile(db, customer_id)
+        allowed_fields = {
+            "churn_probability", "emotion_index", "customer_segment",
+            "total_orders", "total_spent", "last_purchase_date",
+            "purchase_history", "notes"
+        }
+        for field, value in payload.items():
+            if field in allowed_fields:
+                if field == "purchase_history" and isinstance(value, list):
+                    value = json.dumps(value, ensure_ascii=False)
+                setattr(profile, field, value)
+        profile.updated_at = datetime.utcnow()
+        db.commit()
+        db.refresh(profile)
+        return {"status": "success", "customer_id": customer_id}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
 
