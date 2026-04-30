@@ -512,6 +512,23 @@ async def delete_chat_history(customer_id: str):
 
 # ── Customer Profile ────────────────────────────────────────────────────────
 
+def _deserialize_notes(raw: str | None) -> str | None:
+    """
+    notes được lưu dưới dạng JSON array ["insight1", "insight2"].
+    Hàm này chuyển thành chuỗi dễ đọc để frontend hiển thị trực tiếp.
+    Nếu raw là chuỗi plain text (DB cũ), trả về nguyên xi.
+    """
+    if not raw:
+        return None
+    try:
+        parsed = json.loads(raw)
+        if isinstance(parsed, list):
+            return " · ".join(str(i) for i in parsed if i)
+    except (json.JSONDecodeError, TypeError):
+        pass
+    return raw  # fallback: plain text cũ
+
+
 @app.get("/api/customer-profile/{customer_id}")
 async def get_customer_profile(customer_id: str):
     """Trả về hồ sơ khách hàng; tự tạo mới nếu chưa tồn tại."""
@@ -529,7 +546,7 @@ async def get_customer_profile(customer_id: str):
             "total_spent": profile.total_spent,
             "last_purchase_date": profile.last_purchase_date,
             "purchase_history": purchase_history,
-            "notes": profile.notes,
+            "notes": _deserialize_notes(profile.notes),
             "updated_at": profile.updated_at.isoformat() if profile.updated_at else None,
         }
     except Exception as e:

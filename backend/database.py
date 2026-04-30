@@ -5,7 +5,13 @@ from sqlalchemy.orm import sessionmaker
 import datetime
 
 # Cấu hình Database chuyển đổi linh hoạt giữa SQLite và PostgreSQL
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./agicom_system.db")
+# Dùng đường dẫn tuyệt đối dựa trên vị trí file này (backend/) thay vì CWD
+# để tránh tạo ra 2 file DB khác nhau khi chạy từ thư mục khác nhau.
+_DB_DIR = os.path.dirname(os.path.abspath(__file__))
+SQLALCHEMY_DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "sqlite:///" + os.path.join(_DB_DIR, "agicom_system.db")
+)
 
 # Fix lỗi "postgres://" vs "postgresql://" của SQLAlchemy khi dùng Render Postgres
 if SQLALCHEMY_DATABASE_URL and SQLALCHEMY_DATABASE_URL.startswith("postgres://"):

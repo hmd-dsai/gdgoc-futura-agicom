@@ -685,6 +685,10 @@ async function sendLiveChatMessage(msg) {
       // Refresh the stats panel
       renderChatSessionStats();
 
+      // Tự động cập nhật hồ sơ khách hàng sau mỗi lượt chat thực
+      // (fire-and-forget: cập nhật panel ngầm, không block UI)
+      loadCustomerProfile(liveChatCustomerId);
+
       // ── Đồng bộ tin nhắn vào Hộp Thư (Tin nhắn cần duyệt) ──
       _syncLiveChatToInbox(msg, result.reply, eval_);
 

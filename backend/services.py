@@ -1,5 +1,6 @@
 import os
 import json
+import datetime
 from fastapi import HTTPException
 from google.genai import types
 import config as _cfg
@@ -9,7 +10,7 @@ from config import client
 def _get_cols():
     return _cfg.policy_col, _cfg.product_col, _cfg.resolved_qa_col
 from prompts import CHAT_RAG_PROMPT, LEARNING_EXTRACTOR_PROMPT
-from database import SessionLocal, CoordinationTask, ChatLog, get_chat_history, save_message, get_or_create_customer_profile
+from database import SessionLocal, CoordinationTask, ChatLog, CustomerProfile, get_chat_history, save_message, get_or_create_customer_profile
 
 async def analyze_strategy_slow_track(data: dict):
     """THINK -> PLAN: Luồng chậm (Phân tích giá & Nội dung)"""
@@ -254,4 +255,85 @@ async def chat_with_history_service(db, customer_id: str, user_text: str, brand_
             risk_category=risk_cat
         )
 
+    # BƯỚC 7: Cập nhật hồ sơ khách hàng dựa trên kết quả phân tích AI
+    try:
+        update_customer_profile_from_chat(db, customer_id, ai_data)
+    except Exception as e:
+        # Không để lỗi cập nhật profile làm crash toàn bộ response
+        print(f"[chat_with_history] Không thể cập nhật hồ sơ khách hàng: {e}")
+
     return ai_data
+
+
+def update_customer_profile_from_chat(db, customer_id: str, ai_data: dict):
+    """
+    Cập nhật CustomerProfile sau mỗi lượt chat dựa trên phân tích AI.
+    Sử dụng EMA (trọng số 25%) để cập nhật emotion_index dần dần,
+    và delta cộng/trừ cho churn_probability.
+    """
+    profile = get_or_create_customer_profile(db, customer_id)
+
+    sentiment  = ai_data.get("sentiment_analysis", "bình thường")
+    risk_level = ai_data.get("risk_level", "Thấp")
+    insight    = ai_data.get("sensor_insight")
+
+    # ── 1. Cập nhật emotion_index (EMA, trọng số 25% cho quan sát mới) ───────
+    sentiment_score_map = {
+        "hài lòng":  0.90,
+        "tích cực":  0.85,
+        "bình thường": 0.55,
+        "phân vân":  0.40,
+        "gấp gáp":   0.40,
+        "tức giận":  0.05,
+    }
+    new_score = sentiment_score_map.get(sentiment, 0.55)
+    old_emotion = profile.emotion_index if profile.emotion_index is not None else 0.5
+    profile.emotion_index = round(0.75 * old_emotion + 0.25 * new_score, 3)
+
+    # ── 2. Cập nhật churn_probability (delta, kẹp trong [0.0, 1.0]) ──────────
+    old_churn = profile.churn_probability if profile.churn_probability is not None else 0.1
+    if sentiment == "tức giận" and risk_level == "Cao":
+        delta = +0.15
+    elif risk_level == "Cao":
+        delta = +0.10
+    elif risk_level == "Trung bình":
+        delta = +0.05
+    elif sentiment == "hài lòng":
+        delta = -0.05
+    elif new_score >= 0.8:           # tích cực
+        delta = -0.02
+    else:
+        delta = 0.0
+    profile.churn_probability = round(max(0.0, min(1.0, old_churn + delta)), 3)
+
+    # ── 3. Cập nhật notes (giữ 3 insight gần nhất, không trùng lặp) ─────────
+    if insight and insight not in ("None", "none", ""):
+        try:
+            existing = json.loads(profile.notes or "[]")
+            if not isinstance(existing, list):
+                existing = []
+        except Exception:
+            existing = []
+        # Thêm insight mới lên đầu, bỏ trùng, giới hạn 3 phần tử
+        updated = [insight] + [n for n in existing if n != insight]
+        profile.notes = json.dumps(updated[:3], ensure_ascii=False)
+
+    # ── 4. Tự động phân khúc lại customer_segment ───────────────────────────
+    total_orders = profile.total_orders or 0
+    churn        = profile.churn_probability
+    if churn >= 0.6:
+        profile.customer_segment = "at_risk"
+    elif total_orders >= 5:
+        profile.customer_segment = "vip"
+    elif total_orders >= 2:
+        profile.customer_segment = "regular"
+    else:
+        profile.customer_segment = "new"
+
+    # ── 5. Ghi timestamp và commit ───────────────────────────────────────────
+    profile.updated_at = datetime.datetime.utcnow()
+    db.commit()
+    print(
+        f"[Profile] {customer_id} → emotion={profile.emotion_index}, "
+        f"churn={profile.churn_probability}, segment={profile.customer_segment}"
+    )
