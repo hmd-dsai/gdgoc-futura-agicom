@@ -883,21 +883,32 @@ async def reset_all_data():
         db.query(CoordinationTask).delete()
         db.commit()
 
-        # 2. Xóa sạch kiến thức trong Vector DB (ChromaDB)
-        from config import chroma_client
-        # Lấy danh sách tất cả collections và xóa sạch
-        all_cols = ["policy_db", "product_db", "resolved_qa_db"]
-        for col in all_cols:
+        # 2. Xóa và tạo lại các Collections trong Vector DB.
+        #    QUAN TRỌNG: Phải cập nhật lại module globals _cfg.policy_col / product_col /
+        #    resolved_qa_col để services.py (dùng _get_cols()) luôn nhận đúng collection
+        #    mới sau khi reset, tránh lỗi "Collection đã bị xóa" khi query/add.
+        all_col_names = ["policy_db", "product_db", "resolved_qa_db"]
+        for col_name in all_col_names:
             try:
-                chroma_client.delete_collection(col)
-                # Tạo lại collection trống ngay lập tức
-                chroma_client.get_or_create_collection(col)
-            except:
-                pass
+                _cfg.chroma_client.delete_collection(col_name)
+            except Exception:
+                pass  # Bỏ qua nếu collection chưa tồn tại
 
-        return {"status": "success", "message": "Hệ thống đã được đưa về trạng thái trắng."}
+        # Tạo lại và gán lại module globals — cùng pattern với seed_demo.clear_data()
+        _cfg.policy_col      = _cfg.chroma_client.get_or_create_collection(name="policy_db",      embedding_function=_cfg.default_ef)
+        _cfg.product_col     = _cfg.chroma_client.get_or_create_collection(name="product_db",     embedding_function=_cfg.default_ef)
+        _cfg.resolved_qa_col = _cfg.chroma_client.get_or_create_collection(name="resolved_qa_db", embedding_function=_cfg.default_ef)
+
+        # 3. Nạp lại dữ liệu nền (seed) để hệ thống hoạt động được ngay sau reset
+        seed_vector_db(_cfg.policy_col, _cfg.product_col, _cfg.resolved_qa_col)
+
+        return {"status": "success", "message": "Hệ thống đã được reset và nạp lại dữ liệu nền thành công."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     import uvicorn
