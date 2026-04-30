@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 class ShopProfile(BaseModel):
     target_customers: str = "Khách hàng phổ thông"
@@ -81,12 +81,88 @@ class ChatSessionInput(BaseModel):
 
 class ReviewData(BaseModel):
     product_id: str
-    rating: int          # Số sao (1-5)
-    review_text: str     # Nội dung đánh giá
+    rating: int
+    review_text: str
     customer_name: str = "Khách hàng Ẩn danh"
 
 class ReviewExtractedInsight(BaseModel):
-    sentiment: str       # Tiêu cực, Tích cực, Bình thường
-    key_issue: str       # Vấn đề cốt lõi (vd: "Giao hàng chậm", "Lỗi móp méo")
-    action_needed: bool  # Có cần agent khác xử lý không?
-    qa_knowledge: str    # Bài học rút ra (ví dụ: "Nếu khách hỏi về móp méo, hãy báo do vận chuyển và xin lỗi")
+    sentiment: str
+    key_issue: str
+    action_needed: bool
+    qa_knowledge: str
+
+
+# ── Content Agent Models ──────────────────────────────────────────────────────
+
+class ContentAgentRequest(BaseModel):
+    """Input cho pipeline phân tích sản phẩm từ link."""
+    product_url: str
+    platform: str = "shopee"           # shopee | lazada | tiktok
+    shop_context: Optional[dict] = None
+    content_goal: str = "viral"         # viral | review | demo
+    product_data_override: Optional[dict] = None  # Tự nhập nếu scrape thất bại
+
+
+class USPItem(BaseModel):
+    rank: int
+    point: str      # Điểm bán nổi bật
+    evidence: str   # Bằng chứng từ review / spec
+
+
+class AudiencePersona(BaseModel):
+    persona_id: str
+    persona: str
+    age_range: str
+    pain_point: str
+    buying_trigger: str
+    preferred_content: str
+
+
+class ScriptScene(BaseModel):
+    scene_no: int
+    time_range: str    # "0-3s"
+    type: str          # hook | body | proof | cta
+    voiceover: str
+    caption: str
+    visual_note: str
+
+
+class VideoScript(BaseModel):
+    variant: str           # emotional | informational | humor
+    total_duration: int
+    hook_text: str
+    scenes: List[ScriptScene]
+    cta: str
+    hashtags: List[str]
+    caption_post: str
+
+
+class ScriptGenerateRequest(BaseModel):
+    product_intel_id: str
+    video_length: int = 30
+    variants: List[str] = ["emotional", "informational", "humor"]
+    language: str = "vi"
+    persona_id: Optional[str] = None
+
+
+class FilmingGuideRequest(BaseModel):
+    script_id: str
+    variant: str = "emotional"
+    equipment: str = "phone"   # phone | camera
+    location: str = "home"     # home | outdoor | studio
+
+
+class FilmingScene(BaseModel):
+    scene_no: int
+    duration: str
+    setup: str
+    lighting: str
+    angle: str
+    props: List[str]
+    tip: str
+
+
+class ScriptFeedbackRequest(BaseModel):
+    script_id: str
+    variant: str
+    feedback: str
