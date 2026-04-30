@@ -90,19 +90,30 @@ const chatSessionStats = {
    2. API HELPER
    ────────────────────────────────────────────────────────────────────── */
 
-async function apiCall(endpoint, method = 'GET', body = null) {
+async function apiCall(endpoint, method = 'GET', body = null, timeoutMs = 20000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
   const opts = {
     method,
     headers: { 'Content-Type': 'application/json' },
+    signal: controller.signal,
   };
   if (body) opts.body = JSON.stringify(body);
 
-  const res = await fetch(API_BASE + endpoint, opts);
-  if (!res.ok) {
-    const errText = await res.text().catch(() => res.statusText);
-    throw new Error(`HTTP ${res.status}: ${errText}`);
+  try {
+    const res = await fetch(API_BASE + endpoint, opts);
+    clearTimeout(timeoutId);
+    if (!res.ok) {
+      const errText = await res.text().catch(() => res.statusText);
+      throw new Error(`HTTP ${res.status}: ${errText}`);
+    }
+    return res.json();
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') throw new Error('Request timed out after ' + timeoutMs + 'ms');
+    throw err;
   }
-  return res.json();
 }
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -197,7 +208,7 @@ runScan = async function () {
         brand_tone: 'Chuyên nghiệp, nhiệt tình',
       },
       manager_directive: directive,
-    });
+    }, 90000); // LLM call — Gemini Flash có thể mất 15-20s trên Render
 
     if (overlay) overlay.classList.remove('show');
     if (btn) btn.classList.remove('scanning');
@@ -296,7 +307,7 @@ async function submitReviewToAPI(formData) {
   _syncReviewToMock(formData);
 
   try {
-    const result = await apiCall('/learn-from-review', 'POST', formData);
+    const result = await apiCall('/learn-from-review', 'POST', formData, 90000); // LLM call
     showToast('✅ Review đã gửi! AI đang phân tích và học hỏi từ dữ liệu này.', 'success');
     setTimeout(loadReviewsFromAPI, 1500);
     // Nếu review tiêu cực → nhắc chuyển sang Crisis Center
@@ -636,7 +647,7 @@ async function sendLiveChatMessage(msg) {
       customer_id: liveChatCustomerId,
       message: msg,
       brand_tone: 'Chuyên nghiệp, nhiệt tình',
-    });
+    }, 90000); // LLM call (RAG + Gemini) — có thể mất 15-20s trên Render
 
     const elapsed = Date.now() - t0;
     const thinking = document.getElementById('liveChatThinkingBubble');
@@ -857,6 +868,41 @@ async function loadDailySummary() {
   const container = document.getElementById('dailySummaryContent');
   if (!container) return;
 
+  // Backend offline — hiển thị bản demo ngay, không thử kết nối
+  if (!_backendConnected) {
+    container.innerHTML = `
+      <div style="padding:14px;background:rgba(245,158,11,0.08);border-radius:10px;
+        border:1px solid rgba(245,158,11,0.25);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span style="font-size:1.1rem;">🟡</span>
+          <span style="font-size:0.82rem;font-weight:700;color:#f59e0b;">
+            Demo Mode — Backend offline
+          </span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;">
+          <div style="padding:10px;background:var(--accent-emerald-bg);border-radius:8px;text-align:center;">
+            <div style="font-size:1.5rem;">✅</div>
+            <div style="font-size:0.7rem;font-weight:700;color:var(--accent-emerald);">Rủi ro: An toàn</div>
+          </div>
+          <div style="padding:10px;background:var(--accent-amber-bg);border-radius:8px;text-align:center;">
+            <div style="font-size:1.5rem;font-weight:800;color:var(--accent-amber);">3</div>
+            <div style="font-size:0.7rem;font-weight:700;color:var(--accent-amber);">Tác vụ chờ xử lý</div>
+          </div>
+          <div style="padding:10px;background:var(--accent-indigo-bg);border-radius:8px;text-align:center;">
+            <div style="font-size:1.5rem;font-weight:800;color:var(--accent-indigo);">5</div>
+            <div style="font-size:0.7rem;font-weight:700;color:var(--accent-indigo);">Insights CSKH</div>
+          </div>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;margin-bottom:10px;">
+          Đây là dữ liệu mẫu. Kết nối backend để xem tóm tắt thực từ cơ sở dữ liệu của bạn.
+        </div>
+        <button onclick="loadDailySummary()" class="btn-modal-cancel" style="font-size:0.76rem;padding:6px 14px;">
+          🔄 Thử tải lại
+        </button>
+      </div>`;
+    return;
+  }
+
   container.innerHTML =
     '<div style="text-align:center;padding:24px;color:var(--text-muted);">⏳ Đang tải tóm tắt từ backend...</div>';
 
@@ -1073,7 +1119,7 @@ async function handleResetAll() {
   if (!confirmed) return;
 
   try {
-    await apiCall('/system/reset-all', 'POST');
+    await apiCall('/system/reset-all', 'POST', null, 45000); // Xóa + seed lại vector DB
     showToast('✅ Đã reset toàn bộ dữ liệu AI về trạng thái trắng.', 'success');
   } catch (err) {
     showToast('❌ Lỗi reset: ' + err.message, 'danger');
@@ -1562,6 +1608,62 @@ function _attachLiveChatIdEditorEvents() {
 async function loadChatbotFeatures() {
   const el = document.getElementById('chatbotFeaturesContent');
   if (!el) return;
+
+  // Backend offline — hiển thị dữ liệu demo tĩnh ngay lập tức, không thử kết nối
+  if (!_backendConnected) {
+    el.innerHTML = `
+      <div style="margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span style="font-size:0.68rem;padding:2px 8px;border-radius:6px;
+          background:rgba(245,158,11,0.15);color:#f59e0b;font-weight:700;
+          border:1px solid rgba(245,158,11,0.3);">🟡 Demo Mode — Backend offline</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div style="padding:10px 12px;background:var(--bg-secondary);border-radius:8px;
+          border:1px solid var(--border-primary);border-left:3px solid #10b981;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:0.8rem;font-weight:700;color:var(--text-primary);">Phân tích cảm xúc</span>
+            <span style="font-size:0.65rem;padding:2px 7px;border-radius:8px;font-weight:600;
+              background:#10b98122;color:#10b981;">Ổn định</span>
+          </div>
+          <div style="font-size:0.73rem;color:var(--text-muted);line-height:1.45;">
+            Theo dõi trạng thái cảm xúc theo từng cụm hội thoại để cảnh báo sớm nhóm khách tiêu cực.
+          </div>
+        </div>
+        <div style="padding:10px 12px;background:var(--bg-secondary);border-radius:8px;
+          border:1px solid var(--border-primary);border-left:3px solid #f59e0b;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:0.8rem;font-weight:700;color:var(--text-primary);">Báo cáo thắc mắc</span>
+            <span style="font-size:0.65rem;padding:2px 7px;border-radius:8px;font-weight:600;
+              background:#f59e0b22;color:#f59e0b;">Đang cập nhật</span>
+          </div>
+          <div style="font-size:0.73rem;color:var(--text-muted);line-height:1.45;">
+            Tổng hợp câu hỏi lặp lại trong ngày, ưu tiên theo tần suất và mức độ ảnh hưởng.
+          </div>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--border-primary);padding-top:10px;">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);margin-bottom:8px;">
+          🔍 Chất Lượng Hệ Thống AI
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="padding:10px 12px;background:var(--accent-indigo-bg);border-radius:8px;">
+            <div style="font-size:0.77rem;font-weight:700;color:var(--accent-indigo);margin-bottom:3px;">Tổng hợp từ chat bot</div>
+            <div style="font-size:0.82rem;font-weight:800;color:var(--text-primary);margin-bottom:3px;">128 tín hiệu/7 ngày</div>
+            <div style="font-size:0.7rem;color:var(--text-muted);line-height:1.4;">
+              Hệ thống gom nhóm phản hồi theo chủ đề sản phẩm, kênh bán và thời điểm phát sinh.
+            </div>
+          </div>
+          <div style="padding:10px 12px;background:var(--accent-indigo-bg);border-radius:8px;">
+            <div style="font-size:0.77rem;font-weight:700;color:var(--accent-indigo);margin-bottom:3px;">Quản trị khủng hoảng</div>
+            <div style="font-size:0.82rem;font-weight:800;color:var(--text-primary);margin-bottom:3px;">1 cảnh báo cần xử lý</div>
+            <div style="font-size:0.7rem;color:var(--text-muted);line-height:1.4;">
+              Phát hiện cụm phản hồi tiêu cực tăng nhanh ở nhóm giao vận, đề xuất xử lý ưu tiên trong 24 giờ.
+            </div>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
 
   try {
     const [featData, qualData] = await Promise.all([
@@ -2397,11 +2499,12 @@ async function loadCrisisFromBackend() {
   const contentEl = document.getElementById('crisisLiveContent');
   if (!contentEl) return;
 
-  // ── Thử backend trước, fallback sang MOCK nếu lỗi ──
+  // ── Thử backend trước, fallback sang MOCK nếu lỗi hoặc offline ──
   let data = null;
   let isFromMock = false;
 
   try {
+    if (!_backendConnected) throw new Error('Backend offline');
     data = await apiCall('/api/crisis-overview');
   } catch (err) {
     console.warn('[Agicom] Backend offline — dùng MOCK data cho Crisis panel:', err.message);
@@ -2880,7 +2983,7 @@ document.addEventListener('click', async function (e) {
       const draftMsg = msgs.find(m => m.from === 'ai_draft');
       if (draftMsg && _backendConnected) {
         // Fire-and-forget: AI học từ việc chủ shop approve draft
-        apiCall('/learn-feedback', 'POST', { customer_q: currentChatId, human_a: draftMsg.text }).catch(() => {});
+        apiCall('/learn-feedback', 'POST', { customer_q: currentChatId, human_a: draftMsg.text }, 90000).catch(() => {});
       }
     }
     return; // app4.js handlePageClick xử lý tiếp
@@ -2894,7 +2997,7 @@ document.addEventListener('click', async function (e) {
       const editedText = ta ? ta.value.trim() : '';
       if (editedText) {
         // Dạy AI: "với câu hỏi này, chủ shop muốn trả lời như vậy"
-        apiCall('/learn-feedback', 'POST', { customer_q: currentChatId, human_a: editedText }).catch(() => {});
+        apiCall('/learn-feedback', 'POST', { customer_q: currentChatId, human_a: editedText }, 90000).catch(() => {});
       }
     }
     return;
@@ -2935,7 +3038,7 @@ document.addEventListener('click', async function (e) {
     showToast(action === 'chat-approve' ? '✅ Đã gửi tin nhắn!' : '🔄 Đã chuyển cho agent khác', action === 'chat-approve' ? 'success' : 'info');
     // Ghi log vào backend (fire-and-forget)
     if (editedText) {
-      apiCall('/learn-feedback', 'POST', { customer_q: convId, human_a: editedText }).catch(() => {});
+      apiCall('/learn-feedback', 'POST', { customer_q: convId, human_a: editedText }, 90000).catch(() => {});
     }
     return;
   }
