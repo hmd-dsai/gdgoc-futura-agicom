@@ -15,9 +15,11 @@ if not API_KEY:
 
 client = genai.Client(api_key=API_KEY)
 
-# Sử dụng EphemeralClient cho môi trường cloud (Render) vì filesystem là ephemeral.
-# Dữ liệu ChromaDB sẽ tồn tại trong RAM suốt vòng đời của server instance.
-chroma_client = chromadb.EphemeralClient()
+# Sử dụng PersistentClient để lưu Vector DB xuống disk — dữ liệu không bị mất khi server restart.
+# Trên Render (ephemeral filesystem), vẫn hoạt động tốt trong session; đủ cho demo.
+# Có thể override đường dẫn bằng biến môi trường CHROMA_DB_DIR.
+CHROMA_DB_DIR = os.getenv("CHROMA_DB_DIR", "./chroma_data")
+chroma_client = chromadb.PersistentClient(path=CHROMA_DB_DIR)
 
 # Sử dụng Embedding mặc định của Chroma
 default_ef = embedding_functions.DefaultEmbeddingFunction()
