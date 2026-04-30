@@ -1,14 +1,20 @@
 import os
 import json
+import re
+import uuid
+import httpx
+from datetime import datetime
 from fastapi import HTTPException
 from google.genai import types
 import config as _cfg
 from config import client
-# Truy cập collections qua module để luôn dùng đúng references
-# (tránh trường hợp clear_data() recreate collections nhưng services.py vẫn giữ old refs)
 def _get_cols():
     return _cfg.policy_col, _cfg.product_col, _cfg.resolved_qa_col
-from prompts import DATA_ANALYST_PROMPT, CHAT_RAG_PROMPT, LEARNING_EXTRACTOR_PROMPT, STRATEGY_SYSTEM_PROMPT
+from prompts import (
+    DATA_ANALYST_PROMPT, CHAT_RAG_PROMPT, LEARNING_EXTRACTOR_PROMPT,
+    STRATEGY_SYSTEM_PROMPT, CONTENT_INTEL_PROMPT, SCRIPT_GENERATOR_PROMPT,
+    FILMING_GUIDE_PROMPT, SCRIPT_FEEDBACK_PROMPT
+)
 from models import MarketInsight
 from database import SessionLocal, CoordinationTask, ChatLog, get_chat_history, save_message, get_or_create_customer_profile
 
@@ -24,18 +30,16 @@ def fetch_raw_market_data(sku_id: str) -> dict:
 async def analyze_raw_data_phase1(sku_id: str) -> MarketInsight:
     print(f"[*] PHASE 1: Đang trích xuất dữ liệu thô cho {sku_id}...")
     
-    # 1. Đọc dữ liệu thô
     raw_data = fetch_raw_market_data(sku_id)
     user_prompt = f"Dữ liệu thô từ sàn: {json.dumps(raw_data, ensure_ascii=False)}"
     
-    # 2. Gọi Gemini đóng vai Data Analyst
     response = await client.aio.models.generate_content(
         model="gemini-flash-latest",
         contents=[DATA_ANALYST_PROMPT, user_prompt],
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=MarketInsight,
-            http_options={'timeout': 45000}
+            http_options={"timeout": 45000}
         )
     )
     
@@ -47,14 +51,12 @@ async def analyze_raw_data_phase1(sku_id: str) -> MarketInsight:
     
     print(f"[*] PHASE 1 HOÀN TẤT: {insight_dict['analyst_summary']}")
     
-    # Trả về cả Insight đã lọc và Internal Data gốc (để lát nữa đưa cho Strategist)
     return {
         "insight": insight_dict,
         "internal_data": raw_data["internal_data"]
     }
 
 async def analyze_strategy_slow_track(data: dict):
-    """THINK -> PLAN: Luồng chậm (Phân tích giá & Nội dung)"""
     prompt = f"Phân tích dữ liệu thị trường sau và đưa ra chiến lược định giá/nội dung: {data}"
     
     response = await client.aio.models.generate_content(
@@ -62,14 +64,11 @@ async def analyze_strategy_slow_track(data: dict):
         contents=prompt,
         config=types.GenerateContentConfig(response_mime_type="application/json")
     )
-    # Trong thực tế, sẽ có response_schema ở đây
     return {"track": "Slow Track", "strategy": "Pricing & Content Proposal", "details": response.text}
 
 async def customer_care_fast_track(data: dict):
-    """THINK -> PLAN -> GUARDRAIL: Luồng nhanh (CSKH)"""
     chat_history = data.get("message", "")
     
-    # Prompt tích hợp Safety Guardrail
     prompt = f"""Bạn là Agent CSKH. Trả lời tin nhắn sau: '{chat_history}'.
     Đồng thời tự đánh giá độ tự tin (confidence) của bạn từ 0.0 đến 1.0. 
     Nếu bạn không chắc chắn hoặc khách hàng đang giận dữ, hãy cho confidence < 0.7.
@@ -85,7 +84,6 @@ async def customer_care_fast_track(data: dict):
         result = json.loads(response.text)
         confidence = result.get("confidence", 1.0)
         
-        # ACT: SAFETY GUARDRAIL LOGIC
         if confidence >= 0.7:
             return {"track": "Fast Track", "action": "Auto Reply to Customers", "message": result["reply"], "status": "Safe"}
         else:
@@ -98,17 +96,14 @@ async def coordinate_agents(insight_text: str, product_id: str, risk_level: str 
     target = None
     instruction = ""
 
-    # Ưu tiên xử lý Rủi ro
     if risk_level == "Cao" or risk_category in ["Chất lượng sản phẩm", "Pháp lý/Phốt"]:
         target = "RiskManager"
         instruction = f"BÁO ĐỘNG KHẨN CẤP ({risk_category}): {insight_text}. Kiểm tra ngay sản phẩm {product_id}!"
     
-    # Phân loại cho Pricing
     elif any(word in insight_text.lower() for word in ["giá", "đắt", "rẻ", "voucher"]):
         target = "Pricing"
         instruction = f"Insight về giá cho sản phẩm {product_id}: {insight_text}"
         
-    # Phân loại cho Content
     elif any(word in insight_text.lower() for word in ["màu", "thông tin", "mô tả"]):
         target = "Content"
         instruction = f"Yêu cầu cập nhật nội dung cho {product_id}: {insight_text}"
@@ -126,7 +121,6 @@ async def coordinate_agents(insight_text: str, product_id: str, risk_level: str 
     db.close()
 
 async def cskh_rag_service(customer_text: str, brand_tone: str):
-    # Kiểm tra nhanh đầu vào (Input Validation)
     if len(customer_text.strip()) < 3 or customer_text.lower() in ["string", "test", "hello"]:
         return {
             "suggested_reply": "Dạ Agicom chào anh/chị, em có thể giúp gì được cho mình ạ?",
@@ -139,19 +133,16 @@ async def cskh_rag_service(customer_text: str, brand_tone: str):
             "sensor_insight": "Khách chào hỏi hoặc nhập tin nhắn test"
         }
 
-    # 1. Retrieval
     _policy_col, _product_col, _resolved_qa_col = _get_cols()
     policy_hits = _policy_col.query(query_texts=[customer_text], n_results=1)
     product_hits = _product_col.query(query_texts=[customer_text], n_results=1)
     qa_hits = _resolved_qa_col.query(query_texts=[customer_text], n_results=1)
     
-    # Một mẹo nhỏ: Chỉ lấy context nếu điểm số (distance) thấp (nghĩa là độ khớp cao)
     def get_valid_hits(hits):
-        if hits and hits.get('documents') and len(hits['documents'][0]) > 0:
-            # Nếu distance > 1.5 thường là kết quả "ép buộc", không liên quan
-            if hits.get('distances') and hits['distances'][0][0] > 1.5:
+        if hits and hits.get("documents") and len(hits["documents"][0]) > 0:
+            if hits.get("distances") and hits["distances"][0][0] > 1.5:
                 return "Không có thông tin liên quan."
-            return hits['documents'][0][0]
+            return hits["documents"][0][0]
         return "Không có thông tin cụ thể."
 
     context = f"""
@@ -160,8 +151,6 @@ async def cskh_rag_service(customer_text: str, brand_tone: str):
     Kinh nghiệm: {get_valid_hits(qa_hits)}
     """
 
-    # 2. Generation (Gemini sẽ nhận prompt đã được siết chặt quy tắc)
-    # Lưu ý: Cần truyền rỗng cho chat_history vì version caunguyen không dùng history
     user_prompt = CHAT_RAG_PROMPT.format(
         customer_profile="Không có hồ sơ (endpoint cũ, không có customer_id).",
         chat_history="Đoạn thoại trước: Trống (không có tin nhắn cũ)",
@@ -169,7 +158,6 @@ async def cskh_rag_service(customer_text: str, brand_tone: str):
         brand_tone=brand_tone,
     )
     
-    # Gọi Gemini — bắt lỗi quota (429) riêng để không crash server
     try:
         response = await client.aio.models.generate_content(
             model="gemini-flash-latest",
@@ -194,11 +182,9 @@ async def cskh_rag_service(customer_text: str, brand_tone: str):
         raise
 
     try:
-        # Làm sạch chuỗi trước khi parse (loại bỏ markdown nếu có)
         clean_text = response.text.replace("```json", "").replace("```", "").strip()
         result = json.loads(clean_text)
 
-        # Nếu AI trả về một danh sách (List), lấy phần tử đầu tiên
         if isinstance(result, list):
             result = result[0] if len(result) > 0 else {}
             
@@ -210,24 +196,19 @@ async def cskh_rag_service(customer_text: str, brand_tone: str):
             "is_safe": False
         }
 
-    # 3. Trích xuất các thông tin AI vừa phân tích
     sentiment = result.get("sentiment_analysis", "bình thường")
-    product_id = result.get("identified_product_id", "General") # AI tự xác định sản phẩm
+    product_id = result.get("identified_product_id", "General")
     risk_level = result.get("risk_level", "Thấp")
     risk_cat = result.get("risk_category", "None")
     insight = result.get("sensor_insight")
 
-    # 4. Logic Guardrail: Nếu khách tức giận, chặn Auto-Reply
     if sentiment == "tức giận" or risk_level == "Cao":
         result["is_safe"] = False
         print(f"[!] CẢNH BÁO RỦI RO: Khách {sentiment}, ID sản phẩm: {product_id}")
 
-    # 4b. Enforce: is_safe=False phải đi kèm confidence_score thấp
-    # Tránh trường hợp AI trả về is_safe=False nhưng confidence=0.95 gây hiểu nhầm
     if not result.get("is_safe", True):
         result["confidence_score"] = min(result.get("confidence_score", 0.4), 0.45)
 
-    # 5. Coordination: Điều phối dựa trên dữ liệu AI cung cấp
     if insight and insight != "None":
         await coordinate_agents(
             insight_text=insight, 
@@ -239,12 +220,9 @@ async def cskh_rag_service(customer_text: str, brand_tone: str):
     return result
 
 async def learn_from_human_service(customer_q: str, human_a: str):
-    """Lưu cặp Q&A đã được con người duyệt vào Vector DB"""
     try:
-        # 1. Chuẩn bị Prompt
         prompt = LEARNING_EXTRACTOR_PROMPT.format(chat_log=f"Q: {customer_q}, A: {human_a}")
         
-        # 2. Gọi Gemini (Thêm config response_mime_type để ép AI trả về JSON)
         response = await client.aio.models.generate_content(
             model="gemini-flash-latest", 
             contents=prompt,
@@ -256,15 +234,12 @@ async def learn_from_human_service(customer_q: str, human_a: str):
         if not response.text:
             raise HTTPException(status_code=500, detail="AI không trả về kết quả để học.")
 
-        # 3. LÀM SẠCH TEXT (Quan trọng: Xử lý lỗi JSONDecodeError)
         clean_text = response.text.replace("```json", "").replace("```", "").strip()
         
-        # 4. Parse JSON và lưu vào DB
         data = json.loads(clean_text)
         
-        # Tạo ID duy nhất bằng cách băm nội dung câu hỏi
         import hashlib
-        doc_id = hashlib.md5(data['question'].encode()).hexdigest()
+        doc_id = hashlib.md5(data["question"].encode()).hexdigest()
 
         _, _, _resolved_qa_col = _get_cols()
         _resolved_qa_col.add(
@@ -283,16 +258,10 @@ async def learn_from_human_service(customer_q: str, human_a: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 async def full_strategy_pipeline(sku_id: str, shop_profile: dict):
-    """KẾT NỐI PHASE 1 & PHASE 2"""
-    
-    # 1. Chạy Phase 1: Data Analyst
-    # Giả sử hàm analyze_raw_data_phase1 đã có sẵn từ code cũ của bạn
     phase1_result = await analyze_raw_data_phase1(sku_id)
     insight = phase1_result["insight"]
     internal = phase1_result["internal_data"]
 
-    # 2. Chạy Phase 2: Strategist (Sử dụng STRATEGY_SYSTEM_PROMPT)
-    # Gom tất cả dữ liệu lại để AI ra quyết định
     combined_data = {
         "market_insight": insight,
         "internal_data": internal,
@@ -306,24 +275,19 @@ async def full_strategy_pipeline(sku_id: str, shop_profile: dict):
         contents=[STRATEGY_SYSTEM_PROMPT, user_prompt],
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
-            # Giả sử bạn dùng StrategyProposal model đã định nghĩa ở models.py
         )
     )
     
     return json.loads(response.text)
 
 async def chat_with_history_service(db, customer_id: str, user_text: str, brand_tone: str):
-    # BƯỚC 1: Lấy lịch sử chat cũ (10 câu gần nhất)
     history_msgs = get_chat_history(db, customer_id, limit=10)
 
-    # BƯỚC 2: Định dạng lịch sử thành chuỗi văn bản
     history_context = ""
     for msg in history_msgs:
         prefix = "Khách" if msg.role == "user" else "AI"
         history_context += f"{prefix}: {msg.content}\n"
 
-    # BƯỚC 3: Lấy hồ sơ khách hàng từ DB và format thành chuỗi cho prompt
-    # Bọc trong try/except: nếu bảng chưa migrate, chat vẫn tiếp tục với hồ sơ mặc định
     try:
         profile = get_or_create_customer_profile(db, customer_id)
 
@@ -366,23 +330,21 @@ async def chat_with_history_service(db, customer_id: str, user_text: str, brand_
     except Exception as e:
         print(f"[chat_with_history] Khong the tai ho so khach hang: {e}")
         customer_profile_context = f"- customer_id: {customer_id}\n- (Ho so chua co trong database)"
-        # QUAN TRỌNG: rollback session SQLAlchemy bị lỗi để các query tiếp theo không bị ảnh hưởng
         try:
             db.rollback()
         except Exception:
             pass
 
-    # BƯỚC 4: Truy xuất thêm từ Vector DB (RAG)
     _policy_col, _product_col, _resolved_qa_col = _get_cols()
     policy_hits = _policy_col.query(query_texts=[user_text], n_results=1)
     product_hits = _product_col.query(query_texts=[user_text], n_results=1)
     qa_hits = _resolved_qa_col.query(query_texts=[user_text], n_results=1)
 
     def get_valid_hits(hits):
-        if hits and hits.get('documents') and len(hits['documents'][0]) > 0:
-            if hits.get('distances') and hits['distances'][0][0] > 1.5:
+        if hits and hits.get("documents") and len(hits["documents"][0]) > 0:
+            if hits.get("distances") and hits["distances"][0][0] > 1.5:
                 return "Không có thông tin liên quan."
-            return hits['documents'][0][0]
+            return hits["documents"][0][0]
         return "Không có thông tin cụ thể."
 
     context = f"""
@@ -391,7 +353,6 @@ async def chat_with_history_service(db, customer_id: str, user_text: str, brand_
     Kinh nghiệm: {get_valid_hits(qa_hits)}
     """
 
-    # BƯỚC 5: Generate — truyền customer_profile vào prompt
     user_prompt = CHAT_RAG_PROMPT.format(
         customer_profile=customer_profile_context,
         chat_history=history_context,
@@ -399,7 +360,6 @@ async def chat_with_history_service(db, customer_id: str, user_text: str, brand_
         brand_tone=brand_tone,
     )
 
-    # BƯỚC 6: Gọi Gemini — bắt lỗi quota (429) riêng để không crash server
     try:
         response = await client.aio.models.generate_content(
             model="gemini-flash-latest",
@@ -421,9 +381,8 @@ async def chat_with_history_service(db, customer_id: str, user_text: str, brand_
                 "sensor_insight": None,
                 "_quota_exhausted": True
             }
-        raise  # Lỗi khác thì re-raise bình thường
+        raise
 
-    # Parse JSON với error handling (tương tự cskh_rag_service)
     try:
         clean_text = response.text.replace("```json", "").replace("```", "").strip()
         ai_data = json.loads(clean_text)
@@ -451,11 +410,9 @@ async def chat_with_history_service(db, customer_id: str, user_text: str, brand_
     if sentiment == "tức giận" or risk_level == "Cao":
         ai_data["is_safe"] = False
 
-    # Enforce: is_safe=False phải đi kèm confidence_score thấp
     if not ai_data.get("is_safe", True):
         ai_data["confidence_score"] = min(ai_data.get("confidence_score", 0.4), 0.45)
     else:
-        # Đảm bảo is_safe=True luôn có confidence_score (fallback nếu Gemini bỏ sót trường này)
         if "confidence_score" not in ai_data or ai_data["confidence_score"] is None:
             ai_data["confidence_score"] = 0.7
 
@@ -468,3 +425,201 @@ async def chat_with_history_service(db, customer_id: str, user_text: str, brand_
         )
 
     return ai_data
+
+
+# ── Content Agent Services ────────────────────────────────────────────────────
+
+async def scrape_shopee_product(url: str) -> dict:
+    """Lấy dữ liệu sản phẩm qua Shopee unofficial API."""
+    match = re.search(r"i\.(\d+)\.(\d+)", url)
+    if not match:
+        return {}
+    shop_id, item_id = match.group(1), match.group(2)
+    api_url = f"https://shopee.vn/api/v4/item/get?itemid={item_id}&shopid={shop_id}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Referer": "https://shopee.vn/",
+        "x-api-source": "pc",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=12.0, follow_redirects=True) as http:
+            resp = await http.get(api_url, headers=headers)
+        if resp.status_code == 200:
+            data = resp.json()
+            item = (data.get("data") or {})
+            rating_data = item.get("item_rating") or {}
+            rating_count = rating_data.get("rating_count") or [0] * 6
+            total_ratings = sum(rating_count)
+            neg_count = rating_count[1] + rating_count[2] if len(rating_count) >= 3 else 0
+            attributes = [
+                {"name": a.get("name", ""), "value": a.get("value", "")}
+                for a in (item.get("attributes") or [])[:15]
+            ]
+            return {
+                "name": item.get("name", ""),
+                "description": (item.get("description") or "")[:1000],
+                "price_vnd": (item.get("price") or 0) / 100000,
+                "price_min_vnd": (item.get("price_min") or 0) / 100000,
+                "rating": rating_data.get("rating_star", 0),
+                "total_ratings": total_ratings,
+                "neg_rating_count": neg_count,
+                "sold": item.get("sold", 0),
+                "stock": item.get("stock", 0),
+                "categories": [c.get("display_name", "") for c in (item.get("categories") or [])],
+                "attributes": attributes,
+                "brand": item.get("brand", ""),
+                "shop_name": item.get("shop_name", ""),
+                "platform": "shopee",
+                "_scrape_success": True,
+            }
+    except Exception as e:
+        print(f"[scraper] Shopee scrape error: {e}")
+    return {}
+
+
+async def scrape_product_data(url: str, platform: str) -> dict:
+    """Thử scrape product từ URL. Trả về dict rỗng nếu thất bại."""
+    try:
+        if platform == "shopee":
+            data = await scrape_shopee_product(url)
+            if data:
+                return data
+    except Exception as e:
+        print(f"[scraper] Error for {platform}: {e}")
+    return {
+        "url": url,
+        "platform": platform,
+        "_scrape_success": False,
+        "note": "Không thể scrape tự động. LLM sẽ suy luận từ URL và context."
+    }
+
+
+async def analyze_content_intel_service(
+    product_data: dict,
+    shop_context: dict,
+    content_goal: str,
+    product_url: str,
+) -> dict:
+    """Phase 1 Content Agent: Phân tích USP + Audience từ dữ liệu sản phẩm."""
+    user_prompt = (
+        f"Link sản phẩm: {product_url}\n"
+        f"Platform: {product_data.get('platform', 'shopee')}\n"
+        f"Dữ liệu sản phẩm: {json.dumps(product_data, ensure_ascii=False)}\n"
+        f"Context shop: {json.dumps(shop_context or {}, ensure_ascii=False)}\n"
+        f"Mục tiêu content: {content_goal}"
+    )
+    response = await client.aio.models.generate_content(
+        model="gemini-flash-latest",
+        contents=[CONTENT_INTEL_PROMPT, user_prompt],
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            http_options={"timeout": 60000},
+        ),
+    )
+    if not response.text:
+        raise HTTPException(status_code=500, detail="Content Intel: AI không trả về kết quả.")
+    clean = response.text.replace("```json", "").replace("```", "").strip()
+    result = json.loads(clean)
+    # Gắn thêm metadata
+    result["product_url"] = product_url
+    result["platform"] = product_data.get("platform", "shopee")
+    result["scrape_success"] = product_data.get("_scrape_success", False)
+    return result
+
+
+async def generate_scripts_service(
+    product_intel: dict,
+    variants: list,
+    video_length: int,
+    language: str,
+    persona_id: str = None,
+) -> list:
+    """Phase 2 Content Agent: Tạo kịch bản video cho từng variant."""
+    # Chọn audience persona nếu có chỉ định
+    audience = product_intel.get("audience", [])
+    target_persona = None
+    if persona_id and audience:
+        for p in audience:
+            if p.get("persona_id") == persona_id:
+                target_persona = p
+                break
+    if not target_persona and audience:
+        target_persona = audience[0]
+
+    scripts = []
+    for variant in variants:
+        user_prompt = (
+            f"Product Intelligence:\n{json.dumps(product_intel, ensure_ascii=False)}\n\n"
+            f"Variant: {variant}\n"
+            f"Độ dài video: {video_length} giây\n"
+            f"Ngôn ngữ: {language}\n"
+            f"Target persona: {json.dumps(target_persona, ensure_ascii=False) if target_persona else 'Không chỉ định'}"
+        )
+        try:
+            response = await client.aio.models.generate_content(
+                model="gemini-flash-latest",
+                contents=[SCRIPT_GENERATOR_PROMPT, user_prompt],
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    http_options={"timeout": 60000},
+                ),
+            )
+            if response.text:
+                clean = response.text.replace("```json", "").replace("```", "").strip()
+                script = json.loads(clean)
+                script["variant"] = variant  # enforce variant field
+                scripts.append(script)
+        except Exception as e:
+            print(f"[script_gen] Error for variant {variant}: {e}")
+            scripts.append({
+                "variant": variant,
+                "error": str(e),
+                "hook_text": "",
+                "scenes": [],
+                "cta": "",
+                "hashtags": [],
+            })
+    return scripts
+
+
+async def generate_filming_guide_service(
+    script: dict,
+    equipment: str,
+    location: str,
+) -> dict:
+    """Phase 3 Content Agent: Tạo hướng dẫn quay phim từ script."""
+    filming_prompt = FILMING_GUIDE_PROMPT.replace("{equipment}", equipment).replace("{location}", location)
+    user_prompt = f"Script cần quay:\n{json.dumps(script, ensure_ascii=False)}"
+
+    response = await client.aio.models.generate_content(
+        model="gemini-flash-latest",
+        contents=[filming_prompt, user_prompt],
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            http_options={"timeout": 60000},
+        ),
+    )
+    if not response.text:
+        raise HTTPException(status_code=500, detail="Filming Guide: AI không trả về kết quả.")
+    clean = response.text.replace("```json", "").replace("```", "").strip()
+    return json.loads(clean)
+
+
+async def improve_script_service(script_data: dict, feedback: str) -> dict:
+    """Content Agent: Cải thiện script dựa trên feedback của chủ shop."""
+    feedback_prompt = SCRIPT_FEEDBACK_PROMPT.format(
+        current_script=json.dumps(script_data, ensure_ascii=False),
+        feedback=feedback,
+    )
+    response = await client.aio.models.generate_content(
+        model="gemini-flash-latest",
+        contents=feedback_prompt,
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            http_options={"timeout": 60000},
+        ),
+    )
+    if not response.text:
+        raise HTTPException(status_code=500, detail="Script Feedback: AI không trả về kết quả.")
+    clean = response.text.replace("```json", "").replace("```", "").strip()
+    return json.loads(clean)
