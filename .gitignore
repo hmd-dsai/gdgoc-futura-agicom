@@ -1,6 +1,7 @@
 # Databases & Vector Stores
 agicom_system.db
 chroma_db/
+chroma_data/
 
 # Environment secrets
 .env

@@ -21,41 +21,18 @@ class MarketData(BaseModel):
     our_rating: float = 4.8
     platform_campaign: str = "None"
 
-class MarketInsight(BaseModel):
-    competitor_min_price: float
-    competitor_avg_price: float
-    market_trend: str
-    overall_sentiment: str
-    customer_pain_points: List[str]
-    top_frequent_questions: List[str]
-    analyst_summary: str
-
 class CustomerContext(BaseModel):
     recent_sentiment: str
     frequent_question: str
-
-class IncomingData(BaseModel):
-    data_type: str
-    payload: dict
 
 class ProposalApproval(BaseModel):
     proposal_id: str
     status: str
     feedback: str = ""
 
-class ChatMessageRequest(BaseModel):
-    shop_policy: str = ""
-    customer_text: str
-
 class ChatMessage(BaseModel):
     shop_policy: str = "Đổi trả trong 7 ngày. Phí ship khách chịu."
     customer_text: str
-
-class GuardrailResponse(BaseModel):
-    suggested_reply: str
-    confidence_score: float
-    is_safe: bool
-    flag_reason: str
 
 class StrategyProposal(BaseModel):
     action_required: bool
