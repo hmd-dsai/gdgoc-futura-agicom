@@ -387,8 +387,18 @@ function _alertCrisisFromReview(formData) {
    6. LIVE CHAT — /chat-v3
    ────────────────────────────────────────────────────────────────────── */
 
-let liveChatCustomerId =
-  'demo_customer_' + Math.random().toString(36).substring(2, 8);
+// Giữ nguyên ID khách hàng demo qua các lần Cmd+R (localStorage)
+let liveChatCustomerId = (function () {
+  try {
+    const saved = localStorage.getItem('agicom_live_chat_id');
+    if (saved) return saved;
+    const newId = 'demo_customer_' + Math.random().toString(36).substring(2, 8);
+    localStorage.setItem('agicom_live_chat_id', newId);
+    return newId;
+  } catch (_) {
+    return 'demo_customer_' + Math.random().toString(36).substring(2, 8);
+  }
+})();
 
 function buildLiveChatWidgetHTML() {
   return `
@@ -1516,6 +1526,9 @@ function injectLiveChatWidget() {
 
   // Load customer profile lần đầu
   loadCustomerProfile(liveChatCustomerId);
+
+  // Replay lịch sử chat từ backend (sau Cmd+R ID vẫn giữ nguyên → tải lại được)
+  _reloadChatHistoryFromBackend(liveChatCustomerId);
 }
 
 /**
@@ -1553,6 +1566,7 @@ function _attachLiveChatIdEditorEvents() {
 
     const changed = newId !== liveChatCustomerId;
     liveChatCustomerId = newId;
+    try { localStorage.setItem('agicom_live_chat_id', liveChatCustomerId); } catch (_) {}
 
     // Cập nhật badge
     if (badge) badge.textContent = '🪪 ' + liveChatCustomerId;
@@ -2131,6 +2145,14 @@ function _syncLiveChatToInbox(customerMsg, aiReply, evalData) {
   // ── Tìm conversation hiện có của cùng customer (tránh tạo box trùng) ──
   let existingConv = MOCK.conversations.find(c => c.name === displayName && c.platform === 'Live Chat');
 
+  // Lấy hồ sơ thực từ backend (đã được load bởi loadCustomerProfile)
+  const _profile = window._currentCustomerProfile;
+  const _churnPct = _profile ? Math.round((_profile.churn_probability ?? 0.1) * 100) + '%' : '—';
+  const _riskLevel = _profile
+    ? (_profile.churn_probability >= 0.6 ? 'high' : _profile.churn_probability >= 0.3 ? 'medium' : 'low')
+    : (isEscalated ? 'high' : 'low');
+  const _purchases = _profile?.purchase_history || [];
+
   if (existingConv) {
     // Cập nhật conversation đã có thay vì tạo mới
     existingConv.time    = now;
@@ -2140,6 +2162,10 @@ function _syncLiveChatToInbox(customerMsg, aiReply, evalData) {
     existingConv.sentiment = sentimentScore;
     existingConv.angry   = sentimentScore < 30;
     existingConv.customer.note = `Live Chat · ID: ${displayName} · Confidence: ${conf !== null ? conf + '%' : '—'} · Cảm xúc: ${sentiment || 'bình thường'}`;
+    // Đồng bộ dữ liệu hồ sơ thực
+    existingConv.customer.churn     = _churnPct;
+    existingConv.customer.risk      = _riskLevel;
+    existingConv.customer.purchases = _purchases;
     // Đưa lên đầu danh sách
     MOCK.conversations = [existingConv, ...MOCK.conversations.filter(c => c !== existingConv)];
   } else {
@@ -2162,9 +2188,9 @@ function _syncLiveChatToInbox(customerMsg, aiReply, evalData) {
       angry: sentimentScore < 30,
       customer: {
         note: `Live Chat · ID: ${displayName} · Confidence: ${conf !== null ? conf + '%' : '—'} · Cảm xúc: ${sentiment || 'bình thường'}`,
-        risk: isEscalated ? 'high' : 'low',
-        churn: '—',
-        purchases: []
+        risk: _riskLevel,
+        churn: _churnPct,
+        purchases: _purchases
       }
     };
     MOCK.conversations.unshift(existingConv);
@@ -2191,7 +2217,10 @@ function _syncLiveChatToInbox(customerMsg, aiReply, evalData) {
       },
       { from: 'ai_draft', text: aiReply, confidence: conf }
     );
-    showToast(`⚠️ Tin nhắn Live Chat cần duyệt — đã chuyển vào Hộp Thư!`, 'warning');
+    // Không hiện toast khi replay lịch sử (tránh spam khi Cmd+R)
+    if (!evalData._isHistory) {
+      showToast(`⚠️ Tin nhắn Live Chat cần duyệt — đã chuyển vào Hộp Thư!`, 'warning');
+    }
   } else {
     MOCK.chat_messages[convId].push({ from: 'ai_sent', time: now, text: aiReply });
   }
@@ -2204,6 +2233,45 @@ function _syncLiveChatToInbox(customerMsg, aiReply, evalData) {
   // ── Nếu đang ở trang chat → re-render để inbox cập nhật ngay ──
   if (typeof currentPage !== 'undefined' && currentPage === 'chat' && typeof navigate === 'function') {
     setTimeout(() => navigate('chat'), 300);
+  }
+}
+
+/**
+ * Tải lịch sử chat từ backend và replay vào UI (chatbox + inbox).
+ * Gọi một lần khi injectLiveChatWidget() khởi tạo để phục hồi sau Cmd+R.
+ */
+async function _reloadChatHistoryFromBackend(customerId) {
+  if (!_backendConnected) return;
+  try {
+    const data = await apiCall(`/api/chat-messages/${encodeURIComponent(customerId)}`);
+    if (!data || data.status !== 'success' || !data.messages || data.messages.length === 0) return;
+
+    const msgs = data.messages;
+    const container = document.getElementById('liveChatMessages');
+    if (container) {
+      // Xóa placeholder "gửi tin nhắn để bắt đầu"
+      container.innerHTML = '';
+      // Replay từng tin nhắn vào chatbox (không có eval meta cho tin lịch sử)
+      msgs.forEach(m => appendLiveChatBubble(m.role === 'user' ? 'user' : 'ai', m.content));
+    }
+
+    // Tạo duy nhất 1 inbox entry với cặp cuối cùng (tránh spam toast)
+    // Tìm cặp user → assistant cuối
+    let lastUserMsg = null;
+    let lastAiMsg = null;
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      if (!lastAiMsg && msgs[i].role === 'assistant') lastAiMsg = msgs[i].content;
+      if (!lastUserMsg && msgs[i].role === 'user') { lastUserMsg = msgs[i].content; break; }
+    }
+    if (lastUserMsg && lastAiMsg) {
+      // Sử dụng flag _isHistory=true để _syncLiveChatToInbox bỏ qua showToast
+      _syncLiveChatToInbox(lastUserMsg, lastAiMsg, {
+        is_safe: true, confidence_score: undefined,
+        sentiment_analysis: 'bình thường', _isHistory: true
+      });
+    }
+  } catch (err) {
+    console.warn('[Agicom] Không thể replay lịch sử chat:', err.message);
   }
 }
 

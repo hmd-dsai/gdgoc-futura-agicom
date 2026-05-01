@@ -495,6 +495,32 @@ async def process_chat_with_history(data: ChatSessionInput):
     finally:
         db.close()
 
+@app.get("/api/chat-messages/{customer_id}")
+async def get_chat_messages_endpoint(customer_id: str, limit: int = 50):
+    """Lấy lịch sử chat để frontend replay lại sau khi reload trang."""
+    db = SessionLocal()
+    try:
+        from sqlalchemy import asc
+        messages = (
+            db.query(DB_ChatMessage)
+            .filter(DB_ChatMessage.customer_id == customer_id)
+            .order_by(asc(DB_ChatMessage.timestamp))
+            .limit(limit)
+            .all()
+        )
+        return {
+            "status": "success",
+            "customer_id": customer_id,
+            "messages": [
+                {"role": m.role, "content": m.content,
+                 "timestamp": m.timestamp.isoformat() if m.timestamp else None}
+                for m in messages
+            ]
+        }
+    finally:
+        db.close()
+
+
 @app.delete("/chat/{customer_id}")
 async def delete_chat_history(customer_id: str):
     db = SessionLocal()
