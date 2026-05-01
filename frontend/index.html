@@ -1,731 +1,382 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agicom – AI Agent quản lý shop thông minh</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{font-family:'Inter',sans-serif;overflow-x:hidden;color:#111827;}
-img{max-width:100%;display:block;}
-a{text-decoration:none;color:inherit;}
-button{cursor:pointer;border:none;background:none;font-family:inherit;}
-ul{list-style:none;}
-@keyframes floatUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-@keyframes floatDown{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
-@keyframes floatSlow{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-@keyframes particleFloat{0%,100%{transform:translateY(0);opacity:0.15}50%{transform:translateY(-28px);opacity:0.5}}
-@keyframes fadeInUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeInRight{from{opacity:0;transform:translateX(50px)}to{opacity:1;transform:translateX(0)}}
-.animate-fade-in-up{animation:fadeInUp .8s ease forwards;}
-.animate-fade-in-right{animation:fadeInRight .9s .2s ease both;}
-.float-up{animation:floatUp 3s ease-in-out infinite;}
-.float-down{animation:floatDown 4s 1s ease-in-out infinite;}
-.float-slow{animation:floatSlow 3s 2s ease-in-out infinite;}
-.reveal{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease;}
-.reveal.visible{opacity:1;transform:translateY(0);}
-.reveal-d1{transition-delay:.1s;}.reveal-d2{transition-delay:.2s;}.reveal-d3{transition-delay:.3s;}
-/* Navbar */
-#navbar{position:fixed;top:0;left:0;right:0;z-index:50;transition:background .3s,box-shadow .3s;background:rgba(255,253,235,0.4);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(30,58,95,0.06);}
-#navbar.scrolled{background:rgba(255,255,255,0.92);border-bottom:1px solid rgba(0,0,0,0.07);box-shadow:0 4px 20px rgba(0,0,0,0.08);}
-.nav-inner{max-width:1280px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:64px;}
-.nav-logo{display:flex;align-items:center;gap:8px;cursor:pointer;}
-.nav-logo img{width:32px;height:32px;border-radius:8px;}
-.logo-agi{color:#F5C842;font-weight:800;font-size:1.15rem;}
-.logo-com{color:#1E3A5F;font-weight:800;font-size:1.15rem;}
-.logo-com-inv{color:rgba(255,255,255,.85);font-weight:800;font-size:1.15rem;}
-.nav-links{display:flex;align-items:center;gap:28px;}
-.nav-links button{color:#374151;font-size:14px;font-weight:500;transition:color .2s;}
-.nav-links button:hover{color:#D97706;}
-.nav-ctas{display:flex;align-items:center;gap:12px;}
-.nav-login{color:#6B7280;font-size:14px;font-weight:500;transition:color .2s;}
-.nav-login:hover{color:#D97706;}
-.btn-nav{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;font-size:14px;font-weight:600;color:#fff;background:linear-gradient(135deg,#1E3A5F,#2563EB);box-shadow:0 4px 14px rgba(30,58,95,0.35);transition:transform .2s;cursor:pointer;}
-.btn-nav:hover{transform:scale(1.05);}
-.btn-primary{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:12px;font-size:1rem;font-weight:600;color:#fff;background:linear-gradient(135deg,#1E3A5F,#2563EB);box-shadow:0 6px 24px rgba(30,58,95,0.35);transition:transform .2s;cursor:pointer;}
-.btn-primary:hover{transform:scale(1.05);}
-.btn-outline{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:12px;font-size:1rem;font-weight:600;border:1.5px solid rgba(30,58,95,0.25);color:#1E3A5F;background:rgba(255,255,255,0.35);transition:background .2s;cursor:pointer;}
-.btn-outline:hover{background:rgba(255,255,255,0.6);}
-.btn-amber{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:12px;font-size:1rem;font-weight:600;color:#fff;background:linear-gradient(135deg,#F5C842,#F59E0B);box-shadow:0 4px 16px rgba(245,200,66,.4);transition:transform .2s;cursor:pointer;}
-.btn-amber:hover{transform:scale(1.05);}
-.mob-toggle{display:none;color:#1E3A5F;}
-.mob-menu{display:none;background:#fff;border-top:1px solid #F3F4F6;padding:16px 20px;}
-.mob-menu.open{display:block;}
-.mob-menu button{display:block;width:100%;text-align:left;padding:10px 0;color:#374151;font-size:14px;font-weight:500;}
-.mob-cta{display:block;width:100%;text-align:center;margin-top:8px;padding:12px;border-radius:12px;color:#fff;font-weight:600;font-size:14px;background:linear-gradient(135deg,#1E3A5F,#2563EB);}
-@media(max-width:768px){.nav-links,.nav-ctas{display:none!important;}.mob-toggle{display:flex;}}
-/* Hero */
-#hero{position:relative;min-height:100vh;display:flex;align-items:center;padding-top:64px;background:linear-gradient(160deg,#FFFDE7 0%,#FEF3C7 45%,#FDE68A 80%,#FCD34D 100%);}
-.orb1{position:absolute;top:10%;right:5%;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(30,58,95,0.08),transparent 70%);filter:blur(40px);pointer-events:none;}
-.orb2{position:absolute;bottom:15%;left:5%;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,0.25),transparent 70%);filter:blur(40px);pointer-events:none;}
-.grid-bg{position:absolute;inset:0;opacity:.04;pointer-events:none;background-image:linear-gradient(rgba(30,58,95,1) 1px,transparent 1px),linear-gradient(90deg,rgba(30,58,95,1) 1px,transparent 1px);background-size:48px 48px;}
-.particles-wrap{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
-.particle{position:absolute;border-radius:50%;background:rgba(30,58,95,0.18);animation:particleFloat linear infinite;}
-.hero-inner{position:relative;max-width:1280px;margin:0 auto;padding:80px 20px 112px;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;}
-@media(max-width:900px){.hero-inner{grid-template-columns:1fr;padding:60px 20px 80px;}.hero-right{display:none!important;}}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;margin-bottom:24px;border:1px solid rgba(30,58,95,0.2);background:rgba(30,58,95,0.06);}
-.hero-badge span{color:#1E3A5F;font-size:13px;font-weight:500;}
-.hero-h1{font-size:clamp(2rem,4.5vw,3.4rem);font-weight:800;line-height:1.12;letter-spacing:-.02em;color:#1E3A5F;margin-bottom:20px;}
-.grad-text{background:linear-gradient(135deg,#D97706,#92400E);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.hero-p{color:#374151;font-size:1.1rem;line-height:1.75;max-width:520px;margin-bottom:32px;}
-.hero-ctas{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:40px;}
-.trust-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;}
-.trust-lbl{color:rgba(30,58,95,0.5);font-size:13px;}
-.trust-badge{padding:4px 12px;border-radius:999px;font-size:12px;font-weight:500;background:rgba(255,255,255,0.55);color:rgba(30,58,95,0.75);border:1px solid rgba(30,58,95,0.12);}
-.hero-fade{position:absolute;bottom:0;left:0;right:0;height:96px;pointer-events:none;background:linear-gradient(to bottom,transparent,#f8fafc);}
-/* Mockup */
-.mockup-wrap{position:relative;width:100%;max-width:520px;margin:0 auto;user-select:none;}
-.mockup-glow{position:absolute;inset:-24px;border-radius:24px;pointer-events:none;background:radial-gradient(ellipse,rgba(30,58,95,0.25) 0%,transparent 70%);filter:blur(40px);opacity:.3;}
-.mockup-browser{position:relative;border-radius:16px;overflow:hidden;border:1px solid rgba(30,58,95,0.15);background:rgba(255,255,255,0.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 40px 80px rgba(30,58,95,0.2),0 0 0 1px rgba(255,255,255,0.6) inset;}
-.titlebar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid rgba(30,58,95,0.1);background:rgba(255,255,255,0.7);}
-.tlights{display:flex;gap:6px;}
-.tl{width:12px;height:12px;border-radius:50%;}
-.tl-r{background:#FF5F57;}.tl-y{background:#FFBD2E;}.tl-g{background:#28CA42;}
-.urlbar{flex:1;height:24px;border-radius:6px;margin:0 12px;display:flex;align-items:center;padding:0 12px;gap:6px;background:rgba(255,255,255,0.8);border:1px solid rgba(30,58,95,0.1);}
-.urlbar-dot{width:8px;height:8px;border-radius:50%;background:rgba(30,58,95,0.2);}
-.urlbar-txt{color:rgba(30,58,95,0.4);font-size:11px;}
-.mbody{display:flex;background:#fef9c3;min-height:280px;}
-.msidebar{width:144px;background:#fff;border-right:1px solid #F3F4F6;padding:12px;flex-shrink:0;}
-.msidebar-logo{display:flex;align-items:center;gap:4px;margin-bottom:16px;}
-.msidebar-logo .a{color:#F5C842;font-weight:700;font-size:13px;}
-.msidebar-logo .c{color:#1E3A5F;font-weight:700;font-size:13px;}
-.mnav{padding:6px 8px;border-radius:8px;margin-bottom:4px;font-size:10px;}
-.mnav-a{background:#FEF3C7;color:#92400E;font-weight:600;}
-.mnav-i{background:transparent;color:#9CA3AF;}
-.mmain{flex:1;padding:16px;}
-.kpi3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
-.kcard{background:#fff;border-radius:12px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
-.kl{color:#9CA3AF;font-size:9px;margin-bottom:2px;}
-.kv{font-weight:700;color:#111827;font-size:14px;}
-.ks-g{font-size:9px;color:#16A34A;}
-.ks-a{font-size:9px;color:#D97706;}
-.mchart{background:#fff;border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
-.mchart-lbl{color:#6B7280;font-size:10px;font-weight:600;margin-bottom:8px;}
-.bars{display:flex;align-items:flex-end;gap:4px;height:60px;}
-.bar{flex:1;border-radius:2px 2px 0 0;}
-.mtable{background:#fff;border-radius:12px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
-.mrow{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #F9FAFB;}
-.mrow:last-child{border-bottom:none;}
-.mrow-n{color:#374151;font-size:9px;}
-.mrow-p{font-weight:600;color:#D97706;font-size:9px;}
-.mbadge{border-radius:4px;padding:2px 6px;font-size:8px;}
-.mbadge-g{background:#DCFCE7;color:#15803D;}
-.mbadge-a{background:#FEF3C7;color:#92400E;}
-.callout{position:absolute;padding:10px 16px;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.18);}
-.callout-lbl{font-size:10px;font-weight:600;margin-bottom:2px;}
-.callout-val{font-size:15px;font-weight:800;}
-.co-dark{background:#1E3A5F;border:1px solid rgba(255,255,255,0.15);}
-.co-dark .callout-lbl{color:rgba(255,255,255,.6);}
-.co-dark .callout-val{color:#FCD34D;}
-.co-light{background:rgba(255,255,255,0.92);border:1px solid rgba(30,58,95,.12);backdrop-filter:blur(10px);}
-.co-light .callout-lbl{color:#6B7280;}
-.co-light .callout-val{color:#1E3A5F;}
-/* Shared */
-.sec-badge{display:inline-block;padding:6px 14px;border-radius:999px;font-size:14px;font-weight:500;background:#FEF3C7;color:#92400E;margin-bottom:16px;}
-.sec-h2{font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;line-height:1.22;color:#111827;}
-.grad-h2{background:linear-gradient(135deg,#D97706,#92400E);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.sec-sub{color:#6B7280;font-size:1.05rem;line-height:1.72;max-width:500px;margin:16px auto 0;}
-.container{max-width:1280px;margin:0 auto;padding:0 20px;}
-.tc{text-align:center;}
-/* Problem */
-#problem{padding:96px 0;background:#f8fafc;}
-.prob-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px;}
-@media(max-width:768px){.prob-grid{grid-template-columns:1fr;}}
-.prob-card{background:#fff;border-radius:16px;padding:28px;border:1px solid #E5E7EB;box-shadow:0 2px 20px rgba(0,0,0,.06);}
-.prob-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
-.prob-card h3{font-size:1.1rem;font-weight:700;color:#111827;margin-bottom:12px;}
-.prob-card p{color:#6B7280;line-height:1.72;}
-/* Features */
-#features{padding:96px 0;background:#fff;}
-.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px;}
-@media(max-width:900px){.feat-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:600px){.feat-grid{grid-template-columns:1fr;}}
-.feat-card{padding:28px;border-radius:16px;border:1px solid #F3F4F6;box-shadow:0 2px 12px rgba(0,0,0,.06);background:#fff;transition:transform .2s,box-shadow .2s;cursor:pointer;}
-.feat-card:hover{transform:translateY(-4px);box-shadow:0 8px 32px rgba(0,0,0,.12);}
-.feat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;margin-bottom:20px;transition:transform .2s;}
-.feat-card:hover .feat-icon{transform:scale(1.1);}
-.feat-card h3{font-weight:700;color:#111827;font-size:1rem;margin-bottom:8px;}
-.feat-card p{color:#6B7280;line-height:1.68;font-size:.92rem;}
-.feat-link{margin-top:16px;display:flex;align-items:center;gap:4px;font-size:14px;font-weight:500;color:#D97706;opacity:0;transition:opacity .2s;}
-.feat-card:hover .feat-link{opacity:1;}
-.ga{background:linear-gradient(135deg,#F59E0B,#F97316);}
-.gb{background:linear-gradient(135deg,#3B82F6,#06B6D4);}
-.gc{background:linear-gradient(135deg,#A855F7,#EC4899);}
-.gd{background:linear-gradient(135deg,#22C55E,#14B8A6);}
-.ge{background:linear-gradient(135deg,#FBBF24,#F59E0B);}
-.gf{background:linear-gradient(135deg,#EF4444,#E11D48);}
-/* How it works */
-#how{padding:96px 0;background:#FFFBEB;}
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:56px;position:relative;}
-.steps-line{display:none;position:absolute;top:40px;left:calc(33.33% + 40px);right:calc(33.33% + 40px);height:2px;background:linear-gradient(to right,#F5C842,#D97706);}
-@media(min-width:768px){.steps-line{display:block;}}
-@media(max-width:768px){.steps{grid-template-columns:1fr;}}
-.step{text-align:center;}
-.step-icon{position:relative;display:inline-flex;align-items:center;justify-content:center;width:80px;height:80px;border-radius:16px;color:#fff;margin-bottom:24px;background:linear-gradient(135deg,#F5C842,#D97706);box-shadow:0 8px 30px rgba(217,119,6,0.35);}
-.step-num{position:absolute;top:-10px;right:-10px;width:28px;height:28px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#D97706;border:2px solid #F5C842;}
-.step h3{font-size:1.1rem;font-weight:700;color:#111827;margin-bottom:12px;}
-.step p{color:#6B7280;line-height:1.72;}
-/* Dashboard preview */
-#preview{padding:96px 0;background:linear-gradient(160deg,#FEF3C7 0%,#FDE68A 45%,#FBBF24 80%,#F59E0B 100%);}
-.big-wrap{position:relative;max-width:900px;margin:56px auto 0;}
-.big-glow{position:absolute;inset:-40px;border-radius:24px;pointer-events:none;background:radial-gradient(ellipse,rgba(30,58,95,0.2),transparent 70%);filter:blur(40px);opacity:.3;}
-.big-browser{position:relative;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.5);background:#1e293b;box-shadow:0 50px 100px rgba(30,58,95,.35),0 0 0 1px rgba(255,255,255,.2) inset;}
-.big-bar{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.07);background:#1a2332;}
-.big-url{flex:1;height:28px;border-radius:8px;display:flex;align-items:center;padding:0 16px;margin:0 8px;gap:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);}
-.big-udot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.18);}
-.big-utxt{color:rgba(255,255,255,.28);font-size:11px;}
-.big-body{display:flex;background:#fef9c3;min-height:380px;}
-.big-sidebar{width:192px;background:#fff;border-right:1px solid #E5E7EB;padding:16px;flex-shrink:0;}
-.bs-logo{display:flex;align-items:center;gap:4px;margin-bottom:20px;}
-.bs-logo .a{color:#F5C842;font-weight:700;font-size:14px;}
-.bs-logo .c{color:#1E3A5F;font-weight:700;font-size:14px;}
-.bnav{padding:8px 12px;border-radius:8px;margin-bottom:4px;font-size:11px;}
-.bnav-a{background:#FEF3C7;color:#92400E;font-weight:600;}
-.bnav-i{background:transparent;color:#9CA3AF;}
-.big-main{flex:1;padding:20px;}
-.kpi4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
-.k4{background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
-.k4l{color:#9CA3AF;font-size:9px;margin-bottom:4px;}
-.k4v{font-weight:700;color:#111827;font-size:17px;}
-.k4g{font-size:10px;color:#16A34A;}
-.k4a{font-size:10px;color:#D97706;}
-.charts2{display:grid;grid-template-columns:2fr 1fr;gap:12px;}
-.bchart{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
-.bchart-lbl{font-weight:600;color:#374151;font-size:11px;margin-bottom:12px;}
-.bbars{display:flex;align-items:flex-end;gap:6px;height:90px;}
-.bbar{flex:1;border-radius:2px 2px 0 0;}
-.tprod{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
-.tprod-lbl{font-weight:600;color:#374151;font-size:11px;margin-bottom:12px;}
-.trow{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
-.trow:last-child{margin-bottom:0;}
-.tdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.tname{flex:1;color:#374151;font-size:9px;}
-.tpct{font-weight:600;color:#F59E0B;font-size:9px;}
-.preview-cta{text-align:center;margin-top:64px;}
-/* Testimonials */
-#testimonials{padding:96px 0;background:#fff;}
-.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px;}
-@media(max-width:900px){.test-grid{grid-template-columns:1fr;}}
-.test-card{padding:28px;border-radius:16px;border:1px solid #F3F4F6;box-shadow:0 4px 20px rgba(0,0,0,.06);transition:box-shadow .2s;}
-.test-card:hover{box-shadow:0 8px 40px rgba(0,0,0,.1);}
-.stars{display:flex;gap:4px;margin-bottom:16px;}
-.test-q{color:#374151;line-height:1.72;font-style:italic;margin-bottom:24px;}
-.test-author{display:flex;align-items:center;gap:12px;}
-.test-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;}
-.test-name{font-weight:600;color:#111827;}
-.test-meta{display:flex;align-items:center;gap:8px;margin-top:2px;}
-.test-shop{font-size:13px;color:#6B7280;}
-.plat{padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;}
-.plat-s{background:#FFF1E6;color:#EA580C;}
-.plat-t{background:#F0FDF4;color:#16A34A;}
-.plat-l{background:#EFF6FF;color:#2563EB;}
-/* Pricing */
-#pricing{padding:96px 0;background:#FFFBEB;}
-.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:960px;margin:56px auto 0;align-items:center;}
-@media(max-width:768px){.price-grid{grid-template-columns:1fr;max-width:400px;}}
-.price-card{position:relative;border-radius:16px;padding:28px;border:1px solid #E5E7EB;background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.06);}
-.price-card.rec{background:linear-gradient(145deg,#1E3A5F,#0a1628);border:2px solid #F5C842;box-shadow:0 24px 64px rgba(30,58,95,.35);transform:scale(1.05);}
-.price-pop{position:absolute;top:-16px;left:50%;transform:translateX(-50%);padding:6px 16px;border-radius:999px;font-size:12px;font-weight:900;color:#fff;white-space:nowrap;background:linear-gradient(135deg,#F5C842,#F59E0B);}
-.pname-l{font-size:1.15rem;font-weight:700;color:#111827;margin-bottom:4px;}
-.pname-d{font-size:1.15rem;font-weight:700;color:#fff;margin-bottom:4px;}
-.pdesc-l{font-size:13px;color:#9CA3AF;}
-.pdesc-d{font-size:13px;color:rgba(255,255,255,.55);}
-.pprice-l{font-size:1.9rem;font-weight:800;color:#111827;}
-.pprice-d{font-size:1.9rem;font-weight:800;color:#F5C842;}
-.pper-l{font-size:14px;color:#9CA3AF;}
-.pper-d{font-size:14px;color:rgba(255,255,255,.4);}
-.pfeats{margin:24px 0 28px;}
-.pfeat{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;}
-.chk-g{color:#10B981;flex-shrink:0;margin-top:1px;}
-.chk-d{color:#F5C842;flex-shrink:0;margin-top:1px;}
-.pft-l{font-size:14px;color:#4B5563;}
-.pft-d{font-size:14px;color:rgba(255,255,255,.78);}
-.pcta{display:block;width:100%;text-align:center;padding:12px;border-radius:12px;font-weight:600;font-size:14px;transition:transform .2s;cursor:pointer;}
-.pcta:hover{transform:scale(1.02);}
-.pcta-r{background:linear-gradient(135deg,#F5C842,#F59E0B);color:#fff;box-shadow:0 4px 16px rgba(245,200,66,.4);}
-.pcta-e{border:1.5px solid #1E3A5F;color:#1E3A5F;background:transparent;}
-.pcta-s{border:1.5px solid #D1D5DB;color:#374151;background:transparent;}
-/* FAQ */
-#faq{padding:96px 0;background:#fff;}
-.faq-list{max-width:672px;margin:56px auto 0;}
-.faq-item{border-radius:12px;border:1px solid #E5E7EB;overflow:hidden;margin-bottom:12px;}
-.faq-btn{width:100%;display:flex;align-items:center;justify-content:space-between;padding:16px 24px;text-align:left;transition:background .2s;}
-.faq-btn:hover{background:#FFFBEB;}
-.faq-q{font-weight:600;color:#111827;}
-.faq-chev{color:#9CA3AF;flex-shrink:0;margin-left:16px;transition:transform .25s;}
-.faq-chev.open{transform:rotate(180deg);}
-.faq-ans{padding:0 24px;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease;color:#6B7280;line-height:1.72;}
-.faq-ans.open{padding:0 24px 20px;max-height:300px;}
-/* CTA */
-#cta{padding:112px 0;position:relative;background:linear-gradient(135deg,#FBBF24 0%,#F59E0B 40%,#D97706 75%,#B45309 100%);}
-.cta-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:300px;border-radius:50%;pointer-events:none;background:radial-gradient(ellipse,rgba(255,255,255,.5),transparent 70%);filter:blur(40px);opacity:.3;}
-.cta-inner{position:relative;max-width:672px;margin:0 auto;text-align:center;padding:0 20px;}
-.cta-h2{font-size:clamp(2rem,4vw,3.2rem);font-weight:800;line-height:1.15;color:#1E3A5F;}
-.grad-blue{background:linear-gradient(135deg,#1E3A5F,#2563EB);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.cta-p{color:rgba(30,58,95,.7);font-size:1.1rem;line-height:1.7;margin:16px 0 32px;}
-.cta-note{margin-top:20px;font-size:14px;color:rgba(30,58,95,.5);}
-/* Footer */
-footer{background:linear-gradient(180deg,#92400E 0%,#78350F 100%);}
-.footer-in{max-width:1280px;margin:0 auto;padding:64px 20px;}
-.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;margin-bottom:48px;}
-@media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;}}
-@media(max-width:600px){.footer-grid{grid-template-columns:1fr;}}
-.fbrand p{font-size:14px;color:rgba(255,255,255,.5);line-height:1.75;margin:16px 0 20px;}
-.fsocials{display:flex;gap:12px;}
-.fsoc{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);transition:background .2s;color:rgba(255,255,255,.6);}
-.fsoc:hover{background:rgba(255,255,255,.2);}
-.fcol h4{font-weight:600;color:rgba(255,255,255,.75);font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;}
-.fcol a{display:block;font-size:14px;color:rgba(255,255,255,.45);margin-bottom:10px;transition:color .2s;}
-.fcol a:hover{color:#fff;}
-.fbottom{border-top:1px solid rgba(255,255,255,.1);padding-top:32px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;}
-.fcopy{font-size:14px;color:rgba(255,255,255,.3);}
-.flegal{display:flex;gap:24px;}
-.flegal a{font-size:14px;color:rgba(255,255,255,.3);transition:color .2s;}
-.flegal a:hover{color:#fff;}
-svg{display:inline-block;vertical-align:middle;}
-</style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agicom – AI-Powered E-commerce Dashboard</title>
+    <meta name="description"
+        content="Agicom Dashboard – Hệ thống Agentic AI hỗ trợ chủ shop quản lý giá, nội dung, chat tự động và phân tích thị trường." />
+    <link rel="stylesheet" href="index4.css" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg viewBox='0 0 44 44' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23FDE047'/%3E%3Cstop offset='100%25' stop-color='%23EAB308'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='2' y='2' width='40' height='40' rx='12' fill='url(%23g)'/%3E%3Cpath d='M13 33 L22 14 L31 33' stroke='%23451a03' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M16.5 26 L27.5 26' stroke='%23451a03' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E" />
+
+    <style>
+    /* ── Accordion Nav Groups ── */
+    .nav-group { margin-bottom: 2px; }
+
+    .nav-group-header {
+        display: flex; align-items: center; gap: 10px;
+        width: 100%; padding: 9px 16px;
+        background: none; border: none; cursor: pointer;
+        color: var(--text-secondary); font-size: 0.8rem;
+        font-weight: 700; text-align: left;
+        border-radius: var(--radius-sm);
+        transition: background var(--transition-fast), color var(--transition-fast);
+        letter-spacing: 0.1px;
+    }
+    .nav-group-header:hover { background: var(--bg-glass); color: var(--text-primary); }
+    .nav-group-header .nav-item-icon { color: #9CA3AF; flex-shrink:0; }
+    .nav-group-header:hover .nav-item-icon { color: var(--accent-amber); }
+    .nav-group-header > span:nth-child(2) { flex: 1; }
+
+    .nav-group-arrow {
+        color: #9CA3AF; flex-shrink: 0;
+        transition: transform 250ms ease, color 250ms ease;
+    }
+    .nav-group.open .nav-group-arrow { transform: rotate(0deg); }
+    .nav-group:not(.open) .nav-group-arrow { transform: rotate(-90deg); }
+    .nav-group.has-active .nav-group-header { color: var(--accent-amber); }
+    .nav-group.has-active .nav-group-header .nav-item-icon { color: var(--accent-amber); }
+    .nav-group.has-active .nav-group-arrow { color: var(--accent-amber); }
+
+    .nav-group-children {
+        overflow: hidden;
+        max-height: 500px;
+        transition: max-height 280ms ease, opacity 280ms ease;
+        opacity: 1;
+    }
+    .nav-group:not(.open) .nav-group-children {
+        max-height: 0; opacity: 0;
+    }
+
+    .nav-child-item {
+        display: flex; align-items: center; gap: 10px;
+        width: 100%; padding: 7px 16px 7px 36px;
+        background: none; border: none; cursor: pointer;
+        color: var(--text-muted); font-size: 0.8rem;
+        font-weight: 500; text-align: left;
+        border-radius: var(--radius-sm);
+        transition: background var(--transition-fast), color var(--transition-fast);
+    }
+    .nav-child-item:hover { background: var(--bg-glass); color: var(--text-primary); }
+    .nav-child-item.active {
+        color: var(--accent-amber); font-weight: 700;
+        background: var(--accent-indigo-bg);
+    }
+    .nav-child-item.active .nav-child-dot { background: var(--accent-amber); }
+
+    .nav-child-dot {
+        width: 5px; height: 5px; border-radius: 50%;
+        background: #CBD5E1; flex-shrink: 0;
+        transition: background 200ms;
+    }
+
+    .nav-divider {
+        height: 1px; background: var(--border-primary);
+        margin: 8px 16px;
+    }
+
+    /* Override nav-item icon color to use currentColor */
+    .nav-item .nav-item-icon,
+    .nav-group-header .nav-item-icon { transition: color var(--transition-fast); }
+    .nav-item:hover .nav-item-icon,
+    .nav-item.active .nav-item-icon { color: var(--accent-amber) !important; }
+
+    /* Sidebar scrollable */
+    .sidebar-nav { overflow-y: auto; padding-bottom: 12px; }
+    </style>
 </head>
+
 <body>
 
-<!-- NAVBAR -->
-<nav id="navbar">
-  <div class="nav-inner">
-    <a href="landing.html" class="nav-logo">
-      <img src="logo-agicom.svg" alt="Agicom">
-      <span><span class="logo-agi">Agi</span><span class="logo-com">com</span></span>
-    </a>
-    <div class="nav-links">
-      <button onclick="navTo('features')">Tính năng</button>
-      <button onclick="navTo('pricing')">Giá</button>
-      <button onclick="navTo('preview')">Demo</button>
-      <button onclick="navTo('faq')">FAQ</button>
-    </div>
-    <div class="nav-ctas">
-      <a href="index.html" class="nav-login">Đăng nhập</a>
-      <a href="index.html" class="btn-nav">Dùng thử miễn phí</a>
-    </div>
-    <button class="mob-toggle" onclick="toggleMob()" aria-label="Menu">
-      <svg id="ico-menu" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      <svg id="ico-x" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-  </div>
-  <div class="mob-menu" id="mob-menu">
-    <button onclick="navTo('features')">Tính năng</button>
-    <button onclick="navTo('pricing')">Giá</button>
-    <button onclick="navTo('preview')">Demo</button>
-    <button onclick="navTo('faq')">FAQ</button>
-    <a href="index.html" class="mob-cta">Dùng thử miễn phí</a>
-  </div>
-</nav>
+    <!-- ===== Toast Container ===== -->
+    <div class="toast-container" id="toastContainer"></div>
 
-<!-- HERO -->
-<section id="hero">
-  <div class="orb1"></div><div class="orb2"></div>
-  <div class="grid-bg"></div>
-  <div class="particles-wrap" id="ptcls"></div>
-  <div class="hero-inner">
-    <div class="animate-fade-in-up">
-      <div class="hero-badge">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E3A5F" stroke-width="2.5" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        <span>AI-Powered E-commerce Platform</span>
-      </div>
-      <h1 class="hero-h1">AI Agent quản lý shop thông minh -&nbsp;<span class="grad-text">bán nhiều hơn</span>, làm ít hơn.</h1>
-      <p class="hero-p">Tự động hóa giá, chatbot, nội dung và phân tích đối thủ - tất cả trong một nền tảng. Dành riêng cho shop điện thoại Việt Nam.</p>
-      <div class="hero-ctas">
-        <a href="index.html" class="btn-primary">Bắt đầu miễn phí 14 ngày <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
-        <button class="btn-outline" onclick="navTo('preview')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Xem demo</button>
-      </div>
-      <div class="trust-row">
-        <span class="trust-lbl">Đang được dùng bởi:</span>
-        <span class="trust-badge">500+ shop ✓</span>
-        <span class="trust-badge">Shopee</span>
-        <span class="trust-badge">TikTok Shop</span>
-        <span class="trust-badge">Lazada</span>
-      </div>
-    </div>
-    <div class="hero-right animate-fade-in-right">
-      <div class="mockup-wrap">
-        <div class="mockup-glow"></div>
-        <div class="mockup-browser">
-          <div class="titlebar">
-            <div class="tlights"><div class="tl tl-r"></div><div class="tl tl-y"></div><div class="tl tl-g"></div></div>
-            <div class="urlbar"><div class="urlbar-dot"></div><span class="urlbar-txt">app.agicom.vn/dashboard</span></div>
-          </div>
-          <div class="mbody">
-            <div class="msidebar">
-              <div class="msidebar-logo"><span class="a">Agi</span><span class="c">com</span></div>
-              <div class="mnav mnav-a">Tổng quan</div>
-              <div class="mnav mnav-i">Phân tích</div>
-              <div class="mnav mnav-i">Chatbot</div>
-              <div class="mnav mnav-i">Pricing</div>
-              <div class="mnav mnav-i">Content</div>
-              <div class="mnav mnav-i">Cài đặt</div>
+    <!-- ===== Scanning Overlay ===== -->
+    <div class="scan-overlay" id="scanOverlay">
+        <div class="scan-content">
+            <div class="scan-icon"><svg viewBox="0 0 24 24" width="48" height="48" stroke="#9CA3AF" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
+            <div class="scan-text">Đang phân tích thị trường...</div>
+            <div class="scan-subtext">AI đang quét dữ liệu đối thủ và đề xuất chiến lược</div>
+            <div class="scan-progress">
+                <div class="scan-progress-bar"></div>
             </div>
-            <div class="mmain">
-              <div class="kpi3">
-                <div class="kcard"><div class="kl">Doanh thu</div><div class="kv">₫142M</div><div class="ks-g">+23%</div></div>
-                <div class="kcard"><div class="kl">Đơn hàng</div><div class="kv">1,847</div><div class="ks-g">+12%</div></div>
-                <div class="kcard"><div class="kl">Tự động</div><div class="kv">91%</div><div class="ks-a">tin nhắn</div></div>
-              </div>
-              <div class="mchart">
-                <div class="mchart-lbl">Doanh thu 12 tháng</div>
-                <div class="bars">
-                  <div class="bar" style="height:40%;background:#E5E7EB"></div><div class="bar" style="height:55%;background:#E5E7EB"></div><div class="bar" style="height:45%;background:#E5E7EB"></div><div class="bar" style="height:70%;background:#E5E7EB"></div><div class="bar" style="height:65%;background:#E5E7EB"></div><div class="bar" style="height:80%;background:#E5E7EB"></div><div class="bar" style="height:75%;background:#E5E7EB"></div><div class="bar" style="height:88%;background:#E5E7EB"></div><div class="bar" style="height:82%;background:#E5E7EB"></div>
-                  <div class="bar" style="height:92%;background:linear-gradient(to top,#F59E0B,#FCD34D)"></div><div class="bar" style="height:87%;background:linear-gradient(to top,#F59E0B,#FCD34D)"></div><div class="bar" style="height:100%;background:linear-gradient(to top,#F59E0B,#FCD34D)"></div>
+        </div>
+    </div>
+
+    <!-- ===== Feedback Modal ===== -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Từ chối đề xuất</h3>
+                <button class="modal-close-btn" id="modalCloseBtn" aria-label="Close">✕</button>
+            </div>
+            <div class="modal-body">
+                <label for="feedbackText">Vui lòng cho biết lý do từ chối:</label>
+                <textarea id="feedbackText"
+                    placeholder="Nhập lý do tại đây... (VD: Giá đề xuất quá thấp, chưa phù hợp với chi phí vận hành)"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal-cancel" id="modalCancelBtn">Hủy</button>
+                <button class="btn-modal-submit" id="modalSubmitBtn" disabled>Gửi & Từ chối</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== App Container ===== -->
+    <div class="app-container">
+
+        <!-- ===== Sidebar ===== -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo" style="gap:10px;align-items:center;">
+                    <!-- Agicom Logo Icon — Official -->
+                    <div style="width:44px;height:44px;flex-shrink:0;background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(234,179,8,0.3);">
+                        <img src="logo-agicom.svg" alt="Agicom" style="width:100%;height:100%;object-fit:contain;display:block;" />
+                    </div>
+                    <div>
+                        <div class="sidebar-logo-text" style="font-size:1.2rem;font-weight:800;letter-spacing:-0.5px;line-height:1;"><span style="color:#F5C842;">Agi</span><span style="color:#1E3A5F;">com</span></div>
+                    </div>
                 </div>
-              </div>
-              <div class="mtable">
-                <div class="mrow"><span class="mrow-n">iPhone 15 Pro</span><span class="mrow-p">₫28.5M</span><span class="mbadge mbadge-g">Optimal</span></div>
-                <div class="mrow"><span class="mrow-n">Samsung S24 Ultra</span><span class="mrow-p">₫22M</span><span class="mbadge mbadge-a">Adjust</span></div>
-              </div>
             </div>
-          </div>
-        </div>
-        <div class="callout co-dark float-up" style="right:-16px;top:32px;"><div class="callout-lbl">Doanh thu</div><div class="callout-val">+23% 📈</div></div>
-        <div class="callout co-light float-down" style="left:-16px;bottom:64px;"><div class="callout-lbl">Tin nhắn tự động</div><div class="callout-val">91% 🤖</div></div>
-      </div>
-    </div>
-  </div>
-  <div class="hero-fade"></div>
-</section>
 
-<!-- PROBLEM -->
-<section id="problem">
-  <div class="container">
-    <div class="tc reveal">
-      <span class="sec-badge">Vấn đề thực tế</span>
-      <h2 class="sec-h2">Quản lý shop thủ công đang <span style="color:#DC2626">bào mòn thời gian</span> của bạn.</h2>
-    </div>
-    <div class="prob-grid">
-      <div class="prob-card reveal reveal-d1">
-        <div class="prob-icon" style="background:rgba(239,68,68,.1)"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
-        <h3>Theo dõi giá đối thủ mỗi ngày</h3>
-        <p>Bạn mất 2-3 giờ mỗi ngày chỉ để kiểm tra xem đối thủ đang bán giá bao nhiêu, rồi cập nhật lại giá của mình. Vừa tốn thời gian, vừa không kịp phản ứng.</p>
-      </div>
-      <div class="prob-card reveal reveal-d2">
-        <div class="prob-icon" style="background:rgba(249,115,22,.1)"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-        <h3>Trả lời 200+ tin nhắn mỗi ngày</h3>
-        <p>Khách hỏi giá, hỏi màu, hỏi ship... cứ lặp đi lặp lại. Không trả lời nhanh là mất đơn. Trả lời thì không còn thời gian làm việc khác.</p>
-      </div>
-      <div class="prob-card reveal reveal-d3">
-        <div class="prob-icon" style="background:rgba(168,85,247,.1)"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
-        <h3>Viết mô tả sản phẩm lặp đi lặp lại</h3>
-        <p>Mỗi sản phẩm mới lại phải ngồi viết mô tả từ đầu. Cho ra nội dung nhàm chán, không chuẩn SEO và tốn hàng giờ đồng hồ mỗi tuần.</p>
-      </div>
-    </div>
-  </div>
-</section>
+            <nav class="sidebar-nav" id="sidebarNav">
 
-<!-- FEATURES -->
-<section id="features">
-  <div class="container">
-    <div class="tc reveal">
-      <span class="sec-badge">6 AI Agents</span>
-      <h2 class="sec-h2">6 AI Agent hoạt động <span class="grad-h2">24/7 thay bạn</span></h2>
-      <p class="sec-sub">Mỗi agent được chuyên biệt hóa cho một nhiệm vụ, hoạt động đồng thời và liên tục học hỏi từ dữ liệu thực tế của shop bạn.</p>
-    </div>
-    <div class="feat-grid">
-      <div class="feat-card reveal reveal-d1"><div class="feat-icon ga"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div><h3>Dynamic Pricing Agent</h3><p>Tự động điều chỉnh giá theo đối thủ và xu hướng thị trường theo thời gian thực.</p><div class="feat-link">Tìm hiểu thêm <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
-      <div class="feat-card reveal reveal-d2"><div class="feat-icon gb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><h3>Chat Agent</h3><p>Trả lời tự động 91% tin nhắn khách hàng 24/7 trên Shopee, TikTok và Lazada.</p><div class="feat-link">Tìm hiểu thêm <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
-      <div class="feat-card reveal reveal-d3"><div class="feat-icon gc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><h3>Content Agent</h3><p>Tạo script TikTok, mô tả sản phẩm và caption theo phong cách thương hiệu.</p><div class="feat-link">Tìm hiểu thêm <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
-      <div class="feat-card reveal reveal-d1"><div class="feat-icon gd"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><h3>Market Intelligence</h3><p>Theo dõi giá và chiến lược của đối thủ. Cảnh báo khi thị trường thay đổi.</p><div class="feat-link">Tìm hiểu thêm <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
-      <div class="feat-card reveal reveal-d2"><div class="feat-icon ge"><svg width="20" height="20" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><h3>Quality Guardian</h3><p>Phân tích review, phát hiện sản phẩm lỗi và đề xuất cải thiện chất lượng.</p><div class="feat-link">Tìm hiểu thêm <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
-      <div class="feat-card reveal reveal-d3"><div class="feat-icon gf"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><h3>Crisis Manager</h3><p>Phát hiện và xử lý khủng hoảng thương hiệu trong thời gian nhanh nhất.</p><div class="feat-link">Tìm hiểu thêm <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
-    </div>
-  </div>
-</section>
+                <!-- ── Tổng quan ── -->
+                <button class="nav-item active" data-page="dashboard">
+                    <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+                    Tổng quan
+                </button>
 
-<!-- HOW IT WORKS -->
-<section id="how">
-  <div class="container">
-    <div class="tc reveal">
-      <span class="sec-badge">Quy trình đơn giản</span>
-      <h2 class="sec-h2">Bắt đầu trong <span style="color:#D97706">5 phút</span></h2>
-    </div>
-    <div class="steps">
-      <div class="steps-line"></div>
-      <div class="step reveal reveal-d1">
-        <div class="step-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span class="step-num">01</span></div>
-        <h3>Kết nối sàn</h3>
-        <p>Kết nối Shopee, TikTok Shop hoặc Lazada chỉ trong vài click. Không cần code, không cần kỹ thuật.</p>
-      </div>
-      <div class="step reveal reveal-d2">
-        <div class="step-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8.01" y2="16"/><line x1="12" y1="16" x2="12.01" y2="16"/><line x1="16" y1="16" x2="16.01" y2="16"/></svg><span class="step-num">02</span></div>
-        <h3>AI học và phân tích</h3>
-        <p>AI tự động phân tích dữ liệu lịch sử, học phong cách trả lời và hiểu sản phẩm của bạn.</p>
-      </div>
-      <div class="step reveal reveal-d3">
-        <div class="step-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="step-num">03</span></div>
-        <h3>Nhận đề xuất & duyệt 1 click</h3>
-        <p>Nhận đề xuất về giá, content và phản hồi khách hàng. Duyệt bằng 1 click hoặc để AI tự động.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- DASHBOARD PREVIEW -->
-<section id="preview">
-  <div class="container">
-    <div class="tc reveal">
-      <h2 class="sec-h2" style="color:#1E3A5F">Toàn bộ hoạt động kinh doanh, <span class="grad-blue">một màn hình</span></h2>
-      <p class="sec-sub" style="color:rgba(30,58,95,.65)">Dashboard trực quan, dữ liệu thời gian thực, quyết định thông minh hơn.</p>
-    </div>
-    <div class="big-wrap reveal">
-      <div class="big-glow"></div>
-      <div class="big-browser">
-        <div class="big-bar">
-          <div class="tlights"><div class="tl tl-r"></div><div class="tl tl-y"></div><div class="tl tl-g"></div></div>
-          <div class="big-url"><div class="big-udot"></div><span class="big-utxt">app.agicom.vn/dashboard</span></div>
-        </div>
-        <div class="big-body">
-          <div class="big-sidebar">
-            <div class="bs-logo"><span class="a">Agi</span><span class="c">com</span></div>
-            <div class="bnav bnav-a">Tổng quan</div>
-            <div class="bnav bnav-i">Phân tích thị trường</div>
-            <div class="bnav bnav-i">Chatbot</div>
-            <div class="bnav bnav-i">Dynamic Pricing</div>
-            <div class="bnav bnav-i">Content</div>
-            <div class="bnav bnav-i">Cài đặt</div>
-          </div>
-          <div class="big-main">
-            <div class="kpi4">
-              <div class="k4"><div class="k4l">Doanh thu</div><div class="k4v">₫142M</div><div class="k4g">+23.4%</div></div>
-              <div class="k4"><div class="k4l">Đơn hàng</div><div class="k4v">1,847</div><div class="k4g">+12.1%</div></div>
-              <div class="k4"><div class="k4l">Tin nhắn tự động</div><div class="k4v">91%</div><div class="k4a">hiệu quả</div></div>
-              <div class="k4"><div class="k4l">Đánh giá TB</div><div class="k4v">4.8★</div><div class="k4a">xuất sắc</div></div>
-            </div>
-            <div class="charts2">
-              <div class="bchart">
-                <div class="bchart-lbl">Doanh thu theo tháng</div>
-                <div class="bbars">
-                  <div class="bbar" style="height:55%;background:#E5E7EB"></div><div class="bbar" style="height:62%;background:#E5E7EB"></div><div class="bbar" style="height:48%;background:#E5E7EB"></div><div class="bbar" style="height:72%;background:#E5E7EB"></div><div class="bbar" style="height:68%;background:#E5E7EB"></div><div class="bbar" style="height:82%;background:#E5E7EB"></div><div class="bbar" style="height:78%;background:#E5E7EB"></div><div class="bbar" style="height:90%;background:#E5E7EB"></div><div class="bbar" style="height:85%;background:#E5E7EB"></div>
-                  <div class="bbar" style="height:95%;background:linear-gradient(to top,#F59E0B,#FCD34D)"></div><div class="bbar" style="height:91%;background:linear-gradient(to top,#F59E0B,#FCD34D)"></div><div class="bbar" style="height:100%;background:linear-gradient(to top,#F59E0B,#FCD34D)"></div>
+                <!-- ── Phân tích thị trường ── -->
+                <div class="nav-group open" data-group="thi-truong">
+                    <button class="nav-group-header">
+                        <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><path d="M2 20h20M5 20V10l7-7 7 7v10"/><path d="M9 20v-5h6v5"/></svg></span>
+                        <span>Phân tích thị trường</span>
+                        <svg class="nav-group-arrow" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="nav-group-children">
+                        <button class="nav-child-item" data-page="market-overview">
+                            <span class="nav-child-dot"></span>Tổng quan ngành hàng
+                        </button>
+                        <button class="nav-child-item" data-page="competitor">
+                            <span class="nav-child-dot"></span>Đối thủ cạnh tranh
+                        </button>
+                    </div>
                 </div>
-              </div>
-              <div class="tprod">
-                <div class="tprod-lbl">Top sản phẩm</div>
-                <div class="trow"><div class="tdot" style="background:#F59E0B"></div><span class="tname">iPhone 15 Pro</span><span class="tpct">42%</span></div>
-                <div class="trow"><div class="tdot" style="background:#3B82F6"></div><span class="tname">Samsung S24 Ultra</span><span class="tpct">28%</span></div>
-                <div class="trow"><div class="tdot" style="background:#10B981"></div><span class="tname">Google Pixel 8</span><span class="tpct">30%</span></div>
-              </div>
+
+                <!-- ── Phân tích doanh nghiệp ── -->
+                <div class="nav-group open" data-group="doanh-nghiep">
+                    <button class="nav-group-header">
+                        <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><path d="M3 3h18v4H3z"/><path d="M3 10h18v4H3z"/><path d="M3 17h10v4H3z"/></svg></span>
+                        <span>Phân tích doanh nghiệp</span>
+                        <svg class="nav-group-arrow" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="nav-group-children">
+                        <button class="nav-child-item" data-page="revenue">
+                            <span class="nav-child-dot"></span>Doanh thu & Chi phí
+                        </button>
+                        <button class="nav-child-item" data-page="inventory">
+                            <span class="nav-child-dot"></span>Tồn kho
+                            <span class="nav-item-badge" style="background:var(--accent-amber-bg);color:var(--accent-amber);">5</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── Divider ── -->
+                <div class="nav-divider"></div>
+
+                <!-- ── Chatbot ── -->
+                <div class="nav-group open" data-group="chatbot">
+                    <button class="nav-group-header">
+                        <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                        <span>Chatbot</span>
+                        <svg class="nav-group-arrow" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="nav-group-children">
+                        <button class="nav-child-item" data-page="chat">
+                            <span class="nav-child-dot"></span>Tin nhắn cần duyệt
+                            <span class="nav-item-badge" style="background:var(--accent-amber-bg);color:var(--accent-amber);">3</span>
+                        </button>
+                        <button class="nav-child-item" data-page="chat-report">
+                            <span class="nav-child-dot"></span>Báo cáo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── Dynamic Pricing ── -->
+                <div class="nav-group open" data-group="pricing">
+                    <button class="nav-group-header">
+                        <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+                        <span>Dynamic Pricing</span>
+                        <svg class="nav-group-arrow" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="nav-group-children">
+                        <button class="nav-child-item" data-page="ai-suggestions">
+                            <span class="nav-child-dot"></span>Đề xuất thay đổi giá
+                            <span class="nav-item-badge" style="background:var(--accent-amber-bg);color:var(--accent-amber);">3</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── Quản lý chất lượng ── -->
+                <div class="nav-group open" data-group="quality">
+                    <button class="nav-group-header">
+                        <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>
+                        <span>Quản lý chất lượng</span>
+                        <svg class="nav-group-arrow" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="nav-group-children">
+                        <button class="nav-child-item" data-page="reviews">
+                            <span class="nav-child-dot"></span>Review sản phẩm
+                            <span class="nav-item-badge">12</span>
+                        </button>
+                        <button class="nav-child-item" data-page="chat-insights">
+                            <span class="nav-child-dot"></span>Tổng hợp từ Chatbot
+                        </button>
+                        <button class="nav-child-item" data-page="crisis-center">
+                            <span class="nav-child-dot" style="background:var(--accent-rose);"></span>Quản trị khủng hoảng
+                            <span class="nav-item-badge" style="background:var(--accent-rose-bg);color:var(--accent-rose);">1</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── Content ── -->
+                <div class="nav-group open" data-group="content">
+                    <button class="nav-group-header">
+                        <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
+                        <span>Content</span>
+                        <svg class="nav-group-arrow" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="nav-group-children">
+                        <button class="nav-child-item" data-page="content-agent">
+                            <span class="nav-child-dot" style="background:var(--accent-amber);"></span>Content Agent 🎬
+                            <span class="nav-item-badge" style="background:rgba(234,179,8,0.15);color:#eab308;">AI</span>
+                        </button>
+                        <button class="nav-child-item" data-page="content-suggestions">
+                            <span class="nav-child-dot"></span>Đề xuất content
+                        </button>
+                        <button class="nav-child-item" data-page="product-descriptions">
+                            <span class="nav-child-dot"></span>Mô tả sản phẩm
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── Divider ── -->
+                <div class="nav-divider"></div>
+
+                <!-- ── Demo khách hàng ── -->
+                <button class="nav-item" data-page="demo-customer">
+                    <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                    Demo khách hàng
+                </button>
+
+                <!-- ── Cài đặt ── -->
+                <button class="nav-item" data-page="settings">
+                    <span class="nav-item-icon"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/></svg></span>
+                    Cài đặt & Hồ sơ
+                </button>
+
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="sidebar-user-avatar">SP</div>
+                    <div class="sidebar-user-info">
+                        <div class="sidebar-user-name">Shop PhoneMax</div>
+                        <div class="sidebar-user-role">Gói Premium · Shopee & TikTok</div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-      <!-- Floating badges (desktop only) -->
-      <div id="fbL" class="callout co-light float-up" style="position:absolute;left:-32px;top:33%;display:none;"><div class="callout-lbl" style="color:#6B7280">Doanh thu tháng này</div><div class="callout-val" style="color:#1E3A5F">+23% 📈</div></div>
-      <div id="fbR" class="callout co-light float-down" style="position:absolute;right:-32px;top:50%;display:none;"><div class="callout-lbl" style="color:#6B7280">Tin nhắn tự động</div><div class="callout-val" style="color:#1E3A5F">91% 🤖</div></div>
-      <div id="fbB" class="callout co-dark float-slow" style="position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);display:none;"><div class="callout-lbl">Đánh giá trung bình</div><div class="callout-val">4.8★ ⭐</div></div>
+        </aside>
+
+        <!-- ===== Main Content ===== -->
+        <main class="main-content">
+
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <div class="header-title-area">
+                        <h1 id="pageTitle">Dashboard</h1>
+                        <p id="pageSubtitle">Tổng quan chiến lược AI – Cập nhật lúc 00:12, 10/04/2026</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="btn-scan" id="btnScan">
+                        <span class="btn-scan-text"><svg viewBox="0 0 24 24" width="16" height="16" stroke="#451a03" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;margin-right:4px"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg> Quét thị trường</span>
+                        <span class="btn-scan-loading"><span class="spinner"></span> Đang quét...</span>
+                    </button>
+                    <button class="header-icon-btn" id="btnNotification" aria-label="Notifications">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#1e293b" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17H3v-2m0 0V5m0 10h2m12-2l.01.01M17.5 4h.5m0 14h-2m6-6l.01.01"/></svg>
+                        <span class="notification-dot"></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- ===== Strategic Guidance Toolbar ===== -->
+            <div class="guidance-toolbar" id="guidanceToolbar">
+                <div class="guidance-inner">
+                    <div class="guidance-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="#9CA3AF" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></div>
+                    <input type="text" class="guidance-input" id="guidanceInput"
+                        placeholder='Nhập chỉ thị chiến lược... (VD: "Ưu tiên xả kho Galaxy A55 tuần này", "Giữ biên lợi nhuận iPhone ≥ 10%")' />
+                    <button class="guidance-send-btn" id="guidanceSendBtn">Gửi cho AI ➜</button>
+                </div>
+                <div class="guidance-tags" id="guidanceTags">
+                    <button class="guidance-tag" data-cmd="Ưu tiên đẩy mạnh xả kho sản phẩm tồn lâu nhất">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="16" rx="2" ry="2"/><path d="M9 9h6M9 15h6"/>
+                        </svg>
+                        Xả kho
+                    </button>
+                    <button class="guidance-tag" data-cmd="Tập trung giữ vững biên lợi nhuận ≥ 10% cho tất cả sản phẩm">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/>
+                        </svg>
+                        Giữ biên LN
+                    </button>
+                    <button class="guidance-tag" data-cmd="Tập trung cạnh tranh giá với MobileWorld Store tuần này">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Đấu giá đối thủ
+                    </button>
+                    <button class="guidance-tag" data-cmd="Tối ưu SEO toàn bộ tiêu đề sản phẩm theo keyword Shopee trending">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                        SEO toàn bộ
+                    </button>
+                    <button class="guidance-tag" data-cmd="Đẩy mạnh Flash Sale cuối tuần cho Samsung">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Flash Sale
+                    </button>
+                </div>
+                <div class="guidance-active-cmd" id="guidanceActiveCmd" style="display:none;">
+                    <span class="guidance-active-label"><svg viewBox="0 0 24 24" width="16" height="16" stroke="#9CA3AF" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;margin-right:4px"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M8 9h8M8 13h8M8 17h4"/></svg> AI đang ưu tiên:</span>
+                    <span class="guidance-active-text" id="guidanceActiveCmdText"></span>
+                    <button class="guidance-clear-btn" id="guidanceClearBtn">✕ Hủy</button>
+                </div>
+            </div>
+
+            <!-- Page Content (all pages rendered here by JS) -->
+            <div class="page-content" id="pageContent">
+                <!-- Dynamic content rendered by app.js -->
+            </div>
+
+        </main>
     </div>
-    <div class="preview-cta">
-      <a href="index.html" class="btn-primary">Khám phá Dashboard ngay <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
-    </div>
-  </div>
-</section>
 
-<!-- TESTIMONIALS -->
-<section id="testimonials">
-  <div class="container">
-    <div class="tc reveal">
-      <span class="sec-badge">Khách hàng nói gì</span>
-      <h2 class="sec-h2">Được tin dùng bởi <span style="color:#D97706">500+ shop</span> Việt Nam</h2>
-    </div>
-    <div class="test-grid">
-      <div class="test-card reveal reveal-d1">
-        <div class="stars">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="#F59E0B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#F59E0B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#F59E0B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#F59E0B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#F59E0B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-        <p class="test-q">"Sau 2 tháng dùng Agicom, doanh thu của tôi tăng 34%. Chatbot trả lời khách thay tôi lúc 2 giờ sáng. Thực sự tuyệt vời!"</p>
-        <div class="test-author"><img class="test-avatar" src="https://images.unsplash.com/photo-1698556954522-ae28ac7f61d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=100" alt="Nguyễn Thị Lan"><div><div class="test-name">Nguyễn Thị Lan</div><div class="test-meta"><span class="test-shop">LanPhone Store</span><span class="plat plat-s">Shopee</span></div></div></div>
-      </div>
-      <div class="test-card reveal reveal-d2">
-        <div class="stars">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="#F59E0B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#F59E0B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#F59E0B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#F59E0B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#F59E0B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-        <p class="test-q">"Dynamic Pricing giúp tôi không cần theo dõi giá đối thủ mỗi ngày nữa. Tiết kiệm 3-4 tiếng mỗi ngày dành để tập trung phát triển shop."</p>
-        <div class="test-author"><img class="test-avatar" src="https://images.unsplash.com/photo-1646032538296-09b327e928b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=100" alt="Trần Minh Đức"><div><div class="test-name">Trần Minh Đức</div><div class="test-meta"><span class="test-shop">TechZone VN</span><span class="plat plat-t">TikTok</span></div></div></div>
-      </div>
-      <div class="test-card reveal reveal-d3">
-        <div class="stars">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="#F59E0B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#F59E0B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#F59E0B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#F59E0B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#F59E0B"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-        <p class="test-q">"Content Agent viết mô tả sản phẩm chuẩn SEO cho 200 sản phẩm chỉ trong 20 phút. Tôi không thể tin được cho đến khi dùng thử!"</p>
-        <div class="test-author"><img class="test-avatar" src="https://images.unsplash.com/photo-1770013413878-2530e2c3d82b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=100" alt="Phạm Thu Hương"><div><div class="test-name">Phạm Thu Hương</div><div class="test-meta"><span class="test-shop">SmartPhone Hub</span><span class="plat plat-l">Lazada</span></div></div></div>
-      </div>
-    </div>
-  </div>
-</section>
+    <script src="app4.js"></script>
+    <!-- config.js phải load TRƯỚC api_integration.js để set window.AGICOM_API_BASE -->
+    <script src="config.js"></script>
+    <script src="api_integration.js"></script>
 
-<!-- PRICING -->
-<section id="pricing">
-  <div class="container">
-    <div class="tc reveal">
-      <span class="sec-badge">Bảng giá</span>
-      <h2 class="sec-h2">Đơn giản, minh bạch</h2>
-      <p class="sec-sub">Không phí ẩn · Hủy bất cứ lúc nào · Nâng cấp dễ dàng</p>
-    </div>
-    <div class="price-grid">
-      <div class="price-card reveal reveal-d1">
-        <div class="pname-l">Starter</div><div class="pdesc-l">Dành cho shop mới bắt đầu</div>
-        <div style="margin:20px 0 24px"><span class="pprice-l">Miễn phí</span></div>
-        <div class="pfeats">
-          <div class="pfeat"><svg class="chk-g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-l">1 sàn thương mại điện tử</span></div>
-          <div class="pfeat"><svg class="chk-g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-l">Chatbot cơ bản (50 tin nhắn/ngày)</span></div>
-          <div class="pfeat"><svg class="chk-g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-l">Báo cáo doanh thu cơ bản</span></div>
-          <div class="pfeat"><svg class="chk-g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-l">Hỗ trợ email</span></div>
-        </div>
-        <a href="index.html" class="pcta pcta-s">Bắt đầu miễn phí</a>
-      </div>
-      <div class="price-card rec reveal reveal-d2">
-        <div class="price-pop">⚡ Phổ biến nhất</div>
-        <div class="pname-d">Growth</div><div class="pdesc-d">Phổ biến nhất cho shop đang phát triển</div>
-        <div style="margin:20px 0 24px"><span class="pprice-d">499.000₫</span><span class="pper-d">/tháng</span></div>
-        <div class="pfeats">
-          <div class="pfeat"><svg class="chk-d" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-d">3 sàn thương mại điện tử</span></div>
-          <div class="pfeat"><svg class="chk-d" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-d">Chatbot không giới hạn</span></div>
-          <div class="pfeat"><svg class="chk-d" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-d">Dynamic Pricing tự động</span></div>
-          <div class="pfeat"><svg class="chk-d" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-d">Market Intelligence</span></div>
-          <div class="pfeat"><svg class="chk-d" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-d">Content Agent (100 content/tháng)</span></div>
-          <div class="pfeat"><svg class="chk-d" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-d">Báo cáo nâng cao</span></div>
-          <div class="pfeat"><svg class="chk-d" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-d">Hỗ trợ chat ưu tiên</span></div>
-        </div>
-        <a href="index.html" class="pcta pcta-r">Dùng thử 14 ngày</a>
-      </div>
-      <div class="price-card reveal reveal-d3">
-        <div class="pname-l">Enterprise</div><div class="pdesc-l">Giải pháp tùy chỉnh cho doanh nghiệp lớn</div>
-        <div style="margin:20px 0 24px"><span class="pprice-l">Liên hệ</span></div>
-        <div class="pfeats">
-          <div class="pfeat"><svg class="chk-g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-l">Không giới hạn sàn</span></div>
-          <div class="pfeat"><svg class="chk-g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-l">Tất cả tính năng Growth</span></div>
-          <div class="pfeat"><svg class="chk-g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-l">API tích hợp riêng</span></div>
-          <div class="pfeat"><svg class="chk-g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-l">AI tùy chỉnh theo thương hiệu</span></div>
-          <div class="pfeat"><svg class="chk-g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-l">Onboarding 1-1 với chuyên gia</span></div>
-          <div class="pfeat"><svg class="chk-g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-l">SLA 99.9% uptime</span></div>
-          <div class="pfeat"><svg class="chk-g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="pft-l">Hỗ trợ 24/7 hotline</span></div>
-        </div>
-        <a href="index.html" class="pcta pcta-e">Liên hệ tư vấn</a>
-      </div>
-    </div>
-  </div>
-</section>
+<!-- sidebar logic handled by app4.js -->
+<!-- Backend URL config: config.js (đổi URL Render ở đây) -->
+<!-- API integration (real backend calls) handled by api_integration.js -->
 
-<!-- FAQ -->
-<section id="faq">
-  <div class="container">
-    <div class="tc reveal"><h2 class="sec-h2">Câu hỏi thường gặp</h2></div>
-    <div class="faq-list">
-      <div class="faq-item reveal"><button class="faq-btn" onclick="tFaq(this)"><span class="faq-q">Agicom hỗ trợ những sàn thương mại điện tử nào?</span><svg class="faq-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></button><div class="faq-ans">Agicom hiện hỗ trợ Shopee, TikTok Shop, Lazada và sẽ mở rộng sang Tiki và Facebook Marketplace trong Q3/2025. Kết nối chỉ mất khoảng 5 phút.</div></div>
-      <div class="faq-item reveal"><button class="faq-btn" onclick="tFaq(this)"><span class="faq-q">Tôi có cần kỹ thuật để cài đặt không?</span><svg class="faq-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></button><div class="faq-ans">Không cần! Agicom được thiết kế cho người bán hàng, không phải developer. Bạn chỉ cần đăng ký, kết nối sàn và AI sẽ tự học từ dữ liệu shop của bạn.</div></div>
-      <div class="faq-item reveal"><button class="faq-btn" onclick="tFaq(this)"><span class="faq-q">Dữ liệu shop của tôi có an toàn không?</span><svg class="faq-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></button><div class="faq-ans">Tuyệt đối an toàn. Chúng tôi chỉ yêu cầu quyền đọc dữ liệu cần thiết và không bao giờ chia sẻ thông tin của bạn với bên thứ ba. Hệ thống được mã hóa AES-256.</div></div>
-      <div class="faq-item reveal"><button class="faq-btn" onclick="tFaq(this)"><span class="faq-q">AI có thể làm hỏng giá hay gửi tin nhắn sai không?</span><svg class="faq-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></button><div class="faq-ans">Không. Tất cả hành động quan trọng đều cần bạn duyệt trước khi áp dụng. Chatbot chỉ tự động trả lời các câu hỏi đã được training sẵn, còn câu hỏi phức tạp sẽ chuyển về cho bạn.</div></div>
-      <div class="faq-item reveal"><button class="faq-btn" onclick="tFaq(this)"><span class="faq-q">Tôi có thể hủy gói bất cứ lúc nào không?</span><svg class="faq-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></button><div class="faq-ans">Có, bạn có thể hủy bất cứ lúc nào mà không mất phí. Không có hợp đồng dài hạn, không ràng buộc. Bạn chỉ trả tiền cho những gì bạn dùng.</div></div>
-      <div class="faq-item reveal"><button class="faq-btn" onclick="tFaq(this)"><span class="faq-q">Mất bao lâu để thấy kết quả?</span><svg class="faq-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></button><div class="faq-ans">Hầu hết shop thấy sự cải thiện ngay trong tuần đầu tiên. Chatbot bắt đầu trả lời ngay sau khi cài đặt. Doanh thu thường tăng đáng kể sau 30-60 ngày tối ưu liên tục.</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- FINAL CTA -->
-<section id="cta">
-  <div class="cta-glow"></div>
-  <div class="grid-bg"></div>
-  <div class="cta-inner reveal">
-    <h2 class="cta-h2">Sẵn sàng để <span class="grad-blue">AI làm việc</span> thay bạn?</h2>
-    <p class="cta-p">Tham gia cùng 500+ shop đang bán hàng thông minh hơn với Agicom.</p>
-    <a href="index.html" class="btn-primary">Bắt đầu miễn phí 14 ngày <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
-    <p class="cta-note">Không cần thẻ tín dụng · Cài đặt trong 5 phút · Hủy bất cứ lúc nào</p>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  <div class="footer-in">
-    <div class="footer-grid">
-      <div class="fbrand">
-        <div class="nav-logo"><img src="logo-agicom.svg" alt="Agicom"><span><span class="logo-agi">Agi</span><span class="logo-com-inv">com</span></span></div>
-        <p>Nền tảng AI quản lý e-commerce thông minh dành cho shop Việt Nam.</p>
-        <div class="fsocials">
-          <div class="fsoc"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></div>
-          <div class="fsoc"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg></div>
-          <div class="fsoc"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.95C18.88 4 12 4 12 4s-6.88 0-8.59.47a2.78 2.78 0 0 0-1.95 1.95C1 8.12 1 12 1 12s0 3.88.46 5.58a2.78 2.78 0 0 0 1.95 1.95C5.12 20 12 20 12 20s6.88 0 8.59-.47a2.78 2.78 0 0 0 1.95-1.95C23 15.88 23 12 23 12s0-3.88-.46-5.58zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/></svg></div>
-        </div>
-      </div>
-      <div class="fcol"><h4>Sản phẩm</h4><a href="#">Dynamic Pricing</a><a href="#">Chat Agent</a><a href="#">Content Agent</a><a href="#">Market Intelligence</a><a href="#">Crisis Manager</a></div>
-      <div class="fcol"><h4>Công ty</h4><a href="#">Về chúng tôi</a><a href="#">Blog</a><a href="#">Careers</a><a href="#">Báo chí</a></div>
-      <div class="fcol"><h4>Hỗ trợ</h4><a href="#">Tài liệu</a><a href="#">Liên hệ</a><a href="#">Cộng đồng</a><a href="#">Status</a></div>
-    </div>
-    <div class="fbottom">
-      <p class="fcopy">© 2025 Agicom. All rights reserved.</p>
-      <div class="flegal"><a href="#">Điều khoản dịch vụ</a><a href="#">Chính sách bảo mật</a><a href="#">Cookie</a></div>
-    </div>
-  </div>
-</footer>
-
-<script>
-// Navbar scroll
-const nav=document.getElementById('navbar');
-window.addEventListener('scroll',()=>{
-  nav.classList.toggle('scrolled',window.scrollY>30);
-});
-
-// Mobile menu
-function toggleMob(){
-  const m=document.getElementById('mob-menu');
-  const o=m.classList.toggle('open');
-  document.getElementById('ico-menu').style.display=o?'none':'block';
-  document.getElementById('ico-x').style.display=o?'block':'none';
-}
-
-// Smooth scroll
-function navTo(id){
-  const el=document.getElementById(id);
-  if(el) el.scrollIntoView({behavior:'smooth'});
-  const m=document.getElementById('mob-menu');
-  m.classList.remove('open');
-  document.getElementById('ico-menu').style.display='block';
-  document.getElementById('ico-x').style.display='none';
-}
-
-// FAQ
-function tFaq(btn){
-  const item=btn.parentElement;
-  const ans=item.querySelector('.faq-ans');
-  const chev=btn.querySelector('.faq-chev');
-  const wasOpen=ans.classList.contains('open');
-  document.querySelectorAll('.faq-ans.open').forEach(a=>a.classList.remove('open'));
-  document.querySelectorAll('.faq-chev.open').forEach(c=>c.classList.remove('open'));
-  if(!wasOpen){ans.classList.add('open');chev.classList.add('open');}
-}
-
-// Scroll reveal
-const obs=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});
-},{threshold:0.12});
-document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
-
-// Particles
-(function(){
-  const c=document.getElementById('ptcls');
-  for(let i=0;i<24;i++){
-    const p=document.createElement('div');
-    p.className='particle';
-    const sz=Math.random()*4+1;
-    p.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${sz}px;height:${sz}px;animation-duration:${Math.random()*12+10}s;animation-delay:${Math.random()*-12}s;`;
-    c.appendChild(p);
-  }
-})();
-
-// Desktop floating badges
-function showBadges(){
-  if(window.innerWidth>1100){
-    ['fbL','fbR','fbB'].forEach(id=>document.getElementById(id).style.display='block');
-  }
-}
-showBadges();
-window.addEventListener('resize',showBadges);
-</script>
 </body>
+
 </html>
