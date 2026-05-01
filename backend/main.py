@@ -522,8 +522,13 @@ async def process_chat_with_history(data: ChatSessionInput):
         
         reply_content = ai_response.get("suggested_reply", "Dạ, em chưa hiểu ý mình ạ.")
 
-        # 3. Lưu câu trả lời của AI vào SQLite
-        save_message(db, data.customer_id, "assistant", reply_content)
+        # 3. Lưu câu trả lời của AI vào SQLite (kèm metadata để frontend replay đúng trạng thái)
+        save_message(
+            db, data.customer_id, "assistant", reply_content,
+            is_safe=ai_response.get("is_safe"),
+            confidence_score=ai_response.get("confidence_score"),
+            sentiment=ai_response.get("sentiment_analysis"),
+        )
 
         # 4. Trả về cho Frontend
         return {
@@ -555,8 +560,15 @@ async def get_chat_messages_endpoint(customer_id: str, limit: int = 50):
             "status": "success",
             "customer_id": customer_id,
             "messages": [
-                {"role": m.role, "content": m.content,
-                 "timestamp": m.timestamp.isoformat() if m.timestamp else None}
+                {
+                    "role": m.role,
+                    "content": m.content,
+                    "timestamp": m.timestamp.isoformat() if m.timestamp else None,
+                    # AI evaluation metadata — None cho tin nhắn của user
+                    "is_safe": m.is_safe,
+                    "confidence_score": m.confidence_score,
+                    "sentiment": m.sentiment,
+                }
                 for m in messages
             ]
         }

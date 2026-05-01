@@ -2143,7 +2143,9 @@ function _syncLiveChatToInbox(customerMsg, aiReply, evalData) {
   const avatarChar = displayName.charAt(0).toUpperCase();
 
   // ── Tìm conversation hiện có của cùng customer (tránh tạo box trùng) ──
-  let existingConv = MOCK.conversations.find(c => c.name === displayName && c.platform === 'Live Chat');
+  // Ưu tiên: khớp tên+platform (live chat đang hoạt động), sau đó khớp id (conv đã load từ backend)
+  let existingConv = MOCK.conversations.find(c => c.name === displayName && c.platform === 'Live Chat')
+                  || MOCK.conversations.find(c => c.id === displayName);
 
   // Lấy hồ sơ thực từ backend (đã được load bởi loadCustomerProfile)
   const _profile = window._currentCustomerProfile;
@@ -3140,29 +3142,46 @@ var _backendCustomerIds = new Set();
 var _chatLoadInProgress = false;
 
 /**
+ * Tracks which customer IDs have already had their backend history fetched.
+ * Separate from message-length check so live messages don't block history loads.
+ */
+var _fetchedChatHistory = new Set();
+
+/** Parse a UTC ISO timestamp string from Python (no timezone suffix) as UTC. */
+function _parseBackendTs(tsStr) {
+  if (!tsStr) return new Date();
+  // Python datetime.utcnow().isoformat() produces "2024-05-01T15:16:00.123456"
+  // Without a timezone suffix JS parses it as LOCAL — append 'Z' to force UTC.
+  var s = tsStr.endsWith('Z') || /[+-]\d{2}:\d{2}$/.test(tsStr) ? tsStr : tsStr + 'Z';
+  return new Date(s);
+}
+
+/**
  * Tải danh sách khách hàng từ /api/customers và merge vào MOCK.conversations.
  * Tính toán status (escalate / pending / auto) từ dữ liệu backend.
+ * Nếu customer đã có entry dạng live_ (từ _syncLiveChatToInbox), đổi tên id về canonical.
  */
 async function loadChatInboxFromBackend() {
   if (typeof MOCK === 'undefined' || !_backendConnected) return;
   try {
-    const data = await apiCall('/api/customers');
+    var data = await apiCall('/api/customers');
     if (!data || data.status !== 'success' || !Array.isArray(data.customers)) return;
 
     data.customers.forEach(function(c) {
       _backendCustomerIds.add(c.customer_id);
 
-      var churn    = c.churn_probability ?? 0.1;
-      var emotion  = c.emotion_index ?? 0.5;
-      var status   = churn >= 0.6 ? 'escalate'
-                   : c.last_role === 'user' ? 'pending'
-                   : 'auto';
-      var priority = status === 'escalate' ? 0 : status === 'pending' ? 1 : 2;
+      var churn     = c.churn_probability ?? 0.1;
+      var emotion   = c.emotion_index ?? 0.5;
+      var status    = churn >= 0.6 ? 'escalate'
+                    : c.last_role === 'user' ? 'pending'
+                    : 'auto';
+      var priority  = status === 'escalate' ? 0 : status === 'pending' ? 1 : 2;
       var sentiment = Math.round(emotion * 100);
       var churnStr  = Math.round(churn * 100) + '%';
       var riskLevel = churn >= 0.6 ? 'high' : churn >= 0.3 ? 'medium' : 'low';
 
-      var ts = c.last_timestamp ? new Date(c.last_timestamp) : new Date();
+      // Fix timestamp: backend stores UTC without 'Z', so append it before parsing
+      var ts      = _parseBackendTs(c.last_timestamp);
       var timeStr = ts.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 
       var convObj = {
@@ -3191,17 +3210,43 @@ async function loadChatInboxFromBackend() {
         }
       };
 
-      var existing = MOCK.conversations.find(function(conv) { return conv.id === c.customer_id; });
+      // Check for existing entry — either by canonical id OR the live_ variant created by _syncLiveChatToInbox
+      var liveId   = 'live_' + c.customer_id.replace(/\W/g, '_');
+      var existing = MOCK.conversations.find(function(conv) { return conv.id === c.customer_id; })
+                  || MOCK.conversations.find(function(conv) { return conv.id === liveId; });
+
       if (existing) {
+        // If found under the live_ id, rename it so both the inbox and _syncLiveChatToInbox
+        // use the same key going forward — and transfer its messages (which may contain ai_draft).
+        if (existing.id === liveId) {
+          var liveMsgs = MOCK.chat_messages[liveId];
+          if (liveMsgs && liveMsgs.length) {
+            // Preserve live messages (ai_draft / ai_thinking) under the canonical id
+            MOCK.chat_messages[c.customer_id] = MOCK.chat_messages[c.customer_id]
+              ? MOCK.chat_messages[c.customer_id].concat(liveMsgs.filter(function(m) {
+                  return m.from === 'ai_draft' || m.from === 'ai_thinking';
+                }))
+              : liveMsgs;
+            delete MOCK.chat_messages[liveId];
+          }
+          existing.id = c.customer_id;
+          // Update currentChatId if it was pointing at the old live_ id
+          if (typeof currentChatId !== 'undefined' && currentChatId === liveId) {
+            currentChatId = c.customer_id;
+          }
+        }
+        // Merge backend data (timestamp, status, churn, etc.) but keep live messages/status if more urgent
+        var keepStatus = (existing.status === 'escalate') ? 'escalate' : convObj.status;
         Object.assign(existing, convObj);
+        existing.status = keepStatus;
       } else {
         MOCK.conversations.push(convObj);
       }
     });
 
-    // Nếu currentChatId vẫn là mock mặc định, chuyển sang khách thực đầu tiên
+    // Set currentChatId to first real customer if it's null or invalid
     if (typeof currentChatId !== 'undefined' &&
-        (currentChatId === 'c1' || currentChatId === 'c2') &&
+        (!currentChatId || !MOCK.conversations.find(function(c) { return c.id === currentChatId; })) &&
         data.customers.length > 0) {
       currentChatId = data.customers[0].customer_id;
     }
@@ -3212,24 +3257,81 @@ async function loadChatInboxFromBackend() {
 
 /**
  * Tải lịch sử tin nhắn của customerId từ backend vào MOCK.chat_messages.
- * Bỏ qua nếu đã có cache (tránh gọi API lặp lại khi re-render).
+ * Sử dụng _fetchedChatHistory để chỉ fetch 1 lần — live messages (ai_draft)
+ * được giữ nguyên ở cuối mảng sau khi history được prepend vào đầu.
  */
 async function _loadChatConvMessagesIntoMock(customerId) {
   if (!_backendConnected || typeof MOCK === 'undefined') return;
-  if (MOCK.chat_messages[customerId] && MOCK.chat_messages[customerId].length > 0) return;
+  if (_fetchedChatHistory.has(customerId)) return;   // already fetched once
+  _fetchedChatHistory.add(customerId);
   try {
     var data = await apiCall('/api/chat-messages/' + encodeURIComponent(customerId));
     if (!data || data.status !== 'success' || !Array.isArray(data.messages)) return;
-    MOCK.chat_messages[customerId] = data.messages.map(function(m) {
-      return {
-        from: m.role === 'user' ? 'customer' : 'ai_sent',
-        time: m.timestamp
-          ? new Date(m.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
-          : '',
-        text: m.content
-      };
+
+    var historyMsgs = [];
+    data.messages.forEach(function(m) {
+      var ts = m.timestamp
+        ? _parseBackendTs(m.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+        : '';
+
+      if (m.role === 'user') {
+        historyMsgs.push({ from: 'customer', time: ts, text: m.content });
+        return;
+      }
+
+      // --- assistant message ---
+      var conf = (m.confidence_score !== undefined && m.confidence_score !== null)
+        ? Math.round(m.confidence_score * 100)
+        : null;
+      var isSafe = m.is_safe;   // true | false | null
+      var sentiment = m.sentiment || '';
+
+      if (isSafe === false) {
+        // Tin nhắn bị escalate — hiện ô phân tích + nháp chờ duyệt
+        historyMsgs.push({
+          from: 'ai_thinking',
+          text: 'AI phân tích ngữ cảnh và tìm kiếm trong knowledge base...',
+          context: [
+            conf !== null ? ('Confidence: ' + conf + '%') : 'Confidence: —',
+            sentiment ? ('Cảm xúc: ' + sentiment) : 'Cảm xúc: bình thường',
+            'is_safe: ❌ Cần duyệt thủ công'
+          ]
+        });
+        historyMsgs.push({
+          from: 'ai_draft',
+          time: ts,
+          text: m.content,
+          confidence: conf
+        });
+      } else {
+        // Tin nhắn tự động (is_safe=true) hoặc không có metadata (DB cũ)
+        historyMsgs.push({
+          from: 'ai_sent',
+          time: ts,
+          text: m.content,
+          confidence: conf,
+          is_safe: isSafe   // true hoặc null
+        });
+      }
     });
+
+    // Giữ lại các tin nhắn live (ai_draft / ai_thinking) được thêm VÀO trong phiên hiện tại,
+    // nhưng loại bỏ những tin nào mà nội dung đã có trong history (tránh hiện đôi).
+    var existing = MOCK.chat_messages[customerId] || [];
+    var historyTexts = new Set(
+      historyMsgs.filter(function(m) { return m.from === 'ai_draft' || m.from === 'ai_sent'; })
+                 .map(function(m) { return m.text; })
+    );
+    // Chỉ giữ lại live messages mà nội dung CHƯA xuất hiện trong history
+    var liveMsgs = existing.filter(function(m) {
+      if (m.from !== 'ai_draft' && m.from !== 'ai_thinking') return false;
+      if (m.from === 'ai_draft' && historyTexts.has(m.text)) return false;
+      return true;
+    });
+
+    MOCK.chat_messages[customerId] = historyMsgs.concat(liveMsgs);
   } catch (err) {
+    _fetchedChatHistory.delete(customerId); // allow retry on error
     console.warn('[Agicom] _loadChatConvMessagesIntoMock:', err.message);
   }
 }

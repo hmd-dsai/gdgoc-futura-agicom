@@ -191,64 +191,8 @@ const MOCK = {
     }
   ],
 
-  // Chat conversations
-  conversations: [
-    {
-      id: 'c1', name: 'Nguyễn Thị A', avatar: 'N', time: '10:05', status: 'auto', unread: 0,
-      preview: 'Sắp có hàng Shopee Mall chưa shop?',
-      category: 'Hỏi hàng', sentiment: 72, wait_min: 0, priority: 2,
-      ltv: 3200000, orders: 2, platform: 'Shopee',
-      customer: { note: 'Khách mới, tiềm năng trung bình', risk: 'low', churn: '8%',
-        purchases: [{ date: '10/03', item: 'Ốp lưng Samsung', value: 350000 }] }
-    },
-    {
-      id: 'c2', name: 'Trần Văn B', avatar: 'T', time: '09:45', status: 'pending', unread: 1,
-      preview: 'Mua 3 cái có bớt không?',
-      category: 'Thương lượng giá', sentiment: 68, wait_min: 18, priority: 1,
-      ltv: 12500000, orders: 5, platform: 'Shopee', vip: true,
-      customer: { note: 'Khách VIP — đã mua 5 đơn Samsung, có xu hướng mua bulk', risk: 'low', churn: '5%',
-        purchases: [
-          { date: '15/03', item: 'Galaxy S23 Ultra', value: 28900000 },
-          { date: '20/02', item: 'Ốp Spigen x2', value: 700000 },
-          { date: '10/01', item: 'Cáp Anker 100W', value: 350000 }
-        ] }
-    },
-    {
-      id: 'c3', name: 'Lê C', avatar: 'L', time: '09:12', status: 'escalate', unread: 1,
-      preview: 'Làm ăn dối trá, hàng giả à?',
-      category: 'Khiếu nại — Bảo hành', sentiment: 4, wait_min: 51, priority: 0,
-      ltv: 28900000, orders: 1, platform: 'Shopee', angry: true,
-      customer: { note: '⚠ Đơn hàng #SP-2401-892 — AirPods Pro 2, mua 5 ngày trước, bảo hành còn 12 tháng', risk: 'high', churn: '82%',
-        purchases: [{ date: '08/04', item: 'AirPods Pro 2', value: 5200000 }] }
-    },
-    {
-      id: 'c4', name: 'Phạm Hương', avatar: 'P', time: '08:50', status: 'auto', unread: 0,
-      preview: 'Shop ơi',
-      category: 'Khách quay lại', sentiment: 80, wait_min: 0, priority: 2,
-      ltv: 7400000, orders: 3, platform: 'Tiki', returning: true,
-      customer: { note: 'Khách quen — lần cuối hỏi hộp sạc rời chưa mua. Đang có deal -15%', risk: 'medium', churn: '24%',
-        purchases: [
-          { date: '15/02', item: 'AirPods Pro 2', value: 5200000 },
-          { date: '10/01', item: 'Cáp Lightning', value: 250000 }
-        ] }
-    },
-    {
-      id: 'c5', name: 'Hoàng Mạnh', avatar: 'H', time: '08:32', status: 'escalate', unread: 1,
-      preview: 'Cáp xài 1 tuần hư rồi',
-      category: 'Khiếu nại — Chất lượng SP', sentiment: 12, wait_min: 71, priority: 0,
-      ltv: 890000, orders: 1, platform: 'TikTok', angry: true,
-      customer: { note: '⚠ Cùng vấn đề với 7 khách khác — Cáp Anker 100W lô T03/2026 có thể lỗi', risk: 'high', churn: '90%',
-        purchases: [{ date: '07/04', item: 'Cáp Anker 100W', value: 350000 }] }
-    },
-    {
-      id: 'c6', name: 'Vũ Linh', avatar: 'V', time: '08:15', status: 'auto', unread: 0,
-      preview: 'Cảm ơn shop nhiều ạ ❤️',
-      category: 'Phản hồi tích cực', sentiment: 98, wait_min: 0, priority: 3,
-      ltv: 4100000, orders: 2, platform: 'Shopee',
-      customer: { note: 'Khách hài lòng cao — tiềm năng upsell', risk: 'low', churn: '6%',
-        purchases: [{ date: '12/04', item: 'Galaxy Buds3 Pro', value: 3200000 }] }
-    }
-  ],
+  // Chat conversations — populated at runtime by api_integration.js (loadChatInboxFromBackend)
+  conversations: [],
 
   // Issue clusters from AI pattern detection
   chat_clusters: [
@@ -430,34 +374,8 @@ const MOCK = {
     }
   ],
 
-  // Chat detail messages (Trần Văn B - VIP smart pricing demo)
-  chat_messages: {
-    c2: [
-      { from: 'customer', time: '09:44', text: 'Shop ơi mình định lấy 3 cái S24 Ultra, shop có bớt không?' },
-      { from: 'ai_thinking', text: 'AI đang phân tích context...', context: [
-        '✓ Khách LTV: 12.5M (VIP)', '✓ Lịch sử: 2 đơn Samsung trước đó', '✓ Đối thủ: Hoàng Hà -6.5%',
-        '✓ Tồn kho: 4 máy, 12 ngày', '✓ Margin tối thiểu: 8%'
-      ]},
-      { from: 'ai_draft', text: 'Dạ với khách quen như anh, em ưu đãi giá 28.790k/máy + tặng kèm ốp Spigen chính hãng (giá thị trường 250k) cho 3 máy ạ! Anh chốt giúp em hôm nay nhé 🥰', confidence: 87 }
-    ],
-    c3: [
-      { from: 'customer', time: '09:12', text: 'Làm ăn dối trá, hàng giả à? Mua tuần trước giờ shipper bảo hết bảo hành rồi!' },
-      { from: 'ai_thinking', text: 'AI phát hiện cảm xúc tiêu cực mạnh — chuyển sang Reasoning Agent', context: [
-        '⚠ Sentiment: Rất tiêu cực (95%)', '✓ Đơn hàng: #SP-2401-892 (5 ngày trước)',
-        '✓ Sản phẩm: AirPods Pro 2 — bảo hành 12 tháng', '⚠ Tag: ESCALATE — cần chủ shop xử lý'
-      ]},
-      { from: 'system', text: '🚨 AI đã gửi tin tạm cho khách: "Anh ơi em đã ghi nhận và chuyển trực tiếp cho quản lý shop xử lý trong 15 phút ạ. Em xin lỗi anh đã phải trải qua việc này 🙏"' }
-    ],
-    c4: [
-      { from: 'customer', time: '08:50', text: 'Shop ơi' },
-      { from: 'ai_thinking', text: 'AI nhận diện khách quen — load lịch sử...', context: [
-        '✓ Lần cuối: 15/02 mua AirPods Pro 2',
-        '✓ Đã hỏi: "Hộp sạc rời còn không?" (chưa chốt)',
-        '✓ Hộp sạc rời đang giảm 15%'
-      ]},
-      { from: 'ai_draft', text: 'Dạ chị Hương ơi em chào chị ạ! 😊 Em vẫn nhớ lần trước chị có hỏi về hộp sạc rời cho AirPods Pro 2. Hiện shop đang có chương trình giảm 15% cho mặt hàng này (chỉ còn 850k thay vì 1tr), chị quan tâm em báo giá chi tiết nhé?', confidence: 91 }
-    ]
-  },
+  // Chat messages — populated at runtime by api_integration.js
+  chat_messages: {},
 
   // Insight reports (auto-generated from chat data)
   insights: [
@@ -1400,7 +1318,7 @@ function renderMedia() {
 }
 
 // ===== Chat Page (Smart Multi-Agent Demo) =====
-let currentChatId = 'c2';
+let currentChatId = null;   // set to first real customer after backend loads
 let chatFilter = 'all';
 let chatDraftEditMode = false;  // true khi đang ở chế độ chỉnh sửa nháp
 
@@ -1425,7 +1343,22 @@ function priorityDot(p) {
 }
 
 function renderChat() {
-  const conv = MOCK.conversations.find(c => c.id === currentChatId) || MOCK.conversations[0];
+  // Nếu chưa có conversation nào (backend chưa load xong) → hiển thị skeleton
+  if (!MOCK.conversations.length) {
+    return `
+      <div style="display:flex;align-items:center;justify-content:center;height:400px;flex-direction:column;gap:16px;color:var(--text-muted);">
+        <div style="font-size:2rem;">📬</div>
+        <div style="font-size:1rem;font-weight:700;">Đang tải hộp thư...</div>
+        <div style="font-size:0.8rem;">Đang kết nối backend và tải danh sách khách hàng</div>
+      </div>`;
+  }
+
+  // Ensure currentChatId points to a valid conversation
+  if (!currentChatId || !MOCK.conversations.find(c => c.id === currentChatId)) {
+    currentChatId = MOCK.conversations[0].id;
+  }
+
+  const conv = MOCK.conversations.find(c => c.id === currentChatId);
   const messages = MOCK.chat_messages[currentChatId] || [];
   const filtered = chatFilter === 'all' ? MOCK.conversations
     : chatFilter === 'pending' ? MOCK.conversations.filter(c => c.status === 'pending')
@@ -1579,11 +1512,35 @@ function renderChat() {
               </div>`;
             }
             if (m.from === 'ai_sent') {
+              // Badge hiển thị confidence + trạng thái tự động gửi
+              const _conf = (m.confidence !== undefined && m.confidence !== null) ? m.confidence : null;
+              const _isSafe = m.is_safe;
+              let _metaBadge = '';
+              if (_conf !== null || _isSafe !== null) {
+                _metaBadge = `<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;justify-content:flex-end;">` +
+                  (_conf !== null
+                    ? `<span style="font-size:0.67rem;padding:2px 6px;border-radius:4px;
+                        background:${_conf >= 70 ? 'var(--accent-emerald-bg)' : 'var(--accent-rose-bg)'};
+                        color:${_conf >= 70 ? 'var(--accent-emerald)' : 'var(--accent-rose)'};">
+                        🎯 Confidence: ${_conf}%</span>`
+                    : '') +
+                  (_isSafe === true
+                    ? `<span style="font-size:0.67rem;padding:2px 6px;border-radius:4px;
+                        background:var(--accent-emerald-bg);color:var(--accent-emerald);">
+                        ✅ Được gửi tự động</span>`
+                    : (_isSafe === null || _isSafe === undefined)
+                      ? ''
+                      : '') +
+                  `</div>`;
+              }
               return `<div style="align-self:flex-end;max-width:85%;">
                 <div style="font-size:0.7rem;color:var(--accent-emerald);margin-bottom:4px;text-align:right;">
                   🤖 AI Agent · ${m.time}${m.edited?' · ✏ Đã chỉnh sửa':''}
                 </div>
-                <div class="chat-bubble" style="background:var(--accent-emerald-bg);padding:10px 14px;border-radius:12px 0 12px 12px;border:1px solid var(--accent-emerald)40;">${m.text}</div>
+                <div class="chat-bubble" style="background:var(--accent-emerald-bg);padding:10px 14px;border-radius:12px 0 12px 12px;border:1px solid var(--accent-emerald)40;">
+                  ${m.text}
+                  ${_metaBadge}
+                </div>
               </div>`;
             }
             if (m.from === 'shop_owner') {

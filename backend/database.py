@@ -82,6 +82,10 @@ class ChatMessage(Base):
     role = Column(String) # 'user' hoặc 'assistant'
     content = Column(Text)
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    # Metadata từ AI evaluation (chỉ có ở tin nhắn assistant)
+    is_safe = Column(Boolean, nullable=True)
+    confidence_score = Column(Float, nullable=True)
+    sentiment = Column(String, nullable=True)
 
 def get_chat_history(db, customer_id: str, limit: int = 6):
     from sqlalchemy import desc
@@ -92,8 +96,16 @@ def get_chat_history(db, customer_id: str, limit: int = 6):
         .all()
     return messages[::-1] # Trả về thứ tự cũ -> mới
 
-def save_message(db, customer_id: str, role: str, content: str):
-    new_msg = ChatMessage(customer_id=customer_id, role=role, content=content)
+def save_message(db, customer_id: str, role: str, content: str,
+                 is_safe=None, confidence_score=None, sentiment=None):
+    new_msg = ChatMessage(
+        customer_id=customer_id,
+        role=role,
+        content=content,
+        is_safe=is_safe,
+        confidence_score=confidence_score,
+        sentiment=sentiment,
+    )
     db.add(new_msg)
     db.commit()
 
@@ -163,9 +175,16 @@ def get_or_create_customer_profile(db, customer_id: str) -> "CustomerProfile":
 
 def init_db():
     Base.metadata.create_all(bind=engine)
-    # Tự động thêm cột is_archived nếu DB cũ đang chạy để tránh lỗi
+    # Tự động thêm các cột mới nếu DB cũ đang chạy (tránh lỗi khi upgrade schema)
     with engine.begin() as conn:
-        try:
-            conn.execute(text("ALTER TABLE chat_logs ADD COLUMN is_archived BOOLEAN DEFAULT 0"))
-        except Exception:
-            pass # Bỏ qua nếu cột đã tồn tại
+        migrations = [
+            "ALTER TABLE chat_logs ADD COLUMN is_archived BOOLEAN DEFAULT 0",
+            "ALTER TABLE chat_messages ADD COLUMN is_safe BOOLEAN",
+            "ALTER TABLE chat_messages ADD COLUMN confidence_score FLOAT",
+            "ALTER TABLE chat_messages ADD COLUMN sentiment VARCHAR",
+        ]
+        for sql in migrations:
+            try:
+                conn.execute(text(sql))
+            except Exception:
+                pass  # Bỏ qua nếu cột đã tồn tại
