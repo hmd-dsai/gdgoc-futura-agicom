@@ -130,49 +130,12 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo" style="gap:10px;align-items:center;">
-                    <!-- Agicom Logo Icon -->
-                    <div style="width:44px;height:44px;flex-shrink:0;">
-                        <svg viewBox="0 0 44 44" width="44" height="44" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="lgMain" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#FDE047"/>
-                                    <stop offset="100%" stop-color="#EAB308"/>
-                                </linearGradient>
-                                <linearGradient id="lgAccent" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#451a03"/>
-                                    <stop offset="100%" stop-color="#78350f"/>
-                                </linearGradient>
-                                <filter id="glow">
-                                    <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
-                                    <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                                </filter>
-                            </defs>
-                            <!-- Outer rounded square -->
-                            <rect x="2" y="2" width="40" height="40" rx="12" fill="url(#lgMain)" filter="url(#glow)"/>
-                            <!-- Inner shadow layer -->
-                            <rect x="2" y="2" width="40" height="40" rx="12" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
-                            <!-- Brain/circuit nodes — top 3 dots -->
-                            <circle cx="13" cy="11" r="2.2" fill="url(#lgAccent)" opacity="0.9"/>
-                            <circle cx="22" cy="9"  r="2.2" fill="url(#lgAccent)" opacity="0.9"/>
-                            <circle cx="31" cy="11" r="2.2" fill="url(#lgAccent)" opacity="0.9"/>
-                            <!-- Connecting lines top -->
-                            <path d="M13 11 Q17.5 7 22 9 Q26.5 7 31 11" stroke="#451a03" stroke-width="1.3" fill="none" opacity="0.7" stroke-linecap="round"/>
-                            <!-- Stylised 'A' body -->
-                            <path d="M13 33 L22 14 L31 33" stroke="#451a03" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M16.5 26 L27.5 26" stroke="#451a03" stroke-width="2.4" stroke-linecap="round"/>
-                            <!-- Circuit node left arm -->
-                            <line x1="13" y1="33" x2="10" y2="36" stroke="#451a03" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
-                            <circle cx="9" cy="37" r="1.6" fill="#451a03" opacity="0.6"/>
-                            <!-- Circuit node right arm -->
-                            <line x1="31" y1="33" x2="34" y2="36" stroke="#451a03" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
-                            <circle cx="35" cy="37" r="1.6" fill="#451a03" opacity="0.6"/>
-                            <!-- Small spark dot on crossbar -->
-                            <circle cx="22" cy="26" r="2" fill="#451a03" opacity="0.85"/>
-                        </svg>
+                    <!-- Agicom Logo Icon — Official -->
+                    <div style="width:44px;height:44px;flex-shrink:0;background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(234,179,8,0.3);">
+                        <img src="logo-agicom.svg" alt="Agicom" style="width:100%;height:100%;object-fit:contain;display:block;" />
                     </div>
                     <div>
-                        <div class="sidebar-logo-text" style="font-size:1.15rem;font-weight:800;letter-spacing:-0.3px;">Agicom</div>
-                        <div class="sidebar-logo-badge" style="font-size:0.6rem;">BETA V2.0</div>
+                        <div class="sidebar-logo-text" style="font-size:1.2rem;font-weight:800;letter-spacing:-0.5px;line-height:1;"><span style="color:#F5C842;">Agi</span><span style="color:#1E3A5F;">com</span></div>
                     </div>
                 </div>
             </div>
@@ -286,6 +249,10 @@
                         <svg class="nav-group-arrow" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="nav-group-children">
+                        <button class="nav-child-item" data-page="content-agent">
+                            <span class="nav-child-dot" style="background:var(--accent-amber);"></span>Content Agent 🎬
+                            <span class="nav-item-badge" style="background:rgba(234,179,8,0.15);color:#eab308;">AI</span>
+                        </button>
                         <button class="nav-child-item" data-page="content-suggestions">
                             <span class="nav-child-dot"></span>Đề xuất content
                         </button>
