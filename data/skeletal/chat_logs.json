@@ -1,0 +1,12 @@
+{
+  "__schema_version": "1.0",
+  "__description": "Chat interaction logs for SQL chat_logs table (ChatLog ORM). Used for daily summary reports, trend/insight detection, and sensor analytics. hours_ago is relative to seed time — used to construct realistic timestamps.",
+  "chat_logs": [
+    {
+      "customer_q": "<string: the customer's raw message>",
+      "ai_a": "<string: the AI's reply>",
+      "insight": "<string: short extracted insight label, e.g. 'Khách lo ngại kích ứng với niacinamide'>",
+      "hours_ago": "<int: 1–48 — how many hours before seed time this occurred>"
+    }
+  ]
+}

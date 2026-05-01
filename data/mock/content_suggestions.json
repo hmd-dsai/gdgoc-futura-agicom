@@ -1,0 +1,82 @@
+{
+  "content_suggestions": [
+    {
+      "suggestion_id": "cs-001",
+      "title": "Video swipe 8 màu Son Bóng GIAO FARA — 'Màu nào tôn da bạn nhất?'",
+      "type": "video",
+      "platform": "TikTok + Shopee Live",
+      "priority": "high",
+      "status": "pending",
+      "combined_score": 93,
+      "chatbot_count": 22,
+      "chatbot_topic": "Khách hỏi màu son bóng phù hợp tông da, không thấy ảnh thực tế",
+      "review_count": 3,
+      "review_neg_pct": 0,
+      "sample_questions": [
+        "Da ngăm nên chọn mã mấy hả shop?",
+        "Màu 03 và 04 khác nhau như thế nào, có ảnh thật không shop?"
+      ],
+      "sample_reviews": [
+        "Màu son cực xinh, tôn da lắm",
+        "Muốn xem thêm ảnh swipe màu trực tiếp trên môi"
+      ],
+      "estimated_impact": "Giảm ~60% câu hỏi tư vấn màu, tăng CR listing 10–15%",
+      "estimated_production": "1 buổi chụp + 2 tiếng edit video",
+      "angle": "Model thật 3 tông da (sáng, trung, ngăm) swipe đủ 8 màu — caption 'Tông da bạn hợp màu nào?'",
+      "source": "content_task",
+      "source_product_id": "P001"
+    },
+    {
+      "suggestion_id": "cs-002",
+      "title": "'Son kem lì bị lỗi vòi bơm phải làm sao?' — FAQ + hướng dẫn báo lỗi",
+      "type": "blog_faq",
+      "platform": "Shopee Product Description + Zalo OA",
+      "priority": "high",
+      "status": "pending",
+      "combined_score": 85,
+      "chatbot_count": 8,
+      "chatbot_topic": "Khách báo lỗi vòi bơm son kem lì không ra màu",
+      "review_count": 2,
+      "review_neg_pct": 100,
+      "sample_questions": [
+        "Son vặn mãi không ra màu, có phải hàng lỗi không?",
+        "Bị lỗi sản phẩm thì báo shop qua đâu cho nhanh?"
+      ],
+      "sample_reviews": [
+        "Son bị lỗi vòi bơm, vặn mãi không ra màu",
+        "Nhắn tin không thấy trả lời"
+      ],
+      "estimated_impact": "Giảm 40% khách tức giận khi gặp lỗi, giảm rating 1-2 sao do không biết cách báo lỗi",
+      "estimated_production": "2 tiếng viết + thiết kế banner",
+      "angle": "Hướng dẫn rõ 3 bước: chụp video → nhắn tin shop trong 7 ngày → nhận đổi hàng/hoàn tiền trong 24h",
+      "source": "content_task",
+      "source_product_id": "P002"
+    },
+    {
+      "suggestion_id": "cs-003",
+      "title": "Hướng dẫn chọn tông phấn phủ bột cho da Việt — 'Đừng chọn sai màu như mình'",
+      "type": "guide",
+      "platform": "TikTok + Blog Shopee",
+      "priority": "medium",
+      "status": "saved",
+      "combined_score": 71,
+      "chatbot_count": 14,
+      "chatbot_topic": "Khách hỏi chọn tông phấn phủ theo màu da, lo bị sáng hoặc tối hơn da thật",
+      "review_count": 2,
+      "review_neg_pct": 50,
+      "sample_questions": [
+        "Tông Tự Nhiên và Tông Sáng khác nhau như thế nào?",
+        "Da vàng hơi ngăm dùng tông nào không bị trắng bệch?"
+      ],
+      "sample_reviews": [
+        "Giao nhầm tông màu, đặt tự nhiên mà nhận tông sáng",
+        "Phấn kiềm dầu ổn nhưng hạt phấn hơi to"
+      ],
+      "estimated_impact": "Giảm 50% đơn giao nhầm tông, giảm tỷ lệ hoàn hàng do chọn sai màu",
+      "estimated_production": "1 ngày quay + edit video ngắn 60 giây",
+      "angle": "So sánh 2 tông trực tiếp trên da thật: 'Tự Nhiên = match da vàng ấm Việt, Sáng = dành cho da trắng hồng'",
+      "source": "mock_cluster",
+      "source_product_id": "P003"
+    }
+  ]
+}

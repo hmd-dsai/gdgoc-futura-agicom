@@ -1,0 +1,28 @@
+{
+  "chat_logs": [
+    {
+      "customer_q": "Shop ơi son bóng mã 03 với mã 04 màu trông như thế nào, da vàng thì nên chọn mã nào?",
+      "ai_a": "Dạ mã 03 là đỏ cam rất tôn da vàng ấm, mã 04 là hồng đào nhẹ phù hợp da sáng hơn ạ. Với da vàng thì em tư vấn chị mã 03 hoặc mã 06 (đỏ đô) để màu nổi bật và tôn da ạ.",
+      "insight": "Khách hỏi tư vấn màu son theo tông da — cần bảng màu trực quan hơn trong listing",
+      "hours_ago": 2
+    },
+    {
+      "customer_q": "Son kem lì mình mua hôm qua vặn mãi không ra màu, vòi bơm bị kẹt rồi shop ơi",
+      "ai_a": "Dạ em thành thật xin lỗi chị về sự cố này ạ. Em đã ghi nhận và chuyển thông tin cho bộ phận đổi hàng liên hệ chị trong 30 phút để hỗ trợ đổi sản phẩm mới hoặc hoàn tiền ạ.",
+      "insight": "Khách phàn nàn lỗi vòi bơm son kem lì — cần kiểm tra lô hàng hiện tại",
+      "hours_ago": 6
+    },
+    {
+      "customer_q": "Sữa rửa mặt Hada Labo bên shop có phải hàng nội địa Nhật hay hàng Guardian Việt không?",
+      "ai_a": "Dạ bên em bán Hada Labo nhập từ nhà phân phối chính hãng Guardian Việt Nam ạ, có đầy đủ tem phụ tiếng Việt và hoá đơn nguồn gốc. Chị yên tâm về độ auth nhé, em có thể gửi ảnh chứng từ trước khi chị đặt hàng ạ.",
+      "insight": "Khách hỏi nguồn gốc Hada Labo — cần nêu rõ nguồn Guardian trong mô tả sản phẩm",
+      "hours_ago": 10
+    },
+    {
+      "customer_q": "Bộ phấn phủ tông nào phù hợp da hỗn hợp T-zone dầu ở Hà Nội hả shop?",
+      "ai_a": "Dạ với da hỗn hợp T-zone dầu ở Hà Nội thời tiết nóng ẩm, em tư vấn chị dùng Phấn Phủ Bột GIAO FARA Kềm Dầu tông Tự Nhiên ạ — kiềm dầu 6–8 tiếng, hạt mịn không nặng mặt. Chị có thể dặm lại giữa ngày bằng phiên bản mini 18.000đ tiện mang theo túi ạ.",
+      "insight": "Khách hỏi chọn phấn phủ theo loại da và khí hậu — tiềm năng upsell combo phấn mini",
+      "hours_ago": 18
+    }
+  ]
+}

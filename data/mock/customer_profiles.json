@@ -1,0 +1,118 @@
+{
+  "customer_profiles": [
+    {
+      "customer_id": "customer_vip_01",
+      "churn_probability": 0.05,
+      "emotion_index": 0.9,
+      "customer_segment": "vip",
+      "total_orders": 7,
+      "total_spent": 1540000,
+      "last_purchase_date": "2026-04-25",
+      "purchase_history": [
+        {
+          "date": "25/04/2026",
+          "item": "Son Kem Lì GIAO FARA (Mã 12 + Mã 14)",
+          "value": 78000,
+          "status": "Hoàn tất"
+        },
+        {
+          "date": "10/04/2026",
+          "item": "Bộ Cọ Trang Điểm 13 Món",
+          "value": 87000,
+          "status": "Hoàn tất"
+        },
+        {
+          "date": "20/03/2026",
+          "item": "Set Son Kem Lì 6 Thỏi",
+          "value": 114000,
+          "status": "Hoàn tất"
+        }
+      ],
+      "notes": "Khách VIP mua son và cọ thường xuyên. Hay hỏi tư vấn màu sắc theo outfit. Tiềm năng upsell Hada Labo cleanser và combo trang điểm."
+    },
+    {
+      "customer_id": "customer_atrisk_01",
+      "churn_probability": 0.82,
+      "emotion_index": 0.12,
+      "customer_segment": "at_risk",
+      "total_orders": 2,
+      "total_spent": 198000,
+      "last_purchase_date": "2026-04-28",
+      "purchase_history": [
+        {
+          "date": "28/04/2026",
+          "item": "Son Kem Lì GIAO FARA Mã 01",
+          "value": 39000,
+          "status": "Khiếu nại"
+        },
+        {
+          "date": "15/03/2026",
+          "item": "Phấn Phủ Bột GIAO FARA Tự Nhiên",
+          "value": 129000,
+          "status": "Hoàn tất"
+        }
+      ],
+      "notes": "Phàn nàn son kem lì lỗi vòi bơm, yêu cầu hoàn tiền. Cần xử lý hoàn tiền khẩn trong 24h để giữ chân khách."
+    },
+    {
+      "customer_id": "customer_new_01",
+      "churn_probability": 0.25,
+      "emotion_index": 0.7,
+      "customer_segment": "new",
+      "total_orders": 1,
+      "total_spent": 87000,
+      "last_purchase_date": "2026-04-27",
+      "purchase_history": [
+        {
+          "date": "27/04/2026",
+          "item": "Bộ Cọ Trang Điểm 13 Món",
+          "value": 87000,
+          "status": "Hoàn tất"
+        }
+      ],
+      "notes": "Khách mới, đơn đầu là bộ cọ. Hỏi nhiều về cách vệ sinh cọ. Tiềm năng upsell phấn phủ và son để có đủ bộ trang điểm cơ bản."
+    },
+    {
+      "customer_id": "customer_regular_01",
+      "churn_probability": 0.18,
+      "emotion_index": 0.76,
+      "customer_segment": "regular",
+      "total_orders": 5,
+      "total_spent": 633000,
+      "last_purchase_date": "2026-04-20",
+      "purchase_history": [
+        {
+          "date": "20/04/2026",
+          "item": "Son Bóng GIAO FARA Mã 03 + Mã 06",
+          "value": 78000,
+          "status": "Hoàn tất"
+        },
+        {
+          "date": "02/04/2026",
+          "item": "Phấn Phủ Bột GIAO FARA Tự Nhiên",
+          "value": 129000,
+          "status": "Hoàn tất"
+        },
+        {
+          "date": "15/03/2026",
+          "item": "Kẹp Bấm Mi Chuyên Dụng",
+          "value": 54000,
+          "status": "Hoàn tất"
+        },
+        {
+          "date": "20/02/2026",
+          "item": "Bộ Trang Điểm 6 Món",
+          "value": 74000,
+          "status": "Hoàn tất"
+        },
+        {
+          "date": "10/01/2026",
+          "item": "Son Kem Lì GIAO FARA Mã 09",
+          "value": 39000,
+          "status": "Hoàn tất"
+        }
+      ],
+      "notes": "Mua đa dạng sản phẩm GIAO FARA, trung thành với brand. Chưa thử Hada Labo — tiềm năng upsell skincare."
+    }
+  ]
+}

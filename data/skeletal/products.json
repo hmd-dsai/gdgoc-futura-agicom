@@ -1,0 +1,71 @@
+{
+  "__schema_version": "2.0",
+  "__description": "Product catalog. Structure mirrors teammate's real GIAO FARA shop data from mock_data.json. Each entry serves two purposes: (a) description_for_rag → ChromaDB product_col for RAG; (b) all other fields → operational/analytics dashboard. Multiple entries may share the same product_id (variants differ by variant_id). seed_demo.py deduplicates by product_id before inserting into ChromaDB.",
+  "products": [
+    {
+      "catalog_info": {
+        "product_id": "<string: e.g. P001 — shared across variants of same product>",
+        "variant_id": "<string: unique per variant, e.g. V00101 — upsert key in merge.py>",
+        "sku_code": "<string: internal SKU>",
+        "name": "<string: full display name>",
+        "category_id": "<string: e.g. C01>",
+        "brand_id": "<string: brand name>",
+        "status": "<string: active | inactive | draft>",
+        "industry_category": "<string: optional — e.g. 'Mỹ phẩm & Trang điểm' (present in new.json products)>",
+        "dynamic_attributes": {
+          "<key>": "<string|int: product-specific attribute, e.g. skin_type, finish, pieces>"
+        }
+      },
+      "pricing_and_financials": {
+        "retail_price": "<float: VND>",
+        "current_selling_price": "<float: VND>",
+        "base_cost": "<float: VND>",
+        "packaging_cost": "<float: VND>",
+        "platform_fees": {
+          "fixed_fee_percent": "<float: e.g. 3.0>",
+          "payment_fee_percent": "<float: e.g. 2.0>",
+          "freeship_extra_percent": "<float: e.g. 4.0>",
+          "total_fee_estimate": "<float: VND — pre-calculated>"
+        },
+        "estimated_net_profit": "<float: VND>"
+      },
+      "inventory_management": {
+        "warehouse_id": "<string: e.g. WH-Hanoi>",
+        "quantity_available": "<int>",
+        "quantity_reserved": "<int>",
+        "restock_threshold": "<int>"
+      },
+      "performance_and_behavioral": {
+        "last_updated": "<string: ISO 8601 datetime>",
+        "views_7d": "<int>",
+        "add_to_cart_7d": "<int>",
+        "conversion_rate": "<float: 0.0–1.0>",
+        "sold_count_30d": "<int>",
+        "return_rate": "<float: 0.0–1.0>",
+        "average_rating": "<float: 1.0–5.0>"
+      },
+      "logistics_and_lifecycle": {
+        "weight_gram": "<float>",
+        "dimensions_cm": {
+          "length": "<float>",
+          "width": "<float>",
+          "height": "<float>"
+        },
+        "is_perishable": "<bool: optional>",
+        "expiration_date": "<string: YYYY-MM-DD — empty string if non-perishable>",
+        "warranty_months": "<int: 0 if no warranty>"
+      },
+      "content_and_seo": {
+        "description_length": "<int: character count>",
+        "missing_attributes": [
+          "<string: attribute name>"
+        ],
+        "seo_score": "<int: 0–100>",
+        "keyword_ranking": {
+          "<keyword>": "<int: search rank>"
+        }
+      },
+      "description_for_rag": "<string: natural-language paragraph for ChromaDB. Include: product name, brand, category, key features/ingredients, skin type or use case, price, warranty, compatibility notes. Written in Vietnamese, 3–5 sentences.>"
+    }
+  ]
+}

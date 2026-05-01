@@ -1,0 +1,22 @@
+{
+  "tasks": [
+    {
+      "target_agent": "RiskManager",
+      "product_id": "P002",
+      "instruction": "KHẨN CẤP: Trong 48h ghi nhận 2 khách phản hồi son kem lì GIAO FARA (P002) bị lỗi vòi bơm không ra màu (1 review 2 sao + 1 chat phàn nàn). Kiểm tra ngay lô hàng nhập gần nhất — đối chiếu batch code trên đáy hộp. Nếu xác nhận lỗi lô thì tạm dừng bán và liên hệ toàn bộ khách đã mua lô đó để đổi hàng.",
+      "status": "pending"
+    },
+    {
+      "target_agent": "Pricing",
+      "product_id": "P001",
+      "instruction": "Đối thủ 'Mỹ Phẩm X' (shop Shopee Yêu thích+) đang bán son bóng tương tự giá 35.000đ thấp hơn mình 4.000đ, đã bán 5.500 cái. Đề xuất chiến lược giữ chân khách: ưu tiên tăng giá trị đơn qua combo hoặc voucher thay vì giảm giá trực tiếp để bảo vệ biên lợi nhuận.",
+      "status": "pending"
+    },
+    {
+      "target_agent": "Content",
+      "product_id": "P001",
+      "instruction": "Trong 7 ngày có 20+ câu hỏi về việc chọn mã màu son bóng theo tông da. Cần tạo ngay: (1) Bảng màu chi tiết 8 mã son bóng kèm ảnh thật trên các tông da khác nhau; (2) Video TikTok 30 giây 'Swipe 8 màu son bóng GIAO FARA trên môi thật'. Đăng trong 3 ngày tới.",
+      "status": "pending"
+    }
+  ]
+}

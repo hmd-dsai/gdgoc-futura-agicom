@@ -1,0 +1,12 @@
+{
+  "__schema_version": "1.0",
+  "__description": "AI-to-human action items for SQL coordination_tasks table (CoordinationTask ORM). These are tasks the AI flags for human specialists. target_agent must be one of: RiskManager, Pricing, Content.",
+  "tasks": [
+    {
+      "target_agent": "<string: 'RiskManager' | 'Pricing' | 'Content'>",
+      "product_id": "<string: related product_id from products.json>",
+      "instruction": "<string: specific, actionable instruction for the human agent — include numbers and deadlines where relevant>",
+      "status": "<string: 'pending' | 'completed' | 'archived'>"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "__schema_version": "1.0",
+  "__description": "Per-customer message history for SQL chat_messages table (ChatMessage ORM). Used for RAG context injection (chat history) and CRM relationship tracking. customer_id must match customer_profiles.json. Each customer should have 2–6 alternating user/assistant messages.",
+  "customers": [
+    {
+      "customer_id": "<string: must match customer_profiles.json customer_id>",
+      "messages": [
+        {
+          "role": "<string: 'user' | 'assistant'>",
+          "content": "<string: message text in Vietnamese>"
+        }
+      ]
+    }
+  ]
+}

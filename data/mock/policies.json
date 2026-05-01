@@ -1,0 +1,29 @@
+{
+  "policies": [
+    {
+      "policy_id": "pol-001",
+      "topic": "Đổi trả",
+      "text": "Shop nhận đổi trả trong 7 ngày kể từ ngày nhận hàng nếu sản phẩm còn nguyên seal và chưa mở. Với sản phẩm đã mở nhưng phát sinh lỗi nhà sản xuất (son bị lỗi vòi bơm, phấn bể trong hộp, hộp bị móp ảnh hưởng đến sản phẩm bên trong), shop đổi 1-1 trong 7 ngày kèm ảnh/video minh chứng."
+    },
+    {
+      "policy_id": "pol-002",
+      "topic": "Vận chuyển",
+      "text": "Miễn phí vận chuyển toàn quốc cho đơn từ 300.000đ. Nội thành Hà Nội giao hỏa tốc 2–3 tiếng qua Lalamove. Tỉnh thành khác giao 2–4 ngày qua J&T hoặc GHTK. Đơn dưới 300.000đ phí ship dao động 15.000–30.000đ tùy khu vực."
+    },
+    {
+      "policy_id": "pol-003",
+      "topic": "Bảo hành",
+      "text": "Son bóng và son kem lì GIAO FARA bảo hành lỗi sản phẩm 30 ngày. Bộ cọ trang điểm và kẹp bấm mi bảo hành 1 tháng. Kem rửa mặt Hada Labo nhập khẩu chính hãng từ Guardian — có thể kiểm tra hoá đơn nguồn gốc khi yêu cầu."
+    },
+    {
+      "policy_id": "pol-004",
+      "topic": "Khuyến mãi",
+      "text": "Giảm 5% cho khách mua lần 2 trở đi. Mua từ 3 sản phẩm cùng lúc giảm thêm 10% tổng đơn. Thành viên VIP (chi tiêu tích lũy trên 500.000đ) được freeship không điều kiện và nhận ưu đãi sinh nhật 15% toàn đơn."
+    },
+    {
+      "policy_id": "pol-005",
+      "topic": "Xác thực hàng thật",
+      "text": "GIAO FARA là thương hiệu mỹ phẩm nội địa Việt Nam — shop nhập trực tiếp từ nhà sản xuất, đảm bảo hàng chuẩn auth có tem nhãn phụ tiếng Việt. Hada Labo nhập khẩu từ nhà phân phối chính hãng Guardian Việt Nam, có hoá đơn VAT. Khách có thể yêu cầu xem ảnh chứng từ trước khi đặt hàng."
+    }
+  ]
+}

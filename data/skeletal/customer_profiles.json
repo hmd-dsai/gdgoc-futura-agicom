@@ -1,0 +1,24 @@
+{
+  "__schema_version": "1.0",
+  "__description": "Customer profiles for SQL customer_profiles table (CustomerProfile ORM). Based on kho_du_lieu_cung.json user/shop schema extended with churn/emotion analytics. Include 4 segments: vip, regular, new, at_risk. customer_id must match chat_messages.json.",
+  "customer_profiles": [
+    {
+      "customer_id": "<string: unique customer ID — must match chat_messages.json>",
+      "churn_probability": "<float: 0.0–1.0 (0=very loyal, 1=about to churn)>",
+      "emotion_index": "<float: 0.0–1.0 (0=very negative sentiment, 1=very positive)>",
+      "customer_segment": "<string: 'new' | 'regular' | 'vip' | 'at_risk'>",
+      "total_orders": "<int: lifetime number of completed orders>",
+      "total_spent": "<float: lifetime spend in VND>",
+      "last_purchase_date": "<string: ISO date e.g. 2026-04-10>",
+      "purchase_history": [
+        {
+          "date": "<string: dd/MM/yyyy>",
+          "item": "<string: product name>",
+          "value": "<int: VND>",
+          "status": "<string: 'Hoàn tất' | 'Khiếu nại' | 'Đổi trả'>"
+        }
+      ],
+      "notes": "<string: internal CRM note for chatbot personalization — mention purchase patterns, known preferences, issues>"
+    }
+  ]
+}

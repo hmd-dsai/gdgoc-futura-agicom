@@ -1,0 +1,11 @@
+{
+  "__schema_version": "1.0",
+  "__description": "Verified Q&A pairs for ChromaDB resolved_qa_col (learned knowledge store). Stored as 'Q: ... A: ...' text. Based on learn.json memory entry format but without pre-computed vectors (ChromaDB will embed via default_ef). Add pairs for frequently asked, non-trivial questions that required human verification.",
+  "qa_pairs": [
+    {
+      "qa_id": "<string: e.g. qa-001>",
+      "question": "<string: exact question phrasing a customer asked>",
+      "answer": "<string: verified correct answer from shop owner/staff>"
+    }
+  ]
+}

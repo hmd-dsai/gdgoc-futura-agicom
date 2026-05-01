@@ -1,0 +1,44 @@
+{
+  "__schema_version": "2.0",
+  "__description": "Product reviews for SQL review_logs table, grouped by product. Mirrors teammate's review_mock_data.json structure. seed_demo.py flattens reviews_list into individual ReviewLog rows: customer.username_masked → customer_name, ai_analysis.sentiment + key_aspects → ai_insight. Use review_merge_data.py (in Agicom/data/) to upsert new reviews by review_id.",
+  "review_logs": [
+    {
+      "product_id": "<string: must match a product_id in products.json>",
+      "product_name": "<string: display name for reference>",
+      "summary_stats": {
+        "average_rating": "<float: 1.0–5.0>",
+        "total_reviews": "<int>",
+        "rating_distribution": {
+          "5_star": "<int>",
+          "4_star": "<int>",
+          "3_star": "<int>",
+          "2_star": "<int>",
+          "1_star": "<int>"
+        }
+      },
+      "reviews_list": [
+        {
+          "review_id": "<string: unique, e.g. REV_001 — upsert key in review_merge_data.py>",
+          "variant_id": "<string: optional>",
+          "variant_name": "<string: e.g. 'Màu 01 - Đỏ Thuần'>",
+          "customer": {
+            "username_masked": "<string: masked Shopee username, e.g. 'h*****g'>",
+            "is_verified_buyer": "<bool>"
+          },
+          "rating": "<int: 1–5>",
+          "review_text": "<string: authentic customer review in Vietnamese>",
+          "has_media": "<bool: true if customer attached photo/video>",
+          "created_at": "<string: ISO 8601 datetime>",
+          "ai_analysis": {
+            "sentiment": "<string: Positive | Negative | Neutral>",
+            "key_aspects": [
+              "<string: aspect label, e.g. 'giao hàng nhanh'>"
+            ],
+            "requires_customer_service": "<bool>",
+            "service_trigger_reason": "<string: reason if requires_customer_service=true, else ''>"
+          }
+        }
+      ]
+    }
+  ]
+}

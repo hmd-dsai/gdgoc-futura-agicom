@@ -1,0 +1,234 @@
+{
+  "review_logs": [
+    {
+      "product_id": "P011",
+      "product_name": "Kem Rửa Mặt Dưỡng Ẩm Hada Labo Advanced Nourish Hyaluronic Acid Cleanser 80g",
+      "sku_code": "HL-CLEANSER-80G",
+      "summary_stats": {
+        "average_rating": 4.9,
+        "total_reviews": 4,
+        "rating_distribution": {
+          "5_star": 3,
+          "4_star": 1,
+          "3_star": 0,
+          "2_star": 0,
+          "1_star": 0
+        }
+      },
+      "reviews_list": [
+        {
+          "review_id": "REV_001",
+          "variant_name": "80g",
+          "customer": {
+            "username_masked": "m*****9",
+            "is_verified_buyer": true
+          },
+          "rating": 5,
+          "review_text": "Giao hàng nhanh, đóng gói cẩn thận. Sữa rửa mặt dùng rất thích, rửa xong da mềm mịn không bị khô căng. Sẽ ủng hộ shop tiếp.",
+          "has_media": true,
+          "created_at": "2024-03-15T10:30:00Z",
+          "ai_analysis": {
+            "sentiment": "positive",
+            "key_aspects": [
+              "giao hàng nhanh",
+              "đóng gói kỹ",
+              "không khô da",
+              "mềm mịn"
+            ],
+            "requires_customer_service": false,
+            "service_trigger_reason": ""
+          }
+        },
+        {
+          "review_id": "REV_002",
+          "variant_name": "80g",
+          "customer": {
+            "username_masked": "t*****h",
+            "is_verified_buyer": true
+          },
+          "rating": 5,
+          "review_text": "Hàng chính hãng Guardian nên rất yên tâm. Date xa, dùng Hada Labo bấy lâu nay vẫn là chân ái cho da khô.",
+          "has_media": true,
+          "created_at": "2024-03-20T14:15:00Z",
+          "ai_analysis": {
+            "sentiment": "positive",
+            "key_aspects": [
+              "hàng chính hãng",
+              "date xa",
+              "phù hợp da khô"
+            ],
+            "requires_customer_service": false,
+            "service_trigger_reason": ""
+          }
+        },
+        {
+          "review_id": "REV_003",
+          "variant_name": "80g",
+          "customer": {
+            "username_masked": "nguyenvana12",
+            "is_verified_buyer": true
+          },
+          "rating": 4,
+          "review_text": "Sản phẩm tốt, nhưng hộp hơi bị móp một chút do vận chuyển. May mà bên trong không sao.",
+          "has_media": false,
+          "created_at": "2024-03-22T09:00:00Z",
+          "ai_analysis": {
+            "sentiment": "neutral",
+            "key_aspects": [
+              "chất lượng tốt",
+              "vận chuyển làm móp hộp"
+            ],
+            "requires_customer_service": true,
+            "service_trigger_reason": "Khách phàn nàn về tình trạng hộp móp khi vận chuyển"
+          }
+        },
+        {
+          "review_id": "REV_004",
+          "variant_name": "80g",
+          "customer": {
+            "username_masked": "lananh_beauty",
+            "is_verified_buyer": true
+          },
+          "rating": 5,
+          "review_text": "Săn sale được giá rẻ cực kỳ. Check mã vạch chuẩn auth. Cảm ơn shop nhiều nhé!",
+          "has_media": true,
+          "created_at": "2024-03-25T21:45:00Z",
+          "ai_analysis": {
+            "sentiment": "positive",
+            "key_aspects": [
+              "giá rẻ",
+              "hàng chuẩn auth",
+              "săn sale"
+            ],
+            "requires_customer_service": false,
+            "service_trigger_reason": ""
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "P002",
+      "product_name": "Son Kem Lì GIAO FARA Velvet Lip Tint",
+      "summary_stats": {
+        "average_rating": 4.2,
+        "total_reviews": 2,
+        "rating_distribution": {
+          "5_star": 1,
+          "4_star": 0,
+          "3_star": 0,
+          "2_star": 1,
+          "1_star": 0
+        }
+      },
+      "reviews_list": [
+        {
+          "review_id": "REV_SON_001",
+          "variant_id": "VAR_RED_01",
+          "variant_name": "Màu 01 - Đỏ Thuần",
+          "customer": {
+            "username_masked": "h*****g",
+            "is_verified_buyer": true
+          },
+          "rating": 5,
+          "review_text": "Màu son cực xinh, tôn da lắm nha mọi người. Chất son mịn, không bị khô môi, giao hàng siêu nhanh.",
+          "has_media": true,
+          "created_at": "2026-04-28T08:20:00Z",
+          "ai_analysis": {
+            "sentiment": "Positive",
+            "key_aspects": [
+              "màu đẹp",
+              "tôn da",
+              "chất son mịn",
+              "giao hàng nhanh"
+            ],
+            "requires_customer_service": false,
+            "service_trigger_reason": ""
+          }
+        },
+        {
+          "review_id": "REV_SON_002",
+          "variant_id": "VAR_RED_01",
+          "variant_name": "Màu 01 - Đỏ Thuần",
+          "customer": {
+            "username_masked": "l*****a",
+            "is_verified_buyer": true
+          },
+          "rating": 2,
+          "review_text": "Son bị lỗi vòi bơm, vặn mãi không ra màu. Shop làm ăn chán quá, nhắn tin không thấy trả lời.",
+          "has_media": false,
+          "created_at": "2026-04-30T15:10:00Z",
+          "ai_analysis": {
+            "sentiment": "Negative",
+            "key_aspects": [
+              "lỗi sản phẩm",
+              "phản hồi chậm"
+            ],
+            "requires_customer_service": true,
+            "service_trigger_reason": "Sản phẩm lỗi và khách hàng phàn nàn về dịch vụ phản hồi chậm"
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "P003",
+      "product_name": "Phấn Phủ Dạng Bột Kiềm Dầu GIAO FARA Loose Powder",
+      "summary_stats": {
+        "average_rating": 3.5,
+        "total_reviews": 2,
+        "rating_distribution": {
+          "5_star": 0,
+          "4_star": 1,
+          "3_star": 1,
+          "2_star": 0,
+          "1_star": 0
+        }
+      },
+      "reviews_list": [
+        {
+          "review_id": "REV_PHAN_001",
+          "variant_id": "VAR_NATURAL",
+          "variant_name": "Tông Tự Nhiên",
+          "customer": {
+            "username_masked": "k*****i",
+            "is_verified_buyer": true
+          },
+          "rating": 4,
+          "review_text": "Phấn kiềm dầu khá ổn cho da hỗn hợp. Tuy nhiên hạt phấn hơi to một xíu so với mong đợi.",
+          "has_media": true,
+          "created_at": "2026-04-29T11:45:00Z",
+          "ai_analysis": {
+            "sentiment": "Neutral",
+            "key_aspects": [
+              "kiềm dầu ổn",
+              "hạt phấn to"
+            ],
+            "requires_customer_service": false,
+            "service_trigger_reason": ""
+          }
+        },
+        {
+          "review_id": "REV_PHAN_002",
+          "variant_id": "VAR_NATURAL",
+          "variant_name": "Tông Tự Nhiên",
+          "customer": {
+            "username_masked": "p*****u",
+            "is_verified_buyer": true
+          },
+          "rating": 3,
+          "review_text": "Giao nhầm tông màu cho mình rồi shop ơi, mình đặt tự nhiên mà giao tông sáng quá không dùng được.",
+          "has_media": false,
+          "created_at": "2026-05-01T09:30:00Z",
+          "ai_analysis": {
+            "sentiment": "Negative",
+            "key_aspects": [
+              "giao sai hàng",
+              "tông màu không khớp"
+            ],
+            "requires_customer_service": true,
+            "service_trigger_reason": "Giao sai biến thể (variant) sản phẩm cho khách hàng"
+          }
+        }
+      ]
+    }
+  ]
+}

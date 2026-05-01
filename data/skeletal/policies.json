@@ -1,0 +1,11 @@
+{
+  "__schema_version": "1.0",
+  "__description": "Shop policy documents for ChromaDB policy_col. Each item becomes one RAG document. Cover all customer-facing policies: warranty, shipping, returns, promotions, authenticity.",
+  "policies": [
+    {
+      "policy_id": "<string: e.g. pol-001>",
+      "topic": "<string: Bảo hành | Vận chuyển | Đổi trả | Khuyến mãi | Xác thực hàng thật | Tư vấn da liễu>",
+      "text": "<string: full policy text as the chatbot should cite it — Vietnamese, first-person shop tone, 2–4 sentences>"
+    }
+  ]
+}

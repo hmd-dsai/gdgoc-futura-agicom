@@ -20,7 +20,7 @@ from services import (
 )
 from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog, ContentSuggestion, CustomerProfile, get_or_create_customer_profile
 import config as _cfg
-from seed_demo import seed_vector_db
+from seed_demo import seed_vector_db, seed_sql_db, seed_content_suggestions, seed_customer_profiles
 
 init_db()
 
@@ -351,20 +351,63 @@ async def get_crisis_overview():
         ]
 
         # Bảng chuẩn hóa product_id: nhiều tên khác nhau → 1 ID chính tắc
-        # Thêm alias mới vào đây khi AI tạo ra tên sản phẩm không nhất quán
+        # Nguồn sự thật: data/mock/products.json
         PRODUCT_ALIASES: dict = {
-            "anker-100w-cap":       "ANKER-100W-01",
-            "cáp sạc anker 100w":   "ANKER-100W-01",
-            "cap sac anker 100w":   "ANKER-100W-01",
-            "anker 100w":           "ANKER-100W-01",
-            "cáp anker":            "ANKER-100W-01",
-            "anker":                "ANKER-100W-01",
-            "airpods-p2":           "AIRPODS-P2",
-            "airpods pro 2":        "AIRPODS-P2",
-            "tai nghe airpods pro": "AIRPODS-P2",
-            "s24-ultra-001":        "S24-ULTRA-001",
-            "samsung galaxy s24":   "S24-ULTRA-001",
-            "s24 ultra":            "S24-ULTRA-001",
+            # LUMI-TONER-001 — Some By Mi AHA BHA PHA Toner
+            "lumi-toner-001":           "LUMI-TONER-001",
+            "some by mi toner":         "LUMI-TONER-001",
+            "aha bha pha toner":        "LUMI-TONER-001",
+            "toner some by mi":         "LUMI-TONER-001",
+            "sbmi toner":               "LUMI-TONER-001",
+            "some by mi":               "LUMI-TONER-001",
+            # LUMI-SERUM-001 — The Ordinary Niacinamide
+            "lumi-serum-001":           "LUMI-SERUM-001",
+            "the ordinary niacinamide": "LUMI-SERUM-001",
+            "serum niacinamide":        "LUMI-SERUM-001",
+            "niacinamide serum":        "LUMI-SERUM-001",
+            "the ordinary":             "LUMI-SERUM-001",
+            "ordinary niacinamide":     "LUMI-SERUM-001",
+            # LUMI-SERUM-002 — Klairs Vitamin C
+            "lumi-serum-002":           "LUMI-SERUM-002",
+            "klairs vitamin c":         "LUMI-SERUM-002",
+            "serum vitamin c klairs":   "LUMI-SERUM-002",
+            "klairs serum":             "LUMI-SERUM-002",
+            "freshly juiced":           "LUMI-SERUM-002",
+            "vitamin drop klairs":      "LUMI-SERUM-002",
+            # LUMI-MOISS-001 — Cosrx Snail Cream
+            "lumi-moiss-001":           "LUMI-MOISS-001",
+            "cosrx snail":              "LUMI-MOISS-001",
+            "kem ốc sên":               "LUMI-MOISS-001",
+            "kem oc sen":               "LUMI-MOISS-001",
+            "snail cream cosrx":        "LUMI-MOISS-001",
+            "cosrx advanced snail":     "LUMI-MOISS-001",
+            "cosrx":                    "LUMI-MOISS-001",
+            # LUMI-SUN-001 — Anessa Sunscreen
+            "lumi-sun-001":             "LUMI-SUN-001",
+            "anessa sunscreen":         "LUMI-SUN-001",
+            "kem chống nắng anessa":    "LUMI-SUN-001",
+            "kem chong nang anessa":    "LUMI-SUN-001",
+            "anessa perfect uv":        "LUMI-SUN-001",
+            "anessa":                   "LUMI-SUN-001",
+            # LUMI-CLEAN-001 — Bioderma Micellar Water
+            "lumi-clean-001":           "LUMI-CLEAN-001",
+            "bioderma":                 "LUMI-CLEAN-001",
+            "sensibio":                 "LUMI-CLEAN-001",
+            "nước tẩy trang bioderma":  "LUMI-CLEAN-001",
+            "nuoc tay trang bioderma":  "LUMI-CLEAN-001",
+            # LUMI-MASK-001 — Laneige Water Sleeping Mask
+            "lumi-mask-001":            "LUMI-MASK-001",
+            "laneige water sleeping mask": "LUMI-MASK-001",
+            "mặt nạ ngủ laneige":       "LUMI-MASK-001",
+            "mat na ngu laneige":       "LUMI-MASK-001",
+            "water sleeping mask":      "LUMI-MASK-001",
+            # LUMI-LIP-001 — Laneige Lip Sleeping Mask
+            "lumi-lip-001":             "LUMI-LIP-001",
+            "laneige lip mask":         "LUMI-LIP-001",
+            "lip sleeping mask":        "LUMI-LIP-001",
+            "mặt nạ ngủ môi":           "LUMI-LIP-001",
+            "mat na ngu moi":           "LUMI-LIP-001",
+            "laneige lip":              "LUMI-LIP-001",
         }
         # IDs quá chung chung, không tạo crisis entry riêng
         IGNORED_PIDS = {"general", "none", "unknown", "chat_general", ""}
@@ -812,32 +855,36 @@ async def update_content_suggestion_status(suggestion_id: str, body: dict):
 async def reset_all_data():
     db = SessionLocal()
     try:
-        # 1. Xóa sạch các bảng trong SQL
+        # 1. Xóa toàn bộ SQL (tất cả bảng có thể reset)
         db.query(DB_ChatMessage).delete()
         db.query(ChatLog).delete()
         db.query(CoordinationTask).delete()
+        db.query(ReviewLog).delete()
+        db.query(ContentSuggestion).delete()
+        db.query(CustomerProfile).delete()
         db.commit()
 
         # 2. Xóa và tạo lại các Collections trong Vector DB.
         #    QUAN TRỌNG: Phải cập nhật lại module globals _cfg.policy_col / product_col /
         #    resolved_qa_col để services.py (dùng _get_cols()) luôn nhận đúng collection
         #    mới sau khi reset, tránh lỗi "Collection đã bị xóa" khi query/add.
-        all_col_names = ["policy_db", "product_db", "resolved_qa_db"]
-        for col_name in all_col_names:
+        for col_name in ["policy_db", "product_db", "resolved_qa_db"]:
             try:
                 _cfg.chroma_client.delete_collection(col_name)
             except Exception:
-                pass  # Bỏ qua nếu collection chưa tồn tại
+                pass
 
-        # Tạo lại và gán lại module globals — cùng pattern với seed_demo.clear_data()
         _cfg.policy_col      = _cfg.chroma_client.get_or_create_collection(name="policy_db",      embedding_function=_cfg.default_ef)
         _cfg.product_col     = _cfg.chroma_client.get_or_create_collection(name="product_db",     embedding_function=_cfg.default_ef)
         _cfg.resolved_qa_col = _cfg.chroma_client.get_or_create_collection(name="resolved_qa_db", embedding_function=_cfg.default_ef)
 
-        # 3. Nạp lại dữ liệu nền (seed) để hệ thống hoạt động được ngay sau reset
+        # 3. Nạp lại toàn bộ dữ liệu nền từ data/mock/
         seed_vector_db(_cfg.policy_col, _cfg.product_col, _cfg.resolved_qa_col)
+        seed_sql_db(db)
+        seed_content_suggestions(db)
+        seed_customer_profiles(db)
 
-        return {"status": "success", "message": "Hệ thống đã được reset và nạp lại dữ liệu nền thành công."}
+        return {"status": "success", "message": "Hệ thống đã được reset và nạp lại toàn bộ dữ liệu nền thành công."}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))

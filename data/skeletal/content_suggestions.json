@@ -1,0 +1,32 @@
+{
+  "__schema_version": "1.0",
+  "__description": "AI-generated content recommendations for SQL content_suggestions table (ContentSuggestion ORM). Generated from chatbot trend clusters + review analysis. combined_score = weighted sum of chatbot_count, review_count, review_neg_pct.",
+  "content_suggestions": [
+    {
+      "suggestion_id": "<string: e.g. cs-001>",
+      "title": "<string: descriptive title for the content piece>",
+      "type": "<string: 'video' | 'blog_faq' | 'comparison' | 'guide'>",
+      "platform": "<string: e.g. 'TikTok + YouTube' | 'Blog + Shopee' | 'Website + TikTok'>",
+      "priority": "<string: 'high' | 'medium'>",
+      "status": "<string: 'pending' | 'saved' | 'scheduled' | 'ignored'>",
+      "combined_score": "<int: 0–100>",
+      "chatbot_count": "<int: number of related chatbot messages in past 7 days>",
+      "chatbot_topic": "<string: summary of what customers are asking about>",
+      "review_count": "<int: number of related product reviews>",
+      "review_neg_pct": "<int: 0–100, % of those reviews that are negative/neutral>",
+      "sample_questions": [
+        "<string: example customer question 1>",
+        "<string: example 2>"
+      ],
+      "sample_reviews": [
+        "<string: example review snippet 1>",
+        "<string: example snippet 2>"
+      ],
+      "estimated_impact": "<string: predicted business impact, e.g. 'Giảm ~50% câu hỏi về X, tăng CR 5–8%'>",
+      "estimated_production": "<string: effort to produce, e.g. '1 ngày quay + editing'>",
+      "angle": "<string: recommended content angle / key message to lead with>",
+      "source": "<string: 'content_task' | 'mock_cluster' | 'daily_summary'>",
+      "source_product_id": "<string: product_id from products.json>"
+    }
+  ]
+}

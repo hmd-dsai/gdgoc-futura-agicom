@@ -1,8 +1,27 @@
 import datetime
-import hashlib
 import json
+import os
 from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage, ReviewLog, ContentSuggestion, CustomerProfile, init_db
 import config as _cfg
+
+# ── Path resolution ───────────────────────────────────────────────────────────
+# seed_demo.py lives at: gdgoc-futura-agicom/backend/seed_demo.py
+# Mock data lives at:    gdgoc-futura-agicom/data/mock/
+_BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+_MOCK_DIR = os.path.normpath(os.path.join(_BACKEND_DIR, "../data/mock"))
+
+
+def _load(filename: str) -> dict:
+    """Load a JSON file from the mock data directory."""
+    path = os.path.join(_MOCK_DIR, filename)
+    if not os.path.exists(path):
+        raise FileNotFoundError(
+            f"Mock data file not found: {path}\n"
+            f"Make sure data/mock/{filename} exists relative to the repo root."
+        )
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
 
 def clear_data(db):
     print("[1/5] Đang dọn dẹp dữ liệu cũ...")
@@ -14,255 +33,194 @@ def clear_data(db):
     db.query(ContentSuggestion).delete()
     db.commit()
 
-    # Xóa Vector DB và recreate — cập nhật đúng module globals để services.py luôn dùng đúng collection
+    # Xóa Vector DB và recreate
     for col_name in ["policy_db", "product_db", "resolved_qa_db"]:
         try:
             _cfg.chroma_client.delete_collection(col_name)
-        except:
+        except Exception:
             pass
 
-    _cfg.policy_col     = _cfg.chroma_client.get_or_create_collection(name="policy_db",     embedding_function=_cfg.default_ef)
-    _cfg.product_col    = _cfg.chroma_client.get_or_create_collection(name="product_db",    embedding_function=_cfg.default_ef)
+    _cfg.policy_col      = _cfg.chroma_client.get_or_create_collection(name="policy_db",      embedding_function=_cfg.default_ef)
+    _cfg.product_col     = _cfg.chroma_client.get_or_create_collection(name="product_db",     embedding_function=_cfg.default_ef)
     _cfg.resolved_qa_col = _cfg.chroma_client.get_or_create_collection(name="resolved_qa_db", embedding_function=_cfg.default_ef)
     return _cfg.policy_col, _cfg.product_col, _cfg.resolved_qa_col
+
 
 def seed_vector_db(policy_col, product_col, resolved_qa_col):
     print("[2/5] Đang nạp kiến thức vào Vector DB (RAG)...")
 
-    # 1. Kiến thức Sản phẩm (Chi tiết để AI tư vấn kỹ thuật)
-    products = [
-        "Samsung Galaxy S24 Ultra: Màn hình 6.8 inch Dynamic AMOLED 2X, Chip Snapdragon 8 Gen 3, RAM 12GB, Camera 200MP, Pin 5000mAh, Sạc nhanh 45W. Có bút S-Pen. Màu: Đen, Xám, Tím, Vàng.",
-        "iPhone 15 Pro Max: Khung Titan, Chip A17 Pro, Camera 48MP zoom quang 5x, Màn hình ProMotion 120Hz, Cổng USB-C. Màu: Titan Tự Nhiên, Xanh, Trắng, Đen.",
-        "Cáp sạc Anker 100W: Dây bọc dù bền bỉ, hỗ trợ chuẩn PD (Power Delivery), độ dài 1.8m, chip E-Marker quản lý dòng điện thông minh, tương thích MacBook và điện thoại Android sạc siêu nhanh.",
-        "Tai nghe AirPods Pro 2: Chống ồn chủ động (ANC) cải tiến 2 lần, chip H2, cổng sạc USB-C, thời gian nghe lên đến 6 giờ (30 giờ kèm hộp sạc).",
-        "Ốp lưng Spigen Samsung S24 Ultra: Chất liệu TPU chống sốc quân đội, thiết kế mỏng nhẹ, có gờ bảo vệ camera và màn hình."
-    ]
-    product_col.add(
-        documents=products,
-        ids=[f"prod_{i}" for i in range(len(products))]
-    )
+    # 1. Products — description_for_rag field, deduplicated by product_id.
+    # Multiple variants share the same product_id (e.g. P001 has V00101 and V00104).
+    # ChromaDB requires unique IDs, so we only insert one RAG doc per logical product.
+    products_data = _load("products.json")
+    seen_pids, rag_docs, rag_ids = set(), [], []
+    for p in products_data["products"]:
+        pid = p["catalog_info"]["product_id"]
+        if pid not in seen_pids:
+            seen_pids.add(pid)
+            rag_docs.append(p["description_for_rag"])
+            rag_ids.append(pid)
+    product_col.add(documents=rag_docs, ids=rag_ids)
+    print(f"  → {len(rag_ids)} sản phẩm nạp vào product_db ({len(products_data['products'])} variants, {len(rag_ids)} unique product IDs)")
 
-    # 2. Chính sách Shop
-    policies = [
-        "Chính sách bảo hành: Điện thoại bảo hành 12 tháng chính hãng. Phụ kiện bảo hành 6 tháng 1 đổi 1 nếu có lỗi NSX.",
-        "Chính sách vận chuyển: Freeship toàn quốc đơn từ 500k. Nội thành Hà Nội/TP.HCM giao hỏa tốc trong 2h.",
-        "Chính sách đổi trả: Khách được đổi trả trong 7 ngày đầu nếu sản phẩm còn nguyên seal, chưa kích hoạt (với điện thoại).",
-        "Khuyến mãi: Giảm thêm 200k cho khách hàng cũ quay lại mua máy lần 2."
-    ]
+    # 2. Policies
+    policies_data = _load("policies.json")
     policy_col.add(
-        documents=policies,
-        ids=[f"pol_{i}" for i in range(len(policies))]
+        documents=[p["text"] for p in policies_data["policies"]],
+        ids=[p["policy_id"] for p in policies_data["policies"]]
     )
+    print(f"  → {len(policies_data['policies'])} chính sách nạp vào policy_db")
 
-    # 3. Kinh nghiệm đã học (Resolved QA)
-    qas = [
-        "Q: Shop có trả góp không? A: Dạ shop có trả góp 0% qua thẻ tín dụng của 25 ngân hàng hoặc qua công ty tài chính Home Credit/HD Saison.",
-        "Q: S24 Ultra có sẵn màu Tím không? A: Dạ hiện tại bản 256GB màu Tím đang sẵn hàng tại chi nhánh Quận 1, mình có thể qua xem trực tiếp ạ.",
-        "Q: Cáp Anker có dùng được cho Macbook Air M2 không? A: Dạ hoàn toàn được ạ, cáp hỗ trợ 100W nên sạc tối đa công suất cho Macbook Air luôn ạ."
-    ]
+    # 3. Resolved Q&A (learned knowledge)
+    qa_data = _load("resolved_qa.json")
     resolved_qa_col.add(
-        documents=qas,
-        ids=[f"qa_{i}" for i in range(len(qas))]
+        documents=[f"Q: {q['question']} A: {q['answer']}" for q in qa_data["qa_pairs"]],
+        ids=[q["qa_id"] for q in qa_data["qa_pairs"]]
     )
+    print(f"  → {len(qa_data['qa_pairs'])} Q&A pairs nạp vào resolved_qa_db")
+
 
 def seed_sql_db(db):
     print("[3/5] Đang nạp lịch sử giao dịch và hội thoại (SQL)...")
     now = datetime.datetime.utcnow()
 
-    # 1. Chat Logs (Dữ liệu cho Daily Summary và Sensor Insight)
+    # 1. Chat Logs (Daily Summary & Sensor Insight)
+    chat_logs_data = _load("chat_logs.json")
     logs = [
-        ChatLog(customer_q="Cáp sạc Anker mới mua 1 tuần đã hỏng, shop làm ăn gì kỳ vậy?", ai_a="Dạ em rất tiếc về trải nghiệm này, em đã chuyển thông tin cho quản lý bảo hành xử lý ngay cho mình ạ.", insight="Khách phàn nàn chất lượng cáp Anker (Lỗi lô hàng?)", timestamp=now - datetime.timedelta(hours=2)),
-        ChatLog(customer_q="Bên Hoàng Hà bán S24 Ultra rẻ hơn shop 500k, shop có giảm thêm không?", ai_a="Dạ bên em cam kết hàng chính hãng và có tặng kèm ốp Spigen 350k ạ.", insight="Khách chê giá đắt hơn đối thủ Hoàng Hà", timestamp=now - datetime.timedelta(hours=5)),
-        ChatLog(customer_q="Pin con S24 Ultra này dùng thực tế được bao lâu hả shop?", ai_a="Dạ pin 5000mAh dùng hỗn hợp liên tục khoảng 8-10 tiếng ạ.", insight="Khách hỏi nhiều về thời lượng pin S24 Ultra", timestamp=now - datetime.timedelta(hours=8))
+        ChatLog(
+            customer_q=item["customer_q"],
+            ai_a=item["ai_a"],
+            insight=item["insight"],
+            timestamp=now - datetime.timedelta(hours=item["hours_ago"])
+        )
+        for item in chat_logs_data["chat_logs"]
     ]
     db.add_all(logs)
+    print(f"  → {len(logs)} chat logs")
 
-    # 2. Review Logs (Kịch bản Khủng hoảng - Crisis)
-    reviews = [
-        ReviewLog(product_id="ANKER-100W-01", rating=1, review_text="Sạc được 3 ngày thì hỏng, dây nóng ran. Quá thất vọng!", customer_name="Hoàng Mạnh", ai_insight="Cảnh báo: Lỗi cháy nổ/nóng dây cáp Anker"),
-        ReviewLog(product_id="ANKER-100W-01", rating=2, review_text="Giao hàng nhanh nhưng cáp dùng chập chờn lúc được lúc không.", customer_name="Lê Văn C", ai_insight="Vấn đề tiếp xúc đầu cắm cáp Anker"),
-        ReviewLog(product_id="S24-ULTRA-001", rating=5, review_text="Máy quá đẹp, sếp shop tư vấn nhiệt tình, ship hỏa tốc 1h là nhận được luôn.", customer_name="Nguyễn Tuấn", ai_insight="Khen ngợi dịch vụ giao hàng hỏa tốc"),
-        ReviewLog(product_id="AIRPODS-P2", rating=4, review_text="Tai nghe hay, chống ồn tốt nhưng pin không được 6h như quảng cáo, chỉ tầm 5h.", customer_name="Minh Nguyệt", ai_insight="Khách phản hồi pin AirPods thấp hơn kỳ vọng")
-    ]
+    # 2. Review Logs (Crisis detection & content engine)
+    # review_logs.json is grouped by product (teammate's format):
+    #   { "review_logs": [ { "product_id": ..., "reviews_list": [ {...}, ... ] } ] }
+    # Flatten into individual ReviewLog rows, mapping the richer ai_analysis
+    # fields onto the existing ReviewLog.ai_insight column.
+    review_logs_data = _load("review_logs.json")
+    reviews = []
+    for product in review_logs_data["review_logs"]:
+        pid = product["product_id"]
+        for item in product.get("reviews_list", []):
+            analysis  = item.get("ai_analysis", {})
+            sentiment = analysis.get("sentiment", "")
+            aspects   = analysis.get("key_aspects", [])
+            ai_insight = f"{sentiment}: {', '.join(aspects)}" if aspects else sentiment
+            trigger    = analysis.get("service_trigger_reason", "")
+            if analysis.get("requires_customer_service") and trigger:
+                ai_insight += f" | CS: {trigger}"
+            reviews.append(ReviewLog(
+                product_id=pid,
+                rating=item["rating"],
+                review_text=item["review_text"],
+                customer_name=item.get("customer", {}).get("username_masked", "Ẩn danh"),
+                ai_insight=ai_insight,
+            ))
     db.add_all(reviews)
+    print(f"  → {len(reviews)} reviews")
 
-    # 3. Chat Messages (Lịch sử hội thoại thực cho khách VIP để demo RAG + History)
-    vip_id = "customer_vip_88"
-    msgs = [
-        ChatMessage(customer_id=vip_id, role="user", content="Chào shop, mình là khách quen đây."),
-        ChatMessage(customer_id=vip_id, role="assistant", content="Dạ chào anh B, rất vui được gặp lại anh! Anh cần hỗ trợ gì cho chiếc iPhone 15 Pro Max anh mua tháng trước ạ?"),
-        ChatMessage(customer_id=vip_id, role="user", content="Mình định lấy thêm 3 cái cáp Anker 100W cho công ty, có bớt không?"),
-        ChatMessage(customer_id=vip_id, role="assistant", content="Dạ với khách VIP như anh, em giảm thêm 10% tổng đơn phụ kiện và tặng kèm túi đựng cáp chuyên dụng ạ.")
-    ]
-    db.add_all(msgs)
+    # 3. Chat Messages (Per-customer conversation history for RAG context)
+    chat_msgs_data = _load("chat_messages.json")
+    total_msgs = 0
+    for customer in chat_msgs_data["customers"]:
+        for msg in customer["messages"]:
+            db.add(ChatMessage(
+                customer_id=customer["customer_id"],
+                role=msg["role"],
+                content=msg["content"]
+            ))
+            total_msgs += 1
+    print(f"  → {total_msgs} chat messages ({len(chat_msgs_data['customers'])} khách)")
 
-    # 4. Coordination Tasks (Các nhiệm vụ mà AI giao cho con người)
+    # 4. Coordination Tasks (AI-to-human task handoffs)
+    tasks_data = _load("coordination_tasks.json")
     tasks = [
-        CoordinationTask(target_agent="RiskManager", product_id="ANKER-100W-01", instruction="KHẨN CẤP: Có 2 review 1-2 sao và 3 khách phàn nàn về cáp Anker bị hỏng sau 1 tuần. Kiểm tra ngay lô hàng nhập ngày 01/10.", status="pending"),
-        CoordinationTask(target_agent="Pricing", product_id="S24-ULTRA-001", instruction="Đối thủ Hoàng Hà đang giảm giá S24 Ultra xuống còn 28.5tr. Đề xuất điều chỉnh voucher để giữ chân khách hỏi giá.", status="pending"),
-        CoordinationTask(target_agent="Content", product_id="S24-ULTRA-001", instruction="Khách hỏi nhiều về pin. Cần bổ sung video test pin thực tế vào mô tả sản phẩm trên Shopee/Tiktok.", status="pending")
+        CoordinationTask(
+            target_agent=item["target_agent"],
+            product_id=item["product_id"],
+            instruction=item["instruction"],
+            status=item["status"]
+        )
+        for item in tasks_data["tasks"]
     ]
     db.add_all(tasks)
+    print(f"  → {len(tasks)} coordination tasks")
+
     db.commit()
+
 
 def seed_content_suggestions(db):
     print("[4/5] Đang nạp đề xuất content mẫu...")
     now = datetime.datetime.utcnow()
+
+    data = _load("content_suggestions.json")
     suggestions = [
         ContentSuggestion(
-            suggestion_id="cs-seed-001",
-            title='Video test pin S24 Ultra — "72 giờ sử dụng thực tế"',
-            type="video",
-            platform="TikTok + YouTube",
-            priority="high",
-            status="pending",
-            combined_score=94,
-            chatbot_count=23,
-            chatbot_topic="Hỏi thời lượng pin S24 Ultra",
-            review_count=23,
-            review_neg_pct=74,
-            sample_questions=json.dumps(["Pin dùng được mấy tiếng?", "Pin chơi game thì hao nhanh không?"], ensure_ascii=False),
-            sample_reviews=json.dumps(["Pin tụt nhanh khi dùng camera zoom", "Pin không được như quảng cáo"], ensure_ascii=False),
-            estimated_impact="Giảm ~60% câu hỏi về pin, tăng CR 8-12%",
-            estimated_production="1 ngày quay + editing",
-            angle="Test thực tế: sạc đầy lúc 8h sáng, dùng hết ngày làm việc, còn bao nhiêu %?",
-            source="content_task",
-            source_product_id="S24-ULTRA-001",
+            suggestion_id=item["suggestion_id"],
+            title=item["title"],
+            type=item["type"],
+            platform=item["platform"],
+            priority=item["priority"],
+            status=item["status"],
+            combined_score=item["combined_score"],
+            chatbot_count=item["chatbot_count"],
+            chatbot_topic=item["chatbot_topic"],
+            review_count=item["review_count"],
+            review_neg_pct=item["review_neg_pct"],
+            sample_questions=json.dumps(item["sample_questions"], ensure_ascii=False),
+            sample_reviews=json.dumps(item["sample_reviews"], ensure_ascii=False),
+            estimated_impact=item["estimated_impact"],
+            estimated_production=item["estimated_production"],
+            angle=item["angle"],
+            source=item["source"],
+            source_product_id=item["source_product_id"],
             created_at=now
-        ),
-        ContentSuggestion(
-            suggestion_id="cs-seed-002",
-            title='"AirPods Pro 2 có dùng được với Android không?" — FAQ + Video test',
-            type="blog_faq",
-            platform="Blog + TikTok",
-            priority="high",
-            status="saved",
-            combined_score=87,
-            chatbot_count=12,
-            chatbot_topic="Hỏi kết nối với Samsung/Android",
-            review_count=6,
-            review_neg_pct=83,
-            sample_questions=json.dumps(["Dùng với Samsung được không?", "ANC dùng được trên Android không?"], ensure_ascii=False),
-            sample_reviews=json.dumps(["Mua về dùng Samsung, kết nối chập chờn", "ANC không hoạt động trên Android"], ensure_ascii=False),
-            estimated_impact="Giảm 40% câu hỏi về Android, set expectations đúng",
-            estimated_production="2-3 giờ viết + test",
-            angle="Trả lời thẳng: AirPods Pro 2 hoạt động với Android nhưng bị giới hạn tính năng nào...",
-            source="content_task",
-            source_product_id="AIRPODS-P2",
-            created_at=now
-        ),
-        ContentSuggestion(
-            suggestion_id="cs-seed-003",
-            title="Bảng giá sỉ B2B — Landing page cho khách doanh nghiệp từ 5 máy",
-            type="guide",
-            platform="Website + Shopee",
-            priority="medium",
-            status="pending",
-            combined_score=76,
-            chatbot_count=12,
-            chatbot_topic="Hỏi giá sỉ từ 5 sản phẩm",
-            review_count=0,
-            review_neg_pct=0,
-            sample_questions=json.dumps(["Mua sỉ từ bao nhiêu thì được giảm?", "Có invoice/hóa đơn VAT không?"], ensure_ascii=False),
-            sample_reviews=json.dumps([], ensure_ascii=False),
-            estimated_impact="Mở rộng kênh B2B, tăng AOV lên 5-10x",
-            estimated_production="1 ngày thiết kế landing page",
-            angle="Tạo trang giá sỉ riêng với bảng chiết khấu theo số lượng, form liên hệ tư vấn B2B.",
-            source="content_task",
-            source_product_id="S24-ULTRA-001",
-            created_at=now
-        ),
+        )
+        for item in data["content_suggestions"]
     ]
     db.add_all(suggestions)
     db.commit()
+    print(f"  → {len(suggestions)} content suggestions")
+
 
 def seed_customer_profiles(db):
-    print("[6/6] Đang seed hồ sơ khách hàng (CustomerProfile)...")
+    print("[5/5] Đang seed hồ sơ khách hàng (CustomerProfile)...")
     now = datetime.datetime.utcnow()
 
-    # Xóa dữ liệu cũ
     db.query(CustomerProfile).delete()
     db.commit()
 
+    data = _load("customer_profiles.json")
     profiles = [
-        # Khách VIP — trung thành cao, cảm xúc tích cực
         CustomerProfile(
-            customer_id="demo_vip_001",
-            churn_probability=0.05,
-            emotion_index=0.88,
-            customer_segment="vip",
-            total_orders=8,
-            total_spent=42500000.0,
-            last_purchase_date="2026-04-10",
-            purchase_history=json.dumps([
-                {"date": "10/04/2026", "item": "Samsung Galaxy S24 Ultra", "value": 28900000, "status": "Hoàn tất"},
-                {"date": "15/03/2026", "item": "Ốp Spigen S24 Ultra", "value": 350000, "status": "Hoàn tất"},
-                {"date": "02/02/2026", "item": "Cáp Anker 100W (x2)", "value": 700000, "status": "Hoàn tất"},
-            ], ensure_ascii=False),
-            notes="Khách mua bulk Samsung, thường hỏi giá sỉ. Ưu tiên xử lý nhanh.",
+            customer_id=item["customer_id"],
+            churn_probability=item["churn_probability"],
+            emotion_index=item["emotion_index"],
+            customer_segment=item["customer_segment"],
+            total_orders=item["total_orders"],
+            total_spent=item["total_spent"],
+            last_purchase_date=item["last_purchase_date"],
+            purchase_history=json.dumps(item["purchase_history"], ensure_ascii=False),
+            notes=item["notes"],
             created_at=now,
             updated_at=now,
-        ),
-        # Khách có nguy cơ rời bỏ — phàn nàn gần đây
-        CustomerProfile(
-            customer_id="demo_atrisk_001",
-            churn_probability=0.78,
-            emotion_index=0.18,
-            customer_segment="at_risk",
-            total_orders=2,
-            total_spent=5550000.0,
-            last_purchase_date="2026-04-08",
-            purchase_history=json.dumps([
-                {"date": "08/04/2026", "item": "AirPods Pro 2", "value": 5200000, "status": "Khiếu nại"},
-                {"date": "10/03/2026", "item": "Ốp lưng iPhone", "value": 350000, "status": "Hoàn tất"},
-            ], ensure_ascii=False),
-            notes="Phàn nàn AirPods lỗi âm thanh sau 1 tuần. Cần xử lý bảo hành khẩn.",
-            created_at=now,
-            updated_at=now,
-        ),
-        # Khách mới — chưa mua nhiều
-        CustomerProfile(
-            customer_id="demo_new_001",
-            churn_probability=0.30,
-            emotion_index=0.60,
-            customer_segment="new",
-            total_orders=1,
-            total_spent=350000.0,
-            last_purchase_date="2026-04-07",
-            purchase_history=json.dumps([
-                {"date": "07/04/2026", "item": "Cáp Anker 100W", "value": 350000, "status": "Hoàn tất"},
-            ], ensure_ascii=False),
-            notes="Khách mới, hỏi nhiều về bảo hành. Tiềm năng upsell tai nghe.",
-            created_at=now,
-            updated_at=now,
-        ),
-        # Khách quen — trung thành trung bình
-        CustomerProfile(
-            customer_id="demo_regular_001",
-            churn_probability=0.22,
-            emotion_index=0.70,
-            customer_segment="regular",
-            total_orders=4,
-            total_spent=12400000.0,
-            last_purchase_date="2026-04-05",
-            purchase_history=json.dumps([
-                {"date": "05/04/2026", "item": "iPhone 15 Pro Max", "value": 8500000, "status": "Hoàn tất"},
-                {"date": "20/03/2026", "item": "AirPods Pro 2", "value": 3200000, "status": "Hoàn tất"},
-                {"date": "10/02/2026", "item": "Cáp USB-C Anker", "value": 350000, "status": "Hoàn tất"},
-                {"date": "15/01/2026", "item": "Ốp lưng Spigen", "value": 350000, "status": "Hoàn tất"},
-            ], ensure_ascii=False),
-            notes="Mua nhiều Apple ecosystem. Quan tâm đến accessory chính hãng.",
-            created_at=now,
-            updated_at=now,
-        ),
+        )
+        for item in data["customer_profiles"]
     ]
     db.add_all(profiles)
     db.commit()
-    print(f"  → Đã seed {len(profiles)} customer profiles.")
+    print(f"  → {len(profiles)} customer profiles")
 
 
 def main():
     print("=== AGICOM DEMO SEEDER ===")
+    print(f"Đọc dữ liệu từ: {_MOCK_DIR}\n")
     init_db()
     db = SessionLocal()
 
@@ -273,14 +231,24 @@ def main():
         seed_content_suggestions(db)
         seed_customer_profiles(db)
 
+        # Load counts for summary
+        products_count = len(_load("products.json")["products"])
+        policies_count = len(_load("policies.json")["policies"])
+        qa_count       = len(_load("resolved_qa.json")["qa_pairs"])
+
         print("\n[SUCCESS] Hệ thống đã sẵn sàng cho Demo!")
-        print("- Vector DB: 5 Sản phẩm, 4 Chính sách, 3 QA mẫu.")
-        print("- SQL DB: 3 Logs Insight, 4 Reviews (1 Crisis), 4 Messages History, 3 Tasks, 3 Content Suggestions, 4 Customer Profiles.")
+        print(f"- Vector DB: {products_count} Sản phẩm, {policies_count} Chính sách, {qa_count} QA pairs.")
+        print("- SQL DB: Chat Logs, Reviews, Chat Messages, Tasks, Content Suggestions, Customer Profiles.")
+    except FileNotFoundError as e:
+        print(f"\n[ERROR] Không tìm thấy file mock data:\n{e}")
     except Exception as e:
+        import traceback
         print(f"\n[ERROR] Lỗi trong quá trình seed: {e}")
+        traceback.print_exc()
         db.rollback()
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     main()

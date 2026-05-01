@@ -1,0 +1,46 @@
+{
+  "customers": [
+    {
+      "customer_id": "customer_vip_01",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Chào shop, mình là khách hay mua son ở đây nè."
+        },
+        {
+          "role": "assistant",
+          "content": "Dạ chào chị! Em nhận ra chị — chị hay mua son kem lì và bộ cọ bên em ạ. Lần này chị cần hỗ trợ gì không ạ?"
+        },
+        {
+          "role": "user",
+          "content": "Mình muốn mua thêm 2 thỏi son bóng mã 03 tặng bạn, còn hàng không shop?"
+        },
+        {
+          "role": "assistant",
+          "content": "Dạ mã 03 còn hàng ạ! Với chị là khách VIP, em giữ 2 thỏi cho chị luôn nhé. Chị có muốn ghép thêm 1 món nữa để đủ combo 3 món được giảm 10% tổng đơn không ạ?"
+        }
+      ]
+    },
+    {
+      "customer_id": "customer_atrisk_01",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Son kem lì vặn không ra màu, vòi bơm bị lỗi rồi. Shop bán hàng kiểu này à?"
+        },
+        {
+          "role": "assistant",
+          "content": "Dạ em thành thật xin lỗi chị ạ, trường hợp này hoàn toàn do lỗi sản phẩm. Em đã ghi nhận và sẽ có nhân viên liên hệ chị trong 30 phút để đổi hàng mới hoặc hoàn tiền, chị chọn hình thức nào cũng được ạ."
+        },
+        {
+          "role": "user",
+          "content": "Thôi mình muốn hoàn tiền, không muốn đổi nữa."
+        },
+        {
+          "role": "assistant",
+          "content": "Dạ em hiểu ạ. Chị vui lòng giữ sản phẩm và gửi ảnh/video lỗi qua chat này để em xử lý hoàn tiền trong 24h ạ. Em thành thật xin lỗi vì trải nghiệm này."
+        }
+      ]
+    }
+  ]
+}

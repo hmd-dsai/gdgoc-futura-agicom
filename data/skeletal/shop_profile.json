@@ -1,0 +1,46 @@
+{
+  "__schema_version": "1.0",
+  "__description": "Shop owner / tenant profile for future SQL seeding (no ORM model yet — placeholder). Mirrors kho_du_lieu_cung.json structure exactly. Describes the Agicom tenant (shop owner user), their connected platform shop, and subscription plan.",
+  "users": [
+    {
+      "user_id": "<string: unique UUID>",
+      "email": "<string: owner email>",
+      "password_hash": "<string: bcrypt hash of password>",
+      "full_name": "<string: owner full name>",
+      "phone_number": "<string: Vietnamese mobile, e.g. 0901234567>",
+      "created_at": "<string: ISO datetime>",
+      "last_login": "<string: ISO datetime>",
+      "role": "<string: 'owner' | 'staff' | 'viewer'>"
+    }
+  ],
+  "shops": [
+    {
+      "shop_id": "<string: unique shop ID>",
+      "user_id": "<string: references users[].user_id>",
+      "platform": "<string: 'shopee' | 'tiktok_shop' | 'lazada'>",
+      "shop_name": "<string: shop display name on the platform>",
+      "platform_shop_id": "<string: the shop's native ID on the e-commerce platform>",
+      "auth_credentials": {
+        "access_token": "<string: OAuth access token — mask with *** in real data>",
+        "refresh_token": "<string: OAuth refresh token>",
+        "expires_at": "<string: ISO datetime>"
+      },
+      "status": "<string: 'connected' | 'disconnected' | 'pending'>",
+      "sync_settings": {
+        "auto_reply": "<bool: true = AI auto-sends approved replies>",
+        "sync_interval_minutes": "<int: how often to pull new chats/reviews from platform>"
+      }
+    }
+  ],
+  "subscriptions": [
+    {
+      "subscription_id": "<string: unique subscription ID>",
+      "user_id": "<string: references users[].user_id>",
+      "plan_name": "<string: 'starter' | 'growth' | 'enterprise'>",
+      "billing_cycle": "<string: 'monthly' | 'annual'>",
+      "start_date": "<string: ISO date>",
+      "end_date": "<string: ISO date>",
+      "is_active": "<bool>"
+    }
+  ]
+}
