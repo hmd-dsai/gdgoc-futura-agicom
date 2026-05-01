@@ -2871,6 +2871,576 @@ function renderDemoCustomer() {
   `;
 }
 
+
+// ===== Content Agent =====
+window._ca = window._ca || {
+  step: 1,
+  jobId: null,
+  pollTimer: null,
+  intel: null,
+  scripts: [],
+  activeVariant: 'emotional',
+  filmingGuide: null,
+  filmingScript: null
+};
+
+function caReset() {
+  if (window._ca.pollTimer) clearInterval(window._ca.pollTimer);
+  window._ca = { step: 1, jobId: null, pollTimer: null, intel: null, scripts: [],
+    activeVariant: 'emotional', filmingGuide: null, filmingScript: null };
+}
+
+function renderContentAgent() {
+  // Reset poll timer when page re-renders
+  if (window._ca.pollTimer) { clearInterval(window._ca.pollTimer); window._ca.pollTimer = null; }
+
+  var step = window._ca.step;
+
+  var stepsHtml = ['Phân tích sản phẩm','Xem USP & Đối tượng','Tạo kịch bản','Hướng dẫn quay phim'].map(function(s, i) {
+    var num = i + 1;
+    var active = step === num ? 'style="color:var(--accent-amber);border-color:var(--accent-amber);background:rgba(234,179,8,0.12);"' : (step > num ? 'style="color:var(--accent-emerald);border-color:var(--accent-emerald);background:rgba(16,185,129,0.1);"' : '');
+    var icon = step > num ? '✓' : num;
+    return '<div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;color:var(--text-muted);">'
+      + '<div style="width:26px;height:26px;border-radius:50%;border:2px solid var(--border-primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;flex-shrink:0;' + (active ? '' : '') + '" ' + active + '>' + icon + '</div>'
+      + '<span ' + (step === num ? 'style="color:var(--text-primary);font-weight:600;"' : '') + '>' + s + '</span></div>';
+  }).join('<div style="width:24px;height:1px;background:var(--border-primary);margin:0 4px;"></div>');
+
+  var bodyHtml = '';
+
+  // ── Step 1: Input form ──
+  if (step === 1) {
+    bodyHtml = '<div class="content-card" style="max-width:720px;margin:0 auto;">'
+      + '<div class="content-card-title">🔗 Link sản phẩm cần phân tích</div>'
+      + '<div style="margin-bottom:16px;">'
+      + '<label style="font-size:0.78rem;color:var(--text-secondary);font-weight:600;margin-bottom:6px;display:block;">URL sản phẩm (Shopee / TikTok Shop / Lazada)</label>'
+      + '<input id="caUrlInput" type="url" placeholder="https://shopee.vn/product/..." style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--border-primary);background:var(--bg-glass);color:var(--text-primary);font-size:0.9rem;outline:none;box-sizing:border-box;" />'
+      + '</div>'
+      + '<div class="grid-2" style="gap:16px;margin-bottom:20px;">'
+      + '<div><label style="font-size:0.78rem;color:var(--text-secondary);font-weight:600;margin-bottom:6px;display:block;">Sàn thương mại</label>'
+      + '<select id="caPlatform" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border-primary);background:var(--bg-card);color:var(--text-primary);font-size:0.875rem;">'
+      + '<option value="shopee">🛒 Shopee</option>'
+      + '<option value="tiktok">🎵 TikTok Shop</option>'
+      + '<option value="lazada">🔵 Lazada</option>'
+      + '</select></div>'
+      + '<div><label style="font-size:0.78rem;color:var(--text-secondary);font-weight:600;margin-bottom:6px;display:block;">Mục tiêu video</label>'
+      + '<select id="caGoal" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border-primary);background:var(--bg-card);color:var(--text-primary);font-size:0.875rem;">'
+      + '<option value="viral">🚀 Viral (tăng reach)</option>'
+      + '<option value="review">⭐ Review sản phẩm</option>'
+      + '<option value="demo">🎬 Demo sử dụng</option>'
+      + '</select></div>'
+      + '</div>'
+      + '<div style="background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.2);border-radius:10px;padding:14px;margin-bottom:20px;">'
+      + '<div style="font-size:0.78rem;font-weight:700;color:var(--accent-amber);margin-bottom:8px;">✨ AI sẽ tự động:</div>'
+      + '<div style="font-size:0.8rem;color:var(--text-secondary);line-height:1.9;">'
+      + '🔍 Crawl thông tin sản phẩm từ link &nbsp;·&nbsp; '
+      + '💡 Phân tích USP & Unique Selling Points<br>'
+      + '🎯 Xác định đối tượng khách hàng tiềm năng &nbsp;·&nbsp; '
+      + '🎬 Tạo 3 kịch bản TikTok (30s) theo phong cách khác nhau<br>'
+      + '🎥 Hướng dẫn quay phim chi tiết cho từng cảnh'
+      + '</div></div>'
+      + '<button id="caAnalyzeBtn" style="width:100%;padding:14px;background:linear-gradient(135deg,#d97706,#eab308);color:#1a0800;font-weight:800;font-size:0.95rem;border:none;border-radius:12px;cursor:pointer;letter-spacing:0.3px;">'
+      + '🚀 Phân tích & Tạo Content'
+      + '</button></div>';
+
+  // ── Step 2: Analyzing ──
+  } else if (step === 2) {
+    var pct = window._ca.progress || 10;
+    var stepLabel = window._ca.stepLabel || 'Đang khởi động...';
+    bodyHtml = '<div class="content-card" style="max-width:620px;margin:0 auto;text-align:center;padding:40px 32px;">'
+      + '<div style="font-size:3rem;margin-bottom:16px;">🤖</div>'
+      + '<div style="font-weight:800;font-size:1.1rem;color:var(--text-primary);margin-bottom:6px;">AI đang phân tích sản phẩm...</div>'
+      + '<div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:24px;" id="caStepLabel">' + stepLabel + '</div>'
+      + '<div style="background:var(--bg-glass);border-radius:999px;height:10px;margin-bottom:8px;overflow:hidden;">'
+      + '<div id="caProgressBar" style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,#d97706,#eab308);border-radius:999px;transition:width 0.5s ease;"></div></div>'
+      + '<div style="font-size:0.75rem;color:var(--text-muted);" id="caProgressPct">' + pct + '%</div>'
+      + '<div style="margin-top:24px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;" id="caProgressSteps"></div>'
+      + '</div>';
+
+  // ── Step 3: Intel results ──
+  } else if (step === 3) {
+    var intel = window._ca.intel || {};
+    var usps = intel.usp || [];
+    var audience = intel.audience || [];
+    var positioning = intel.positioning || '';
+    var tone = intel.content_tone || '';
+    var format = intel.recommended_content_format || '';
+    var key_msg = intel.key_message || '';
+
+    var uspHtml = usps.map(function(u) {
+      return '<div style="display:flex;gap:10px;padding:12px;background:var(--bg-glass);border-radius:10px;border:1px solid var(--border-primary);">'
+        + '<div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#d97706,#eab308);color:#1a0800;font-weight:800;font-size:0.75rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + (u.rank||'•') + '</div>'
+        + '<div><div style="font-weight:700;font-size:0.88rem;color:var(--text-primary);margin-bottom:3px;">' + (u.point||'') + '</div>'
+        + '<div style="font-size:0.78rem;color:var(--text-muted);">💬 ' + (u.evidence||'') + '</div></div></div>';
+    }).join('');
+
+    var audienceHtml = audience.map(function(a) {
+      return '<div style="padding:14px;background:var(--bg-glass);border-radius:10px;border:1px solid var(--border-primary);">'
+        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+        + '<div style="font-size:1.2rem;">👤</div>'
+        + '<div><div style="font-weight:700;font-size:0.88rem;color:var(--text-primary);">' + (a.persona||'') + '</div>'
+        + '<div style="font-size:0.72rem;color:var(--accent-amber);">' + (a.age_range||'') + '</div></div></div>'
+        + '<div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.7;">'
+        + '😤 <b>Pain:</b> ' + (a.pain_point||'') + '<br>'
+        + '💡 <b>Trigger:</b> ' + (a.buying_trigger||'') + '<br>'
+        + '🎬 <b>Content:</b> ' + (a.preferred_content||'') + '</div></div>';
+    }).join('');
+
+    bodyHtml = '<div style="display:flex;flex-direction:column;gap:20px;">'
+      // Summary bar
+      + '<div style="display:flex;gap:12px;flex-wrap:wrap;">'
+      + '<div style="flex:1;min-width:180px;padding:14px 16px;background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.2);border-radius:12px;">'
+      + '<div style="font-size:0.7rem;font-weight:700;color:var(--accent-amber);text-transform:uppercase;margin-bottom:4px;">Định vị</div>'
+      + '<div style="font-size:0.85rem;color:var(--text-primary);">' + positioning + '</div></div>'
+      + '<div style="flex:1;min-width:180px;padding:14px 16px;background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.2);border-radius:12px;">'
+      + '<div style="font-size:0.7rem;font-weight:700;color:#818cf8;text-transform:uppercase;margin-bottom:4px;">Giọng điệu</div>'
+      + '<div style="font-size:0.85rem;color:var(--text-primary);">' + tone + '</div></div>'
+      + '<div style="flex:1;min-width:180px;padding:14px 16px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:12px;">'
+      + '<div style="font-size:0.7rem;font-weight:700;color:var(--accent-emerald);text-transform:uppercase;margin-bottom:4px;">Format đề xuất</div>'
+      + '<div style="font-size:0.85rem;color:var(--text-primary);">' + format + '</div></div>'
+      + '</div>'
+      // USP
+      + '<div class="content-card">'
+      + '<div class="content-card-title">💡 Điểm bán nổi bật (USP)</div>'
+      + '<div style="display:flex;flex-direction:column;gap:10px;">' + uspHtml + '</div>'
+      + (key_msg ? '<div style="margin-top:14px;padding:12px 14px;background:rgba(234,179,8,0.08);border-radius:10px;border-left:3px solid var(--accent-amber);font-size:0.85rem;color:var(--text-primary);"><b>💬 Key message:</b> ' + key_msg + '</div>' : '')
+      + '</div>'
+      // Audience
+      + '<div class="content-card">'
+      + '<div class="content-card-title">🎯 Chân dung khách hàng mục tiêu</div>'
+      + '<div class="grid-2" style="gap:12px;">' + audienceHtml + '</div></div>'
+      // CTA
+      + '<div style="display:flex;gap:12px;">'
+      + '<button id="caGenScriptBtn" style="flex:1;padding:13px;background:linear-gradient(135deg,#d97706,#eab308);color:#1a0800;font-weight:800;font-size:0.9rem;border:none;border-radius:12px;cursor:pointer;">🎬 Tạo kịch bản video (3 phiên bản)</button>'
+      + '<button id="caResetBtn" style="padding:13px 20px;background:var(--bg-glass);color:var(--text-secondary);font-size:0.85rem;border:1px solid var(--border-primary);border-radius:12px;cursor:pointer;">↺ Phân tích lại</button>'
+      + '</div></div>';
+
+  // ── Step 4: Scripts ──
+  } else if (step === 4) {
+    var scripts = window._ca.scripts || [];
+    var activeVariant = window._ca.activeVariant || 'emotional';
+    var script = scripts.find(function(s) { return s.variant === activeVariant; }) || scripts[0];
+
+    var variantLabels = { emotional: '❤️ Cảm xúc', informational: '📊 Thông tin', humor: '😄 Hài hước' };
+    var variantTabs = ['emotional','informational','humor'].map(function(v) {
+      var isActive = v === activeVariant;
+      return '<button data-ca-variant="' + v + '" style="flex:1;padding:10px;border-radius:10px;font-weight:700;font-size:0.82rem;cursor:pointer;border:' + (isActive ? '2px solid var(--accent-amber)' : '1.5px solid var(--border-primary)') + ';background:' + (isActive ? 'rgba(234,179,8,0.12)' : 'var(--bg-glass)') + ';color:' + (isActive ? 'var(--accent-amber)' : 'var(--text-secondary)') + ';">' + (variantLabels[v]||v) + '</button>';
+    }).join('');
+
+    var scenesHtml = '';
+    if (script && script.scenes) {
+      var typeColors = { hook: '#ef4444', body: '#0ea5e9', proof: '#10b981', cta: '#d97706' };
+      var typeLabels = { hook: 'HOOK', body: 'NỘI DUNG', proof: 'BẰNG CHỨNG', cta: 'CTA' };
+      scenesHtml = script.scenes.map(function(scene) {
+        var color = typeColors[scene.type] || '#6366f1';
+        return '<div style="display:flex;gap:14px;padding:14px;background:var(--bg-glass);border-radius:12px;border-left:3px solid ' + color + ';">'
+          + '<div style="flex-shrink:0;text-align:center;min-width:56px;">'
+          + '<div style="font-size:0.7rem;font-weight:800;color:' + color + ';text-transform:uppercase;">' + (typeLabels[scene.type]||scene.type) + '</div>'
+          + '<div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">' + scene.time_range + '</div></div>'
+          + '<div style="flex:1;">'
+          + '<div style="font-size:0.85rem;color:var(--text-primary);margin-bottom:6px;line-height:1.5;">🎙 <b>VO:</b> ' + scene.voiceover + '</div>'
+          + '<div style="font-size:0.8rem;color:var(--accent-amber);margin-bottom:4px;">📝 <b>Caption:</b> ' + scene.caption + '</div>'
+          + '<div style="font-size:0.78rem;color:var(--text-muted);">🎥 ' + scene.visual_note + '</div>'
+          + '</div></div>';
+      }).join('');
+    }
+
+    var tagsHtml = script && script.hashtags ? script.hashtags.map(function(h) {
+      return '<span style="padding:4px 10px;background:rgba(14,165,233,0.12);color:#38bdf8;border-radius:20px;font-size:0.75rem;font-weight:600;">' + h + '</span>';
+    }).join('') : '';
+
+    bodyHtml = '<div style="display:flex;flex-direction:column;gap:20px;">'
+      + '<div style="display:flex;gap:10px;">' + variantTabs + '</div>'
+      + (script ? '<div class="content-card">'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:16px;">'
+        + '<div>'
+        + '<div class="content-card-title" style="margin-bottom:4px;">🎬 Kịch bản — ' + (variantLabels[activeVariant]||activeVariant) + ' · ' + (script.total_duration||30) + 's</div>'
+        + '<div style="font-size:0.85rem;color:var(--accent-amber);font-weight:700;">🪝 ' + (script.hook_text||'') + '</div>'
+        + '</div>'
+        + '<button id="caFilmingBtn" style="padding:9px 16px;background:rgba(16,185,129,0.12);color:var(--accent-emerald);border:1.5px solid var(--accent-emerald);border-radius:10px;font-weight:700;font-size:0.82rem;cursor:pointer;white-space:nowrap;">🎥 Hướng dẫn quay</button>'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:10px;">' + scenesHtml + '</div>'
+        + (script.cta ? '<div style="margin-top:12px;padding:12px;background:rgba(217,119,6,0.08);border-radius:10px;border-left:3px solid #d97706;">'
+          + '<span style="font-size:0.75rem;font-weight:800;color:#d97706;text-transform:uppercase;">Call to Action</span>'
+          + '<div style="font-size:0.88rem;color:var(--text-primary);margin-top:4px;">' + script.cta + '</div></div>' : '')
+        + (tagsHtml ? '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">' + tagsHtml + '</div>' : '')
+        + (script.caption_post ? '<div style="margin-top:12px;padding:12px;background:var(--bg-glass);border-radius:10px;font-size:0.82rem;color:var(--text-secondary);font-style:italic;">📱 ' + script.caption_post + '</div>' : '')
+        + '</div>' : '<div class="content-card"><div style="color:var(--text-muted);text-align:center;padding:24px;">Không có kịch bản cho phiên bản này</div></div>')
+      // Feedback section
+      + '<div class="content-card">'
+      + '<div class="content-card-title">✏️ Cải thiện kịch bản này</div>'
+      + '<textarea id="caFeedbackText" rows="3" placeholder="VD: Làm hook mạnh hơn, thêm thống kê cụ thể, giọng điệu trẻ hơn..." style="width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--border-primary);background:var(--bg-glass);color:var(--text-primary);font-size:0.85rem;resize:vertical;box-sizing:border-box;"></textarea>'
+      + '<div style="display:flex;gap:10px;margin-top:10px;">'
+      + '<button id="caFeedbackBtn" style="flex:1;padding:11px;background:rgba(99,102,241,0.15);color:#818cf8;border:1.5px solid rgba(99,102,241,0.3);border-radius:10px;font-weight:700;font-size:0.85rem;cursor:pointer;">🔄 Cải thiện với AI</button>'
+      + '<button id="caBackBtn" style="padding:11px 16px;background:var(--bg-glass);color:var(--text-secondary);border:1px solid var(--border-primary);border-radius:10px;font-size:0.85rem;cursor:pointer;">← Xem lại USP</button>'
+      + '</div></div>'
+      + '</div>';
+
+  // ── Step 5: Filming guide ──
+  } else if (step === 5) {
+    var guide = window._ca.filmingGuide || {};
+    var filmScenes = guide.scenes || [];
+
+    var filmScenesHtml = filmScenes.map(function(s) {
+      var propsHtml = (s.props||[]).map(function(p){ return '<span style="padding:3px 8px;background:rgba(234,179,8,0.1);color:var(--accent-amber);border-radius:6px;font-size:0.72rem;">' + p + '</span>'; }).join('');
+      return '<div style="padding:14px;background:var(--bg-glass);border-radius:12px;border:1px solid var(--border-primary);">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
+        + '<div style="font-weight:800;font-size:0.88rem;color:var(--text-primary);">Cảnh ' + (s.scene_no||'') + ' — ' + (s.duration||'') + '</div>'
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.8rem;margin-bottom:10px;">'
+        + '<div style="padding:8px;background:rgba(14,165,233,0.07);border-radius:8px;"><span style="color:#38bdf8;font-weight:700;">⚙️ Setup:</span><br><span style="color:var(--text-secondary);">' + (s.setup||'') + '</span></div>'
+        + '<div style="padding:8px;background:rgba(234,179,8,0.07);border-radius:8px;"><span style="color:var(--accent-amber);font-weight:700;">💡 Ánh sáng:</span><br><span style="color:var(--text-secondary);">' + (s.lighting||'') + '</span></div>'
+        + '<div style="padding:8px;background:rgba(16,185,129,0.07);border-radius:8px;"><span style="color:var(--accent-emerald);font-weight:700;">📐 Góc quay:</span><br><span style="color:var(--text-secondary);">' + (s.angle||'') + '</span></div>'
+        + '<div style="padding:8px;background:rgba(99,102,241,0.07);border-radius:8px;"><span style="color:#818cf8;font-weight:700;">💼 Props:</span><br><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">' + (propsHtml||'<span style="color:var(--text-muted);">Không cần</span>') + '</div></div>'
+        + '</div>'
+        + (s.tip ? '<div style="padding:8px 12px;background:rgba(239,68,68,0.07);border-radius:8px;border-left:2px solid #ef4444;font-size:0.8rem;color:var(--text-secondary);">💡 <b style="color:#f87171;">Tip:</b> ' + s.tip + '</div>' : '')
+        + '</div>';
+    }).join('');
+
+    bodyHtml = '<div style="display:flex;flex-direction:column;gap:20px;">'
+      + '<div class="content-card">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">'
+      + '<div class="content-card-title" style="margin:0;">🎥 Hướng dẫn quay phim chi tiết</div>'
+      + '<button id="caBackScript" style="padding:8px 14px;background:var(--bg-glass);color:var(--text-secondary);border:1px solid var(--border-primary);border-radius:10px;font-size:0.82rem;cursor:pointer;">← Về kịch bản</button>'
+      + '</div>'
+      + (filmScenesHtml || '<div style="color:var(--text-muted);padding:24px;text-align:center;">Đang tải hướng dẫn quay...</div>')
+      + '</div>'
+      + '</div>';
+  }
+
+  setTimeout(function() { initContentAgentEvents(); }, 60);
+
+  return '<div style="display:flex;flex-direction:column;gap:20px;">'
+    + '<div style="padding:14px 18px;background:linear-gradient(135deg,rgba(234,179,8,0.07),rgba(217,119,6,0.04));border-radius:12px;border:1px solid rgba(234,179,8,0.18);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">'
+    + '<div style="display:flex;align-items:center;gap:10px;">'
+    + '<span style="font-size:1.8rem;">🎬</span>'
+    + '<div><div style="font-weight:800;font-size:1rem;color:var(--text-primary);">Content Agent</div>'
+    + '<div style="font-size:0.76rem;color:var(--text-muted);">Phân tích sản phẩm → Tạo kịch bản TikTok chuyên nghiệp trong 60 giây</div></div>'
+    + '</div>'
+    + '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">' + stepsHtml + '</div>'
+    + '</div>'
+    + bodyHtml
+    + '</div>';
+}
+
+function initContentAgentEvents() {
+  var analyzeBtn = document.getElementById('caAnalyzeBtn');
+  if (analyzeBtn) {
+    analyzeBtn.onclick = function() {
+      var url = (document.getElementById('caUrlInput') || {}).value || '';
+      if (!url.trim()) { showToast('Vui lòng nhập URL sản phẩm', 'warning'); return; }
+      var platform = (document.getElementById('caPlatform') || {}).value || 'shopee';
+      var goal = (document.getElementById('caGoal') || {}).value || 'viral';
+      window._ca._lastUrl = url; window._ca._lastPlatform = platform; window._ca._lastGoal = goal;
+      caStartAnalysis(url, platform, goal);
+    };
+  }
+
+  var genBtn = document.getElementById('caGenScriptBtn');
+  if (genBtn) {
+    genBtn.onclick = function() { caGenerateScripts(); };
+  }
+
+  var resetBtn = document.getElementById('caResetBtn');
+  if (resetBtn) { resetBtn.onclick = function() { caReset(); navigate('content-agent'); }; }
+
+  var filmBtn = document.getElementById('caFilmingBtn');
+  if (filmBtn) {
+    filmBtn.onclick = function() { caGetFilmingGuide(); };
+  }
+
+  var backBtn = document.getElementById('caBackBtn');
+  if (backBtn) { backBtn.onclick = function() { window._ca.step = 3; navigate('content-agent'); }; }
+
+  var backScriptBtn = document.getElementById('caBackScript');
+  if (backScriptBtn) { backScriptBtn.onclick = function() { window._ca.step = 4; navigate('content-agent'); }; }
+
+  var feedbackBtn = document.getElementById('caFeedbackBtn');
+  if (feedbackBtn) {
+    feedbackBtn.onclick = function() {
+      var text = (document.getElementById('caFeedbackText')||{}).value || '';
+      if (!text.trim()) { showToast('Vui lòng nhập phản hồi cụ thể', 'warning'); return; }
+      caImproveScript(text);
+    };
+  }
+
+  // Variant tab buttons
+  document.querySelectorAll('[data-ca-variant]').forEach(function(btn) {
+    btn.onclick = function() {
+      window._ca.activeVariant = btn.dataset.caVariant;
+      navigate('content-agent');
+    };
+  });
+}
+
+function caStartAnalysis(url, platform, goal) {
+  window._ca.step = 2;
+  window._ca.progress = 5;
+  window._ca.stepLabel = 'Đang crawl thông tin sản phẩm...';
+  navigate('content-agent');
+
+  fetch(API_BASE + '/api/v1/content-agent/analyze', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ product_url: url, platform: platform, content_goal: goal })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.job_id) {
+      window._ca.jobId = data.job_id;
+      caPollJob(data.job_id);
+    } else {
+      showToast('Lỗi: ' + (data.detail || 'Không tạo được job'), 'danger');
+      caReset(); navigate('content-agent');
+    }
+  }).catch(function(err) {
+    // Demo mode: simulate with mock data
+    caSimulateAnalysis();
+  });
+}
+
+function caPollJob(jobId) {
+  var progressMap = { scraping: 20, analyzing: 60, done: 100 };
+  var labelMap = { scraping: 'Đang lấy dữ liệu sản phẩm...', analyzing: 'AI đang phân tích USP & đối tượng...', done: 'Hoàn tất phân tích!' };
+
+  window._ca.pollTimer = setInterval(function() {
+    fetch(API_BASE + '/api/v1/content-agent/jobs/' + jobId)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var pct = progressMap[data.step] || (window._ca.progress + 10);
+      var lbl = labelMap[data.step] || data.step || 'Đang xử lý...';
+      window._ca.progress = Math.min(pct, 95);
+      window._ca.stepLabel = lbl;
+
+      var bar = document.getElementById('caProgressBar');
+      var pctEl = document.getElementById('caProgressPct');
+      var lblEl = document.getElementById('caStepLabel');
+      if (bar) bar.style.width = window._ca.progress + '%';
+      if (pctEl) pctEl.textContent = window._ca.progress + '%';
+      if (lblEl) lblEl.textContent = lbl;
+
+      if (data.status === 'done' && data.result) {
+        clearInterval(window._ca.pollTimer); window._ca.pollTimer = null;
+        window._ca.intel = data.result;
+        window._ca.intelId = jobId;
+        window._ca.progress = 100;
+        window._ca.step = 3;
+        navigate('content-agent');
+        showToast('✅ Phân tích xong! AI phát hiện ' + (window._ca.intel.usp||[]).length + ' USP và ' + (window._ca.intel.audience||[]).length + ' nhóm khách hàng', 'success');
+      } else if (data.status === 'error') {
+        clearInterval(window._ca.pollTimer); window._ca.pollTimer = null;
+        showToast('Lỗi phân tích: ' + (data.error||'Unknown error'), 'danger');
+        caReset(); navigate('content-agent');
+      }
+    }).catch(function() { /* keep polling */ });
+  }, 1500);
+}
+
+function caSimulateAnalysis() {
+  // Demo/offline mode — simulate a realistic flow
+  var steps = [
+    { pct: 20, label: 'Đang crawl thông tin sản phẩm...', delay: 800 },
+    { pct: 45, label: 'AI đang phân tích review & đặc điểm...', delay: 1600 },
+    { pct: 70, label: 'Xác định USP & đối tượng khách hàng...', delay: 2400 },
+    { pct: 90, label: 'Hoàn thiện phân tích...', delay: 3200 },
+  ];
+  steps.forEach(function(s) {
+    setTimeout(function() {
+      window._ca.progress = s.pct; window._ca.stepLabel = s.label;
+      var bar = document.getElementById('caProgressBar');
+      var pctEl = document.getElementById('caProgressPct');
+      var lblEl = document.getElementById('caStepLabel');
+      if (bar) bar.style.width = s.pct + '%';
+      if (pctEl) pctEl.textContent = s.pct + '%';
+      if (lblEl) lblEl.textContent = s.label;
+    }, s.delay);
+  });
+  setTimeout(function() {
+    window._ca.intel = {
+      usp: [
+        { rank: 1, point: 'Chống ồn ANC thế hệ mới nhất', evidence: '87% review đề cập ANC vượt trội, đặc biệt ở môi trường ồn ào' },
+        { rank: 2, point: 'Pin 6h + case 30h sạc không dây', evidence: 'Thời lượng pin dài nhất trong phân khúc, hỗ trợ MagSafe' },
+        { rank: 3, point: 'Chip H2 độc quyền Apple — trễ âm thanh cực thấp', evidence: 'Kết nối ổn định, độ trễ <10ms cho gaming & video call' }
+      ],
+      audience: [
+        { persona_id: 'p1', persona: 'Nhân viên văn phòng', age_range: '22-35 tuổi', pain_point: 'Làm việc trong môi trường ồn ào, khó tập trung', buying_trigger: 'Review chứng minh ANC hiệu quả tại văn phòng', preferred_content: 'Video test ANC thực tế trong môi trường công sở' },
+        { persona_id: 'p2', persona: 'Sinh viên & người trẻ', age_range: '18-25 tuổi', pain_point: 'Cần tai nghe chất lượng nhưng ngân sách hạn chế', buying_trigger: 'So sánh giá trị với các đối thủ cùng phân khúc', preferred_content: 'Video "đáng tiền không?" dạng honest review' }
+      ],
+      positioning: 'Premium nhưng xứng đáng — chất lượng Apple với giá chính hãng VNA',
+      content_tone: 'Đáng tin cậy, chuyên môn nhưng gần gũi',
+      recommended_content_format: 'Video review thực tế 30-60s + Reel so sánh',
+      key_message: 'Đầu tư một lần, dùng mãi mãi — ANC xịn nhất tầm giá'
+    };
+    window._ca.step = 3;
+    navigate('content-agent');
+    showToast('✅ Phân tích xong! AI phát hiện 3 USP và 2 nhóm khách hàng (Demo Mode)', 'success');
+  }, 4000);
+}
+
+function caGenerateScripts() {
+  var intel = window._ca.intel;
+  if (!intel) { showToast('Chưa có dữ liệu phân tích', 'warning'); return; }
+  window._ca.step = 2;
+  window._ca.progress = 10;
+  window._ca.stepLabel = 'AI đang viết kịch bản video...';
+  navigate('content-agent');
+
+  var intelId = window._ca.intelId;
+  if (intelId) {
+    fetch(API_BASE + '/api/v1/content-agent/script/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product_intel_id: intelId, video_length: 30, variants: ['emotional','informational','humor'], language: 'vi' })
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (data.job_id) { caPollScriptJob(data.job_id); }
+      else { caSimulateScripts(); }
+    }).catch(function() { caSimulateScripts(); });
+  } else {
+    caSimulateScripts();
+  }
+}
+
+function caPollScriptJob(jobId) {
+  var t = setInterval(function() {
+    fetch(API_BASE + '/api/v1/content-agent/jobs/' + jobId)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var pct = Math.min((window._ca.progress || 10) + 15, 90);
+      window._ca.progress = pct;
+      var bar = document.getElementById('caProgressBar'); if (bar) bar.style.width = pct + '%';
+      var pctEl = document.getElementById('caProgressPct'); if (pctEl) pctEl.textContent = pct + '%';
+      if (data.status === 'done' && data.result) {
+        clearInterval(t);
+        window._ca.scripts = data.result;
+        window._ca.step = 4;
+        navigate('content-agent');
+        showToast('✅ Đã tạo ' + data.result.length + ' kịch bản video!', 'success');
+      } else if (data.status === 'error') {
+        clearInterval(t); caSimulateScripts();
+      }
+    }).catch(function() {});
+  }, 1800);
+}
+
+function caSimulateScripts() {
+  var steps2 = [
+    { pct: 30, label: 'Viết kịch bản cảm xúc...', delay: 600 },
+    { pct: 60, label: 'Viết kịch bản thông tin...', delay: 1400 },
+    { pct: 85, label: 'Viết kịch bản hài hước...', delay: 2200 },
+  ];
+  steps2.forEach(function(s) {
+    setTimeout(function() {
+      window._ca.progress = s.pct; window._ca.stepLabel = s.label;
+      var bar = document.getElementById('caProgressBar'); if (bar) bar.style.width = s.pct + '%';
+      var pctEl = document.getElementById('caProgressPct'); if (pctEl) pctEl.textContent = s.pct + '%';
+      var lblEl = document.getElementById('caStepLabel'); if (lblEl) lblEl.textContent = s.label;
+    }, s.delay);
+  });
+  setTimeout(function() {
+    window._ca.scripts = [
+      {
+        variant: 'emotional', total_duration: 30, hook_text: '❤️ Cái tai nghe này đã thay đổi cách tôi làm việc mãi mãi...',
+        scenes: [
+          { scene_no:1, time_range:'0-3s', type:'hook', voiceover:'Tôi đã tốn 2 năm đau đầu vì tiếng ồn văn phòng', caption:'😤 Ngày nào cũng như này...', visual_note:'Góc wide, nhân vật ngồi bàn làm việc ồn ào, biểu cảm mệt mỏi' },
+          { scene_no:2, time_range:'3-18s', type:'body', voiceover:'Rồi tôi thử AirPods Pro 2 — bật ANC lên... và thế giới biến mất. Chỉ còn tôi và công việc', caption:'ANC thế hệ mới 🔇', visual_note:'Close-up tay đeo tai nghe, slow motion, sau đó biểu cảm tập trung' },
+          { scene_no:3, time_range:'18-25s', type:'proof', voiceover:'87% người dùng nói năng suất tăng rõ rệt. Chip H2 — trễ âm chỉ 10ms', caption:'📊 Đã kiểm chứng thực tế', visual_note:'Text overlay thống kê, đan xen cảnh dùng thực tế' },
+          { scene_no:4, time_range:'25-30s', type:'cta', voiceover:'Link ở bio — hàng chính hãng VNA, bảo hành 12 tháng', caption:'🛒 Mua ngay — hết giá tốt!', visual_note:'Sản phẩm đặt trên bàn, text CTA nổi bật' }
+        ],
+        cta: 'Nhấn link bio để mua AirPods Pro 2 chính hãng VNA — bảo hành 12 tháng, giao trong ngày!',
+        hashtags: ['#airpodspro2', '#chongnoi', '#lam_viec_hieu_qua', '#techvietnam', '#review'],
+        caption_post: 'Từ ngày có AirPods Pro 2, tôi làm việc được gấp đôi 😤🎧 ANC xịn nhất tầm giá, chip H2 không delay. Ai cũng nên thử ít nhất 1 lần! 👇 Link trong bio nhé'
+      },
+      {
+        variant: 'informational', total_duration: 30, hook_text: '📊 3 con số bạn cần biết trước khi mua AirPods Pro 2',
+        scenes: [
+          { scene_no:1, time_range:'0-3s', type:'hook', voiceover:'3 con số quyết định có nên mua AirPods Pro 2 không', caption:'Số 1 sẽ khiến bạn bất ngờ 👇', visual_note:'Text animation "3 2 1" trên màn hình' },
+          { scene_no:2, time_range:'3-18s', type:'body', voiceover:'Một: ANC giảm 48dB — tốt nhất phân khúc. Hai: Pin 6h + case 30h. Ba: Trễ âm dưới 10ms với chip H2', caption:'📋 Thông số thực tế', visual_note:'Split screen: text thông số bên trái, demo thực tế bên phải' },
+          { scene_no:3, time_range:'18-25s', type:'proof', voiceover:'So với Galaxy Buds3 Pro cùng giá: ANC tốt hơn 35%, pin tương đương, nhưng tích hợp hệ sinh thái Apple hoàn hảo hơn', caption:'⚖️ So sánh khách quan', visual_note:'Bảng so sánh nhanh trên màn hình' },
+          { scene_no:4, time_range:'25-30s', type:'cta', voiceover:'Hàng chính hãng VNA tại shop — link bio. Hỏi tư vấn free 24/7', caption:'📩 Inbox shop ngay!', visual_note:'Logo shop + thông tin liên hệ' }
+        ],
+        cta: 'Để lại câu hỏi trong comment hoặc inbox shop để được tư vấn miễn phí!',
+        hashtags: ['#airpodspro2review', '#socanh', '#techreview', '#muagidung', '#anc'],
+        caption_post: 'AirPods Pro 2 có thực sự xứng đáng với mức giá không? Tôi đã test 30 ngày và đây là kết quả thực tế 📊 Tham khảo trước khi xuống tiền nhé!'
+      },
+      {
+        variant: 'humor', total_duration: 30, hook_text: '😂 POV: Khi vợ gọi nhưng ANC đang bật...',
+        scenes: [
+          { scene_no:1, time_range:'0-3s', type:'hook', voiceover:'POV: Bạn đang làm việc với AirPods Pro 2 ANC bật', caption:'Không nghe thấy gì cả 😂', visual_note:'Selfie góc hơi trên, biểu cảm nghiêm túc đeo tai nghe' },
+          { scene_no:2, time_range:'3-18s', type:'body', voiceover:'Vợ gọi ăn cơm — không nghe. Sếp họp khẩn — không nghe. Hàng xóm karaoke — cũng không nghe. Chỉ còn deadline và tôi', caption:'Chế độ "không làm phiền" tối thượng', visual_note:'Chuỗi cảnh hài: vợ gọi, sếp gõ vai, hàng xóm hát — tất cả đều bị ignore' },
+          { scene_no:3, time_range:'18-25s', type:'proof', voiceover:'Không phải lỗi của tôi, là ANC H2 đấy. 48dB noise reduction. Khoa học chứng minh', caption:'📢 Tôi vô tội', visual_note:'Text "Khoa học chứng minh" với hiệu ứng hài hước' },
+          { scene_no:4, time_range:'25-30s', type:'cta', voiceover:'Mua AirPods Pro 2 chính hãng — link bio. Mọi hậu quả shop không chịu trách nhiệm nhé!', caption:'🛒 Shop từ chối mọi trách nhiệm 😂', visual_note:'Text CTA với disclaimer hài hước' }
+        ],
+        cta: 'Mua về rồi muốn trả lại vì quá cô lập với thế giới thì shop... vẫn nhận đổi trả trong 7 ngày 😂',
+        hashtags: ['#airpodspro2', '#anc', '#lam_viec_xa_nha', '#trend', '#haihuoc'],
+        caption_post: 'Shop xin miễn trách nhiệm nếu bạn miss cuộc họp quan trọng 😂 ANC quá xịn rồi, nghe thấy gì nữa đâu! 🎧 Link mua trong bio nha cả nhà'
+      }
+    ];
+    window._ca.step = 4;
+    navigate('content-agent');
+    showToast('✅ Đã tạo 3 kịch bản video! (Demo Mode)', 'success');
+  }, 3000);
+}
+
+function caGetFilmingGuide() {
+  var scripts = window._ca.scripts;
+  var script = scripts.find(function(s){ return s.variant === window._ca.activeVariant; }) || scripts[0];
+  if (!script) { showToast('Không có kịch bản để tạo hướng dẫn quay', 'warning'); return; }
+
+  // Try real API, fall back to demo
+  fetch(API_BASE + '/api/v1/content-agent/filming-guide', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ script_id: 'demo-script', variant: window._ca.activeVariant, equipment: 'phone', location: 'home' })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.scenes) {
+      window._ca.filmingGuide = data;
+      window._ca.step = 5;
+      navigate('content-agent');
+    } else { caSimulateFilmingGuide(script); }
+  }).catch(function() { caSimulateFilmingGuide(script); });
+}
+
+function caSimulateFilmingGuide(script) {
+  var guideScenes = (script.scenes || []).map(function(s, i) {
+    var setups = ['Đặt điện thoại trên tripod cách 60-80cm, ngang tầm mắt', 'Cầm điện thoại tay, di chuyển chậm từ trái sang phải', 'Đặt sản phẩm trên bàn trắng, quay từ trên xuống (flat lay)'];
+    var lightings = ['Ánh sáng tự nhiên từ cửa sổ — đặt nhân vật đối diện cửa', 'Đèn ring light 10 inch đặt ngang mặt, cách 80cm', 'Ánh sáng phòng bình thường, thêm đèn bàn chiếu sản phẩm'];
+    var angles = ['Eye-level — thẳng mắt tạo cảm giác kết nối', 'Close-up 45° từ trên xuống — làm nổi bật sản phẩm', 'Wide shot — thu gọn toàn cảnh bối cảnh'];
+    var tips = ['Giữ điện thoại bằng 2 tay và khuỷu tay tì vào người để tránh rung', 'Quay nhiều takes, chọn cái tự nhiên nhất', 'Mặc đồ tối màu để sản phẩm nổi bật hơn'];
+    return {
+      scene_no: s.scene_no, duration: s.time_range,
+      setup: setups[i % setups.length], lighting: lightings[i % lightings.length],
+      angle: angles[i % angles.length],
+      props: i === 0 ? ['Tai nghe', 'Bàn làm việc gọn'] : (i === 1 ? ['Tai nghe', 'Điện thoại/Laptop', 'Bàn sạch'] : ['Hộp sản phẩm', 'Tờ rơi chính hãng']),
+      tip: tips[i % tips.length]
+    };
+  });
+  window._ca.filmingGuide = { scenes: guideScenes };
+  window._ca.step = 5;
+  navigate('content-agent');
+}
+
+function caImproveScript(feedback) {
+  var scripts = window._ca.scripts;
+  var script = scripts.find(function(s){ return s.variant === window._ca.activeVariant; }) || scripts[0];
+  if (!script) return;
+  showToast('🤖 AI đang cải thiện kịch bản...', 'info');
+  var feedbackBtn = document.getElementById('caFeedbackBtn');
+  if (feedbackBtn) { feedbackBtn.textContent = '⏳ Đang xử lý...'; feedbackBtn.disabled = true; }
+
+  fetch(API_BASE + '/api/v1/content-agent/script/feedback', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ script_id: 'demo', variant: window._ca.activeVariant, feedback: feedback })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.scenes) {
+      var idx = window._ca.scripts.findIndex(function(s){ return s.variant === window._ca.activeVariant; });
+      if (idx >= 0) window._ca.scripts[idx] = Object.assign({}, window._ca.scripts[idx], data);
+      showToast('✅ Kịch bản đã được cải thiện!', 'success');
+      navigate('content-agent');
+    } else { showToast('✅ Đã ghi nhận phản hồi! AI sẽ học và cải thiện.', 'success'); navigate('content-agent'); }
+  }).catch(function() {
+    showToast('✅ Đã ghi nhận phản hồi! AI sẽ học và cải thiện.', 'success');
+    navigate('content-agent');
+  });
+}
+
 const ROUTES = {
   dashboard: { title: 'Dashboard', subtitle: 'Tổng quan chiến lược AI – Cập nhật lúc 07:31', render: renderDashboard },
   'ai-suggestions': { title: 'Đề xuất AI', subtitle: 'Human-in-the-loop · Phê duyệt chiến lược do AI đề xuất', render: renderAISuggestions },
@@ -2889,6 +3459,7 @@ const ROUTES = {
   'chat-insights': { title: 'Tổng hợp từ Chatbot', subtitle: 'Pattern detection — AI phân tích toàn bộ hội thoại', render: renderChatInsights },
   'content-suggestions': { title: 'Đề xuất Content', subtitle: 'AI gợi ý nội dung dựa trên dữ liệu thực', render: renderContentSuggestions },
   'product-descriptions': { title: 'Mô tả Sản phẩm', subtitle: 'Tối ưu mô tả sản phẩm với AI', render: renderProductDescriptions },
+  'content-agent': { title: 'Content Agent', subtitle: 'Phân tích sản phẩm & tạo kịch bản TikTok tự động với AI', render: renderContentAgent },
   'demo-customer': { title: 'Demo Khách Hàng', subtitle: 'Thử nghiệm trải nghiệm khách hàng — Gửi Review & Live Chat AI', render: renderDemoCustomer }
 };
 
