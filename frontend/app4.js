@@ -1613,44 +1613,48 @@ function renderChat() {
 
       <!-- Panel 3: Customer Context Sidebar -->
       <div style="display:flex;flex-direction:column;gap:12px;">
-        <!-- Customer Profile -->
-        <div class="content-card" style="padding:14px;">
-          <div style="font-weight:700;font-size:0.82rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Hồ sơ khách hàng</div>
-          <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
-            <div style="width:40px;height:40px;border-radius:50%;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;font-weight:800;color:#451a03;flex-shrink:0;">${conv.avatar}</div>
-            <div>
-              <div style="font-weight:700;font-size:0.9rem;">${conv.name}</div>
-              <div style="font-size:0.72rem;color:var(--text-muted);">${conv.platform} · ${conv.orders} đơn hàng</div>
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-            <div style="background:var(--bg-glass);border-radius:8px;padding:8px;text-align:center;">
-              <div style="font-size:1rem;font-weight:800;color:var(--accent-amber);">${fmt.currency(conv.ltv)}đ</div>
-              <div style="font-size:0.68rem;color:var(--text-muted);">Tổng chi tiêu</div>
-            </div>
-            <div style="background:var(--bg-glass);border-radius:8px;padding:8px;text-align:center;">
-              <div style="font-size:1rem;font-weight:800;color:${conv.customer.risk==='high'?'var(--accent-rose)':conv.customer.risk==='medium'?'var(--accent-amber)':'var(--accent-emerald)'};">${conv.customer.churn}</div>
-              <div style="font-size:0.68rem;color:var(--text-muted);">Xác suất rời bỏ</div>
-            </div>
-          </div>
-          <div style="font-size:0.75rem;padding:8px;background:${conv.customer.risk==='high'?'var(--accent-rose-bg)':conv.customer.risk==='medium'?'var(--accent-amber-bg)':'var(--accent-emerald-bg)'};border-radius:6px;color:${conv.customer.risk==='high'?'var(--accent-rose)':conv.customer.risk==='medium'?'var(--accent-amber)':'var(--accent-emerald)'};">
-            ${ICON.brain} ${conv.customer.note}
-          </div>
-        </div>
 
-        <!-- Purchase History -->
-        <div class="content-card" style="padding:14px;">
-          <div style="font-weight:700;font-size:0.82rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Lịch sử mua hàng</div>
-          ${conv.customer.purchases.map(p => `
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-primary);font-size:0.78rem;">
+        <!-- Profile + Purchase History — replaced by api_integration.js when a backend customer is active -->
+        <div id="chatConvProfileWrapper" style="display:flex;flex-direction:column;gap:12px;">
+          <!-- Customer Profile -->
+          <div class="content-card" style="padding:14px;">
+            <div style="font-weight:700;font-size:0.82rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Hồ sơ khách hàng</div>
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
+              <div style="width:40px;height:40px;border-radius:50%;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;font-weight:800;color:#451a03;flex-shrink:0;">${conv.avatar}</div>
               <div>
-                <div style="font-weight:600;">${p.item}</div>
-                <div style="color:var(--text-muted);">${p.date}</div>
+                <div style="font-weight:700;font-size:0.9rem;">${conv.name}</div>
+                <div style="font-size:0.72rem;color:var(--text-muted);">${conv.platform} · ${conv.orders} đơn hàng</div>
               </div>
-              <div style="font-weight:700;color:var(--accent-indigo);">${fmt.currency(p.value)}đ</div>
             </div>
-          `).join('')}
-        </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+              <div style="background:var(--bg-glass);border-radius:8px;padding:8px;text-align:center;">
+                <div style="font-size:1rem;font-weight:800;color:var(--accent-amber);">${fmt.currency(conv.ltv)}đ</div>
+                <div style="font-size:0.68rem;color:var(--text-muted);">Tổng chi tiêu</div>
+              </div>
+              <div style="background:var(--bg-glass);border-radius:8px;padding:8px;text-align:center;">
+                <div style="font-size:1rem;font-weight:800;color:${conv.customer.risk==='high'?'var(--accent-rose)':conv.customer.risk==='medium'?'var(--accent-amber)':'var(--accent-emerald)'};">${conv.customer.churn}</div>
+                <div style="font-size:0.68rem;color:var(--text-muted);">Xác suất rời bỏ</div>
+              </div>
+            </div>
+            <div style="font-size:0.75rem;padding:8px;background:${conv.customer.risk==='high'?'var(--accent-rose-bg)':conv.customer.risk==='medium'?'var(--accent-amber-bg)':'var(--accent-emerald-bg)'};border-radius:6px;color:${conv.customer.risk==='high'?'var(--accent-rose)':conv.customer.risk==='medium'?'var(--accent-amber)':'var(--accent-emerald)'};">
+              ${ICON.brain} ${conv.customer.note}
+            </div>
+          </div>
+
+          <!-- Purchase History -->
+          <div class="content-card" style="padding:14px;">
+            <div style="font-weight:700;font-size:0.82rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Lịch sử mua hàng</div>
+            ${conv.customer.purchases.map(p => `
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-primary);font-size:0.78rem;">
+                <div>
+                  <div style="font-weight:600;">${p.item}</div>
+                  <div style="color:var(--text-muted);">${p.date}</div>
+                </div>
+                <div style="font-weight:700;color:var(--accent-indigo);">${fmt.currency(p.value)}đ</div>
+              </div>
+            `).join('')}
+          </div>
+        </div><!-- /#chatConvProfileWrapper -->
 
         <!-- AI Recommended Action -->
         <div class="content-card" style="padding:14px;border-color:var(--accent-amber);">

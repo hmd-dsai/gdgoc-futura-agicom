@@ -180,31 +180,31 @@ runScan = async function () {
       'Không có chỉ thị đặc biệt';
 
     const result = await apiCall('/slow-track-strategy', 'POST', {
-      product_id: 'S24-ULTRA-001',
-      product_name: 'Samsung Galaxy S24 Ultra',
+      product_id: 'LUMI-SUN-001',
+      product_name: 'Anessa Perfect UV Sunscreen Skincare Milk SPF50+ 60ml',
       internal_data: {
-        current_price: 29990000,
-        stock_level: 12,
-        cost_price: 26000000,
-        min_margin_percent: 8,
-        conversion_rate: 0.05,
+        current_price: 590000,
+        stock_level: 38,
+        cost_price: 312000,
+        min_margin_percent: 20,
+        conversion_rate: 0.12,
       },
       market_data: {
-        competitor_min_price: 28490000,
-        market_trend: 'Đối thủ giảm giá mạnh tuần này',
-        competitor_name: 'Hoàng Hà',
+        competitor_min_price: 560000,
+        market_trend: 'Kem chống nắng Nhật đang hot, đối thủ cùng phân khúc giảm nhẹ',
+        competitor_name: 'Guardian / Hasaki',
         competitor_rating: 4.5,
         our_rating: 4.8,
         platform_campaign: 'None',
       },
       customer_context: {
         recent_sentiment: 'phân vân',
-        frequent_question: 'Pin S24 Ultra dùng được bao lâu?',
+        frequent_question: 'Anessa có gây bít lỗ chân lông không?',
       },
       shop_profile: {
         target_customers:
-          'Học sinh sinh viên, nhân viên văn phòng yêu công nghệ, thu nhập 8-25 triệu/tháng',
-        strategic_vision: 'Tối ưu lợi nhuận dài hạn, cạnh tranh về chất lượng dịch vụ',
+          'Nữ 18-35 tuổi quan tâm skincare, da dầu/hỗn hợp, thu nhập 8-20 triệu/tháng',
+        strategic_vision: 'Tối ưu lợi nhuận dài hạn, định vị chất lượng hàng chính hãng',
         brand_tone: 'Chuyên nghiệp, nhiệt tình',
       },
       manager_directive: directive,
@@ -485,9 +485,9 @@ function buildLiveChatWidgetHTML() {
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
         ${[
           'Shop ơi hàng có auth không?',
-          'Mua 3 cái có giảm không?',
-          'Cáp bị hỏng rồi shop ơi!',
-          'Pin S24 Ultra dùng được bao lâu?',
+          'Mua 2 cái có giảm không?',
+          'Kem bị chảy nước rồi shop ơi!',
+          'Anessa có hợp da dầu không ạ?',
           'Ship mấy ngày thì đến ạ?',
         ]
           .map(
@@ -719,7 +719,7 @@ async function sendLiveChatMessage(msg) {
     if (isNegative) {
       const mockReply = 'Dạ em xin lỗi anh/chị về trải nghiệm không tốt này ạ 🙏 Em đã ghi nhận phản hồi của anh/chị và sẽ chuyển ngay cho bộ phận kỹ thuật + CSKH kiểm tra. Anh/chị vui lòng cho em xin số đơn hàng để được hỗ trợ đổi/trả miễn phí ạ.';
       // is_safe=false, nhưng confidence_score bị ẩn (undefined) vì không có AI thật phân tích
-      const mockEval = { is_safe: false, confidence_score: undefined, sentiment_analysis: 'tức giận', identified_product_id: 'ANKER-100W-CAP', risk_level: 'Cao', risk_category: 'Chất lượng sản phẩm', _isDemo: true };
+      const mockEval = { is_safe: false, confidence_score: undefined, sentiment_analysis: 'tức giận', identified_product_id: 'LUMI-MOISS-001', risk_level: 'Cao', risk_category: 'Chất lượng sản phẩm', _isDemo: true };
       appendLiveChatBubble('ai', mockReply + ' <em style="font-size:0.68rem;color:var(--text-muted);">[Demo Mode — Confidence N/A]</em>', mockEval);
       _syncLiveChatToInbox(msg, mockReply, mockEval);
       chatSessionStats.totalAIReplies++;
@@ -1413,8 +1413,8 @@ function injectReviewForm() {
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
       <div class="settings-field">
         <label class="settings-label">ID Sản phẩm</label>
-        <input id="rev_product_id" class="settings-input" value="S24-ULTRA-001"
-          placeholder="VD: ANKER-100W-CAP">
+        <input id="rev_product_id" class="settings-input" value="LUMI-SUN-001"
+          placeholder="VD: LUMI-SUN-001">
       </div>
       <div class="settings-field">
         <label class="settings-label">Tên khách hàng</label>
@@ -1843,19 +1843,19 @@ if (_origHandlePageClick) {
 function _applyDemoScenario(scenario) {
   const SCENARIOS = {
     anker: {
-      product_id: 'ANKER-100W-CAP',
+      product_id: 'LUMI-MOISS-001',
       customer_name: 'Hoang_Manh_Demo',
       rating: '1',
-      review_text: 'Cáp Anker 100W xài 1 tuần đã hư rồi, sạc rất chậm, dây nóng ran. Yêu cầu đổi trả! Hàng của shop kém chất lượng quá.',
-      chat_msg: 'Shop ơi cáp Anker 100W tôi mua ở đây bị lỗi rồi! Sạc không vào, dây nóng ran. Tôi muốn đổi trả, có bồi thường không?',
-      label: 'Cáp Anker lỗi hàng loạt'
+      review_text: 'Kem Cosrx Snail mua ở đây về dùng bị nổi mụn hàng loạt, da đỏ ngứa. Hàng có vấn đề gì không? Tôi yêu cầu đổi trả và bồi thường!',
+      chat_msg: 'Shop ơi kem Cosrx Snail tôi mua ở đây dùng bị dị ứng rồi! Da nổi mụn đỏ hết, tôi muốn đổi trả, shop xử lý thế nào?',
+      label: 'Cosrx Snail gây dị ứng'
     },
     shipping: {
-      product_id: 'S24-ULTRA-001',
+      product_id: 'LUMI-SUN-001',
       customer_name: 'Khach_VIP_Demo',
       rating: '2',
-      review_text: 'Điện thoại giao đến hộp bị móp nặng, may mà máy không sao. Shop cần đóng gói cẩn thận hơn, tôi rất thất vọng với dịch vụ giao hàng.',
-      chat_msg: 'Shop ơi điện thoại tôi vừa nhận được mà hộp bị móp hết! Tôi rất bức xúc, shop xử lý thế nào đây?',
+      review_text: 'Kem chống nắng Anessa giao đến bị móp vỏ, nắp không đóng kín. May mà kem vẫn còn dùng được. Shop cần đóng gói cẩn thận hơn, tôi rất thất vọng.',
+      chat_msg: 'Shop ơi kem Anessa tôi vừa nhận được mà hộp bị móp, nắp bị hở! Tôi rất bức xúc, shop xử lý thế nào đây?',
       label: 'Vận chuyển hư hỏng'
     }
   };
@@ -3125,6 +3125,295 @@ document.addEventListener('click', async function (e) {
     return;
   }
 });
+
+/* ──────────────────────────────────────────────────────────────────────
+   13. CHAT INBOX — Load real customers & profiles from backend
+   ────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Set of customer_ids that exist in the backend DB.
+ * Used to distinguish real customers from mock/live-chat entries.
+ */
+var _backendCustomerIds = new Set();
+
+/** Guard: prevents recursive load loops when navigate('chat') re-renders */
+var _chatLoadInProgress = false;
+
+/**
+ * Tải danh sách khách hàng từ /api/customers và merge vào MOCK.conversations.
+ * Tính toán status (escalate / pending / auto) từ dữ liệu backend.
+ */
+async function loadChatInboxFromBackend() {
+  if (typeof MOCK === 'undefined' || !_backendConnected) return;
+  try {
+    const data = await apiCall('/api/customers');
+    if (!data || data.status !== 'success' || !Array.isArray(data.customers)) return;
+
+    data.customers.forEach(function(c) {
+      _backendCustomerIds.add(c.customer_id);
+
+      var churn    = c.churn_probability ?? 0.1;
+      var emotion  = c.emotion_index ?? 0.5;
+      var status   = churn >= 0.6 ? 'escalate'
+                   : c.last_role === 'user' ? 'pending'
+                   : 'auto';
+      var priority = status === 'escalate' ? 0 : status === 'pending' ? 1 : 2;
+      var sentiment = Math.round(emotion * 100);
+      var churnStr  = Math.round(churn * 100) + '%';
+      var riskLevel = churn >= 0.6 ? 'high' : churn >= 0.3 ? 'medium' : 'low';
+
+      var ts = c.last_timestamp ? new Date(c.last_timestamp) : new Date();
+      var timeStr = ts.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+      var convObj = {
+        id:        c.customer_id,
+        name:      c.customer_id,
+        avatar:    c.customer_id.charAt(0).toUpperCase(),
+        time:      timeStr,
+        status:    status,
+        unread:    c.last_role === 'user' ? 1 : 0,
+        preview:   c.last_message || '...',
+        category:  'Chatbot',
+        sentiment: sentiment,
+        wait_min:  0,
+        priority:  priority,
+        ltv:       c.total_spent  || 0,
+        orders:    c.total_orders || 0,
+        platform:  'Chatbot',
+        angry:     sentiment < 30,
+        vip:       c.customer_segment === 'vip',
+        returning: ['vip', 'regular'].includes(c.customer_segment),
+        customer: {
+          note:      'Phân khúc: ' + (c.customer_segment || 'new') + ' · Churn: ' + churnStr,
+          risk:      riskLevel,
+          churn:     churnStr,
+          purchases: []
+        }
+      };
+
+      var existing = MOCK.conversations.find(function(conv) { return conv.id === c.customer_id; });
+      if (existing) {
+        Object.assign(existing, convObj);
+      } else {
+        MOCK.conversations.push(convObj);
+      }
+    });
+
+    // Nếu currentChatId vẫn là mock mặc định, chuyển sang khách thực đầu tiên
+    if (typeof currentChatId !== 'undefined' &&
+        (currentChatId === 'c1' || currentChatId === 'c2') &&
+        data.customers.length > 0) {
+      currentChatId = data.customers[0].customer_id;
+    }
+  } catch (err) {
+    console.warn('[Agicom] loadChatInboxFromBackend:', err.message);
+  }
+}
+
+/**
+ * Tải lịch sử tin nhắn của customerId từ backend vào MOCK.chat_messages.
+ * Bỏ qua nếu đã có cache (tránh gọi API lặp lại khi re-render).
+ */
+async function _loadChatConvMessagesIntoMock(customerId) {
+  if (!_backendConnected || typeof MOCK === 'undefined') return;
+  if (MOCK.chat_messages[customerId] && MOCK.chat_messages[customerId].length > 0) return;
+  try {
+    var data = await apiCall('/api/chat-messages/' + encodeURIComponent(customerId));
+    if (!data || data.status !== 'success' || !Array.isArray(data.messages)) return;
+    MOCK.chat_messages[customerId] = data.messages.map(function(m) {
+      return {
+        from: m.role === 'user' ? 'customer' : 'ai_sent',
+        time: m.timestamp
+          ? new Date(m.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+          : '',
+        text: m.content
+      };
+    });
+  } catch (err) {
+    console.warn('[Agicom] _loadChatConvMessagesIntoMock:', err.message);
+  }
+}
+
+/**
+ * Tải hồ sơ khách hàng đầy đủ từ backend và render vào #chatConvProfileWrapper
+ * (thay thế nội dung mặc định từ MOCK).
+ */
+async function _loadChatConvProfile(customerId) {
+  var wrapper = document.getElementById('chatConvProfileWrapper');
+  if (!wrapper || !_backendConnected) return;
+  try {
+    var data = await apiCall('/api/customer-profile/' + encodeURIComponent(customerId));
+    if (!data || data.status !== 'success') return;
+
+    var churn  = data.churn_probability ?? 0.1;
+    var emotion = data.emotion_index ?? 0.5;
+    var churnColor = churn >= 0.6 ? 'var(--accent-rose)'
+                   : churn >= 0.3 ? 'var(--accent-amber)'
+                   : 'var(--accent-emerald)';
+    var churnBg    = churn >= 0.6 ? 'var(--accent-rose-bg)'
+                   : churn >= 0.3 ? 'var(--accent-amber-bg)'
+                   : 'var(--accent-emerald-bg)';
+    var emotionColor = emotion >= 0.6 ? 'var(--accent-emerald)'
+                     : emotion >= 0.3 ? 'var(--accent-amber)'
+                     : 'var(--accent-rose)';
+    var emotionLabel = emotion >= 0.8 ? 'Rất tích cực'
+                     : emotion >= 0.6 ? 'Tích cực'
+                     : emotion >= 0.4 ? 'Bình thường'
+                     : emotion >= 0.2 ? 'Tiêu cực' : 'Rất tiêu cực';
+
+    var segmentBadgeMap = {
+      vip:     '<span style="background:#7c3aed;color:white;font-size:0.65rem;padding:2px 8px;border-radius:10px;font-weight:800;">👑 VIP</span>',
+      regular: '<span style="background:#2563eb;color:white;font-size:0.65rem;padding:2px 8px;border-radius:10px;font-weight:700;">⭐ Quen</span>',
+      at_risk: '<span style="background:#dc2626;color:white;font-size:0.65rem;padding:2px 8px;border-radius:10px;font-weight:700;">⚠️ Rủi ro</span>',
+      new:     '<span style="background:#059669;color:white;font-size:0.65rem;padding:2px 8px;border-radius:10px;font-weight:700;">🆕 Mới</span>'
+    };
+    var segmentBadge = segmentBadgeMap[data.customer_segment] || '';
+
+    var purchases = (data.purchase_history || []).slice(0, 3);
+    var purchaseHtml = purchases.length
+      ? purchases.map(function(p) {
+          return '<div style="display:flex;justify-content:space-between;align-items:center;' +
+            'padding:6px 0;border-bottom:1px solid var(--border-primary);font-size:0.78rem;">' +
+            '<div><div style="font-weight:600;">' + (p.item || '?') + '</div>' +
+            '<div style="color:var(--text-muted);">' + (p.date || '') +
+              (p.status ? ' · ' + p.status : '') + '</div></div>' +
+            '<div style="font-weight:700;color:var(--accent-indigo);">' +
+              (p.value ? Number(p.value).toLocaleString('vi-VN') + 'đ' : '—') + '</div></div>';
+        }).join('')
+      : '<div style="color:var(--text-muted);font-size:0.78rem;padding:4px 0;">Chưa có lịch sử mua hàng</div>';
+
+    var lastPurchaseHtml = data.last_purchase_date
+      ? '<div style="font-size:0.68rem;color:var(--text-muted);margin-top:6px;">Lần mua cuối: ' + data.last_purchase_date + '</div>'
+      : '';
+
+    var noteHtml = data.notes
+      ? '<div style="font-size:0.75rem;padding:8px;background:var(--accent-indigo-bg);border-radius:6px;' +
+        'color:var(--accent-indigo);margin-top:10px;line-height:1.5;">🧠 ' + data.notes + '</div>'
+      : '';
+
+    wrapper.innerHTML =
+      '<!-- Customer Profile -->' +
+      '<div class="content-card" style="padding:14px;">' +
+        '<div style="font-weight:700;font-size:0.82rem;color:var(--text-muted);margin-bottom:10px;' +
+          'text-transform:uppercase;letter-spacing:0.5px;">Hồ sơ khách hàng</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">' +
+          '<div style="display:flex;gap:10px;align-items:center;">' +
+            '<div style="width:40px;height:40px;border-radius:50%;background:var(--gradient-primary);' +
+              'display:flex;align-items:center;justify-content:center;font-weight:800;color:#451a03;flex-shrink:0;">' +
+              customerId.charAt(0).toUpperCase() + '</div>' +
+            '<div>' +
+              '<div style="font-weight:700;font-size:0.9rem;">' + customerId + '</div>' +
+              '<div style="font-size:0.72rem;color:var(--text-muted);">' + (data.total_orders ?? 0) + ' đơn hàng</div>' +
+            '</div>' +
+          '</div>' +
+          segmentBadge +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">' +
+          '<div style="background:var(--bg-glass);border-radius:8px;padding:8px;text-align:center;">' +
+            '<div style="font-size:1rem;font-weight:800;color:var(--accent-amber);">' +
+              (data.total_spent ? Number(data.total_spent).toLocaleString('vi-VN') : '0') + 'đ</div>' +
+            '<div style="font-size:0.68rem;color:var(--text-muted);">Tổng chi tiêu</div>' +
+          '</div>' +
+          '<div style="background:' + churnBg + ';border-radius:8px;padding:8px;text-align:center;">' +
+            '<div style="font-size:1rem;font-weight:800;color:' + churnColor + ';">' + Math.round(churn * 100) + '%</div>' +
+            '<div style="font-size:0.68rem;color:var(--text-muted);">Xác suất rời bỏ</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
+          '<div style="background:var(--bg-glass);border-radius:8px;padding:8px;text-align:center;">' +
+            '<div style="font-size:1rem;font-weight:800;color:' + emotionColor + ';">' + Math.round(emotion * 100) + '</div>' +
+            '<div style="font-size:0.68rem;color:var(--text-muted);">Cảm xúc</div>' +
+            '<div style="font-size:0.65rem;color:' + emotionColor + ';">' + emotionLabel + '</div>' +
+          '</div>' +
+          '<div style="background:var(--bg-glass);border-radius:8px;padding:8px;text-align:center;">' +
+            '<div style="font-size:0.9rem;font-weight:800;color:var(--accent-indigo);">' +
+              (data.customer_segment || 'new') + '</div>' +
+            '<div style="font-size:0.68rem;color:var(--text-muted);">Phân khúc</div>' +
+          '</div>' +
+        '</div>' +
+        noteHtml +
+      '</div>' +
+      '<!-- Purchase History -->' +
+      '<div class="content-card" style="padding:14px;">' +
+        '<div style="font-weight:700;font-size:0.82rem;color:var(--text-muted);margin-bottom:10px;' +
+          'text-transform:uppercase;letter-spacing:0.5px;">Lịch sử mua hàng</div>' +
+        purchaseHtml +
+        lastPurchaseHtml +
+      '</div>';
+  } catch (err) {
+    console.warn('[Agicom] _loadChatConvProfile:', err.message);
+  }
+}
+
+/**
+ * Bước tải đầy đủ sau khi navigate('chat') render xong:
+ * 1. Tải inbox list từ backend  (merge vào MOCK.conversations)
+ * 2. Tải messages của conv đang xem (cache vào MOCK.chat_messages)
+ * 3. Re-render trang chat một lần với dữ liệu đã merge
+ * 4. Tải hồ sơ chi tiết vào #chatConvProfileWrapper
+ */
+async function _postRenderChat(origNav) {
+  if (_chatLoadInProgress || !_backendConnected) return;
+  _chatLoadInProgress = true;
+  try {
+    await loadChatInboxFromBackend();
+    var cid = (typeof currentChatId !== 'undefined') ? currentChatId : null;
+    if (cid) await _loadChatConvMessagesIntoMock(cid);
+    // Re-render với dữ liệu mới — dùng origNav để không kích hoạt lại _postRenderChat
+    origNav('chat');
+    // Sau khi DOM được cập nhật, load hồ sơ vào #chatConvProfileWrapper
+    if (cid && _backendCustomerIds.has(cid)) {
+      _loadChatConvProfile(cid);
+    }
+  } catch (err) {
+    console.warn('[Agicom] _postRenderChat:', err.message);
+  } finally {
+    _chatLoadInProgress = false;
+  }
+}
+
+/**
+ * Wrap navigate() để hook vào sự kiện chuyển trang Chat Inbox.
+ * Chạy sau khi app4.js đã định nghĩa navigate.
+ */
+(function _wrapNavigateForChatInbox() {
+  if (typeof navigate !== 'function') {
+    // Thử lại sau 500ms nếu app4.js chưa load xong
+    setTimeout(_wrapNavigateForChatInbox, 500);
+    return;
+  }
+  var _origNav = navigate;
+
+  navigate = function(page) {
+    _origNav(page);
+    if (page === 'chat') {
+      // Async post-render — không block synchronous navigate
+      setTimeout(function() { _postRenderChat(_origNav); }, 0);
+    }
+  };
+  window.navigate = navigate;
+
+  // Nếu trang đang ở chat khi script load (ví dụ reload từ URL)
+  if (typeof currentPage !== 'undefined' && currentPage === 'chat') {
+    setTimeout(function() { _postRenderChat(_origNav); }, 200);
+  }
+})();
+
+/**
+ * Khi click chọn một conversation (data-conv), load profile ngay
+ * vào #chatConvProfileWrapper sau khi navigate('chat') render xong.
+ */
+document.addEventListener('click', function(e) {
+  var convEl = e.target.closest('[data-conv]');
+  if (!convEl) return;
+  var convId = convEl.dataset.conv;
+  if (!convId || !_backendCustomerIds.has(convId)) return;
+  // app4.js bubble handler đã gọi navigate('chat') trước chúng ta (đã đăng ký trước).
+  // DOM đã được render, dùng setTimeout để chờ _postRenderChat hoàn thành.
+  setTimeout(function() {
+    _loadChatConvProfile(convId);
+  }, 120);
+}); // bubble phase (mặc định): chạy sau handler app4.js
 
 /* ──────────────────────────────────────────────────────────────────────
    14. INIT

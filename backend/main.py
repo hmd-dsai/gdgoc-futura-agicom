@@ -851,6 +851,61 @@ async def update_content_suggestion_status(suggestion_id: str, body: dict):
         db.close()
 
 
+@app.get("/api/customers")
+async def list_customers():
+    """
+    Liệt kê tất cả khách hàng có tin nhắn trong DB, kèm thông tin
+    hồ sơ cơ bản. Dùng để populate Chat Inbox ở frontend.
+    """
+    db = SessionLocal()
+    try:
+        from sqlalchemy import func, desc as sqldesc
+
+        # Subquery: timestamp lớn nhất mỗi khách → xác định tin nhắn cuối
+        subq = (
+            db.query(
+                DB_ChatMessage.customer_id,
+                func.max(DB_ChatMessage.timestamp).label("max_ts"),
+            )
+            .group_by(DB_ChatMessage.customer_id)
+            .subquery()
+        )
+
+        rows = (
+            db.query(DB_ChatMessage, CustomerProfile)
+            .join(
+                subq,
+                (DB_ChatMessage.customer_id == subq.c.customer_id)
+                & (DB_ChatMessage.timestamp == subq.c.max_ts),
+            )
+            .outerjoin(
+                CustomerProfile,
+                DB_ChatMessage.customer_id == CustomerProfile.customer_id,
+            )
+            .order_by(sqldesc(subq.c.max_ts))
+            .all()
+        )
+
+        customers = []
+        for msg, profile in rows:
+            customers.append(
+                {
+                    "customer_id":       msg.customer_id,
+                    "last_message":      (msg.content or "")[:80],
+                    "last_role":         msg.role,
+                    "last_timestamp":    msg.timestamp.isoformat() if msg.timestamp else None,
+                    "churn_probability": profile.churn_probability if profile else 0.1,
+                    "emotion_index":     profile.emotion_index if profile else 0.5,
+                    "customer_segment":  profile.customer_segment if profile else "new",
+                    "total_orders":      profile.total_orders if profile else 0,
+                    "total_spent":       float(profile.total_spent or 0) if profile else 0.0,
+                }
+            )
+        return {"status": "success", "customers": customers}
+    finally:
+        db.close()
+
+
 @app.post("/system/reset-all")
 async def reset_all_data():
     db = SessionLocal()
