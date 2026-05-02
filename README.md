@@ -4,8 +4,6 @@
 
 **Agicom** is a smart E-commerce Management Dashboard powered by a **Multi-Agent AI** architecture. Instead of just being a standard chatbot, Agicom operates as a virtual staff team, helping SME beauty shop owners automate Customer Service, Pricing Strategy Proposals, Content & Video Script Creation, and Crisis Management in real-time.
 
-> **Demo shop:** GIAO FARA Official Store — lipsticks, face powder, makeup tools & skincare.
-
 ---
 
 ## 🌟 Why Agicom?
@@ -117,24 +115,6 @@ The system is divided into specialized Agents that communicate with each other v
 
 ---
 
-## 📦 Demo Data — GIAO FARA
-
-10 beauty products with full USPs, chatbot Q&As, review features, cost price, inventory, and behavioral data (conversion rate, return rate, bestseller rank):
-
-| ID | Product | Price |
-|----|---------|-------|
-| P001 | Son Bóng GIAO FARA (Glossy Lip Color, 8 shades) | 80,000đ |
-| P002 | Son Kem Lì GIAO FARA (Matte Lip Cream, 8 shades) | 80,000đ |
-| P003 | Phấn Phủ Bột GIAO FARA (Oil-Control Loose Powder) | 250,000đ |
-| P004 | Combo Son Kem Lì + Phấn Phủ | 300,000đ |
-| P006 | Phấn Phủ Bột Mini (Travel size) | 35,000đ |
-| P007 | Set Son Kem Lì 6 Thỏi | 220,000đ |
-| P008 | Bộ Trang Điểm 6 Món (Basic Makeup Set) | 150,000đ |
-| P009 | Bộ Cọ 13 Món (13-piece Brush Set) | 180,000đ |
-| P010 | Kẹp Bấm Mi (Eyelash Curler) | 100,000đ |
-| P011 | Kem Rửa Mặt Hada Labo Advanced 80g | 220,000đ |
-
----
 
 ## 💻 Local Setup & Run Guide
 
