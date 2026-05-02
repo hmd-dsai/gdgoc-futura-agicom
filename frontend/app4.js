@@ -8,12 +8,12 @@
    ===================================================================== */
 const MOCK = {
   shop: {
-    name: 'Shop PhoneMax',
+    name: 'Shop Mỹ phẩm GIAO FARA',
     plan: 'Premium AI',
     id: '#88902',
     target_revenue_month: 3200000000, // 3.2 tỷ
     current_revenue_month: 2120000000,
-    margin_floor: 8, // %
+    margin_floor: 15, // % — mỹ phẩm margin cao hơn điện tử
     roas_floor: 3.0
   },
 
@@ -34,11 +34,11 @@ const MOCK = {
 
   // Critical alerts shown on dashboard
   alerts: [
-    { level: 'critical', icon: '🔴', text: 'S24 Ultra Case Spigen còn 2 cái — dự kiến hết hàng trong 3 ngày', cta: 'Đặt hàng ngay', cta_page: 'inventory' },
-    { level: 'warning', icon: '🟡', text: 'Đối thủ Hoàng Hà vừa giảm giá S24 Ultra -6.5% (10 phút trước)', cta: 'Xem đề xuất', cta_page: 'ai-suggestions' },
-    { level: 'warning', icon: '🟡', text: '23 khách hỏi về pin S24 Ultra trong 7 ngày — đề xuất quay video review', cta: 'Xem chi tiết', cta_page: 'reviews' },
+    { level: 'critical', icon: '🔴', text: 'Kem Rửa Mặt Hada Labo: 3 review 1★ về kích ứng da trong 24h — nguy cơ khủng hoảng', cta: 'Xử lý ngay', cta_page: 'crisis-center' },
+    { level: 'warning', icon: '🟡', text: 'Phấn Phủ Bột GIAO FARA còn 11 hộp — dự kiến hết trong 6 ngày', cta: 'Đặt hàng ngay', cta_page: 'inventory' },
+    { level: 'warning', icon: '🟡', text: '15 khách hỏi về độ bền màu Son Kem Lì P002 trong 7 ngày — đề xuất video demo', cta: 'Xem chi tiết', cta_page: 'reviews' },
     { level: 'info', icon: '🔵', text: 'Tỷ lệ chuyển đổi giảm 0.5% — AI đang phân tích nguyên nhân', cta: 'Xem báo cáo', cta_page: 'ai-performance' },
-    { level: 'info', icon: '🔵', text: 'Cáp Anker 100W: 8 review tiêu cực mới — cần phản hồi', cta: 'Trả lời ngay', cta_page: 'reviews' }
+    { level: 'info', icon: '🔵', text: 'Son Kem Lì P002: 5 khiếu nại giao sai màu — kiểm tra listing ảnh sản phẩm', cta: 'Trả lời ngay', cta_page: 'reviews' }
   ],
 
   // AI agent activity today
@@ -76,10 +76,10 @@ const MOCK = {
   ],
 
   margin_by_product: [
-    { name: 'Ốp lưng Silicon', margin: 45, color: '#10b981' },
-    { name: 'Cáp sạc Baseus', margin: 38, color: '#10b981' },
-    { name: 'AirPods Pro 2', margin: 12, color: '#f59e0b' },
-    { name: 'iPhone 15 Pro Max', margin: 8, color: '#ef4444' }
+    { name: 'Phấn Phủ Bột GIAO FARA', margin: 62, color: '#10b981' },
+    { name: 'Son Kem Lì GIAO FARA', margin: 55, color: '#10b981' },
+    { name: 'Bộ Cọ Trang Điểm 13 Món', margin: 48, color: '#f59e0b' },
+    { name: 'Kem Rửa Mặt Hada Labo 80g', margin: 22, color: '#ef4444' }
   ],
 
   // Inventory
@@ -92,33 +92,69 @@ const MOCK = {
   },
 
   inventory_low: [
-    { sku: 'S24 Ultra Case Spigen', qty: 2, days: 3, ai_action: 'Đặt 50 cái — lead time 7 ngày' },
-    { sku: 'Cáp Anker 100W', qty: 5, days: 4, ai_action: 'Đặt 100 cái — đang trending' },
-    { sku: 'Củ sạc Ugreen 65W', qty: 8, days: 7, ai_action: 'Đặt 80 cái' }
+    { sku: 'Son Kem Lì GIAO FARA (Mã 12)', qty: 6, days: 3, ai_action: 'Đặt 200 thỏi — đang viral TikTok' },
+    { sku: 'Phấn Phủ Bột GIAO FARA', qty: 11, days: 6, ai_action: 'Đặt 150 hộp — review 4.9★, sắp hết' },
+    { sku: 'Kem Rửa Mặt Hada Labo 80g', qty: 14, days: 8, ai_action: 'Đặt 100 tuýp — bestseller dưỡng da' }
   ],
 
   inventory_slow: [
-    { sku: 'Mi Band 7 Xanh', qty: 45, days: 80, ai_reason: 'Review trung bình 3.2★, đối thủ giá rẻ hơn 15%', ai_action: 'Giảm 25% + Flash Sale cuối tuần' },
-    { sku: 'Ốp lưng IP13 Thường', qty: 120, days: 65, ai_reason: 'Mẫu cũ, IP13 không còn trending', ai_action: 'Combo với cáp sạc giảm 20%' }
+    { sku: 'Son Bóng GIAO FARA (Mã 04)', qty: 38, days: 72, ai_reason: 'Màu 04 ít được chọn — màu hồng nude đang trending hơn', ai_action: 'Giảm 15% + bundle với Son Kem Lì' },
+    { sku: 'Phấn Phủ Mini GIAO FARA (lô cũ)', qty: 85, days: 60, ai_reason: 'Lô cũ có 3 review phản hồi bột hơi thô, lô mới đã cải tiến', ai_action: 'Flash sale 20% + ghi rõ "Lô mới cải tiến"' }
   ],
 
   // Competitors
   competitors: [
-    { name: 'MobileWorld Store', activity: 'Vừa giảm giá iPhone 15 PM (-500k)', time: '10 phút trước', color: '#ef4444' },
-    { name: 'TechZone', activity: 'Mở campaign Flash Sale cuối tuần', time: '2 giờ trước', color: '#f59e0b' },
-    { name: 'Hoàng Hà', activity: 'Hết hàng mã Buds3 Pro', time: 'Hôm qua', color: '#10b981' }
+    { name: 'Hasaki Beauty', activity: 'Vừa chạy Flash Sale son MAC giảm 20% — bundle deal hút khách', time: '15 phút trước', color: '#ef4444' },
+    { name: 'Beauty Skin Store', activity: 'Ra mắt Set Son + Phấn 189k (so P004: 159k)', time: '2 giờ trước', color: '#f59e0b' },
+    { name: 'Guardian', activity: 'Hada Labo 80g hết hàng trên Shopee — cơ hội chiếm market share', time: 'Hôm qua', color: '#10b981' }
   ],
 
-  competitor_products: ['Galaxy S24 Ultra', 'iPhone 15 Pro Max', 'AirPods Pro 2', 'Galaxy Buds3 Pro', 'Cáp Anker 100W'],
+  competitor_products: ['Son Kem Lì GIAO FARA', 'Phấn Phủ Bột GIAO FARA', 'Kem Rửa Mặt Hada Labo 80g', 'Set Son 6 Thỏi', 'Bộ Cọ 13 Món'],
 
   competitor_prices: {
-    'Galaxy S24 Ultra': {
-      history: [29490000, 29490000, 29200000, 29200000, 28990000, 28990000, 28490000],
+    'Son Kem Lì GIAO FARA': {
+      history: [39000, 39000, 38000, 39000, 39000, 37000, 39000],
       shops: [
-        { name: 'Shop Của Bạn', old: null, new: 29990000, gap: 0 },
-        { name: 'Hoàng Hà', old: 30490000, new: 28490000, gap: -5.0 },
-        { name: 'CellphoneS', old: 28990000, new: 28990000, gap: -3.3 },
-        { name: 'MobileWorld', old: 29200000, new: 28800000, gap: -4.0 }
+        { name: 'Shop Của Bạn (GIAO FARA)', old: null, new: 39000, gap: 0 },
+        { name: 'Beauty Skin Store', old: 42000, new: 37000, gap: -5.1 },
+        { name: 'Shop Mỹ Phẩm Linh', old: 40000, new: 38000, gap: -2.6 },
+        { name: 'Hasaki', old: 45000, new: 43000, gap: +10.3 }
+      ]
+    },
+    'Phấn Phủ Bột GIAO FARA': {
+      history: [129000, 129000, 125000, 129000, 129000, 129000, 129000],
+      shops: [
+        { name: 'Shop Của Bạn (GIAO FARA)', old: null, new: 129000, gap: 0 },
+        { name: 'Beauty Skin Store', old: 135000, new: 125000, gap: -3.1 },
+        { name: 'Shop Mỹ Phẩm Linh', old: 130000, new: 128000, gap: -0.8 },
+        { name: 'Hasaki', old: 140000, new: 135000, gap: +4.7 }
+      ]
+    },
+    'Kem Rửa Mặt Hada Labo 80g': {
+      history: [175000, 178000, 175000, 180000, 180000, 180000, 180000],
+      shops: [
+        { name: 'Shop Của Bạn (GIAO FARA)', old: null, new: 180000, gap: 0 },
+        { name: 'Guardian', old: 185000, new: 183000, gap: +1.7 },
+        { name: 'Hasaki', old: 182000, new: 179000, gap: -0.6 },
+        { name: 'Shopee Mall chính hãng', old: 190000, new: 185000, gap: +2.8 }
+      ]
+    },
+    'Set Son 6 Thỏi': {
+      history: [114000, 114000, 110000, 114000, 114000, 112000, 114000],
+      shops: [
+        { name: 'Shop Của Bạn (GIAO FARA)', old: null, new: 114000, gap: 0 },
+        { name: 'Beauty Skin Store', old: 120000, new: 115000, gap: +0.9 },
+        { name: 'Shop Mỹ Phẩm Linh', old: 118000, new: 110000, gap: -3.5 },
+        { name: 'Lazada Mall', old: 125000, new: 118000, gap: +3.5 }
+      ]
+    },
+    'Bộ Cọ 13 Món': {
+      history: [87000, 87000, 85000, 87000, 87000, 87000, 87000],
+      shops: [
+        { name: 'Shop Của Bạn (GIAO FARA)', old: null, new: 87000, gap: 0 },
+        { name: 'Beauty Skin Store', old: 92000, new: 88000, gap: +1.1 },
+        { name: 'Shop Mỹ Phẩm Linh', old: 90000, new: 85000, gap: -2.3 },
+        { name: 'Shopee Mall khác', old: 95000, new: 90000, gap: +3.4 }
       ]
     }
   },
@@ -126,8 +162,8 @@ const MOCK = {
   // Reviews
   reviews_kpi: { rating: 4.85, count: 12450, positive: 85, neutral: 10, negative: 5, trend_pos: 3 },
 
-  review_tags_pos: ['Giao siêu nhanh', 'Hàng auth hộp đẹp', 'Tư vấn nhiệt tình'],
-  review_tags_neg: ['Shipper thái độ', 'Cáp bị gập', 'Đóng gói móp'],
+  review_tags_pos: ['Giao siêu nhanh', 'Màu đẹp chuẩn ảnh', 'Tư vấn nhiệt tình'],
+  review_tags_neg: ['Hộp bị móp khi ship', 'Giao sai màu son', 'Da hơi khô sau dùng'],
 
   reviews: [
     { product_id: 'P011', author: 'lan_thao_hcm',   date: 'Hôm qua',       rating: 2, text: 'Kem rửa mặt dùng 3 ngày mặt nổi mụn li ti, da đang ổn mà dùng thêm vào thì hỏng. Không biết có phải do sản phẩm không nhưng thôi dừng an toàn hơn.', tag: { type: 'neg', label: 'Chất lượng SP' } },
@@ -143,55 +179,56 @@ const MOCK = {
   ads_kpi: { budget_week: 15000000, spent: 8200000, revenue: 64000000, roas: 7.8 },
 
   ads_campaigns: [
-    { name: 'Tai nghe AirPods Pro 2', channel: 'Shopee Search', cost: 4000000, conv: 45, roas: 12.5, action: 'scale', ai_reason: 'ROAS 12.5x > ngưỡng 10x → đề xuất tăng budget 30%' },
-    { name: 'Sạc Baseus Type-C', channel: 'TikTok Video', cost: 2500000, conv: 112, roas: 8.2, action: 'maintain', ai_reason: 'ROAS ổn định trong vùng tối ưu' },
-    { name: 'Ốp Silicon chống bẩn', channel: 'Shopee Discovery', cost: 1700000, conv: 8, roas: 0.8, action: 'cut', ai_reason: 'ROAS 0.8x < 3.0x → đề xuất tắt campaign, redirect budget' }
+    { name: 'Phấn Phủ Bột GIAO FARA — Shopee Search', channel: 'Shopee Search', cost: 1800000, conv: 68, roas: 9.4, action: 'scale', ai_reason: 'ROAS 9.4x > ngưỡng 8x → đề xuất tăng budget 25%' },
+    { name: 'Son Kem Lì GIAO FARA — TikTok Video', channel: 'TikTok Video', cost: 1200000, conv: 145, roas: 12.1, action: 'scale', ai_reason: 'ROAS 12.1x xuất sắc — scale budget tối đa trong mùa sale' },
+    { name: 'Set Son 6 Thỏi — Facebook Ads', channel: 'Facebook Ads', cost: 900000, conv: 28, roas: 3.9, action: 'maintain', ai_reason: 'ROAS 3.9x vừa qua ngưỡng 3x — duy trì, theo dõi thêm 3 ngày' },
+    { name: 'Bộ Trang Điểm 6 Món — Shopee Discovery', channel: 'Shopee Discovery', cost: 700000, conv: 4, roas: 0.6, action: 'cut', ai_reason: 'ROAS 0.6x < 3.0x — tắt ngay, redirect budget sang Son Kem Lì' }
   ],
 
   // AI Suggestions
   suggestions: [
     {
       id: 'sug-001', type: 'price', status: 'pending', time: '5 phút trước',
-      title: 'Giảm giá S24 Ultra 4% + tặng ốp Spigen',
-      reason: 'Đối thủ Hoàng Hà vừa giảm 6.5%. 7 khách VIP đã xem SP nhưng chưa chốt. Tồn kho còn 12 đơn vị.',
-      metrics: [{label: 'Doanh thu dự kiến', value: '+22M'}, {label: 'Margin sau giảm', value: '11%'}, {label: 'Đơn hàng dự kiến', value: '+5-7'}],
-      confidence: 87
+      title: 'Định giá cao hơn đối thủ 5% — Son Kem Lì GIAO FARA rating 4.8★ vs 4.2★',
+      reason: 'Rating của shop cao hơn Beauty Skin Store 0.6★. Review 4.8★ + 145 đơn/ngày cho thấy khách sẵn sàng trả giá cao hơn để có chất lượng. Margin hiện tại 55% — còn dư địa tăng giá mà không mất khách.',
+      metrics: [{label: 'Doanh thu dự kiến', value: '+8M/tháng'}, {label: 'Margin mới', value: '58%'}, {label: 'Giá đề xuất', value: '41.000đ'}],
+      confidence: 84
     },
     {
       id: 'sug-002', type: 'content', status: 'pending', time: '12 phút trước',
-      title: 'Cập nhật mô tả AirPods Pro 2 — thêm bảng pin',
-      reason: '23 khách hỏi về thời lượng pin trong 7 ngày qua. Tỷ lệ chốt sau khi hỏi pin chỉ 12% (thấp hơn mức TB 28%).',
-      metrics: [{label: 'CR dự kiến tăng', value: '+8%'}, {label: 'Câu hỏi giảm', value: '-60%'}],
-      confidence: 92
+      title: 'Video swatches màu son trên 3 tone da — giảm 60% câu hỏi màu',
+      reason: '18 khách/7 ngày hỏi "màu son phù hợp tone da nào?" — tỷ lệ chốt sau hỏi màu chỉ 22% (thấp hơn TB 35%). Video swatches trực tiếp giải quyết điểm nghẽn này.',
+      metrics: [{label: 'CR dự kiến tăng', value: '+13%'}, {label: 'Câu hỏi giảm', value: '-60%'}, {label: 'Thời gian tư vấn', value: '-40%'}],
+      confidence: 91
     },
     {
       id: 'sug-003', type: 'promo', status: 'pending', time: '1 giờ trước',
-      title: 'Flash Sale Mi Band 7 — giảm 25%',
-      reason: 'Tồn kho 80 ngày. Review TB 3.2★ thấp. Không xả gấp sẽ thành hàng tồn quý 2.',
-      metrics: [{label: 'Thu hồi vốn', value: '~28M'}, {label: 'Margin', value: '5%'}, {label: 'SKU xả', value: '45 cái'}],
-      confidence: 78
+      title: 'Flash Sale Son Bóng Mã 04 + 07 — xả tồn 38 cái trong 72h',
+      reason: 'Mã 04 và 07 tồn 72 ngày — xu hướng màu nude và đỏ đô đang chiếm ưu thế. Giảm 15% + bundle với Son Kem Lì giúp xả kho mà vẫn bảo vệ margin tổng.',
+      metrics: [{label: 'Thu hồi vốn', value: '~2.5M'}, {label: 'Margin gộp', value: '42%'}, {label: 'SKU xả', value: '38 thỏi'}],
+      confidence: 79
     },
     {
       id: 'sug-004', type: 'ads', status: 'approved', time: '2 giờ trước',
-      title: 'Tăng budget AirPods Pro 2 +30%',
-      reason: 'ROAS 12.5x duy trì 5 ngày. Tăng budget có thể scale doanh thu tuyến tính.',
-      metrics: [{label: 'Doanh thu dự kiến', value: '+18M'}, {label: 'ROAS dự báo', value: '11.2x'}],
-      confidence: 94
+      title: 'Tăng budget Son Kem Lì TikTok Video +35%',
+      reason: 'ROAS 12.1x duy trì 5 ngày liên tiếp — đang trong mùa mua sắm 5/5. Scale ngay trước khi hết thời điểm vàng.',
+      metrics: [{label: 'Doanh thu dự kiến', value: '+15M'}, {label: 'ROAS dự báo', value: '10.8x'}],
+      confidence: 93
     },
     {
       id: 'sug-005', type: 'cs', status: 'approved', time: '3 giờ trước',
-      title: 'Gửi tin proactive cho 7 khách quan tâm S24 Ultra',
-      reason: 'Đối thủ đang giảm giá, 7 khách VIP đã inbox hỏi nhưng chưa chốt.',
-      metrics: [{label: 'Khách target', value: '7'}, {label: 'CR dự kiến', value: '40%'}],
-      confidence: 81
+      title: 'Proactive outreach 5 khách VIP quan tâm Combo P004',
+      reason: '5 khách VIP đã xem Combo P004 (Son + Phấn) > 3 lần nhưng chưa chốt. Gửi voucher 15k kèm swatch video — tỷ lệ chốt dự kiến 45%.',
+      metrics: [{label: 'Khách target', value: '5 VIP'}, {label: 'CR dự kiến', value: '45%'}, {label: 'Doanh thu tiềm năng', value: '~800k'}],
+      confidence: 83
     },
     {
       id: 'sug-006', type: 'price', status: 'rejected', time: 'Hôm qua',
-      title: 'Giảm giá Galaxy Buds3 Pro 10%',
-      reason: 'Đối thủ TechZone giảm giá. Inventory cao.',
-      metrics: [{label: 'Doanh thu', value: '+12M'}, {label: 'Margin', value: '4%'}],
-      confidence: 65,
-      rejection_reason: 'Margin còn 4% là quá thấp, không đủ bù phí ship.'
+      title: 'Giảm giá Kem Rửa Mặt Hada Labo xuống 165k để cạnh tranh Hasaki',
+      reason: 'Hasaki đang bán 179k — giảm xuống 165k có thể tăng volume.',
+      metrics: [{label: 'Doanh thu', value: '+3M'}, {label: 'Margin', value: '8%'}],
+      confidence: 58,
+      rejection_reason: 'Margin 8% sau giảm quá thấp. Hada Labo là hàng chính hãng — giữ định vị chất lượng, không phá giá.'
     }
   ],
 
@@ -210,9 +247,9 @@ const MOCK = {
 
   // Proactive targets — khách cần chủ động nhắn
   proactive_targets: [
-    { name: 'Trần Văn B', reason: 'Đối thủ giảm giá S24 Ultra — khách VIP chưa chốt 3 máy', value: '86M tiềm năng', action: 'Gửi offer ngay' },
-    { name: 'Phạm Thị Lan', reason: 'Đã hỏi AirPods Pro 2 (10/4) — hiện đang flash sale -8%', value: '5.2M tiềm năng', action: 'Gửi thông báo' },
-    { name: 'Hoàng Đức', reason: 'Đơn hàng #TK-890 ship 5 ngày, chưa nhận — rủi ro khiếu nại', value: 'Phòng ngừa complaint', action: 'Chủ động hỏi thăm' }
+    { name: 'Nguyễn Thị Bình', reason: 'Đã hỏi Combo P004 (Son + Phấn) 3 lần trong 7 ngày — chưa chốt', value: '159k tiềm năng · VIP repeat buyer', action: 'Gửi voucher 15k' },
+    { name: 'Trần Thị Mai', reason: 'Mua Son Kem Lì màu 12 tháng trước — màu 12 đang flash sale -10%', value: 'Upsell tiềm năng · 35k/đơn', action: 'Gửi thông báo sale' },
+    { name: 'Lê Văn Thành', reason: 'Đơn hàng #GF-2241 giao 4 ngày chưa nhận — rủi ro khiếu nại', value: 'Phòng ngừa review xấu', action: 'Chủ động hỏi thăm' }
   ],
 
   // Crisis data — dữ liệu mẫu cho GIAO FARA (dùng khi backend offline).
@@ -248,11 +285,11 @@ const MOCK = {
 
   // Insight reports (auto-generated from chat data)
   insights: [
-    { icon: '📊', title: '847 tin nhắn xử lý tuần này', detail: '91% tự động, 6% chờ duyệt, 3% cần xử lý cá nhân', cta: null },
-    { icon: '❓', title: 'Câu hỏi phổ biến nhất: "Hàng có auth không?" (134 lần)', detail: 'Đề xuất: Thêm video unbox + tem auth vào ảnh sản phẩm chính', cta: 'Xem chi tiết' },
-    { icon: '🔋', title: '23 khách hỏi pin S24 Ultra', detail: 'Đề xuất: Quay video test pin 24h và đăng TikTok — dự kiến giảm 60% câu hỏi', cta: 'Tạo content brief' },
-    { icon: '📦', title: '8 khách phàn nàn hộp móp khi nhận', detail: 'Đề xuất: Đổi sang thùng carton dày 5 lớp — chi phí +2k/đơn, giảm 80% complaint', cta: 'Xem báo giá' },
-    { icon: '💰', title: '12 khách hỏi giá sỉ từ 5 máy trở lên', detail: 'Insight: Có nhu cầu bán sỉ rõ ràng — cân nhắc tạo bảng giá sỉ chính thức', cta: 'Tạo bảng giá B2B' }
+    { icon: '📊', title: '412 tin nhắn xử lý tuần này', detail: '88% tự động, 8% chờ duyệt, 4% cần xử lý cá nhân', cta: null },
+    { icon: '🎨', title: 'Câu hỏi phổ biến nhất: "Màu son phù hợp với tone da nào?" (68 lần)', detail: 'Đề xuất: Quay video swatches 3 tone da — dự kiến giảm 60% câu hỏi màu sắc', cta: 'Tạo content brief' },
+    { icon: '✅', title: '22 khách hỏi "Son có an toàn không, có chứng nhận không?"', detail: 'Đề xuất: Thêm ảnh chứng nhận an toàn + thành phần vào listing — tăng trust score', cta: 'Xem chi tiết' },
+    { icon: '📦', title: '9 khách phàn nàn hộp móp / nắp son bị nứt khi nhận', detail: 'Đề xuất: Bổ sung mút xốp đệm bên trong túi ship — chi phí +1.5k/đơn, giảm 80% complaint', cta: 'Xem báo giá' },
+    { icon: '💼', title: '8 khách hỏi giá sỉ từ 10 thỏi trở lên', detail: 'Insight: Có nhu cầu B2B rõ ràng (spa, salon) — cân nhắc tạo bảng giá sỉ chính thức', cta: 'Tạo bảng giá B2B' }
   ],
 
   // AI Performance metrics
@@ -274,17 +311,17 @@ const MOCK = {
 
   // Settings - team members
   team_members: [
-    { name: 'Hoàng Minh Đức', email: 'duc.hoang@phonemax.vn', role: 'Admin' },
-    { name: 'Lê Thị Minh Ngọc', email: 'ngoc.le@phonemax.vn', role: 'Vận hành' },
-    { name: 'Trần Văn A', email: 'a.tran@phonemax.vn', role: 'Chỉ xem' }
+    { name: 'Nguyễn Thị Hương', email: 'owner@giaofara.vn', role: 'Admin' },
+    { name: 'Lê Thị Minh Ngọc', email: 'ngoc.le@giaofara.vn', role: 'Vận hành' },
+    { name: 'Trần Văn An', email: 'an.tran@giaofara.vn', role: 'Chỉ xem' }
   ],
 
   recent_activity: [
-    { time: '5 phút', user: 'AI Agent', action: 'Đề xuất giảm giá S24 Ultra 4%', status: 'pending' },
-    { time: '23 phút', user: 'Hoàng Minh Đức', action: 'Duyệt: Tăng budget AirPods +30%', status: 'approved' },
-    { time: '1 giờ', user: 'AI Agent', action: 'Phản hồi khách Trần Văn B (auto)', status: 'approved' },
-    { time: '2 giờ', user: 'Lê Thị Minh Ngọc', action: 'Từ chối: Giảm giá Buds3 Pro', status: 'rejected' },
-    { time: 'Hôm qua', user: 'AI Agent', action: 'Tạo báo cáo insight tuần', status: 'approved' }
+    { time: '5 phút', user: 'AI Agent', action: 'Đề xuất tăng giá Son Kem Lì 5% (rating cao hơn đối thủ)', status: 'pending' },
+    { time: '18 phút', user: 'Nguyễn Thị Hương', action: 'Duyệt: Tăng budget Son Kem Lì TikTok +35%', status: 'approved' },
+    { time: '1 giờ', user: 'AI Agent', action: 'Phản hồi khách Trần Thị Mai về màu son (auto)', status: 'approved' },
+    { time: '2 giờ', user: 'Lê Thị Minh Ngọc', action: 'Từ chối: Giảm giá Hada Labo xuống 165k', status: 'rejected' },
+    { time: 'Hôm qua', user: 'AI Agent', action: 'Tạo báo cáo insight tuần — 5 cơ hội content mới', status: 'approved' }
   ]
 };
 
@@ -293,87 +330,88 @@ const MOCK = {
    ===================================================================== */
 
 MOCK.content_inventory = [
-  { id: 'cnt-001', type: 'blog', title: 'Hướng dẫn sạc AirPods Pro 2', topic: 'pin/sạc', published: '01/03/2026', views: 1240, questions_reduced: 31, product: 'AirPods Pro 2' },
-  { id: 'cnt-002', type: 'video', title: 'Unbox iPhone 15 Pro Max chính hãng', topic: 'auth/hàng thật', published: '15/02/2026', views: 45200, questions_reduced: 45, product: 'iPhone 15 Pro Max' },
-  { id: 'cnt-003', type: 'faq', title: 'FAQ: Bảo hành Samsung Galaxy', topic: 'bảo hành', published: '10/01/2026', views: 890, questions_reduced: 22, product: 'Galaxy S24 Ultra' }
+  { id: 'cnt-001', type: 'video', title: 'Swatches Son Kem Lì GIAO FARA — 8 màu trên 3 tone da', topic: 'màu sắc/tone da', published: '01/03/2026', views: 38500, questions_reduced: 62, product: 'Son Kem Lì GIAO FARA (P002)' },
+  { id: 'cnt-002', type: 'blog', title: 'Review chi tiết Kem Rửa Mặt Hada Labo 80g — có phù hợp da nhạy cảm?', topic: 'dưỡng da/thành phần', published: '15/02/2026', views: 12400, questions_reduced: 45, product: 'Kem Rửa Mặt Hada Labo (P011)' },
+  { id: 'cnt-003', type: 'faq', title: 'FAQ: Phấn Phủ GIAO FARA — da dầu có dùng được không?', topic: 'loại da/cách dùng', published: '10/01/2026', views: 5600, questions_reduced: 34, product: 'Phấn Phủ Bột GIAO FARA (P003)' }
 ];
 
 MOCK.products_detail = [
   {
-    sku: 'S24-ULTRA-TIM', name: 'Samsung Galaxy S24 Ultra', category: 'Smartphone', price: 29990000,
-    description_current: 'Samsung Galaxy S24 Ultra 256GB — màn hình Dynamic AMOLED 6.8 inch. Chip Snapdragon 8 Gen 3. Bút S Pen tích hợp. Bộ nhớ 12GB RAM. Pin 5000mAh. Hàng chính hãng Samsung Việt Nam, bảo hành 12 tháng.',
-    description_key_points: ['màn hình AMOLED', 'Snapdragon 8 Gen 3', 'S Pen', '5000mAh', 'bảo hành 12 tháng'],
+    sku: 'GF-MLIPSTICK-M09', name: 'Son Kem Lì GIAO FARA Siêu Lì Mịn (Mã 09-16)', category: 'Son môi', price: 39000,
+    description_current: 'Son Kem Lì GIAO FARA Siêu Lì Mịn. Màu 09-16. Finish velvet matte. Bám màu 6-8 tiếng. Khô nhanh trong 30 giây. Chất son mịn không tạo vảy. Giá 39.000đ.',
+    description_key_points: ['velvet matte', 'bám màu 6-8 tiếng', 'khô 30 giây', 'không tạo vảy', '8 màu'],
     usp: [
-      'Camera 200MP + zoom quang học 10x — chụp đêm sắc nét không đối thủ trong tầm giá',
-      'Chip Snapdragon 8 Gen 3 mạnh nhất 2024 — xử lý AI, gaming, đa nhiệm không giật lag',
-      'Bút S Pen tích hợp miễn phí — viết tay, ký tài liệu, ghi chú tức thì',
-      'Hàng chính hãng Samsung Việt Nam — bảo hành 12 tháng toàn quốc, đổi mới 30 ngày',
-      'Pin 5000mAh sạc 45W — đầy pin trong 70 phút, dùng cả ngày không lo cạn'
+      'Lì mịn velvet chuẩn studio — bám màu 6–8 tiếng, ăn uống vẫn còn màu, không lem khẩu trang',
+      'Khô trong 30 giây, không dính, không tạo vảy — hoàn hảo cho ngày bận rộn cần makeup nhanh',
+      '8 màu từ nude thanh lịch đến đỏ đô quyến rũ — 1 thỏi đủ mọi mood cả tuần',
+      'Chất son siêu mịn, không tạo vân khô hay bong tróc dù môi hơi thiếu nước',
+      'Giá chỉ 39.000đ — tiết kiệm 70% so với son lì ngoại nhập, chất lượng không thua kém'
     ],
     chatbot_questions: [
-      { topic: 'Thời lượng pin', count: 23, sample: 'Pin dùng được mấy tiếng?', sentiment: 'neutral' },
-      { topic: 'Tốc độ sạc', count: 14, sample: 'Sạc 45W thì đầy bao lâu?', sentiment: 'neutral' },
-      { topic: 'Camera chất lượng', count: 18, sample: 'Zoom 100x có dùng được không?', sentiment: 'positive' },
-      { topic: 'Hàng auth', count: 17, sample: 'Hàng có tem chính hãng không?', sentiment: 'neutral' },
-      { topic: 'Giá sỉ', count: 12, sample: 'Lấy 3 cái có giảm không?', sentiment: 'neutral' },
-      { topic: 'So sánh với iPhone', count: 9, sample: 'So với iPhone 15 Pro Max thì sao?', sentiment: 'neutral' }
+      { topic: 'Màu sắc / tone da', count: 18, sample: 'Màu nào phù hợp với da ngăm tối?', sentiment: 'neutral' },
+      { topic: 'Độ bền màu', count: 15, sample: 'Son có bị bay màu sau khi ăn không?', sentiment: 'neutral' },
+      { topic: 'Thành phần / an toàn', count: 12, sample: 'Son có paraben không? Có an toàn không?', sentiment: 'neutral' },
+      { topic: 'Da khô / môi khô', count: 9, sample: 'Môi khô hay bị bong tróc, dùng son lì có ổn không?', sentiment: 'neutral' },
+      { topic: 'Giá sỉ / số lượng lớn', count: 8, sample: 'Lấy 10 thỏi có giảm không?', sentiment: 'neutral' }
     ],
     review_features: [
-      { feature: 'Pin & Sạc', mentions: 31, positive: 8, negative: 23, sample_neg: 'Pin tụt nhanh khi dùng camera zoom' },
-      { feature: 'S Pen', mentions: 14, positive: 14, negative: 0, sample_pos: 'Bút viết mượt, app Samsung Notes tuyệt' },
-      { feature: 'Camera', mentions: 28, positive: 24, negative: 4, sample_pos: 'Chụp đêm cực đỉnh, zoom 100x rõ nét' },
-      { feature: 'Hàng auth', mentions: 12, positive: 12, negative: 0, sample_pos: 'Seal nguyên vẹn, có tem chính hãng' },
-      { feature: 'Giao hang', mentions: 8, positive: 5, negative: 3, sample_neg: 'Hộp bị móp nhẹ' }
+      { feature: 'Độ bền màu', mentions: 42, positive: 35, negative: 7, sample_neg: 'Ăn xong bay màu khá nhanh' },
+      { feature: 'Chất son / độ mịn', mentions: 38, positive: 34, negative: 4, sample_pos: 'Chất mịn như nhung, không bông tróc' },
+      { feature: 'Màu sắc chuẩn ảnh', mentions: 29, positive: 22, negative: 7, sample_neg: 'Màu thực nhạt hơn ảnh một chút' },
+      { feature: 'Đóng gói / giao hàng', mentions: 14, positive: 10, negative: 4, sample_neg: 'Nắp son hơi lỏng khi nhận' },
+      { feature: 'Giá trị / giá tiền', mentions: 22, positive: 22, negative: 0, sample_pos: 'Giá rẻ mà chất xịn, mua thêm ngay' }
     ]
   },
   {
-    sku: 'ANKER-100W-CAP', name: 'Cáp Anker 100W USB-C', category: 'Phụ kiện sạc', price: 350000,
-    description_current: 'Cáp Anker 100W USB-C to USB-C. Hỗ trợ sạc nhanh đến 100W. Dài 1.8m. Chất liệu dệt bền. Tương thích mọi thiết bị USB-C.',
-    description_key_points: ['100W', '1.8m', 'chất liệu dệt', 'USB-C'],
+    sku: 'GF-SPOWDER-TN', name: 'Phấn Phủ Bột GIAO FARA Kềm Dầu Tự Nhiên', category: 'Phấn phủ', price: 129000,
+    description_current: 'Phấn Phủ Bột GIAO FARA Kềm Dầu Tự Nhiên. Kiềm dầu 6-8 tiếng. Tông tự nhiên phù hợp da vàng ấm. Không paraben. Che phủ lỗ chân lông nhẹ. Giá 129.000đ.',
+    description_key_points: ['kiềm dầu 6-8 tiếng', 'tông tự nhiên', 'không paraben', 'che lỗ chân lông', 'da dầu/hỗn hợp'],
     usp: [
-      'Công suất 100W thực chiến — sạc MacBook Pro, Samsung S24, iPad Pro cùng lúc không giảm tốc',
-      'Dây bọc dệt chống rối, chống gãy — bền gấp 3 lần cáp thường theo thử nghiệm Anker',
-      'Tương thích toàn bộ thiết bị USB-C — không cần mua nhiều loại cáp khác nhau',
-      'Bảo hành chính hãng 18 tháng — lỗi đổi mới, không cần giải thích',
-      'Chỉ 350.000đ cho 100W — tiết kiệm hơn 60% so với cáp Apple chính hãng cùng công suất'
+      'Kiềm dầu cực đỉnh 6–8 tiếng — da luôn mịn như plastic skin, không cần dặm lại giữa ngày',
+      'Tông Tự Nhiên pha chuẩn cho da vàng ấm người Việt — mặc lên không bị trắng bệch hay xám xịt',
+      'Không chứa paraben — an toàn cho da nhạy cảm, da dầu, da hỗn hợp dùng lâu dài',
+      'Che phủ lỗ chân lông và vết thâm nhẹ mà không cần thêm kem nền — tiết kiệm bước makeup',
+      '129.000đ dùng được 3–4 tháng — tính ra chưa đến 1.500đ/ngày cho da đẹp hoàn hảo'
     ],
     chatbot_questions: [
-      { topic: 'Độ bền / Tuổi thọ', count: 15, sample: 'Cáp dùng được bao lâu?', sentiment: 'negative' },
-      { topic: 'Tương thích thiết bị', count: 11, sample: 'Dùng được với MacBook Pro không?', sentiment: 'neutral' },
-      { topic: 'Tốc độ sạc thực tế', count: 9, sample: 'Sạc thực tế được mấy W?', sentiment: 'neutral' },
-      { topic: 'Đổi trả lỗi', count: 8, sample: 'Cáp bị hỏng shop đổi không?', sentiment: 'negative' }
+      { topic: 'Da dầu / da hỗn hợp', count: 12, sample: 'Da dầu nhiều có dùng được không? Kềm dầu tốt không?', sentiment: 'neutral' },
+      { topic: 'Tone màu phù hợp', count: 10, sample: 'Da ngăm tối dùng tông gì cho phù hợp?', sentiment: 'neutral' },
+      { topic: 'Thành phần an toàn', count: 9, sample: 'Phấn có paraben không? Mang thai dùng được không?', sentiment: 'neutral' },
+      { topic: 'Cách dùng + cọ', count: 7, sample: 'Dùng cọ nào đánh phấn này đẹp nhất?', sentiment: 'neutral' },
+      { topic: 'Thời gian sử dụng', count: 5, sample: 'Hộp 129k dùng được bao lâu?', sentiment: 'neutral' }
     ],
     review_features: [
-      { feature: 'Độ bền', mentions: 18, positive: 2, negative: 16, sample_neg: 'Dùng 1 tuần sạc chậm lại, 2 tuần là hư' },
-      { feature: 'Tốc độ sạc', mentions: 12, positive: 7, negative: 5, sample_pos: 'Sạc nhanh lúc mới mua' },
-      { feature: 'Thiết kế', mentions: 6, positive: 6, negative: 0, sample_pos: 'Nhìn chắc chắn, dây bọc dệt đẹp' },
-      { feature: 'Bảo hành', mentions: 8, positive: 0, negative: 8, sample_neg: 'Shop xử lý bảo hành chậm' }
+      { feature: 'Kiềm dầu', mentions: 48, positive: 38, negative: 10, sample_neg: 'Da dầu cực nhiều kiềm chỉ được 4 tiếng' },
+      { feature: 'Tone màu tự nhiên', mentions: 35, positive: 30, negative: 5, sample_pos: 'Màu vừa vặn da vàng ấm, không trắng bệch' },
+      { feature: 'Độ mịn / che phủ', mentions: 28, positive: 24, negative: 4, sample_pos: 'Đánh xong mịn kinh, che khuyết điểm nhẹ ổn' },
+      { feature: 'An toàn / thành phần', mentions: 18, positive: 18, negative: 0, sample_pos: 'Da nhạy cảm dùng không bị dị ứng' },
+      { feature: 'Đóng gói / giao hàng', mentions: 11, positive: 7, negative: 4, sample_neg: 'Hộp phấn bị vỡ góc khi nhận' }
     ]
   },
   {
-    sku: 'AIRPODS-PRO2', name: 'Apple AirPods Pro 2 (USB-C)', category: 'Tai nghe', price: 5200000,
-    description_current: 'Apple AirPods Pro 2 cổng USB-C. Chip H2 mới nhất. Chống ồn ANC cải tiến. Pin 6h + 30h với case. Kháng nước IPX4. Hàng chính hãng VNA.',
-    description_key_points: ['chip H2', 'ANC', 'pin 6h', 'IPX4', 'chính hãng VNA'],
+    sku: 'HL-CLEANSER-80G', name: 'Kem Rửa Mặt Hada Labo Advanced Nourish 80g', category: 'Chăm sóc da', price: 180000,
+    description_current: 'Kem Rửa Mặt Dưỡng Ẩm Hada Labo Advanced Nourish 80g. Hyaluronic Acid. Không cồn, không paraben. Bọt mịn sạch sâu. Hàng chính hãng nhập khẩu có hoá đơn Guardian. Giá 180.000đ.',
+    description_key_points: ['Hyaluronic Acid', 'không cồn/paraben', 'bọt mịn', 'hàng chính hãng', 'da nhạy cảm'],
     usp: [
-      'Chống ồn ANC thế hệ 2 — triệt tiêu 99% tiếng ồn, làm việc ở quán cafe ồn nhất cũng nghe rõ',
-      'Chip H2 Apple — âm thanh Spatial Audio 3D, nghe nhạc như đang trong rạp hát',
-      'Pin 6h liên tục + 30h với case — cả ngày dùng không cần sạc case',
-      'Kháng nước IPX4 — tập gym, đi mưa nhẹ không lo hỏng',
-      'Hàng chính hãng VNA — bảo hành Apple Store 12 tháng, kích hoạt warranty chính thức'
+      'Hyaluronic Acid Nhật Bản giữ ẩm 24/7 — rửa mặt xong da vẫn mềm mịn căng mướt, không khô căng',
+      'Hàng chính hãng nhập khẩu, có hoá đơn Guardian — date xa, nguồn gốc 100% rõ ràng, không lo hàng giả',
+      'Không chứa cồn, không paraben — êm dịu an toàn cho da nhạy cảm, da khô, da mang thai đều dùng được',
+      'Bọt mịn sạch sâu không gây kích ứng — nền skincare vững chắc để serum và kem dưỡng thẩm thấu tốt hơn',
+      '180.000đ/80g dùng được 2–3 tháng — đầu tư thông minh nhất cho bước làm sạch nền tảng skincare'
     ],
     chatbot_questions: [
-      { topic: 'Thời lượng pin', count: 23, sample: 'Pin nghe được mấy tiếng?', sentiment: 'neutral' },
-      { topic: 'Chống ồn ANC', count: 16, sample: 'ANC có tốt không? Dùng ở văn phòng ồn ok không?', sentiment: 'neutral' },
-      { topic: 'Kết nối thiết bị khác', count: 12, sample: 'Dùng với Samsung được không?', sentiment: 'neutral' },
-      { topic: 'Giá vs hàng grey', count: 8, sample: 'Giá shop tại sao cao hơn chỗ khác?', sentiment: 'negative' },
-      { topic: 'Bảo hành', count: 7, sample: 'Bảo hành ở đâu? Bao lâu?', sentiment: 'neutral' }
+      { topic: 'Da nhạy cảm / kích ứng', count: 14, sample: 'Da mình nhạy cảm hay bị nổi mụn dùng được không?', sentiment: 'neutral' },
+      { topic: 'Nguồn gốc / hàng thật', count: 11, sample: 'Hàng có chính hãng không? Date bao lâu?', sentiment: 'neutral' },
+      { topic: 'Da khô / dưỡng ẩm', count: 9, sample: 'Rửa mặt xong có bị khô căng không?', sentiment: 'neutral' },
+      { topic: 'Mang thai / cho con bú', count: 7, sample: 'Đang mang thai dùng được không?', sentiment: 'neutral' },
+      { topic: 'Cách dùng / kết hợp', count: 6, sample: 'Dùng kết hợp với toner/serum nào tốt?', sentiment: 'neutral' }
     ],
     review_features: [
-      { feature: 'Chống ồn ANC', mentions: 24, positive: 22, negative: 2, sample_pos: 'ANC tuyệt vời, đi làm không nghe gì xung quanh' },
-      { feature: 'Pin', mentions: 19, positive: 11, negative: 8, sample_neg: 'Pin 6h hơi ít, phải sạc giữa ca' },
-      { feature: 'Âm thanh', mentions: 18, positive: 17, negative: 1, sample_pos: 'Nghe nhạc rất hay, bass tốt' },
-      { feature: 'Kết nối Samsung', mentions: 6, positive: 1, negative: 5, sample_neg: 'Mua về dùng Samsung, kết nối chập chờn' },
-      { feature: 'Thiết kế / Fit', mentions: 9, positive: 9, negative: 0, sample_pos: 'Đeo vừa, không đau tai dù đeo lâu' }
+      { feature: 'Dưỡng ẩm / không khô', mentions: 52, positive: 42, negative: 10, sample_neg: 'Da khô mình thấy vẫn hơi khô căng sau rửa' },
+      { feature: 'Nguồn gốc / chính hãng', mentions: 28, positive: 28, negative: 0, sample_pos: 'Có bill Guardian, date còn 18 tháng, yên tâm' },
+      { feature: 'An toàn / thành phần', mentions: 24, positive: 20, negative: 4, sample_neg: 'Dùng 3 ngày mặt nổi mụn nhỏ li ti, có thể do purging' },
+      { feature: 'Bọt / tạo bọt', mentions: 19, positive: 16, negative: 3, sample_pos: 'Bọt mịn dày, rửa sạch mà không thấy chật mặt' },
+      { feature: 'Đóng gói / giao hàng', mentions: 12, positive: 8, negative: 4, sample_neg: 'Hộp kem bị móp khi nhận, lo lắng về vệ sinh' }
     ]
   }
 ];
@@ -381,112 +419,112 @@ MOCK.products_detail = [
 MOCK.content_suggestions_generated = [
   {
     id: 'cs-001', priority: 'high', status: 'pending', type: 'video',
-    title: 'Video test pin S24 Ultra — "72 giờ sử dụng thực tế"',
-    platform: 'TikTok + YouTube',
-    chatbot_signal: { count: 23, topic: 'Hỏi thời lượng pin S24 Ultra', sample_questions: ['Pin dùng được mấy tiếng?', 'Pin chơi game thì hao nhanh không?', 'Sạc 1 lần dùng cả ngày không?'] },
-    review_signal: { count: 23, neg_pct: 74, sample_reviews: ['Pin tụt nhanh khi dùng camera zoom', 'Pin không được như quảng cáo'] },
+    title: 'Video swatches Son Kem Lì GIAO FARA — 8 màu trên 3 tone da thực tế',
+    platform: 'TikTok + Shopee Video',
+    chatbot_signal: { count: 18, topic: 'Hỏi màu son phù hợp tone da', sample_questions: ['Màu nào hợp da ngăm tối?', 'Màu 12 có hợp da trắng không?', 'Màu nào dùng được đi học đi làm?'] },
+    review_signal: { count: 7, neg_pct: 71, sample_reviews: ['Màu thực nhạt hơn ảnh một chút', 'Không biết màu nào phù hợp da mình'] },
     combined_score: 94,
-    estimated_impact: 'Giảm ~60% câu hỏi về pin, tăng CR 8-12%',
-    estimated_production: '1 ngày quay + editing',
-    angle: 'Test thực tế: sạc đầy lúc 8h sáng, dùng hết ngày làm việc, chụp 200 ảnh, xem 2h video, còn bao nhiêu %?'
+    estimated_impact: 'Giảm ~60% câu hỏi màu sắc, tăng CR 10-15%',
+    estimated_production: '2-3 giờ quay + editing nhẹ',
+    angle: 'Test thực tế: 3 người mẫu tone da sáng / vàng trung / ngăm tối — quẹt trực tiếp, quay cận chi tiết để khách chọn màu không sai'
   },
   {
     id: 'cs-002', priority: 'high', status: 'pending', type: 'blog_faq',
-    title: '"AirPods Pro 2 có dùng được với Android không?" — FAQ + Video test',
+    title: '"Phấn Phủ GIAO FARA da dầu dùng được không?" — FAQ + Video test 8 tiếng',
     platform: 'Blog + TikTok',
-    chatbot_signal: { count: 12, topic: 'Hỏi kết nối với Samsung/Android', sample_questions: ['Dùng với Samsung được không?', 'ANC dùng được trên Android không?', 'Kết nối Samsung thì nghe có tốt không?'] },
-    review_signal: { count: 6, neg_pct: 83, sample_reviews: ['Mua về dùng Samsung, kết nối chập chờn', 'ANC không hoạt động trên Android'] },
-    combined_score: 87,
-    estimated_impact: 'Giảm 40% câu hỏi về Android, giúp set expectations đúng',
-    estimated_production: '2-3 giờ viết + test',
-    angle: 'Trả lời thẳng: AirPods Pro 2 HOẠT ĐỘNG với Android nhưng bị giới hạn tính năng nào, nếu bạn xài Android thì nên cân nhắc...'
+    chatbot_signal: { count: 12, topic: 'Hỏi phấn có hợp da dầu không', sample_questions: ['Da dầu nhiều dùng có bị trôi không?', 'Kềm dầu được mấy tiếng?', 'Dùng xong có bóng nhờn không?'] },
+    review_signal: { count: 10, neg_pct: 60, sample_reviews: ['Da dầu cực nhiều kiềm chỉ được 4 tiếng', 'Kềm dầu không tốt bằng kỳ vọng'] },
+    combined_score: 88,
+    estimated_impact: 'Giảm 50% câu hỏi về da dầu, set expectations đúng tăng satisfaction',
+    estimated_production: '1-2 giờ viết + 1 ngày test',
+    angle: 'Test thực tế: đánh phấn 8h sáng, check da lúc 12h và 4h chiều — chụp ảnh macro và video gần để khách thấy thực tế'
   },
   {
-    id: 'cs-003', priority: 'high', status: 'pending', type: 'comparison',
-    title: 'So sanh Galaxy S24 Ultra vs iPhone 15 Pro Max — "Tiêu 30 triệu nên chọn máy nào?"',
-    platform: 'Blog + YouTube',
-    chatbot_signal: { count: 9, topic: 'So sanh S24 Ultra voi iPhone 15 PM', sample_questions: ['S24 Ultra hay iPhone 15 PM tốt hơn?', 'Chụp ảnh thì máy nào ngon hơn?', 'Bền hơn thì máy nào?'] },
-    review_signal: { count: 4, neg_pct: 10, sample_reviews: ['Đang phân vân mua cái nào', 'Bảo hành S24 tốt hơn iPhone'] },
-    combined_score: 76,
-    estimated_impact: 'Hỗ trợ quyết định mua hàng, giảm 30% thời gian tư vấn chatbot',
-    estimated_production: '1 ngày nghiên cứu + viết',
-    angle: 'Phân tích theo use case: công việc vs gaming vs nhiều ảnh vs video. Không có máy tốt hơn tuyệt đối, chỉ có phù hợp hơn'
+    id: 'cs-003', priority: 'high', status: 'pending', type: 'guide',
+    title: '"Kem Rửa Mặt Hada Labo có purging không?" — Giải thích khoa học + timeline',
+    platform: 'Blog + TikTok',
+    chatbot_signal: { count: 9, topic: 'Hỏi kích ứng / nổi mụn sau dùng', sample_questions: ['Dùng 3 ngày mặt nổi mụn có phải lỗi sản phẩm?', 'Purging là gì? Bao lâu thì hết?', 'Da nhạy cảm dùng có sao không?'] },
+    review_signal: { count: 10, neg_pct: 40, sample_reviews: ['Dùng 3 ngày mặt nổi mụn li ti', 'Da mình không hợp sản phẩm này'] },
+    combined_score: 82,
+    estimated_impact: 'Giảm lo ngại purging, giảm tỷ lệ đổi trả 30%, tăng trust',
+    estimated_production: '2-3 giờ nghiên cứu + viết',
+    angle: 'Giải thích rõ purging vs dị ứng thật: timeline, triệu chứng, cách phân biệt — đính kèm thành phần an toàn của Hada Labo'
   },
   {
     id: 'cs-004', priority: 'medium', status: 'pending', type: 'guide',
-    title: '"Bảng giá sỉ chính thức" — Landing page cho khách B2B',
-    platform: 'Website + Shopee',
-    chatbot_signal: { count: 12, topic: 'Hỏi giá sỉ từ 5 máy trở lên', sample_questions: ['Lấy 5 cái có giảm không?', 'Bảng giá sỉ của shop?', 'Mua 10 máy được bao nhiêu %?'] },
+    title: '"Bảng giá sỉ GIAO FARA chính thức" — Dành cho spa, salon, đại lý',
+    platform: 'Website + Zalo OA',
+    chatbot_signal: { count: 8, topic: 'Hỏi giá sỉ từ 10 thỏi trở lên', sample_questions: ['Lấy 20 thỏi son có giảm không?', 'Bảng giá sỉ của shop?', 'Mua sỉ cho salon được không?'] },
     review_signal: { count: 0, neg_pct: 0, sample_reviews: [] },
-    combined_score: 65,
-    estimated_impact: 'Mở kênh B2B mới, dự kiến +5-8 đơn sỉ/tháng',
-    estimated_production: '3-4 giờ thiết kế page',
-    angle: 'Tạo landing page riêng với bảng giá sỉ rõ ràng, form đặt hàng sỉ, hotline riêng cho đại lý'
+    combined_score: 67,
+    estimated_impact: 'Mở kênh B2B spa/salon, dự kiến +8-12 đơn sỉ/tháng',
+    estimated_production: '2-3 giờ thiết kế page + bảng giá',
+    angle: 'Tạo landing page riêng với bảng giá sỉ theo bậc (10/20/50 thỏi), form đặt hàng và hotline Zalo riêng cho đại lý'
   },
   {
     id: 'cs-005', priority: 'medium', status: 'saved', type: 'video',
-    title: '"Kiểm tra hàng auth" — Video quy trình unbox + tem chính hãng',
-    platform: 'TikTok + Shopee video',
-    chatbot_signal: { count: 17, topic: 'Hỏi hàng auth, tem chính hãng', sample_questions: ['Hàng có auth không?', 'Tem chính hãng Samsung có không?', 'Mua ở đây có bị hàng giả không?'] },
-    review_signal: { count: 12, neg_pct: 5, sample_reviews: ['Seal nguyên vẹn, có tem chính hãng', 'Hàng auth 100%, mua an tâm'] },
-    combined_score: 71,
-    estimated_impact: 'Giảm 45% câu hỏi về hàng auth, tăng trust score',
+    title: '"Son GIAO FARA có an toàn không?" — Video review thành phần + chứng nhận',
+    platform: 'TikTok + Shopee Video',
+    chatbot_signal: { count: 11, topic: 'Hỏi thành phần an toàn / không paraben', sample_questions: ['Son có paraben không?', 'Mang thai dùng son này được không?', 'Thành phần có hóa chất độc hại không?'] },
+    review_signal: { count: 5, neg_pct: 20, sample_reviews: ['Da nhạy cảm dùng không bị gì', 'Yên tâm vì không chứa hóa chất độc'] },
+    combined_score: 72,
+    estimated_impact: 'Tăng trust score, giảm 40% câu hỏi về thành phần',
     estimated_production: '2-3 giờ quay',
-    angle: 'Video thực chiến: mở hộp live, kiểm tra tem, verify IMEI online ngay trên camera'
+    angle: 'Đọc từng thành phần trực tiếp trên camera, giải thích công dụng, chỉ chứng nhận an toàn — ngắn 60 giây, thẳng vào vấn đề'
   }
 ];
 
 MOCK.market_trends = [
   {
-    topic: 'Pin & Sạc nhanh',
-    chatbot_count: 37, review_count: 31, total_signals: 68,
-    sentiment_pct: { positive: 10, neutral: 28, negative: 62 },
-    trend_direction: 'up', trend_pct: 18,
-    competitor_note: 'CellphoneS đăng video "test sạc 67W" đạt 120k views',
-    opportunity: 'Tạo content test pin thực tế — xóa bỏ lo ngại của 62% khách hỏi tiêu cực'
+    topic: 'Màu sắc / Tone da phù hợp',
+    chatbot_count: 42, review_count: 18, total_signals: 60,
+    sentiment_pct: { positive: 15, neutral: 55, negative: 30 },
+    trend_direction: 'up', trend_pct: 24,
+    competitor_note: 'Hasaki đăng video swatches son MAC đạt 280k views tuần này',
+    opportunity: 'Video swatches 3 tone da — giải quyết trực tiếp 42 câu hỏi màu sắc, tăng CR 10-15%'
   },
   {
-    topic: 'Hàng auth & Tem chính hãng',
-    chatbot_count: 17, review_count: 12, total_signals: 29,
-    sentiment_pct: { positive: 75, neutral: 20, negative: 5 },
-    trend_direction: 'stable', trend_pct: 3,
+    topic: 'Thành phần an toàn / Không hóa chất',
+    chatbot_count: 22, review_count: 14, total_signals: 36,
+    sentiment_pct: { positive: 70, neutral: 20, negative: 10 },
+    trend_direction: 'up', trend_pct: 38,
     competitor_note: null,
-    opportunity: 'Đây là điểm MẠNH — amplify bằng video unbox để tăng trust'
+    opportunity: 'Xu hướng clean beauty đang tăng mạnh — amplify điểm mạnh "không paraben" của GIAO FARA'
   },
   {
-    topic: 'Độ bền / Chất lượng dài hạn',
-    chatbot_count: 24, review_count: 26, total_signals: 50,
-    sentiment_pct: { positive: 25, neutral: 30, negative: 45 },
-    trend_direction: 'up', trend_pct: 31,
-    competitor_note: 'Cáp Anker lô T03 đang viral tiêu cực — rủi ro lan sang thương hiệu shop',
-    opportunity: 'Cần video "test độ bền thực tế" + chính sách bảo hành rõ ràng hơn'
+    topic: 'Kích ứng da / Purging sau dùng',
+    chatbot_count: 18, review_count: 24, total_signals: 42,
+    sentiment_pct: { positive: 20, neutral: 30, negative: 50 },
+    trend_direction: 'up', trend_pct: 35,
+    competitor_note: 'Hada Labo chính hãng có FAQ về purging trên website — cần làm tương tự',
+    opportunity: 'Nội dung giải thích purging vs dị ứng thật — giảm lo ngại, giảm đổi trả 30%'
   },
   {
-    topic: 'Giá sỉ & Đặt số lượng lớn',
-    chatbot_count: 12, review_count: 0, total_signals: 12,
+    topic: 'Độ bền màu / Son trôi sau ăn uống',
+    chatbot_count: 15, review_count: 28, total_signals: 43,
+    sentiment_pct: { positive: 25, neutral: 40, negative: 35 },
+    trend_direction: 'stable', trend_pct: 8,
+    competitor_note: null,
+    opportunity: 'Video test bền màu 8 tiếng + sau ăn — kết hợp để xử lý cả câu hỏi lẫn review tiêu cực'
+  },
+  {
+    topic: 'Giá sỉ & Đặt số lượng lớn (B2B spa/salon)',
+    chatbot_count: 8, review_count: 0, total_signals: 8,
     sentiment_pct: { positive: 0, neutral: 100, negative: 0 },
-    trend_direction: 'up', trend_pct: 45,
-    competitor_note: 'Hoàng Hà đã có bảng giá sỉ công khai trên website',
-    opportunity: 'Cơ hội B2B: 12 khách hỏi sỉ chưa có kênh chính thức để phục vụ'
-  },
-  {
-    topic: 'So sánh sản phẩm',
-    chatbot_count: 9, review_count: 4, total_signals: 13,
-    sentiment_pct: { positive: 20, neutral: 70, negative: 10 },
-    trend_direction: 'stable', trend_pct: 5,
-    competitor_note: null,
-    opportunity: 'Content comparison giúp khách tự ra quyết định, giảm tải chatbot'
+    trend_direction: 'up', trend_pct: 52,
+    competitor_note: 'Nhiều shop mỹ phẩm đã có bảng giá sỉ B2B riêng cho spa/salon',
+    opportunity: 'Cơ hội B2B chưa khai thác: 8 khách hỏi sỉ, tiềm năng +10-15 đơn sỉ/tháng'
   }
 ];
 
 MOCK.competitor_gaps = [
-  { feature: 'Video test pin 24h+', competitor: 'CellphoneS', impact: 'Khách tham khảo competitor trước khi mua', chatbot_count: 23, gap_type: 'content' },
-  { feature: 'Bảng giá sỉ công khai', competitor: 'Hoang Ha + MobileWorld', impact: '12 khách hỏi sỉ nhưng không chốt vì không có bảng giá', chatbot_count: 12, gap_type: 'business' },
-  { feature: 'Chính sách bảo hành rõ ràng', competitor: 'CellphoneS', impact: 'Khách không tin tưởng về bảo hành dài hạn', chatbot_count: 8, gap_type: 'policy' },
-  { feature: 'Live stream unbox', competitor: 'TechZone', impact: 'Tăng trust hàng auth — đang trending', chatbot_count: 17, gap_type: 'content' }
+  { feature: 'Video swatches màu son đa tone da', competitor: 'Hasaki', impact: 'Khách xem Hasaki để quyết định màu trước khi về mua GIAO FARA', chatbot_count: 18, gap_type: 'content' },
+  { feature: 'FAQ trang đích về purging/kích ứng', competitor: 'Hada Labo chính hãng', impact: '18 khách lo ngại kích ứng, một số đổi trả sau 3 ngày dùng', chatbot_count: 9, gap_type: 'content' },
+  { feature: 'Bảng giá sỉ B2B cho spa/salon', competitor: 'Beauty Skin Store + Hasaki', impact: '8 khách hỏi sỉ không có kênh chính thức để phục vụ', chatbot_count: 8, gap_type: 'business' },
+  { feature: 'Chứng nhận thành phần an toàn rõ ràng', competitor: 'Innisfree / The Face Shop', impact: 'Khách hỏi an toàn ngày càng nhiều theo xu hướng clean beauty', chatbot_count: 11, gap_type: 'trust' }
 ];
 
-let currentProductDescSku = 'S24-ULTRA-TIM';
+let currentProductDescSku = 'GF-MLIPSTICK-M09';
 
 
 /* =====================================================================
@@ -610,12 +648,12 @@ function openSlideover(sug) {
     <div class="slideover-section">
       <div class="section-title" style="margin-bottom:8px;">📜 Đề xuất tương tự trước đó</div>
       <div class="slideover-history-item">
-        <div style="font-size:0.85rem; font-weight:600;">Giảm giá iPhone 15 Pro Max 3% (12/3)</div>
-        <div style="font-size:0.75rem; color:var(--text-muted);">Kết quả: +14M doanh thu, margin giữ 12%</div>
+        <div style="font-size:0.85rem; font-weight:600;">Tăng giá Son Kem Lì 5% (12/3)</div>
+        <div style="font-size:0.75rem; color:var(--text-muted);">Kết quả: +8M doanh thu, margin tăng lên 58%, không giảm đơn</div>
       </div>
       <div class="slideover-history-item">
-        <div style="font-size:0.85rem; font-weight:600;">Giảm giá Galaxy S23 5% (28/2)</div>
-        <div style="font-size:0.75rem; color:var(--text-muted);">Kết quả: +9M doanh thu, margin giữ 9%</div>
+        <div style="font-size:0.85rem; font-weight:600;">Flash Sale Phấn Phủ Mini 20% (28/2)</div>
+        <div style="font-size:0.75rem; color:var(--text-muted);">Kết quả: +5M doanh thu, xả 85 hộp tồn kho thành công</div>
       </div>
     </div>
   `;
@@ -1002,9 +1040,9 @@ function renderInventory() {
 }
 
 // ===== Competitor Page =====
-let currentCompetitorProduct = 'Galaxy S24 Ultra';
+let currentCompetitorProduct = 'Son Kem Lì GIAO FARA';
 function renderCompetitor() {
-  const data = MOCK.competitor_prices[currentCompetitorProduct] || MOCK.competitor_prices['Galaxy S24 Ultra'];
+  const data = MOCK.competitor_prices[currentCompetitorProduct] || MOCK.competitor_prices['Son Kem Lì GIAO FARA'];
   const max = Math.max(...data.history);
   const min = Math.min(...data.history);
   const range = max - min || 1;
@@ -1082,9 +1120,9 @@ function renderReviews() {
       <label style="font-size:0.85rem;font-weight:600;">🔍 Lọc theo sản phẩm:</label>
       <select class="settings-input" style="max-width:280px;">
         <option>Tất cả sản phẩm</option>
-        <option>AirPods Pro 2</option>
-        <option>Galaxy S24 Ultra</option>
-        <option>Cáp Anker 100W</option>
+        <option>Son Kem Lì GIAO FARA</option>
+        <option>Phấn Phủ Bột GIAO FARA</option>
+        <option>Kem Rửa Mặt Hada Labo 80g</option>
       </select>
     </div>
 
@@ -1179,7 +1217,7 @@ function renderMedia() {
 
     <div class="content-card" style="margin-top:16px;">
       <div class="content-card-title">📊 Dự báo nếu phân bổ lại</div>
-      <p style="font-size:0.9rem;color:var(--text-secondary);">Nếu chuyển 1.7M ngân sách từ "Ốp Silicon" (ROAS 0.8x) sang "AirPods Pro 2" (ROAS 12.5x), AI dự báo:</p>
+      <p style="font-size:0.9rem;color:var(--text-secondary);">Nếu chuyển 1.7M ngân sách từ "Son Bóng Mã 04" (ROAS 0.8x) sang "Son Kem Lì GIAO FARA" (ROAS 12.5x), AI dự báo:</p>
       <div class="grid-3" style="margin-top:12px;">
         <div class="big-metric"><div class="big-metric-value" style="color:var(--accent-emerald);">+8.2M</div><div class="big-metric-label">Doanh thu thêm/tuần</div></div>
         <div class="big-metric"><div class="big-metric-value" style="color:var(--accent-emerald);">9.1x</div><div class="big-metric-label">ROAS trung bình mới</div></div>
@@ -1610,15 +1648,15 @@ function renderSettingsTab() {
         <div class="content-card-title">Hồ sơ doanh nghiệp</div>
         <div style="display:flex;gap:24px;align-items:flex-start;margin-bottom:20px;">
           <div class="logo-upload">
-            <div class="logo-upload-circle" style="width:80px;height:80px;border-radius:50%;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:800;color:#451a03;">SP</div>
+            <div class="logo-upload-circle" id="settingsLogoAvatar" style="width:80px;height:80px;border-radius:50%;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:800;color:#451a03;">GF</div>
             <button class="btn-modal-cancel" style="margin-top:8px;">Đổi logo</button>
           </div>
           <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-            <div class="settings-field"><label class="settings-label">Tên shop</label><input class="settings-input" value="Shop PhoneMax"></div>
+            <div class="settings-field"><label class="settings-label">Tên shop</label><input class="settings-input" value="Shop Mỹ phẩm GIAO FARA"></div>
             <div class="settings-field"><label class="settings-label">Mã số thuế</label><input class="settings-input" value="0301234567"></div>
             <div class="settings-field" style="grid-column:1/-1;"><label class="settings-label">Địa chỉ kho hàng</label><input class="settings-input" value="123 Nguyễn Trãi, Q.1, TP.HCM"></div>
             <div class="settings-field"><label class="settings-label">Ngành hàng chính</label>
-              <select class="settings-input"><option>Điện tử & Phụ kiện</option><option>Thời trang</option><option>Mỹ phẩm</option><option>Gia dụng</option></select>
+              <select class="settings-input"><option>Mỹ phẩm</option><option>Điện tử & Phụ kiện</option><option>Thời trang</option><option>Gia dụng</option></select>
             </div>
             <div class="settings-field"><label class="settings-label">Số nhân viên vận hành</label><input class="settings-input" type="number" value="3"></div>
             <div class="settings-field"><label class="settings-label">Số SKU đang bán</label><input class="settings-input" type="number" value="234"></div>
@@ -1634,8 +1672,8 @@ function renderSettingsTab() {
       <div class="content-card">
         <div class="content-card-title">Dữ liệu định hướng cho AI Agent</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-          <div class="settings-field" style="grid-column:1/-1;"><label class="settings-label">Khách hàng mục tiêu</label><textarea class="settings-input" rows="2">Học sinh sinh viên, nhân viên văn phòng yêu công nghệ, thu nhập 8-25 triệu/tháng</textarea></div>
-          <div class="settings-field" style="grid-column:1/-1;"><label class="settings-label">Định hướng chiến lược</label><textarea class="settings-input" rows="3">Ưu tiên đi đầu về giá ở nhóm tai nghe. Giữ biên lợi nhuận cao ở nhóm phụ kiện ốp lưng. Không bao giờ phá giá iPhone dòng mới.</textarea></div>
+          <div class="settings-field" style="grid-column:1/-1;"><label class="settings-label">Khách hàng mục tiêu</label><textarea class="settings-input" rows="2">Nữ 18-35 tuổi, yêu làm đẹp, thu nhập 6-20 triệu/tháng, mua sắm qua Shopee/TikTok</textarea></div>
+          <div class="settings-field" style="grid-column:1/-1;"><label class="settings-label">Định hướng chiến lược</label><textarea class="settings-input" rows="3">Ưu tiên biên lợi nhuận cao ở nhóm son và phấn phủ. Đẩy mạnh nội dung swatch/review thực tế. Không bao giờ giảm giá Son Kem Lì xuống dưới ngưỡng biên 15%.</textarea></div>
           <div class="settings-field"><label class="settings-label">Ngưỡng biên LN tối thiểu (%)</label><input class="settings-input" type="number" value="8"><small style="color:var(--text-muted);font-size:0.75rem;">AI sẽ KHÔNG đề xuất giảm giá xuống dưới ngưỡng này</small></div>
           <div class="settings-field"><label class="settings-label">Ngưỡng ROAS tối thiểu</label><input class="settings-input" type="number" step="0.1" value="3.0"><small style="color:var(--text-muted);font-size:0.75rem;">Campaign dưới ngưỡng → AI tự động cắt</small></div>
           <div class="settings-field"><label class="settings-label">Tone Chatbot</label>
@@ -3146,18 +3184,18 @@ function caSimulateAnalysis() {
   setTimeout(function() {
     window._ca.intel = {
       usp: [
-        { rank: 1, point: 'Chống ồn ANC thế hệ mới nhất', evidence: '87% review đề cập ANC vượt trội, đặc biệt ở môi trường ồn ào' },
-        { rank: 2, point: 'Pin 6h + case 30h sạc không dây', evidence: 'Thời lượng pin dài nhất trong phân khúc, hỗ trợ MagSafe' },
-        { rank: 3, point: 'Chip H2 độc quyền Apple — trễ âm thanh cực thấp', evidence: 'Kết nối ổn định, độ trễ <10ms cho gaming & video call' }
+        { rank: 1, point: 'Bền màu transfer-proof cả ngày — kể cả sau ăn uống', evidence: '92% review đề cập độ bền màu vượt trội, không lem khi uống đồ nóng' },
+        { rank: 2, point: 'Thành phần thuần chay, không chì — có Vitamin E dưỡng môi', evidence: 'Được kiểm nghiệm an toàn, phù hợp da nhạy cảm' },
+        { rank: 3, point: 'Lì mịn hoàn toàn sau 2 phút — không cần blot', evidence: 'Công thức matte chuẩn lì, không co rút hay nhăn môi' }
       ],
       audience: [
-        { persona_id: 'p1', persona: 'Nhân viên văn phòng', age_range: '22-35 tuổi', pain_point: 'Làm việc trong môi trường ồn ào, khó tập trung', buying_trigger: 'Review chứng minh ANC hiệu quả tại văn phòng', preferred_content: 'Video test ANC thực tế trong môi trường công sở' },
-        { persona_id: 'p2', persona: 'Sinh viên & người trẻ', age_range: '18-25 tuổi', pain_point: 'Cần tai nghe chất lượng nhưng ngân sách hạn chế', buying_trigger: 'So sánh giá trị với các đối thủ cùng phân khúc', preferred_content: 'Video "đáng tiền không?" dạng honest review' }
+        { persona_id: 'p1', persona: 'Nữ đi làm văn phòng', age_range: '22-32 tuổi', pain_point: 'Son hay trôi sau ăn trưa, phải touch-up nhiều lần', buying_trigger: 'Review thực tế bền màu cả ngày không cần touch-up', preferred_content: 'Video before/after sau bữa ăn, test độ bền' },
+        { persona_id: 'p2', persona: 'Sinh viên & người trẻ', age_range: '18-25 tuổi', pain_point: 'Cần son đẹp nhưng ngân sách hạn chế', buying_trigger: 'So sánh màu sắc và giá trị với các thương hiệu cùng phân khúc', preferred_content: 'Video "đáng tiền không?" dạng honest review + swatch nhiều màu' }
       ],
-      positioning: 'Premium nhưng xứng đáng — chất lượng Apple với giá chính hãng VNA',
-      content_tone: 'Đáng tin cậy, chuyên môn nhưng gần gũi',
-      recommended_content_format: 'Video review thực tế 30-60s + Reel so sánh',
-      key_message: 'Đầu tư một lần, dùng mãi mãi — ANC xịn nhất tầm giá'
+      positioning: 'Đẹp chuẩn — bền thật — giá hợp lý: son kem lì dành cho người bận rộn',
+      content_tone: 'Gần gũi, trung thực, tự tin — như bạn thân tư vấn son',
+      recommended_content_format: 'Video swatch 30-60s + Reel test độ bền sau ăn',
+      key_message: 'Thoa một lần, tự tin cả ngày — không lo touch-up'
     };
     window._ca.step = 3;
     navContentScript();
@@ -3227,40 +3265,40 @@ function caSimulateScripts() {
   setTimeout(function() {
     window._ca.scripts = [
       {
-        variant: 'emotional', total_duration: 30, hook_text: '❤️ Cái tai nghe này đã thay đổi cách tôi làm việc mãi mãi...',
+        variant: 'emotional', total_duration: 30, hook_text: '❤️ Lần đầu thoa son này lên — tôi không còn muốn cất đi nữa...',
         scenes: [
-          { scene_no:1, time_range:'0-3s', type:'hook', voiceover:'Tôi đã tốn 2 năm đau đầu vì tiếng ồn văn phòng', caption:'😤 Ngày nào cũng như này...', visual_note:'Góc wide, nhân vật ngồi bàn làm việc ồn ào, biểu cảm mệt mỏi' },
-          { scene_no:2, time_range:'3-18s', type:'body', voiceover:'Rồi tôi thử AirPods Pro 2 — bật ANC lên... và thế giới biến mất. Chỉ còn tôi và công việc', caption:'ANC thế hệ mới 🔇', visual_note:'Close-up tay đeo tai nghe, slow motion, sau đó biểu cảm tập trung' },
-          { scene_no:3, time_range:'18-25s', type:'proof', voiceover:'87% người dùng nói năng suất tăng rõ rệt. Chip H2 — trễ âm chỉ 10ms', caption:'📊 Đã kiểm chứng thực tế', visual_note:'Text overlay thống kê, đan xen cảnh dùng thực tế' },
-          { scene_no:4, time_range:'25-30s', type:'cta', voiceover:'Link ở bio — hàng chính hãng VNA, bảo hành 12 tháng', caption:'🛒 Mua ngay — hết giá tốt!', visual_note:'Sản phẩm đặt trên bàn, text CTA nổi bật' }
+          { scene_no:1, time_range:'0-3s', type:'hook', voiceover:'Tôi đã thử hơn 20 cây son kem lì mà không cây nào ở lại lâu hơn 3 tiếng', caption:'😤 Ai đồng cảnh ngộ không?', visual_note:'Góc gần, cận môi nhợt nhạt sau giữa ngày, biểu cảm thất vọng' },
+          { scene_no:2, time_range:'3-18s', type:'body', voiceover:'Rồi tôi thử Son Kem Lì GIAO FARA — thoa lúc 7 giờ sáng, đến 5 giờ chiều vẫn còn màu. Thậm chí sau khi ăn trưa.', caption:'Bền màu cả ngày 💄', visual_note:'Close-up môi trước–sau, slow motion ánh sáng tự nhiên, biểu cảm bất ngờ thích thú' },
+          { scene_no:3, time_range:'18-25s', type:'proof', voiceover:'Thành phần thuần chay, không chì — kiểm nghiệm an toàn. 92% người dùng nói môi không bị khô sau 8 tiếng', caption:'📊 Đã kiểm chứng thực tế', visual_note:'Text overlay chứng nhận an toàn, đan xen cảnh swatch tay' },
+          { scene_no:4, time_range:'25-30s', type:'cta', voiceover:'Link ở bio — giao nhanh trong ngày, đổi trả 7 ngày nếu không vừa ý', caption:'🛒 Mua ngay — hết màu là hết!', visual_note:'Sản phẩm trên nền trắng sạch, text CTA nổi bật' }
         ],
-        cta: 'Nhấn link bio để mua AirPods Pro 2 chính hãng VNA — bảo hành 12 tháng, giao trong ngày!',
-        hashtags: ['#airpodspro2', '#chongnoi', '#lam_viec_hieu_qua', '#techvietnam', '#review'],
-        caption_post: 'Từ ngày có AirPods Pro 2, tôi làm việc được gấp đôi 😤🎧 ANC xịn nhất tầm giá, chip H2 không delay. Ai cũng nên thử ít nhất 1 lần! 👇 Link trong bio nhé'
+        cta: 'Nhấn link bio để xem đủ 12 màu Son Kem Lì GIAO FARA — giao trong ngày, đổi trả miễn phí!',
+        hashtags: ['#sonkemlì', '#giaofara', '#sonbenmau', '#reviewson', '#lipswatch'],
+        caption_post: 'Từ ngày dùng Son Kem Lì GIAO FARA, tôi không còn lo touch-up giữa ngày nữa 💄 Bền màu thật sự, môi không khô, giá hợp lý. Ai cần tag ngay bạn thân! 👇 Link trong bio nhé'
       },
       {
-        variant: 'informational', total_duration: 30, hook_text: '📊 3 con số bạn cần biết trước khi mua AirPods Pro 2',
+        variant: 'informational', total_duration: 30, hook_text: '📊 3 điều bạn cần biết trước khi mua son kem lì',
         scenes: [
-          { scene_no:1, time_range:'0-3s', type:'hook', voiceover:'3 con số quyết định có nên mua AirPods Pro 2 không', caption:'Số 1 sẽ khiến bạn bất ngờ 👇', visual_note:'Text animation "3 2 1" trên màn hình' },
-          { scene_no:2, time_range:'3-18s', type:'body', voiceover:'Một: ANC giảm 48dB — tốt nhất phân khúc. Hai: Pin 6h + case 30h. Ba: Trễ âm dưới 10ms với chip H2', caption:'📋 Thông số thực tế', visual_note:'Split screen: text thông số bên trái, demo thực tế bên phải' },
-          { scene_no:3, time_range:'18-25s', type:'proof', voiceover:'So với Galaxy Buds3 Pro cùng giá: ANC tốt hơn 35%, pin tương đương, nhưng tích hợp hệ sinh thái Apple hoàn hảo hơn', caption:'⚖️ So sánh khách quan', visual_note:'Bảng so sánh nhanh trên màn hình' },
-          { scene_no:4, time_range:'25-30s', type:'cta', voiceover:'Hàng chính hãng VNA tại shop — link bio. Hỏi tư vấn free 24/7', caption:'📩 Inbox shop ngay!', visual_note:'Logo shop + thông tin liên hệ' }
+          { scene_no:1, time_range:'0-3s', type:'hook', voiceover:'3 tiêu chí đánh giá son kem lì mà ít người để ý', caption:'Tiêu chí số 2 quan trọng nhất 👇', visual_note:'Text animation "3 2 1" trên nền gradient hồng' },
+          { scene_no:2, time_range:'3-18s', type:'body', voiceover:'Một: độ bền màu sau ăn uống. Hai: thành phần — có chì không, có dưỡng môi không. Ba: độ phủ — lì hoàn toàn hay còn bóng?', caption:'📋 Checklist trước khi xuống tiền', visual_note:'Split screen: text checklist bên trái, demo swatch bên phải' },
+          { scene_no:3, time_range:'18-25s', type:'proof', voiceover:'Son Kem Lì GIAO FARA đạt cả 3 tiêu chí: bền 8h, không chì – có dưỡng Vitamin E, lì mịn hoàn toàn sau 2 phút', caption:'⚖️ So sánh khách quan', visual_note:'Bảng so sánh nhanh với 2 đối thủ cùng phân khúc' },
+          { scene_no:4, time_range:'25-30s', type:'cta', voiceover:'Shop GIAO FARA — link bio. Tư vấn chọn màu theo tone da miễn phí 24/7', caption:'📩 Inbox shop để được tư vấn màu!', visual_note:'Logo shop + grid 12 màu son' }
         ],
-        cta: 'Để lại câu hỏi trong comment hoặc inbox shop để được tư vấn miễn phí!',
-        hashtags: ['#airpodspro2review', '#socanh', '#techreview', '#muagidung', '#anc'],
-        caption_post: 'AirPods Pro 2 có thực sự xứng đáng với mức giá không? Tôi đã test 30 ngày và đây là kết quả thực tế 📊 Tham khảo trước khi xuống tiền nhé!'
+        cta: 'Để lại tone da trong comment hoặc inbox để được tư vấn màu son phù hợp miễn phí!',
+        hashtags: ['#sonkemlìreview', '#chonson', '#giaofara', '#muagidung', '#lipswatch'],
+        caption_post: 'Son kem lì có thực sự xứng đáng không? Tôi đã test 30 ngày và đây là kết quả thực tế 📊 Đặc biệt màu Mã 12 — lì cực mịn, bền cả ngày. Xem trước khi xuống tiền nhé!'
       },
       {
-        variant: 'humor', total_duration: 30, hook_text: '😂 POV: Khi vợ gọi nhưng ANC đang bật...',
+        variant: 'humor', total_duration: 30, hook_text: '😂 POV: Ăn bún bò xong mà son vẫn còn nguyên...',
         scenes: [
-          { scene_no:1, time_range:'0-3s', type:'hook', voiceover:'POV: Bạn đang làm việc với AirPods Pro 2 ANC bật', caption:'Không nghe thấy gì cả 😂', visual_note:'Selfie góc hơi trên, biểu cảm nghiêm túc đeo tai nghe' },
-          { scene_no:2, time_range:'3-18s', type:'body', voiceover:'Vợ gọi ăn cơm — không nghe. Sếp họp khẩn — không nghe. Hàng xóm karaoke — cũng không nghe. Chỉ còn deadline và tôi', caption:'Chế độ "không làm phiền" tối thượng', visual_note:'Chuỗi cảnh hài: vợ gọi, sếp gõ vai, hàng xóm hát — tất cả đều bị ignore' },
-          { scene_no:3, time_range:'18-25s', type:'proof', voiceover:'Không phải lỗi của tôi, là ANC H2 đấy. 48dB noise reduction. Khoa học chứng minh', caption:'📢 Tôi vô tội', visual_note:'Text "Khoa học chứng minh" với hiệu ứng hài hước' },
-          { scene_no:4, time_range:'25-30s', type:'cta', voiceover:'Mua AirPods Pro 2 chính hãng — link bio. Mọi hậu quả shop không chịu trách nhiệm nhé!', caption:'🛒 Shop từ chối mọi trách nhiệm 😂', visual_note:'Text CTA với disclaimer hài hước' }
+          { scene_no:1, time_range:'0-3s', type:'hook', voiceover:'POV: Bạn vừa ăn xong một tô bún bò mà nhìn xuống gương thấy son vẫn còn', caption:'Không tin được 😂', visual_note:'Selfie góc hơi trên, biểu cảm ngơ ngác nhìn gương sau bữa ăn' },
+          { scene_no:2, time_range:'3-18s', type:'body', voiceover:'Canh nóng — vẫn còn. Nước chanh — vẫn còn. Bánh tráng trộn — vẫn còn. Tôi bắt đầu lo lắng cho chính bản thân mình', caption:'Son hay là mực xăm vậy 😭', visual_note:'Chuỗi cảnh hài: ăn các món khác nhau, mỗi lần nhìn vào gương son vẫn nguyên — hiệu ứng hài' },
+          { scene_no:3, time_range:'18-25s', type:'proof', voiceover:'Không phải ma thuật, là công thức transfer-proof của GIAO FARA đấy. Khoa học chứng minh bền 8 tiếng.', caption:'📢 Khoa học xác nhận', visual_note:'Text "Bền 8 tiếng" với hiệu ứng hài hước đóng dấu' },
+          { scene_no:4, time_range:'25-30s', type:'cta', voiceover:'Mua Son Kem Lì GIAO FARA — link bio. Mọi hậu quả về bữa ăn không dừng được, shop không chịu trách nhiệm!', caption:'🛒 Shop từ chối mọi trách nhiệm 😂', visual_note:'Text CTA với disclaimer hài hước' }
         ],
-        cta: 'Mua về rồi muốn trả lại vì quá cô lập với thế giới thì shop... vẫn nhận đổi trả trong 7 ngày 😂',
-        hashtags: ['#airpodspro2', '#anc', '#lam_viec_xa_nha', '#trend', '#haihuoc'],
-        caption_post: 'Shop xin miễn trách nhiệm nếu bạn miss cuộc họp quan trọng 😂 ANC quá xịn rồi, nghe thấy gì nữa đâu! 🎧 Link mua trong bio nha cả nhà'
+        cta: 'Mua về rồi ăn nhiều quá mà son vẫn còn thì... đó là tính năng chứ không phải lỗi nhé 😂',
+        hashtags: ['#sonkemlì', '#giaofara', '#benhmau', '#trend', '#haihuoc'],
+        caption_post: 'Shop xin miễn trách nhiệm nếu bạn ăn quá nhiều vì tự tin son không lem 😂 Bền thật sự rồi, không tin thì thử! 💄 Link mua trong bio nha cả nhà'
       }
     ];
     window._ca.step = 4;
@@ -3298,7 +3336,7 @@ function caSimulateFilmingGuide(script) {
       scene_no: s.scene_no, duration: s.time_range,
       setup: setups[i % setups.length], lighting: lightings[i % lightings.length],
       angle: angles[i % angles.length],
-      props: i === 0 ? ['Tai nghe', 'Bàn làm việc gọn'] : (i === 1 ? ['Tai nghe', 'Điện thoại/Laptop', 'Bàn sạch'] : ['Hộp sản phẩm', 'Tờ rơi chính hãng']),
+      props: i === 0 ? ['Son GIAO FARA', 'Gương trang điểm nhỏ'] : (i === 1 ? ['Son GIAO FARA', 'Bảng màu swatch', 'Bàn trắng sạch'] : ['Hộp sản phẩm', 'Tờ rơi chính hãng']),
       tip: tips[i % tips.length]
     };
   });

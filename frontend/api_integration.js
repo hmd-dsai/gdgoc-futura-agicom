@@ -161,6 +161,81 @@ async function checkBackendHealth() {
 }
 
 /* ──────────────────────────────────────────────────────────────────────
+   3b. SHOP PROFILE — Load từ backend + cập nhật sidebar & settings form
+   ────────────────────────────────────────────────────────────────────── */
+
+// In-memory cache cho shop profile
+let _shopProfile = null;
+
+/**
+ * Tải thông tin shop từ /api/shop-profile và cập nhật:
+ *  - Sidebar (avatar initials, tên shop, gói dịch vụ)
+ *  - MOCK.shop.name (để các nơi dùng MOCK.shop.name hiển thị đúng)
+ *  - Form "Cài đặt > Thông tin doanh nghiệp" nếu đang mở
+ */
+async function _loadShopProfile() {
+  try {
+    const profile = _backendConnected
+      ? await apiCall('/api/shop-profile')
+      : null;
+
+    // Fallback về giá trị từ MOCK.shop nếu backend offline
+    _shopProfile = profile || {
+      shop_name:  (typeof MOCK !== 'undefined' && MOCK.shop) ? MOCK.shop.name : 'GIAO FARA Official Store',
+      initials:   'GF',
+      platform:   'Shopee',
+      plan:       'Growth',
+      role_label: 'Gói Growth · Shopee',
+      owner_name: 'Nguyễn Thị Hương',
+      email:      'owner@giaofara.vn',
+      status:     'connected',
+    };
+
+    _updateSidebarProfile(_shopProfile);
+
+    // Đồng bộ vào MOCK.shop.name để các render function dùng được
+    if (typeof MOCK !== 'undefined' && MOCK.shop) {
+      MOCK.shop.name = _shopProfile.shop_name;
+    }
+  } catch (err) {
+    console.warn('[Agicom] _loadShopProfile failed:', err.message);
+  }
+}
+
+/**
+ * Cập nhật DOM sidebar với profile data.
+ */
+function _updateSidebarProfile(profile) {
+  const avatarEl   = document.getElementById('sidebarUserAvatar');
+  const nameEl     = document.getElementById('sidebarShopName');
+  const roleEl     = document.getElementById('sidebarShopRole');
+  if (avatarEl) avatarEl.textContent = profile.initials || 'GF';
+  if (nameEl)   nameEl.textContent   = profile.shop_name || 'GIAO FARA';
+  if (roleEl)   roleEl.textContent   = profile.role_label || 'Gói Growth · Shopee';
+}
+
+/**
+ * Điền dữ liệu vào form Cài đặt > Thông tin doanh nghiệp khi tab mở.
+ * Gọi sau khi renderSettings() đã gắn HTML vào DOM.
+ */
+function _populateSettingsForm() {
+  if (!_shopProfile) return;
+  // Điền tên shop vào input field
+  document.querySelectorAll('.settings-field').forEach(field => {
+    const label = field.querySelector('.settings-label');
+    const input = field.querySelector('input.settings-input, textarea.settings-input');
+    if (!label || !input) return;
+    const ltext = label.textContent.trim();
+    if (ltext === 'Tên shop') input.value = _shopProfile.shop_name || input.value;
+    if (ltext === 'Khách hàng mục tiêu'  && _shopProfile.target_customers)  input.value = _shopProfile.target_customers;
+    if (ltext === 'Định hướng chiến lược' && _shopProfile.strategic_vision)  input.value = _shopProfile.strategic_vision;
+  });
+  // Đồng bộ logo avatar trong settings form
+  const avatarEl = document.getElementById('settingsLogoAvatar');
+  if (avatarEl) avatarEl.textContent = _shopProfile.initials || 'GF';
+}
+
+/* ──────────────────────────────────────────────────────────────────────
    4. SCAN THỊ TRƯỜNG — Gọi /slow-track-strategy
    ────────────────────────────────────────────────────────────────────── */
 
@@ -730,7 +805,7 @@ async function sendLiveChatMessage(msg) {
       chatSessionStats.sentiments.push('tức giận');
       renderChatSessionStats();
     } else {
-      const mockReply = 'Dạ anh/chị ơi! Shop PhoneMax hân hạnh được phục vụ ạ. Em có thể giúp gì cho anh/chị?';
+      const mockReply = 'Dạ anh/chị ơi! GIAO FARA hân hạnh được phục vụ ạ. Em có thể giúp gì cho anh/chị?';
       const mockEval = { is_safe: true, confidence_score: undefined, sentiment_analysis: 'bình thường', _isDemo: true };
       appendLiveChatBubble('ai', mockReply + ' <em style="font-size:0.68rem;color:var(--text-muted);">[Demo Mode — Confidence N/A]</em>', mockEval);
       _syncLiveChatToInbox(msg, mockReply, mockEval);
@@ -1412,6 +1487,7 @@ navigate = function (page) {
       // Live Chat widget đã chuyển sang trang Demo khách hàng
     } else if (page === 'settings') {
       injectResetButton();
+      setTimeout(_populateSettingsForm, 50);
     } else if (page === 'crisis-center') {
       loadCrisisFromBackend();
     } else if (page === 'demo-customer') {
@@ -3443,11 +3519,12 @@ function generateContentSuggestionsFromSummary(summaryData) {
     // Từ customer_sentiment_overview — nhóm theo từ khoá
     const insightMap = {};
     insights.forEach(ins => {
-      const kw = /pin|sạc/.test(ins) ? 'pin/sạc'
-               : /cáp|dây/.test(ins) ? 'cáp sạc'
+      const kw = /màu|son/.test(ins) ? 'màu sắc/son'
+               : /phấn|bột/.test(ins) ? 'phấn/bột'
+               : /kem|dưỡng|rửa mặt/.test(ins) ? 'dưỡng da'
                : /giao|ship/.test(ins) ? 'giao hàng'
-               : /bảo hành/.test(ins) ? 'bảo hành'
-               : /auth|hàng thật|chính hãng/.test(ins) ? 'hàng auth'
+               : /kích ứng|purging/.test(ins) ? 'kích ứng/purging'
+               : /sỉ|b2b|đại lý/.test(ins) ? 'sỉ/B2B'
                : 'chung';
       (insightMap[kw] = insightMap[kw] || []).push(ins);
     });
@@ -4038,12 +4115,79 @@ document.addEventListener('click', function(e) {
 }); // bubble phase (mặc định): chạy sau handler app4.js
 
 /* ──────────────────────────────────────────────────────────────────────
+   13b. SETTINGS SAVE — Lưu thay đổi hồ sơ doanh nghiệp & cấu hình AI
+   ────────────────────────────────────────────────────────────────────── */
+
+document.addEventListener('click', function (e) {
+  // "Lưu thay đổi" button — chỉ trong settings page
+  const saveBtn = e.target.closest('.btn-approve');
+  if (!saveBtn) return;
+  // Phải nằm trong một .content-card bên trong #mainContent khi đang ở settings
+  const card = saveBtn.closest('.content-card');
+  if (!card) return;
+
+  // Business tab save
+  const shopNameInput = card.querySelector('input.settings-input[value], input.settings-input');
+  const titleEl = card.querySelector('.content-card-title');
+  if (!titleEl) return;
+
+  const titleText = titleEl.textContent.trim();
+
+  if (titleText === 'Hồ sơ doanh nghiệp') {
+    // Đọc tất cả input fields trong card
+    const inputs = card.querySelectorAll('input.settings-input, textarea.settings-input, select.settings-input');
+    let newShopName = null;
+    inputs.forEach(inp => {
+      const label = inp.closest('.settings-field')?.querySelector('.settings-label')?.textContent.trim();
+      if (label === 'Tên shop') newShopName = inp.value.trim();
+    });
+
+    if (newShopName && newShopName.length > 0) {
+      // Cập nhật profile cache
+      if (!_shopProfile) _shopProfile = {};
+      _shopProfile.shop_name = newShopName;
+      // Tạo initials mới
+      const words = newShopName.replace(/^shop\s*/i, '').split(/\s+/);
+      _shopProfile.initials = words.map(w => w[0]?.toUpperCase() || '').join('').slice(0, 2) || 'GF';
+      // Cập nhật sidebar
+      _updateSidebarProfile(_shopProfile);
+      // Cập nhật MOCK.shop.name
+      if (typeof MOCK !== 'undefined' && MOCK.shop) MOCK.shop.name = newShopName;
+    }
+    showToast('✅ Đã lưu hồ sơ doanh nghiệp!', 'success');
+    return;
+  }
+
+  if (titleText === 'Dữ liệu định hướng cho AI Agent') {
+    // Đọc và lưu cấu hình AI vào _shopProfile để pricing agent dùng
+    const inputs = card.querySelectorAll('input.settings-input, textarea.settings-input, select.settings-input');
+    if (!_shopProfile) _shopProfile = {};
+    inputs.forEach(inp => {
+      const label = inp.closest('.settings-field')?.querySelector('.settings-label')?.textContent.trim();
+      if (label === 'Khách hàng mục tiêu')      _shopProfile.target_customers   = inp.value.trim();
+      if (label === 'Định hướng chiến lược')     _shopProfile.strategic_vision   = inp.value.trim();
+      if (label === 'Tone Chatbot')              _shopProfile.brand_tone         = inp.value.trim();
+      if (label === 'Ngưỡng biên LN tối thiểu (%)') {
+        if (typeof MOCK !== 'undefined' && MOCK.shop) MOCK.shop.margin_floor = parseFloat(inp.value) || MOCK.shop.margin_floor;
+      }
+    });
+    showToast('✅ Đã lưu cấu hình AI Agent!', 'success');
+    return;
+  }
+});
+
+/* ──────────────────────────────────────────────────────────────────────
    14. INIT
    ────────────────────────────────────────────────────────────────────── */
 
 document.addEventListener('DOMContentLoaded', function () {
   // Kiểm tra kết nối backend sau khi trang load
   setTimeout(checkBackendHealth, 1800);
+  // Load shop profile — dùng setTimeout đủ dài để health check chạy trước
+  // Nếu backend online, _backendConnected sẽ là true sau ~2-3s
+  setTimeout(async function () {
+    await _loadShopProfile();
+  }, 3500);
 });
 
 console.log(

@@ -453,6 +453,119 @@ async def get_quality_overview():
         ]
     }
 
+@app.get("/api/dashboard/ai-stats")
+async def get_dashboard_ai_stats():
+    """
+    Thống kê hiệu suất AI Agent thực từ DB — dùng cho card "Hiệu suất AI Agent" trên Tổng quan.
+    Trả về counts theo thời gian thực thay vì dữ liệu hardcoded.
+    """
+    db = SessionLocal()
+    try:
+        # Content Suggestions
+        all_sugs       = db.query(ContentSuggestion).all()
+        sug_total      = len(all_sugs)
+        sug_pending    = sum(1 for s in all_sugs if s.status == "pending")
+        sug_approved   = sum(1 for s in all_sugs if s.status == "approved")
+        sug_rejected   = sum(1 for s in all_sugs if s.status == "rejected")
+
+        # Chat Logs (proxy: tổng số cuộc hội thoại đã xử lý)
+        chats_total    = db.query(ChatLog).count()
+        chats_escalated = db.query(ChatLog).filter(ChatLog.is_archived == True).count()
+
+        # Reviews
+        reviews_total  = db.query(ReviewLog).count()
+        reviews_neg    = db.query(ReviewLog).filter(ReviewLog.rating <= 3).count()
+
+        # Coordination Tasks (tác vụ AI giao con người)
+        tasks_total    = db.query(CoordinationTask).count()
+        tasks_pending  = db.query(CoordinationTask).filter(
+            CoordinationTask.status == "pending"
+        ).count()
+
+        # Crisis Plans được AI sinh ra
+        crisis_plans   = db.query(CrisisPlan).count()
+        crisis_actions_done = db.query(CrisisAction).filter(
+            CrisisAction.status == "done"
+        ).count()
+        crisis_actions_total = db.query(CrisisAction).count()
+
+        return {
+            "suggestions": {
+                "total":    sug_total,
+                "pending":  sug_pending,
+                "approved": sug_approved,
+                "rejected": sug_rejected,
+            },
+            "chats": {
+                "total":     chats_total,
+                "escalated": chats_escalated,
+                "auto":      max(0, chats_total - chats_escalated),
+            },
+            "reviews": {
+                "total":    reviews_total,
+                "negative": reviews_neg,
+                "positive": max(0, reviews_total - reviews_neg),
+            },
+            "tasks": {
+                "total":   tasks_total,
+                "pending": tasks_pending,
+                "done":    max(0, tasks_total - tasks_pending),
+            },
+            "crisis": {
+                "plans_generated":  crisis_plans,
+                "actions_done":     crisis_actions_done,
+                "actions_total":    crisis_actions_total,
+            },
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
+@app.get("/api/shop-profile")
+async def get_shop_profile():
+    """
+    Trả về thông tin shop từ data/mock/shop_profile.json — dùng cho sidebar và form Cài đặt.
+    """
+    try:
+        profile_path = os.path.join(os.path.dirname(__file__), "../data/mock/shop_profile.json")
+        with open(profile_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        shop = data["shops"][0] if data.get("shops") else {}
+        user = data["users"][0] if data.get("users") else {}
+        sub  = data["subscriptions"][0] if data.get("subscriptions") else {}
+        shop_name = shop.get("shop_name", "GIAO FARA Official Store")
+        # Tạo initials từ tên shop (lấy chữ cái đầu mỗi từ, tối đa 2 ký tự)
+        words = shop_name.split()
+        initials = "".join(w[0].upper() for w in words if w)[:2]
+        plan_name = sub.get("plan_name", "growth").capitalize()
+        platform = shop.get("platform", "shopee").capitalize()
+        return {
+            "shop_name":  shop_name,
+            "initials":   initials,
+            "platform":   platform,
+            "plan":       plan_name,
+            "role_label": f"Gói {plan_name} · {platform}",
+            "owner_name": user.get("full_name", ""),
+            "email":      user.get("email", ""),
+            "status":     shop.get("status", "connected"),
+        }
+    except FileNotFoundError:
+        return {
+            "shop_name":  "GIAO FARA Official Store",
+            "initials":   "GF",
+            "platform":   "Shopee",
+            "plan":       "Growth",
+            "role_label": "Gói Growth · Shopee",
+            "owner_name": "Nguyễn Thị Hương",
+            "email":      "owner@giaofara.vn",
+            "status":     "connected",
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/learn-from-review")
 async def process_and_learn_review(review: ReviewData):
     try:
