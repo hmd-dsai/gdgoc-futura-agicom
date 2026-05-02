@@ -678,11 +678,12 @@ function renderCrisisBannerHTML() {
 // ===== Dashboard =====
 function renderDashboard() {
   const k = MOCK.kpis;
-  const ai = MOCK.ai_today;
   return `
 
-    ${renderCrisisBannerHTML()}
-    <!-- Filter Tabs -->    <!-- Filter Tabs -->
+    <!-- 🚨 Crisis Banner — được điền bởi api_integration.js sau khi tải /api/crisis-overview -->
+    <div id="dashCrisisBanner"></div>
+
+    <!-- Filter Tabs -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
       <div class="filter-tabs">
         <button class="filter-tab active">Tất cả sàn</button>
@@ -697,7 +698,7 @@ function renderDashboard() {
       </div>
     </div>
 
-    <!-- KPI Cards with Sparklines -->
+    <!-- KPI Cards with Sparklines (dữ liệu minh họa) -->
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-card-header">
@@ -749,6 +750,9 @@ function renderDashboard() {
       </div>
     </div>
 
+    <!-- 🤖 AI Agent Performance — được điền bởi api_integration.js sau khi tải /api/dashboard/ai-stats -->
+    <div id="dashAIPerf" style="margin-top:20px;"></div>
+
     <!-- 🚨 Cảnh báo & Hành động ngay -->
     <div class="content-card" style="margin-top:20px;">
       <div class="content-card-title">🚨 Cảnh báo & Hành động ngay (${MOCK.alerts.length})</div>
@@ -760,28 +764,6 @@ function renderDashboard() {
             <button class="alert-cta" data-nav="${a.cta_page}">${a.cta} →</button>
           </div>
         `).join('')}
-      </div>
-    </div>
-
-    <!-- Hiệu suất AI Agent hôm nay -->
-    <div class="content-card" style="margin-top:20px;">
-      <div class="content-card-title">${ICON.brain} Hiệu suất AI Agent hôm nay</div>
-      <div class="grid-3" style="gap:12px;">
-        <div class="big-metric">
-          <div class="big-metric-value" style="color:var(--accent-amber);">${ai.suggestions_created}</div>
-          <div class="big-metric-label">Đề xuất AI tạo ra</div>
-          <div class="big-metric-trend">✅ ${ai.suggestions_approved} duyệt · ⏳ ${ai.suggestions_pending} chờ · ❌ ${ai.suggestions_rejected} từ chối</div>
-        </div>
-        <div class="big-metric">
-          <div class="big-metric-value" style="color:var(--accent-emerald);">${ai.chats_handled}</div>
-          <div class="big-metric-label">Tin nhắn xử lý</div>
-          <div class="big-metric-trend">${Math.round(ai.chats_auto/ai.chats_handled*100)}% tự động · ${ai.chats_escalated} cần chủ shop</div>
-        </div>
-        <div class="big-metric">
-          <div class="big-metric-value" style="color:var(--accent-blue);">${fmt.currency(ai.revenue_from_ai)}đ</div>
-          <div class="big-metric-label">Doanh thu từ đề xuất AI</div>
-          <div class="big-metric-trend">+ROAS trung bình 8.4x</div>
-        </div>
       </div>
     </div>
 

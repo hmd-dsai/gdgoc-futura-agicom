@@ -1168,6 +1168,233 @@ async function handleSeedCrisisDemo() {
    10. INJECT UI VÀO CÁC TRANG — Override navigate()
    ────────────────────────────────────────────────────────────────────── */
 
+/* ─────────────────────────────────────────────────────────────────────────
+   DASHBOARD LIVE DATA
+   Điền 2 block động vào Tổng quan:
+     • #dashCrisisBanner  ← /api/crisis-overview  (tín hiệu khủng hoảng thực)
+     • #dashAIPerf        ← /api/dashboard/ai-stats (counts từ DB)
+   Cả hai được tải song song; mỗi block tự xử lý trạng thái offline/lỗi.
+   ──────────────────────────────────────────────────────────────────────── */
+async function _loadDashboardLiveData() {
+  const bannerEl = document.getElementById('dashCrisisBanner');
+  const perfEl   = document.getElementById('dashAIPerf');
+  if (!bannerEl && !perfEl) return;
+
+  // Skeleton loading cho AI perf
+  if (perfEl) perfEl.innerHTML = `
+    <div class="content-card" style="border:1px dashed var(--border-primary);">
+      <div style="height:14px;border-radius:6px;background:var(--border-primary);
+        margin-bottom:10px;width:60%;"></div>
+      <div style="height:10px;border-radius:6px;background:var(--border-primary);
+        margin-bottom:6px;width:90%;"></div>
+      <div style="height:10px;border-radius:6px;background:var(--border-primary);
+        width:70%;"></div>
+      <div style="font-size:0.72rem;color:var(--text-muted);margin-top:10px;">
+        ⏳ Đang tải hiệu suất AI...
+      </div>
+    </div>`;
+
+  // Tải song song
+  const [crisisRes, statsRes] = await Promise.allSettled([
+    _backendConnected ? apiCall('/api/crisis-overview') : Promise.reject(new Error('offline')),
+    _backendConnected ? apiCall('/api/dashboard/ai-stats') : Promise.reject(new Error('offline')),
+  ]);
+
+  // ── CRISIS BANNER ─────────────────────────────────────────────────────
+  if (bannerEl) {
+    if (crisisRes.status === 'fulfilled' && crisisRes.value?.crises?.length) {
+      const overview  = crisisRes.value;
+      const criticals = overview.crises.filter(c => c.severity === 'critical');
+      const warnings  = overview.crises.filter(c => c.severity === 'warning');
+      bannerEl.innerHTML = [...criticals, ...warnings].map(cr => {
+        const isCrit  = cr.severity === 'critical';
+        const bg      = isCrit
+          ? 'linear-gradient(90deg,#7f1d1d,#991b1b)'
+          : 'linear-gradient(90deg,#78350f,#92400e)';
+        const border  = isCrit ? '#ef4444' : '#f59e0b';
+        const textCol = isCrit ? '#fca5a5' : '#fde68a';
+        const badge   = isCrit ? '🚨 MỨC ĐỎ' : '⚠️ CẢNH BÁO';
+        const signals = [
+          cr.neg_review_count  > 0 ? `📝 ${cr.neg_review_count} review tiêu cực`  : null,
+          cr.risk_task_count   > 0 ? `⚡ ${cr.risk_task_count} tác vụ rủi ro`     : null,
+          cr.chat_signal_count > 0 ? `💬 ${cr.chat_signal_count} chat signal`     : null,
+        ].filter(Boolean).join(' · ');
+        return `
+          <div style="display:flex;align-items:center;gap:14px;padding:10px 16px;
+            margin-bottom:10px;background:${bg};border-radius:12px;
+            border:1px solid ${border};box-shadow:0 0 20px ${border}40;">
+            <div style="font-size:1.4rem;flex-shrink:0;">${isCrit ? '🔥' : '⚠️'}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="color:${textCol};font-size:0.65rem;font-weight:700;
+                letter-spacing:1px;text-transform:uppercase;">
+                Orchestrator · ${badge}
+              </div>
+              <div style="color:#fff;font-weight:800;font-size:0.92rem;
+                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                ${cr.product_name || cr.product_id}
+                — Severity <span style="color:${textCol};">${cr.severity_score}/100</span>
+              </div>
+              <div style="font-size:0.72rem;color:${textCol};margin-top:3px;">${signals}</div>
+            </div>
+            <button onclick="navigate('crisis-center')"
+              style="flex-shrink:0;background:${border};color:white;border:none;
+                padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;
+                font-size:0.8rem;white-space:nowrap;">
+              Xử lý →
+            </button>
+          </div>`;
+      }).join('') + `<div style="margin-bottom:6px;"></div>`;
+    }
+    // Safe or offline: no banner — đừng chiếm space
+  }
+
+  // ── AI PERFORMANCE CARD ───────────────────────────────────────────────
+  if (perfEl) {
+    if (statsRes.status === 'fulfilled' && statsRes.value) {
+      const s     = statsRes.value;
+      const sug   = s.suggestions || {};
+      const chats = s.chats       || {};
+      const rev   = s.reviews     || {};
+      const tasks = s.tasks       || {};
+      const cr    = s.crisis      || {};
+
+      const autoRate  = chats.total  > 0
+        ? Math.round((chats.auto       / chats.total)  * 100) : 0;
+      const negPct    = rev.total    > 0
+        ? Math.round((rev.negative     / rev.total)    * 100) : 0;
+      const actionPct = cr.actions_total > 0
+        ? Math.round((cr.actions_done  / cr.actions_total) * 100) : 0;
+
+      perfEl.innerHTML = `
+        <div class="content-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;
+            margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+            <div class="content-card-title" style="margin:0;">
+              🤖 Hiệu suất AI Agent — Dữ liệu thực từ DB
+            </div>
+            <span style="font-size:0.7rem;background:var(--accent-emerald-bg);
+              color:var(--accent-emerald);padding:3px 9px;border-radius:20px;
+              font-weight:700;">● LIVE</span>
+          </div>
+
+          <div class="grid-3" style="gap:12px;margin-bottom:14px;">
+            <div class="big-metric" style="cursor:pointer;"
+              onclick="navigate('content-suggestions')">
+              <div class="big-metric-value" style="color:var(--accent-amber);">
+                ${sug.total || 0}
+              </div>
+              <div class="big-metric-label">Đề xuất AI tổng</div>
+              <div class="big-metric-trend">
+                ✅ ${sug.approved || 0} duyệt ·
+                ⏳ ${sug.pending  || 0} chờ ·
+                ❌ ${sug.rejected || 0} từ chối
+              </div>
+            </div>
+            <div class="big-metric" style="cursor:pointer;" onclick="navigate('chat')">
+              <div class="big-metric-value" style="color:var(--accent-emerald);">
+                ${chats.total || 0}
+              </div>
+              <div class="big-metric-label">Hội thoại đã xử lý</div>
+              <div class="big-metric-trend">
+                ${autoRate}% tự động · ${chats.escalated || 0} cần can thiệp
+              </div>
+            </div>
+            <div class="big-metric" style="cursor:pointer;" onclick="navigate('reviews')">
+              <div class="big-metric-value"
+                style="color:${negPct >= 40 ? 'var(--accent-rose)' : 'var(--accent-blue)'};">
+                ${rev.total || 0}
+              </div>
+              <div class="big-metric-label">Reviews phân tích</div>
+              <div class="big-metric-trend">
+                ${negPct}% tiêu cực · ${rev.positive || 0} tích cực
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:150px;padding:10px 14px;
+              background:var(--accent-amber-bg);border-radius:10px;">
+              <div style="font-size:0.72rem;font-weight:700;
+                color:var(--accent-amber);margin-bottom:4px;">
+                ⚡ Tác vụ AI → Người
+              </div>
+              <div style="font-size:1.35rem;font-weight:800;color:var(--text-primary);">
+                ${tasks.pending || 0}
+                <span style="font-size:0.74rem;font-weight:400;color:var(--text-muted);">
+                  chờ xử lý / ${tasks.total || 0} tổng
+                </span>
+              </div>
+            </div>
+            <div style="flex:1;min-width:150px;padding:10px 14px;
+              background:var(--accent-rose-bg);border-radius:10px;cursor:pointer;"
+              onclick="navigate('crisis-center')">
+              <div style="font-size:0.72rem;font-weight:700;
+                color:var(--accent-rose);margin-bottom:4px;">
+                🛡 Kế hoạch Khủng hoảng AI
+              </div>
+              <div style="font-size:1.35rem;font-weight:800;color:var(--text-primary);">
+                ${cr.plans_generated || 0}
+                <span style="font-size:0.74rem;font-weight:400;color:var(--text-muted);">
+                  kế hoạch · ${cr.actions_done || 0}/${cr.actions_total || 0} hành động ✓
+                </span>
+              </div>
+              ${cr.actions_total > 0 ? `
+                <div style="margin-top:6px;height:4px;background:var(--border-primary);
+                  border-radius:4px;overflow:hidden;">
+                  <div style="height:100%;width:${actionPct}%;
+                    background:var(--accent-rose);border-radius:4px;"></div>
+                </div>` : ''}
+            </div>
+          </div>
+        </div>`;
+
+    } else {
+      // Backend offline — fallback với MOCK.ai_today
+      const ai = (typeof MOCK !== 'undefined' && MOCK.ai_today) || {};
+      perfEl.innerHTML = `
+        <div class="content-card"
+          style="border-color:var(--accent-amber);opacity:0.9;">
+          <div style="display:flex;justify-content:space-between;align-items:center;
+            margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+            <div class="content-card-title" style="margin:0;">
+              🤖 Hiệu suất AI Agent hôm nay
+            </div>
+            <span style="font-size:0.7rem;background:var(--accent-amber-bg);
+              color:var(--accent-amber);padding:3px 9px;border-radius:20px;
+              font-weight:700;">Demo</span>
+          </div>
+          <div class="grid-3" style="gap:12px;">
+            <div class="big-metric">
+              <div class="big-metric-value" style="color:var(--accent-amber);">
+                ${ai.suggestions_created || 12}
+              </div>
+              <div class="big-metric-label">Đề xuất AI tạo ra</div>
+              <div class="big-metric-trend">
+                ✅ ${ai.suggestions_approved || 8} duyệt ·
+                ⏳ ${ai.suggestions_pending  || 3} chờ ·
+                ❌ ${ai.suggestions_rejected || 1} từ chối
+              </div>
+            </div>
+            <div class="big-metric">
+              <div class="big-metric-value" style="color:var(--accent-emerald);">
+                ${ai.chats_handled || 142}
+              </div>
+              <div class="big-metric-label">Tin nhắn xử lý</div>
+              <div class="big-metric-trend">
+                ~79% tự động · ${ai.chats_escalated || 30} cần can thiệp
+              </div>
+            </div>
+            <div class="big-metric">
+              <div class="big-metric-value" style="color:var(--accent-blue);">—</div>
+              <div class="big-metric-label">Kế hoạch Khủng hoảng AI</div>
+              <div class="big-metric-trend">Kết nối backend để xem</div>
+            </div>
+          </div>
+        </div>`;
+    }
+  }
+}
+
 const _origNavigate = navigate;
 
 navigate = function (page) {
@@ -1177,6 +1404,7 @@ navigate = function (page) {
   setTimeout(() => {
     if (page === 'dashboard') {
       injectDailySummaryCard();
+      _loadDashboardLiveData();
     } else if (page === 'reviews') {
       // Chỉ tải dữ liệu — form submit đã chuyển sang trang Demo khách hàng
       loadReviewsFromAPI();
