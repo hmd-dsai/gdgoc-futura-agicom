@@ -303,6 +303,13 @@ MOCK.products_detail = [
     sku: 'S24-ULTRA-TIM', name: 'Samsung Galaxy S24 Ultra', category: 'Smartphone', price: 29990000,
     description_current: 'Samsung Galaxy S24 Ultra 256GB — màn hình Dynamic AMOLED 6.8 inch. Chip Snapdragon 8 Gen 3. Bút S Pen tích hợp. Bộ nhớ 12GB RAM. Pin 5000mAh. Hàng chính hãng Samsung Việt Nam, bảo hành 12 tháng.',
     description_key_points: ['màn hình AMOLED', 'Snapdragon 8 Gen 3', 'S Pen', '5000mAh', 'bảo hành 12 tháng'],
+    usp: [
+      'Camera 200MP + zoom quang học 10x — chụp đêm sắc nét không đối thủ trong tầm giá',
+      'Chip Snapdragon 8 Gen 3 mạnh nhất 2024 — xử lý AI, gaming, đa nhiệm không giật lag',
+      'Bút S Pen tích hợp miễn phí — viết tay, ký tài liệu, ghi chú tức thì',
+      'Hàng chính hãng Samsung Việt Nam — bảo hành 12 tháng toàn quốc, đổi mới 30 ngày',
+      'Pin 5000mAh sạc 45W — đầy pin trong 70 phút, dùng cả ngày không lo cạn'
+    ],
     chatbot_questions: [
       { topic: 'Thời lượng pin', count: 23, sample: 'Pin dùng được mấy tiếng?', sentiment: 'neutral' },
       { topic: 'Tốc độ sạc', count: 14, sample: 'Sạc 45W thì đầy bao lâu?', sentiment: 'neutral' },
@@ -323,6 +330,13 @@ MOCK.products_detail = [
     sku: 'ANKER-100W-CAP', name: 'Cáp Anker 100W USB-C', category: 'Phụ kiện sạc', price: 350000,
     description_current: 'Cáp Anker 100W USB-C to USB-C. Hỗ trợ sạc nhanh đến 100W. Dài 1.8m. Chất liệu dệt bền. Tương thích mọi thiết bị USB-C.',
     description_key_points: ['100W', '1.8m', 'chất liệu dệt', 'USB-C'],
+    usp: [
+      'Công suất 100W thực chiến — sạc MacBook Pro, Samsung S24, iPad Pro cùng lúc không giảm tốc',
+      'Dây bọc dệt chống rối, chống gãy — bền gấp 3 lần cáp thường theo thử nghiệm Anker',
+      'Tương thích toàn bộ thiết bị USB-C — không cần mua nhiều loại cáp khác nhau',
+      'Bảo hành chính hãng 18 tháng — lỗi đổi mới, không cần giải thích',
+      'Chỉ 350.000đ cho 100W — tiết kiệm hơn 60% so với cáp Apple chính hãng cùng công suất'
+    ],
     chatbot_questions: [
       { topic: 'Độ bền / Tuổi thọ', count: 15, sample: 'Cáp dùng được bao lâu?', sentiment: 'negative' },
       { topic: 'Tương thích thiết bị', count: 11, sample: 'Dùng được với MacBook Pro không?', sentiment: 'neutral' },
@@ -340,6 +354,13 @@ MOCK.products_detail = [
     sku: 'AIRPODS-PRO2', name: 'Apple AirPods Pro 2 (USB-C)', category: 'Tai nghe', price: 5200000,
     description_current: 'Apple AirPods Pro 2 cổng USB-C. Chip H2 mới nhất. Chống ồn ANC cải tiến. Pin 6h + 30h với case. Kháng nước IPX4. Hàng chính hãng VNA.',
     description_key_points: ['chip H2', 'ANC', 'pin 6h', 'IPX4', 'chính hãng VNA'],
+    usp: [
+      'Chống ồn ANC thế hệ 2 — triệt tiêu 99% tiếng ồn, làm việc ở quán cafe ồn nhất cũng nghe rõ',
+      'Chip H2 Apple — âm thanh Spatial Audio 3D, nghe nhạc như đang trong rạp hát',
+      'Pin 6h liên tục + 30h với case — cả ngày dùng không cần sạc case',
+      'Kháng nước IPX4 — tập gym, đi mưa nhẹ không lo hỏng',
+      'Hàng chính hãng VNA — bảo hành Apple Store 12 tháng, kích hoạt warranty chính thức'
+    ],
     chatbot_questions: [
       { topic: 'Thời lượng pin', count: 23, sample: 'Pin nghe được mấy tiếng?', sentiment: 'neutral' },
       { topic: 'Chống ồn ANC', count: 16, sample: 'ANC có tốt không? Dùng ở văn phòng ồn ok không?', sentiment: 'neutral' },
@@ -2010,6 +2031,34 @@ function renderChatInsights() {
     + '</div>';
 }
 function renderContentSuggestions() {
+  var activeTab = window._csTab || 'suggestions';
+
+  // Tab bar chung cho cả 2 tab
+  var tabBar = '<div style="display:flex;gap:6px;margin-bottom:20px;padding:4px;background:var(--bg-glass);border-radius:12px;border:1px solid var(--border-primary);max-width:fit-content;">'
+    + ['suggestions','script'].map(function(t) {
+        var isActive = t === activeTab;
+        var label = t === 'suggestions' ? '📋 Đề xuất AI' : '🎬 Tạo Script Video';
+        return '<button data-cs-tab="' + t + '" style="padding:9px 20px;border-radius:9px;font-size:0.82rem;font-weight:' + (isActive ? '700' : '600') + ';cursor:pointer;border:none;background:' + (isActive ? 'linear-gradient(135deg,#d97706,#eab308)' : 'transparent') + ';color:' + (isActive ? '#1a0800' : 'var(--text-secondary)') + ';transition:all 0.2s;">'
+          + label + (t === 'script' && isActive ? '' : '') + '</button>';
+      }).join('')
+    + '</div>';
+
+  // Gắn sự kiện cho tab buttons sau khi DOM sẵn sàng
+  setTimeout(function() {
+    document.querySelectorAll('[data-cs-tab]').forEach(function(btn) {
+      btn.onclick = function() {
+        window._csTab = btn.dataset.csTab;
+        navigate('content-suggestions');
+      };
+    });
+  }, 0);
+
+  // Nếu đang ở tab Script → delegate sang renderContentAgent
+  if (activeTab === 'script') {
+    return tabBar + renderContentAgent();
+  }
+
+  // Tab Đề xuất AI (nội dung gốc bên dưới)
   const sugs = MOCK.content_suggestions_generated;
   const pending = sugs.filter(s => s.status === 'pending');
   const saved = sugs.filter(s => s.status === 'saved');
@@ -2264,7 +2313,7 @@ function renderContentSuggestions() {
   html += '</div>';
   html += '</div>'; // grid-2
 
-  return html;
+  return tabBar + html;
 }
 
 function renderProductDescriptions() {
@@ -2549,7 +2598,9 @@ function renderDemoCustomer() {
 }
 
 
-// ===== Content Agent =====
+// ===== Content Agent (embedded trong tab "Tạo Script" của trang Đề xuất Content) =====
+window._csTab = window._csTab || 'suggestions'; // 'suggestions' | 'script'
+
 window._ca = window._ca || {
   step: 1,
   jobId: null,
@@ -2558,13 +2609,26 @@ window._ca = window._ca || {
   scripts: [],
   activeVariant: 'emotional',
   filmingGuide: null,
-  filmingScript: null
+  filmingScript: null,
+  catalogProducts: null,
+  _selectedProduct: null,
+  _selectedUsps: null,
+  _lastRequest: null
 };
+
+// Chuyển sang tab Script trong trang Đề xuất Content
+function navContentScript() {
+  window._csTab = 'script';
+  navigate('content-suggestions');
+}
 
 function caReset() {
   if (window._ca.pollTimer) clearInterval(window._ca.pollTimer);
+  // Giữ cache catalog khi reset để không cần reload
+  var cachedProducts = window._ca.catalogProducts;
   window._ca = { step: 1, jobId: null, pollTimer: null, intel: null, scripts: [],
-    activeVariant: 'emotional', filmingGuide: null, filmingScript: null };
+    activeVariant: 'emotional', filmingGuide: null, filmingScript: null,
+    catalogProducts: cachedProducts, _selectedProduct: null, _selectedUsps: null, _lastRequest: null };
 }
 
 function renderContentAgent() {
@@ -2584,39 +2648,93 @@ function renderContentAgent() {
 
   var bodyHtml = '';
 
-  // ── Step 1: Input form ──
+  // ── Step 1: Input form (NEW — Product selector thay thế URL crawl) ──
   if (step === 1) {
-    bodyHtml = '<div class="content-card" style="max-width:720px;margin:0 auto;">'
-      + '<div class="content-card-title">🔗 Link sản phẩm cần phân tích</div>'
+    // Render products đã cache hoặc placeholder
+    var products = window._ca.catalogProducts || [];
+    var productOptions = products.length
+      ? products.map(function(p) {
+          return '<option value="' + p.product_id + '" data-name="' + p.name + '" data-usp="' + encodeURIComponent(JSON.stringify(p.usp||[])) + '" data-price="' + p.price + '">'
+            + p.short_name + ' — ' + (p.price ? Number(p.price).toLocaleString('vi-VN') + 'đ' : '') + '</option>';
+        }).join('')
+      : '<option value="">⏳ Đang tải danh sách sản phẩm...</option>';
+
+    // Render USP checkboxes nếu đã có sản phẩm được chọn
+    var selectedProduct = window._ca._selectedProduct || (products[0] || null);
+    var uspList = selectedProduct ? (selectedProduct.usp || []) : [];
+    var uspCheckboxes = uspList.length
+      ? uspList.map(function(u, i) {
+          var checked = !window._ca._selectedUsps || window._ca._selectedUsps.indexOf(u) !== -1 ? 'checked' : '';
+          return '<label style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--bg-glass);border-radius:8px;cursor:pointer;font-size:0.8rem;color:var(--text-secondary);line-height:1.4;">'
+            + '<input type="checkbox" data-usp-item="' + i + '" value="' + encodeURIComponent(u) + '" ' + checked + ' style="margin-top:2px;accent-color:#d97706;flex-shrink:0;">'
+            + '<span>' + u + '</span></label>';
+        }).join('')
+      : '<div style="font-size:0.8rem;color:var(--text-muted);padding:8px;">Chọn sản phẩm để xem USP</div>';
+
+    bodyHtml = '<div class="content-card" style="max-width:740px;margin:0 auto;">'
+      // Product selector
+      + '<div class="content-card-title">🎯 Chọn sản phẩm & cấu hình content</div>'
       + '<div style="margin-bottom:16px;">'
-      + '<label style="font-size:0.78rem;color:var(--text-secondary);font-weight:600;margin-bottom:6px;display:block;">URL sản phẩm (Shopee / TikTok Shop / Lazada)</label>'
-      + '<input id="caUrlInput" type="url" placeholder="https://shopee.vn/product/..." style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--border-primary);background:var(--bg-glass);color:var(--text-primary);font-size:0.9rem;outline:none;box-sizing:border-box;" />'
-      + '</div>'
-      + '<div class="grid-2" style="gap:16px;margin-bottom:20px;">'
-      + '<div><label style="font-size:0.78rem;color:var(--text-secondary);font-weight:600;margin-bottom:6px;display:block;">Sàn thương mại</label>'
-      + '<select id="caPlatform" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border-primary);background:var(--bg-card);color:var(--text-primary);font-size:0.875rem;">'
-      + '<option value="shopee">🛒 Shopee</option>'
-      + '<option value="tiktok">🎵 TikTok Shop</option>'
-      + '<option value="lazada">🔵 Lazada</option>'
+      + '<label style="font-size:0.78rem;color:var(--text-secondary);font-weight:600;margin-bottom:6px;display:block;">Sản phẩm</label>'
+      + '<select id="caProductSelect" style="width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid var(--border-primary);background:var(--bg-card);color:var(--text-primary);font-size:0.875rem;">'
+      + productOptions
       + '</select></div>'
-      + '<div><label style="font-size:0.78rem;color:var(--text-secondary);font-weight:600;margin-bottom:6px;display:block;">Mục tiêu video</label>'
-      + '<select id="caGoal" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border-primary);background:var(--bg-card);color:var(--text-primary);font-size:0.875rem;">'
-      + '<option value="viral">🚀 Viral (tăng reach)</option>'
-      + '<option value="review">⭐ Review sản phẩm</option>'
-      + '<option value="demo">🎬 Demo sử dụng</option>'
+
+      // Content type + Brand tone
+      + '<div class="grid-2" style="gap:14px;margin-bottom:16px;">'
+      + '<div><label style="font-size:0.78rem;color:var(--text-secondary);font-weight:600;margin-bottom:6px;display:block;">Loại content</label>'
+      + '<select id="caContentType" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border-primary);background:var(--bg-card);color:var(--text-primary);font-size:0.875rem;">'
+      + '<option value="tiktok_30s">🎵 TikTok 30s</option>'
+      + '<option value="tiktok_15s">⚡ TikTok 15s</option>'
+      + '<option value="tiktok_60s">🎬 TikTok 60s</option>'
+      + '<option value="reels_30s">📱 Instagram Reels 30s</option>'
+      + '<option value="reels_60s">📱 Instagram Reels 60s</option>'
+      + '<option value="youtube_short">▶️ YouTube Short</option>'
+      + '<option value="shopee_video">🛒 Shopee Video</option>'
+      + '<option value="facebook_post">📘 Facebook Post</option>'
+      + '<option value="caption_instagram">📷 Caption Instagram</option>'
+      + '</select></div>'
+      + '<div><label style="font-size:0.78rem;color:var(--text-secondary);font-weight:600;margin-bottom:6px;display:block;">Tông giọng thương hiệu</label>'
+      + '<select id="caBrandTone" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border-primary);background:var(--bg-card);color:var(--text-primary);font-size:0.875rem;">'
+      + '<option value="Trẻ trung, vui vẻ, gần gũi">🌟 Trẻ trung & gần gũi</option>'
+      + '<option value="Chuyên nghiệp, đáng tin cậy">💼 Chuyên nghiệp</option>'
+      + '<option value="Hài hước, dí dỏm, viral">😄 Hài hước & viral</option>'
+      + '<option value="Sang trọng, premium, tinh tế">✨ Sang trọng & premium</option>'
+      + '<option value="Chân thực, honest review">🔍 Chân thực & honest</option>'
       + '</select></div>'
       + '</div>'
+
+      // Target audience
+      + '<div style="margin-bottom:16px;">'
+      + '<label style="font-size:0.78rem;color:var(--text-secondary);font-weight:600;margin-bottom:6px;display:block;">Đối tượng mục tiêu</label>'
+      + '<input id="caTargetAudience" type="text" placeholder="VD: Nữ sinh 16–22 tuổi, yêu thích makeup nhẹ nhàng, dùng TikTok hàng ngày" '
+      + 'style="width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid var(--border-primary);background:var(--bg-glass);color:var(--text-primary);font-size:0.85rem;outline:none;box-sizing:border-box;" />'
+      + '</div>'
+
+      // USP checkboxes
+      + '<div style="margin-bottom:16px;">'
+      + '<label style="font-size:0.78rem;color:var(--text-secondary);font-weight:600;margin-bottom:8px;display:block;">💡 USP muốn nhấn mạnh <span style="font-weight:400;color:var(--text-muted);">(tick để chọn — bỏ tick để loại bỏ)</span></label>'
+      + '<div id="caUspCheckboxes" style="display:flex;flex-direction:column;gap:6px;">' + uspCheckboxes + '</div>'
+      + '</div>'
+
+      // Custom instructions
+      + '<div style="margin-bottom:20px;">'
+      + '<label style="font-size:0.78rem;color:var(--text-secondary);font-weight:600;margin-bottom:6px;display:block;">📝 Hướng dẫn tuỳ chỉnh <span style="font-weight:400;color:var(--text-muted);">(tuỳ chọn)</span></label>'
+      + '<textarea id="caCustomInstructions" rows="2" placeholder="VD: Nhắm đến học sinh sắp thi, hook phải liên quan đến stress học tập. Không dùng từ ngữ quá trẻ con." '
+      + 'style="width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid var(--border-primary);background:var(--bg-glass);color:var(--text-primary);font-size:0.85rem;resize:vertical;box-sizing:border-box;outline:none;"></textarea>'
+      + '</div>'
+
+      // AI capabilities reminder
       + '<div style="background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.2);border-radius:10px;padding:14px;margin-bottom:20px;">'
-      + '<div style="font-size:0.78rem;font-weight:700;color:var(--accent-amber);margin-bottom:8px;">✨ AI sẽ tự động:</div>'
+      + '<div style="font-size:0.78rem;font-weight:700;color:var(--accent-amber);margin-bottom:8px;">✨ AI sẽ tạo ra:</div>'
       + '<div style="font-size:0.8rem;color:var(--text-secondary);line-height:1.9;">'
-      + '🔍 Crawl thông tin sản phẩm từ link &nbsp;·&nbsp; '
-      + '💡 Phân tích USP & Unique Selling Points<br>'
-      + '🎯 Xác định đối tượng khách hàng tiềm năng &nbsp;·&nbsp; '
-      + '🎬 Tạo 3 kịch bản TikTok (30s) theo phong cách khác nhau<br>'
-      + '🎥 Hướng dẫn quay phim chi tiết cho từng cảnh'
+      + '💡 Phân tích USP & định vị sản phẩm &nbsp;·&nbsp; 🎯 Chân dung khách hàng mục tiêu<br>'
+      + '🎬 3 phiên bản kịch bản: Cảm xúc · Thông tin · Hài hước<br>'
+      + '🎙 Voiceover + Caption on-screen + Gợi ý hình ảnh cho từng cảnh &nbsp;·&nbsp; 📱 Caption & Hashtag tối ưu'
       + '</div></div>'
+
       + '<button id="caAnalyzeBtn" style="width:100%;padding:14px;background:linear-gradient(135deg,#d97706,#eab308);color:#1a0800;font-weight:800;font-size:0.95rem;border:none;border-radius:12px;cursor:pointer;letter-spacing:0.3px;">'
-      + '🚀 Phân tích & Tạo Content'
+      + '🚀 Phân tích & Tạo Content Script'
       + '</button></div>';
 
   // ── Step 2: Analyzing ──
@@ -2799,16 +2917,98 @@ function renderContentAgent() {
     + '</div>';
 }
 
+// Chuyển đổi MOCK.products_detail sang format catalog dùng cho Content Agent
+function _mockToCatalogProducts() {
+  return (MOCK.products_detail || []).map(function(p, i) {
+    return {
+      product_id: p.sku || ('MOCK-' + i),
+      name: p.name,
+      short_name: p.name.length > 30 ? p.name.substring(0, 30) + '…' : p.name,
+      category: p.category || '',
+      price: p.price || 0,
+      usp: p.usp || [],
+      status: 'active',
+      _fromMock: true
+    };
+  });
+}
+
 function initContentAgentEvents() {
+  // ── Load catalog products: dùng mock ngay, đồng thời thử fetch backend ──
+  if (!window._ca.catalogProducts) {
+    // Hiển thị mock ngay lập tức để không phải chờ
+    var mockProducts = _mockToCatalogProducts();
+    window._ca.catalogProducts = mockProducts;
+    if (window._ca.step === 1) { navContentScript(); }
+
+    // Song song: thử lấy từ backend để override (nếu backend đang chạy)
+    fetch(API_BASE + '/api/content-agent/products')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.products && data.products.length > 0) {
+          window._ca.catalogProducts = data.products;
+          if (window._ca.step === 1) { navContentScript(); }
+        }
+      }).catch(function() { /* giữ mock */ });
+  }
+
+  // ── Khi chọn sản phẩm → cập nhật USP checkboxes ──
+  var productSelect = document.getElementById('caProductSelect');
+  if (productSelect) {
+    productSelect.onchange = function() {
+      var selectedId = productSelect.value;
+      var products = window._ca.catalogProducts || [];
+      var p = products.find(function(x) { return x.product_id === selectedId; });
+      window._ca._selectedProduct = p || null;
+      window._ca._selectedUsps = null; // reset selection
+      // Re-render chỉ phần USP checkboxes
+      var container = document.getElementById('caUspCheckboxes');
+      if (container && p) {
+        var uspList = p.usp || [];
+        container.innerHTML = uspList.map(function(u, i) {
+          return '<label style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--bg-glass);border-radius:8px;cursor:pointer;font-size:0.8rem;color:var(--text-secondary);line-height:1.4;">'
+            + '<input type="checkbox" data-usp-item="' + i + '" value="' + encodeURIComponent(u) + '" checked style="margin-top:2px;accent-color:#d97706;flex-shrink:0;">'
+            + '<span>' + u + '</span></label>';
+        }).join('') || '<div style="font-size:0.8rem;color:var(--text-muted);padding:8px;">Sản phẩm này chưa có USP</div>';
+      }
+    };
+  }
+
+  // ── Nút Phân tích & Tạo Script ──
   var analyzeBtn = document.getElementById('caAnalyzeBtn');
   if (analyzeBtn) {
     analyzeBtn.onclick = function() {
-      var url = (document.getElementById('caUrlInput') || {}).value || '';
-      if (!url.trim()) { showToast('Vui lòng nhập URL sản phẩm', 'warning'); return; }
-      var platform = (document.getElementById('caPlatform') || {}).value || 'shopee';
-      var goal = (document.getElementById('caGoal') || {}).value || 'viral';
-      window._ca._lastUrl = url; window._ca._lastPlatform = platform; window._ca._lastGoal = goal;
-      caStartAnalysis(url, platform, goal);
+      var products = window._ca.catalogProducts || [];
+      var productSelectEl = document.getElementById('caProductSelect');
+      var selectedId = productSelectEl ? productSelectEl.value : '';
+      if (!selectedId) { showToast('Vui lòng chọn sản phẩm', 'warning'); return; }
+
+      var selectedProduct = products.find(function(x) { return x.product_id === selectedId; }) || {};
+      var contentType = (document.getElementById('caContentType') || {}).value || 'tiktok_30s';
+      var brandTone = (document.getElementById('caBrandTone') || {}).value || 'Trẻ trung, vui vẻ, gần gũi';
+      var targetAudience = (document.getElementById('caTargetAudience') || {}).value || '';
+      var customInstructions = (document.getElementById('caCustomInstructions') || {}).value || '';
+
+      // Lấy USP được tick
+      var checkedBoxes = document.querySelectorAll('[data-usp-item]:checked');
+      var selectedUsps = Array.from(checkedBoxes).map(function(cb) { return decodeURIComponent(cb.value); });
+      if (!selectedUsps.length) {
+        selectedUsps = selectedProduct.usp || [];
+      }
+
+      window._ca._lastRequest = {
+        product_id: selectedId,
+        product_name: selectedProduct.name || selectedId,
+        product_description: selectedProduct.name || '',
+        usp_focus: selectedUsps,
+        content_type: contentType,
+        brand_tone: brandTone,
+        target_audience: targetAudience,
+        custom_instructions: customInstructions,
+        trigger_source: 'manual',
+      };
+
+      caStartAnalysis(window._ca._lastRequest);
     };
   }
 
@@ -2818,7 +3018,7 @@ function initContentAgentEvents() {
   }
 
   var resetBtn = document.getElementById('caResetBtn');
-  if (resetBtn) { resetBtn.onclick = function() { caReset(); navigate('content-agent'); }; }
+  if (resetBtn) { resetBtn.onclick = function() { caReset(); navContentScript(); }; }
 
   var filmBtn = document.getElementById('caFilmingBtn');
   if (filmBtn) {
@@ -2826,10 +3026,10 @@ function initContentAgentEvents() {
   }
 
   var backBtn = document.getElementById('caBackBtn');
-  if (backBtn) { backBtn.onclick = function() { window._ca.step = 3; navigate('content-agent'); }; }
+  if (backBtn) { backBtn.onclick = function() { window._ca.step = 3; navContentScript(); }; }
 
   var backScriptBtn = document.getElementById('caBackScript');
-  if (backScriptBtn) { backScriptBtn.onclick = function() { window._ca.step = 4; navigate('content-agent'); }; }
+  if (backScriptBtn) { backScriptBtn.onclick = function() { window._ca.step = 4; navContentScript(); }; }
 
   var feedbackBtn = document.getElementById('caFeedbackBtn');
   if (feedbackBtn) {
@@ -2844,31 +3044,63 @@ function initContentAgentEvents() {
   document.querySelectorAll('[data-ca-variant]').forEach(function(btn) {
     btn.onclick = function() {
       window._ca.activeVariant = btn.dataset.caVariant;
-      navigate('content-agent');
+      navContentScript();
     };
   });
 }
 
-function caStartAnalysis(url, platform, goal) {
+function caStartAnalysis(req) {
+  // req = ContentScriptRequest object từ form
   window._ca.step = 2;
-  window._ca.progress = 5;
-  window._ca.stepLabel = 'Đang crawl thông tin sản phẩm...';
-  navigate('content-agent');
+  window._ca.progress = 10;
+  window._ca.stepLabel = 'AI đang phân tích USP & chân dung khách hàng...';
+  navContentScript();
 
-  fetch(API_BASE + '/api/v1/content-agent/analyze', {
+  // ── Bước 1: Gọi /intel để phân tích và hiển thị Step 3 ──
+  var progressSteps = [
+    { pct: 25, label: 'Phân tích điểm bán hàng nổi bật...', delay: 600 },
+    { pct: 55, label: 'Xác định chân dung khách hàng mục tiêu...', delay: 1400 },
+    { pct: 80, label: 'Đang tạo 3 phiên bản kịch bản...', delay: 2200 },
+  ];
+  progressSteps.forEach(function(s) {
+    setTimeout(function() {
+      window._ca.progress = s.pct; window._ca.stepLabel = s.label;
+      var bar = document.getElementById('caProgressBar');
+      var pctEl = document.getElementById('caProgressPct');
+      var lblEl = document.getElementById('caStepLabel');
+      if (bar) bar.style.width = s.pct + '%';
+      if (pctEl) pctEl.textContent = s.pct + '%';
+      if (lblEl) lblEl.textContent = s.label;
+    }, s.delay);
+  });
+
+  fetch(API_BASE + '/api/content-agent/intel', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ product_url: url, platform: platform, content_goal: goal })
+    body: JSON.stringify(req),
   }).then(function(r) { return r.json(); }).then(function(data) {
-    if (data.job_id) {
-      window._ca.jobId = data.job_id;
-      caPollJob(data.job_id);
+    if (data.intel) {
+      window._ca.intel = data.intel;
+      // ── Bước 2: Gọi /generate-script để lấy 3 phiên bản script ──
+      window._ca.stepLabel = 'Đang viết kịch bản chi tiết...';
+      fetch(API_BASE + '/api/content-agent/generate-script', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(req),
+      }).then(function(r2) { return r2.json(); }).then(function(scriptData) {
+        window._ca.scripts = scriptData.scripts || [];
+        window._ca.activeVariant = 'emotional';
+        window._ca.progress = 100;
+        window._ca.step = 4;  // Nhảy thẳng vào bước kịch bản
+        navContentScript();
+        showToast('✅ Đã tạo ' + (scriptData.scripts||[]).length + ' phiên bản kịch bản!', 'success');
+      }).catch(function() { caSimulateScripts(); });
     } else {
-      showToast('Lỗi: ' + (data.detail || 'Không tạo được job'), 'danger');
-      caReset(); navigate('content-agent');
+      showToast('Lỗi phân tích: ' + (data.detail || 'Không có dữ liệu'), 'danger');
+      caReset(); navContentScript();
     }
-  }).catch(function(err) {
-    // Demo mode: simulate with mock data
+  }).catch(function() {
+    // Fallback: simulate nếu backend chưa sẵn sàng
     caSimulateAnalysis();
   });
 }
@@ -2899,12 +3131,12 @@ function caPollJob(jobId) {
         window._ca.intelId = jobId;
         window._ca.progress = 100;
         window._ca.step = 3;
-        navigate('content-agent');
+        navContentScript();
         showToast('✅ Phân tích xong! AI phát hiện ' + (window._ca.intel.usp||[]).length + ' USP và ' + (window._ca.intel.audience||[]).length + ' nhóm khách hàng', 'success');
       } else if (data.status === 'error') {
         clearInterval(window._ca.pollTimer); window._ca.pollTimer = null;
         showToast('Lỗi phân tích: ' + (data.error||'Unknown error'), 'danger');
-        caReset(); navigate('content-agent');
+        caReset(); navContentScript();
       }
     }).catch(function() { /* keep polling */ });
   }, 1500);
@@ -2946,7 +3178,7 @@ function caSimulateAnalysis() {
       key_message: 'Đầu tư một lần, dùng mãi mãi — ANC xịn nhất tầm giá'
     };
     window._ca.step = 3;
-    navigate('content-agent');
+    navContentScript();
     showToast('✅ Phân tích xong! AI phát hiện 3 USP và 2 nhóm khách hàng (Demo Mode)', 'success');
   }, 4000);
 }
@@ -2957,7 +3189,7 @@ function caGenerateScripts() {
   window._ca.step = 2;
   window._ca.progress = 10;
   window._ca.stepLabel = 'AI đang viết kịch bản video...';
-  navigate('content-agent');
+  navContentScript();
 
   var intelId = window._ca.intelId;
   if (intelId) {
@@ -2987,7 +3219,7 @@ function caPollScriptJob(jobId) {
         clearInterval(t);
         window._ca.scripts = data.result;
         window._ca.step = 4;
-        navigate('content-agent');
+        navContentScript();
         showToast('✅ Đã tạo ' + data.result.length + ' kịch bản video!', 'success');
       } else if (data.status === 'error') {
         clearInterval(t); caSimulateScripts();
@@ -3050,7 +3282,7 @@ function caSimulateScripts() {
       }
     ];
     window._ca.step = 4;
-    navigate('content-agent');
+    navContentScript();
     showToast('✅ Đã tạo 3 kịch bản video! (Demo Mode)', 'success');
   }, 3000);
 }
@@ -3069,7 +3301,7 @@ function caGetFilmingGuide() {
     if (data.scenes) {
       window._ca.filmingGuide = data;
       window._ca.step = 5;
-      navigate('content-agent');
+      navContentScript();
     } else { caSimulateFilmingGuide(script); }
   }).catch(function() { caSimulateFilmingGuide(script); });
 }
@@ -3090,7 +3322,7 @@ function caSimulateFilmingGuide(script) {
   });
   window._ca.filmingGuide = { scenes: guideScenes };
   window._ca.step = 5;
-  navigate('content-agent');
+  navContentScript();
 }
 
 function caImproveScript(feedback) {
@@ -3110,11 +3342,11 @@ function caImproveScript(feedback) {
       var idx = window._ca.scripts.findIndex(function(s){ return s.variant === window._ca.activeVariant; });
       if (idx >= 0) window._ca.scripts[idx] = Object.assign({}, window._ca.scripts[idx], data);
       showToast('✅ Kịch bản đã được cải thiện!', 'success');
-      navigate('content-agent');
-    } else { showToast('✅ Đã ghi nhận phản hồi! AI sẽ học và cải thiện.', 'success'); navigate('content-agent'); }
+      navContentScript();
+    } else { showToast('✅ Đã ghi nhận phản hồi! AI sẽ học và cải thiện.', 'success'); navContentScript(); }
   }).catch(function() {
     showToast('✅ Đã ghi nhận phản hồi! AI sẽ học và cải thiện.', 'success');
-    navigate('content-agent');
+    navContentScript();
   });
 }
 
@@ -3134,15 +3366,20 @@ const ROUTES = {
   'chat-sentiment': { title: 'Sentiment Analysis', subtitle: 'Phân tích cảm xúc khách hàng từ toàn bộ hội thoại', render: renderChatSentiment },
   'chat-report': { title: 'Báo cáo thắc mắc', subtitle: 'Vấn đề & câu hỏi phổ biến nhất từ khách hàng', render: renderChatReport },
   'chat-insights': { title: 'Tổng hợp từ Chatbot', subtitle: 'Pattern detection — AI phân tích toàn bộ hội thoại', render: renderChatInsights },
-  'content-suggestions': { title: 'Đề xuất Content', subtitle: 'AI gợi ý nội dung dựa trên dữ liệu thực', render: renderContentSuggestions },
+  'content-suggestions': { title: 'Content & Script AI', subtitle: 'Đề xuất nội dung + Tạo kịch bản video tự động', render: renderContentSuggestions },
   'product-descriptions': { title: 'Mô tả Sản phẩm', subtitle: 'Tối ưu mô tả sản phẩm với AI', render: renderProductDescriptions },
-  'content-agent': { title: 'Content Agent', subtitle: 'Phân tích sản phẩm & tạo kịch bản TikTok tự động với AI', render: renderContentAgent },
   'demo-customer': { title: 'Demo Khách Hàng', subtitle: 'Thử nghiệm trải nghiệm khách hàng — Gửi Review & Live Chat AI', render: renderDemoCustomer }
 };
 
 let currentPage = 'dashboard';
 function navigate(page) {
+  // content-agent đã được gộp vào content-suggestions (tab Script)
+  if (page === 'content-agent') { window._csTab = 'script'; page = 'content-suggestions'; }
   if (!ROUTES[page]) page = 'dashboard';
+  // Reset về tab Đề xuất khi rời khỏi trang content-suggestions
+  if (currentPage === 'content-suggestions' && page !== 'content-suggestions') {
+    window._csTab = 'suggestions';
+  }
   currentPage = page;
   const r = ROUTES[page];
   document.getElementById('pageTitle').textContent = r.title;

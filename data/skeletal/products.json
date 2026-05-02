@@ -1,6 +1,6 @@
 {
-  "__schema_version": "2.0",
-  "__description": "Product catalog. Structure mirrors teammate's real GIAO FARA shop data from mock_data.json. Each entry serves two purposes: (a) description_for_rag → ChromaDB product_col for RAG; (b) all other fields → operational/analytics dashboard. Multiple entries may share the same product_id (variants differ by variant_id). seed_demo.py deduplicates by product_id before inserting into ChromaDB.",
+  "__schema_version": "2.1",
+  "__description": "Product catalog. Structure mirrors teammate's real GIAO FARA shop data from mock_data.json. Each entry serves two purposes: (a) description_for_rag + usp → ChromaDB product_col for RAG; (b) all other fields → operational/analytics dashboard. Multiple entries may share the same product_id (variants differ by variant_id). seed_demo.py deduplicates by product_id before inserting into ChromaDB.",
   "products": [
     {
       "catalog_info": {
@@ -65,7 +65,14 @@
           "<keyword>": "<int: search rank>"
         }
       },
-      "description_for_rag": "<string: natural-language paragraph for ChromaDB. Include: product name, brand, category, key features/ingredients, skin type or use case, price, warranty, compatibility notes. Written in Vietnamese, 3–5 sentences.>"
+      "description_for_rag": "<string: natural-language paragraph for ChromaDB. Include: product name, brand, category, key features/ingredients, skin type or use case, price, warranty, compatibility notes. Written in Vietnamese, 3–5 sentences.>",
+      "usp": [
+        "<string: Điểm bán hàng độc đáo #1 — ngắn gọn, cụ thể, hấp dẫn người mua. Ví dụ: 'Bám màu 8 tiếng, không lem khi đeo khẩu trang'>",
+        "<string: Điểm bán hàng độc đáo #2 — có thể nhấn vào giá trị, lợi ích cảm xúc hoặc so sánh cạnh tranh>",
+        "<string: Điểm bán hàng độc đáo #3 — ...>",
+        "<string: Điểm bán hàng độc đáo #4 — ... (tuỳ sản phẩm, thường 4–6 điểm là tối ưu)>"
+      ]
     }
   ]
 }
+

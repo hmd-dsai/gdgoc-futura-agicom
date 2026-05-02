@@ -1280,6 +1280,8 @@ function restoreSuggestion(sugId) {
 
 /* ── Inject: Action bar trên trang Content Suggestions ── */
 function _injectContentSuggestionsBar() {
+  // Không inject bar khi đang ở tab Tạo Script
+  if (window._csTab === 'script') return;
   const pageContent = document.getElementById('pageContent');
   if (!pageContent || document.getElementById('contentSuggestionsBar')) return;
 

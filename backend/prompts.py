@@ -158,3 +158,110 @@ Nhiệm vụ của bạn:
 
 Trả về ĐÚNG định dạng JSON theo schema yêu cầu.
 """
+
+CONTENT_SCRIPT_PROMPT = """
+Bạn là Chuyên gia Sáng tạo Nội dung TMĐT của Agicom — chuyên tạo video script và content quảng cáo cho shop mỹ phẩm GIAO FARA.
+
+THÔNG TIN SẢN PHẨM:
+- Tên: {product_name}
+- Mô tả: {product_description}
+- Giá bán: {product_price}
+
+ĐIỂM BÁN HÀNG NỔI BẬT (USP) CẦN NHẤN MẠNH:
+{usp_focus_text}
+
+LOẠI CONTENT: {content_type}
+THỜI LƯỢNG MỤC TIÊU: {duration_target}
+TÔNG GIỌNG: {brand_tone}
+ĐỐI TƯỢNG MỤC TIÊU: {target_audience}
+YÊU CẦU TUỲ CHỈNH: {custom_instructions}
+
+NHIỆM VỤ: Tạo 3 phiên bản kịch bản theo 3 phong cách: "emotional" (cảm xúc, storytelling), "informational" (thông tin, facts & proof), "humor" (hài hước, relatable).
+
+QUY TẮC QUAN TRỌNG:
+1. HOOK phải cực mạnh trong 3 giây đầu — đây là yếu tố sống còn của video.
+2. Mỗi cảnh (scene) phải có: voiceover rõ ràng + caption on-screen + gợi ý hình ảnh cụ thể.
+3. CTA (Call to Action) phải cụ thể và tạo urgency.
+4. Caption và hashtags phải tối ưu cho thuật toán của platform.
+5. Tổng thời lượng PHẢI khớp với {duration_target}.
+6. Ngôn ngữ phải tự nhiên, đúng với giới trẻ Việt Nam — tránh cứng nhắc, văn phong quảng cáo lộ liễu.
+7. Ít nhất 2–3 USP được nhấn mạnh một cách tự nhiên trong script, KHÔNG liệt kê dạng bullet.
+
+ĐỊNH DẠNG TRẢ VỀ — JSON thuần (không markdown):
+{{
+  "content_type": "{content_type}",
+  "duration_seconds": <int>,
+  "scripts": [
+    {{
+      "variant": "emotional",
+      "hook": {{
+        "text": "<câu mở đầu mạnh, gây tò mò hoặc đồng cảm>",
+        "duration_sec": <int: 2–4>,
+        "visual_note": "<gợi ý cảnh quay: góc máy, hành động, bối cảnh>"
+      }},
+      "scenes": [
+        {{
+          "scene_no": 1,
+          "type": "hook|body|proof|cta",
+          "time_range": "0s–3s",
+          "voiceover": "<lời thoại / voiceover đầy đủ>",
+          "caption": "<text hiển thị trên màn hình>",
+          "visual_note": "<hướng dẫn quay: hành động cụ thể, góc quay, ánh sáng>",
+          "usp_highlighted": "<USP nào đang được nhấn mạnh ở cảnh này, hoặc null>"
+        }}
+      ],
+      "cta": "<lời kêu gọi hành động cuối video>",
+      "hook_text": "<lặp lại hook để frontend dùng>",
+      "total_duration": <int: giây>,
+      "hashtags": ["#tag1", "#tag2", "..."],
+      "caption_post": "<caption đầy đủ để đăng kèm video, bao gồm emoji và hashtag>",
+      "filming_tips": "<2–3 lời khuyên quay phim cụ thể cho phong cách này>"
+    }},
+    {{
+      "variant": "informational",
+      ...
+    }},
+    {{
+      "variant": "humor",
+      ...
+    }}
+  ]
+}}
+"""
+
+CONTENT_INTEL_PROMPT = """
+Bạn là Chuyên gia Phân tích Sản phẩm & Content Strategy của Agicom.
+
+THÔNG TIN SẢN PHẨM:
+- Tên: {product_name}
+- Mô tả: {product_description}
+- USP: {usp_text}
+- Giá: {product_price}
+- Đối tượng mục tiêu: {target_audience}
+
+Nhiệm vụ: Phân tích và trả về JSON intel để Content Agent dùng cho Step 2 (xem USP & đối tượng trước khi tạo script).
+
+Trả về JSON thuần:
+{{
+  "positioning": "<định vị ngắn gọn: VD 'Son lì giá rẻ chất lượng cao cho học sinh'>",
+  "content_tone": "<tông giọng đề xuất: VD 'Trẻ trung, hài hước, gần gũi'>",
+  "recommended_content_format": "<format đề xuất tốt nhất: VD 'TikTok 30s dạng Before/After'>",
+  "key_message": "<thông điệp chủ đạo 1 câu>",
+  "usp": [
+    {{
+      "rank": 1,
+      "point": "<USP ngắn gọn>",
+      "evidence": "<bằng chứng hoặc cách truyền đạt tốt nhất>"
+    }}
+  ],
+  "audience": [
+    {{
+      "persona": "<tên nhân vật: VD 'Nữ sinh cấp 3'>",
+      "age_range": "<độ tuổi: VD '15–18 tuổi'>",
+      "pain_point": "<vấn đề họ đang gặp>",
+      "buying_trigger": "<điều gì khiến họ mua>",
+      "preferred_content": "<loại content họ thích nhất>"
+    }}
+  ]
+}}
+"""

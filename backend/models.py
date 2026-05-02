@@ -83,3 +83,31 @@ class ReviewExtractedInsight(BaseModel):
     key_issue: str       # Vấn đề cốt lõi (vd: "Giao hàng chậm", "Lỗi móp méo")
     action_needed: bool  # Có cần agent khác xử lý không?
     qa_knowledge: str    # Bài học rút ra (ví dụ: "Nếu khách hỏi về móp méo, hãy báo do vận chuyển và xin lỗi")
+
+
+# ── Content Agent ──────────────────────────────────────────────────────────────
+
+CONTENT_TYPES = [
+    "tiktok_15s", "tiktok_30s", "tiktok_60s",
+    "reels_30s", "reels_60s",
+    "youtube_short",
+    "shopee_video",
+    "facebook_post",
+    "caption_instagram",
+]
+
+class ContentScriptRequest(BaseModel):
+    """
+    Input cho Content Agent generate-script endpoint.
+    Thay thế hoàn toàn luồng crawl URL cũ.
+    """
+    product_id: str                          # VD: "P001" — dùng để tra USP từ catalog
+    product_name: str                        # Tên đầy đủ để AI hiển thị trong script
+    product_description: str                 # Mô tả sản phẩm (tự điền hoặc lấy từ catalog)
+    usp_focus: List[str] = []               # Các USP muốn nhấn mạnh (subset của usp[] trong catalog)
+    content_type: str = "tiktok_30s"        # Xem CONTENT_TYPES
+    target_audience: str = ""               # VD: "Học sinh cấp 3, thích makeup nhẹ"
+    custom_instructions: str = ""           # Hướng dẫn tuỳ chỉnh thêm từ người dùng
+    brand_tone: str = "Trẻ trung, vui vẻ, gần gũi"  # Tông giọng muốn dùng
+    trigger_source: str = "manual"          # "manual" | "content_task" | "crisis_signal" | "strategy_agent"
+    source_task_id: Optional[int] = None    # ID của CoordinationTask gốc nếu kích hoạt tự động

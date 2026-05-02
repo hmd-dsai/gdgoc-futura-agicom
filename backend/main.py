@@ -11,9 +11,12 @@ from config import client
 from models import (
     ProposalApproval, ProductRequest,
     StrategyProposal, ShopProfile, ChatSessionInput, ChatMessage, ReviewData,
-    CrisisPlanRequest, ActionStatusUpdate
+    CrisisPlanRequest, ActionStatusUpdate, ContentScriptRequest
 )
-from prompts import STRATEGY_SYSTEM_PROMPT, REVIEW_LEARNING_PROMPT, CRISIS_PLAN_PROMPT
+from prompts import (
+    STRATEGY_SYSTEM_PROMPT, REVIEW_LEARNING_PROMPT, CRISIS_PLAN_PROMPT,
+    CONTENT_SCRIPT_PROMPT, CONTENT_INTEL_PROMPT
+)
 from services import (
     analyze_strategy_slow_track,
     learn_from_human_service,
@@ -1314,6 +1317,305 @@ async def list_customers():
         return {"status": "success", "customers": customers}
     finally:
         db.close()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CONTENT AGENT ENDPOINTS
+# Thay thế luồng crawl URL cũ bằng form nhập product + USP + custom instructions.
+# Luồng mới: frontend gửi product_id + USP focus → AI tạo script có cấu trúc cố định.
+#
+# Cách kích hoạt Content Agent:
+#   A) THỦ CÔNG: User chọn sản phẩm trên UI và nhấn "Tạo script"
+#   B) TỰ ĐỘNG từ Strategy Agent: CoordinationTask target_agent="Content" được tạo
+#      khi strategy đề xuất content_update_suggestion → frontend poll /api/content-suggestions
+#   C) TỰ ĐỘNG từ Crisis Center: CrisisPlan kích hoạt action category="marketing"
+#      → gọi POST /api/content-agent/generate-script với trigger_source="crisis_signal"
+#   D) TỰ ĐỘNG từ Daily Summary: chat_signal_count hoặc review_neg_pct cao
+#      → tạo CoordinationTask "Content" → (B) ở trên
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _load_catalog_with_usp() -> dict:
+    """Load product catalog kèm USP từ data/catalog/product_catalog.json."""
+    catalog_path = os.path.join(os.path.dirname(__file__), "../data/catalog/product_catalog.json")
+    with open(catalog_path, encoding="utf-8") as f:
+        return json.load(f)
+
+def _duration_for_type(content_type: str) -> tuple[int, str]:
+    """Trả về (giây, mô tả) cho content_type."""
+    mapping = {
+        "tiktok_15s": (15, "15 giây"),
+        "tiktok_30s": (30, "30 giây"),
+        "tiktok_60s": (60, "60 giây"),
+        "reels_30s":  (30, "30 giây"),
+        "reels_60s":  (60, "60 giây"),
+        "youtube_short": (60, "60 giây"),
+        "shopee_video":  (30, "30 giây"),
+        "facebook_post": (0,  "Bài đăng văn bản + ảnh"),
+        "caption_instagram": (0, "Caption Instagram"),
+    }
+    return mapping.get(content_type, (30, "30 giây"))
+
+
+@app.get("/api/content-agent/products")
+async def get_content_agent_products():
+    """
+    [Content Agent] Trả về danh sách sản phẩm kèm USP từ catalog.
+    Frontend dùng để render dropdown chọn sản phẩm (thay thế input URL cũ).
+    """
+    try:
+        catalog = _load_catalog_with_usp()
+        products = [
+            {
+                "product_id":   p["product_id"],
+                "name":         p["name"],
+                "short_name":   p.get("short_name", p["name"]),
+                "category":     p.get("category", ""),
+                "brand":        p.get("brand", ""),
+                "price":        p.get("price", 0),
+                "description":  p.get("description_short", ""),  # optional shortcut
+                "usp":          p.get("usp", []),
+                "status":       p.get("status", "active"),
+            }
+            for p in catalog.get("products", [])
+            if p.get("status") == "active"
+        ]
+        return {"total": len(products), "products": products}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/content-agent/intel")
+async def analyze_product_intel(req: ContentScriptRequest):
+    """
+    [Content Agent — Step 2] Phân tích USP và chân dung khách hàng trước khi tạo script.
+    Thay thế bước crawl URL cũ — dữ liệu đến trực tiếp từ catalog + input người dùng.
+
+    Input: ContentScriptRequest (product_id, product_name, product_description, usp_focus, ...)
+    Output: intel object (positioning, tone, audience personas, ranked USPs)
+
+    Kích hoạt: Frontend gọi khi người dùng nhấn "Phân tích" sau khi chọn sản phẩm.
+    """
+    try:
+        usp_text = "\n".join(f"• {u}" for u in req.usp_focus) if req.usp_focus else "(Dùng toàn bộ USP trong catalog)"
+
+        # Tra thêm USP từ catalog nếu usp_focus rỗng
+        if not req.usp_focus:
+            try:
+                catalog = _load_catalog_with_usp()
+                for p in catalog.get("products", []):
+                    if p["product_id"] == req.product_id:
+                        usp_text = "\n".join(f"• {u}" for u in p.get("usp", []))
+                        break
+            except Exception:
+                pass
+
+        _, duration_label = _duration_for_type(req.content_type)
+        prompt = CONTENT_INTEL_PROMPT.format(
+            product_name=req.product_name,
+            product_description=req.product_description,
+            usp_text=usp_text,
+            product_price=f"{req.product_description[:20]}...",  # fallback
+            target_audience=req.target_audience or "Phụ nữ 18–35 tuổi, yêu thích làm đẹp",
+        )
+
+        response = await client.aio.models.generate_content(
+            model="gemini-flash-latest",
+            contents=prompt,
+        )
+        raw = response.text.strip()
+        clean = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+        intel = json.loads(clean)
+        return {"status": "ok", "intel": intel}
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=502, detail=f"AI trả về JSON không hợp lệ: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/content-agent/generate-script")
+async def generate_content_script(req: ContentScriptRequest):
+    """
+    [Content Agent — Step 3/4] Tạo video/content script có cấu trúc cố định cho sản phẩm.
+
+    ★ ĐÂY LÀ ENDPOINT CHÍNH của Content Agent — thay thế hoàn toàn luồng crawl URL cũ.
+
+    Input (ContentScriptRequest):
+      - product_id, product_name, product_description: thông tin sản phẩm
+      - usp_focus: list USP muốn nhấn mạnh (chọn từ catalog, không cần crawl)
+      - content_type: tiktok_30s | reels_30s | shopee_video | facebook_post | ...
+      - target_audience: chân dung khách hàng mục tiêu
+      - custom_instructions: hướng dẫn tuỳ chỉnh thêm
+      - brand_tone: tông giọng thương hiệu
+      - trigger_source: "manual" | "content_task" | "crisis_signal" | "strategy_agent"
+
+    Output (fixed structure):
+      - 3 phiên bản script: emotional / informational / humor
+      - Mỗi phiên bản gồm: hook, scenes (voiceover + caption + visual_note), cta, hashtags, caption_post
+      - filming_tips: gợi ý quay phim cho từng phong cách
+
+    Cách kích hoạt tự động:
+      - Strategy Agent: tạo CoordinationTask target_agent="Content" → frontend gọi endpoint này
+      - Crisis Center: action category="marketing" → backend tự gọi endpoint này
+      - Daily Summary: content_signal_count cao → tạo task → (như trên)
+    """
+    db = SessionLocal()
+    try:
+        # 1. Lấy USP từ catalog nếu usp_focus rỗng
+        usp_list = req.usp_focus
+        catalog_price = ""
+        if not usp_list or req.product_description == "":
+            try:
+                catalog = _load_catalog_with_usp()
+                for p in catalog.get("products", []):
+                    if p["product_id"] == req.product_id:
+                        if not usp_list:
+                            usp_list = p.get("usp", [])
+                        if not catalog_price:
+                            catalog_price = f"{p.get('price', 0):,.0f}đ"
+                        break
+            except Exception:
+                pass
+
+        usp_focus_text = "\n".join(f"• {u}" for u in usp_list) if usp_list else "(Không có USP cụ thể — AI sẽ tự phân tích từ mô tả)"
+        duration_sec, duration_label = _duration_for_type(req.content_type)
+
+        # 2. Gọi AI generate script
+        prompt = CONTENT_SCRIPT_PROMPT.format(
+            product_name=req.product_name,
+            product_description=req.product_description,
+            product_price=catalog_price or "Xem mô tả sản phẩm",
+            usp_focus_text=usp_focus_text,
+            content_type=req.content_type,
+            duration_target=f"{duration_label} ({duration_sec}s)" if duration_sec else duration_label,
+            brand_tone=req.brand_tone,
+            target_audience=req.target_audience or "Phụ nữ 18–35 tuổi, yêu thích làm đẹp",
+            custom_instructions=req.custom_instructions or "Không có yêu cầu đặc biệt",
+        )
+
+        response = await client.aio.models.generate_content(
+            model="gemini-flash-latest",
+            contents=prompt,
+        )
+        raw = response.text.strip()
+        clean = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+        script_data = json.loads(clean)
+
+        # 3. Đánh dấu CoordinationTask đã hoàn thành nếu kích hoạt từ task
+        if req.source_task_id:
+            task = db.query(CoordinationTask).filter(CoordinationTask.id == req.source_task_id).first()
+            if task:
+                task.status = "done"
+                db.commit()
+
+        # 4. Tạo CoordinationTask ghi nhận content đã được tạo (cho audit trail)
+        if req.trigger_source != "manual":
+            db.add(CoordinationTask(
+                target_agent="Content",
+                product_id=req.product_id,
+                instruction=f"[SCRIPT GENERATED] {req.content_type} cho {req.product_name} — trigger: {req.trigger_source}",
+                status="done",
+            ))
+            db.commit()
+
+        return {
+            "status": "ok",
+            "product_id":     req.product_id,
+            "product_name":   req.product_name,
+            "content_type":   req.content_type,
+            "trigger_source": req.trigger_source,
+            "usp_used":       usp_list,
+            "scripts":        script_data.get("scripts", []),
+            "duration_seconds": script_data.get("duration_seconds", duration_sec),
+        }
+
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=502, detail=f"AI trả về JSON không hợp lệ: {e}")
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
+@app.post("/api/content-agent/trigger-from-task/{task_id}")
+async def trigger_content_from_task(task_id: int):
+    """
+    [Content Agent — Kích hoạt tự động từ CoordinationTask]
+    Đọc CoordinationTask target_agent="Content", resolve product_id,
+    lấy USP từ catalog và gọi generate-script.
+
+    Dùng để: frontend Content page có nút "Generate Script" kế bên mỗi content task.
+    Cũng có thể gọi từ Strategy Agent sau khi tạo task.
+    """
+    db = SessionLocal()
+    try:
+        task = db.query(CoordinationTask).filter(
+            CoordinationTask.id == task_id,
+            CoordinationTask.target_agent == "Content",
+        ).first()
+        if not task:
+            raise HTTPException(status_code=404, detail=f"Không tìm thấy Content task #{task_id}")
+
+        # Lấy thông tin sản phẩm từ catalog
+        product_name = PRODUCT_NAMES.get(task.product_id, task.product_id)
+        usp_list = []
+        description = ""
+        try:
+            catalog = _load_catalog_with_usp()
+            for p in catalog.get("products", []):
+                if p["product_id"] == task.product_id:
+                    usp_list = p.get("usp", [])
+                    description = p.get("name", "")
+                    break
+        except Exception:
+            pass
+
+        req = ContentScriptRequest(
+            product_id=task.product_id,
+            product_name=product_name,
+            product_description=description or task.instruction,
+            usp_focus=usp_list,
+            content_type="tiktok_30s",  # default — có thể override qua query param
+            trigger_source="content_task",
+            source_task_id=task_id,
+        )
+
+        # Delegate sang endpoint chính
+        result = await generate_content_script(req)
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
+# ── DEPRECATED: /api/v1/content-agent/analyze ────────────────────────────────
+# Endpoint crawl URL cũ — đã bị thay thế bởi /api/content-agent/intel
+# Giữ lại để backward compatibility, trả về lỗi 410 Gone với hướng dẫn migrate.
+@app.post("/api/v1/content-agent/analyze")
+async def deprecated_crawl_analyze(body: dict):
+    """
+    [DEPRECATED] Endpoint crawl URL sản phẩm đã bị ngưng hoạt động.
+    Thay bằng: POST /api/content-agent/intel với ContentScriptRequest.
+    """
+    return {
+        "error": "deprecated",
+        "message": (
+            "Tính năng crawl URL sản phẩm đã bị thay thế. "
+            "Vui lòng dùng POST /api/content-agent/intel với thông tin sản phẩm trực tiếp. "
+            "Xem docs tại /docs#/Content Agent"
+        ),
+        "migrate_to": "POST /api/content-agent/generate-script",
+        "status_code": 410,
+    }
+
+@app.post("/api/v1/content-agent/script/generate")
+async def deprecated_script_generate(body: dict):
+    """[DEPRECATED] Thay bằng POST /api/content-agent/generate-script"""
+    return await deprecated_crawl_analyze(body)
 
 
 @app.post("/system/reset-all")

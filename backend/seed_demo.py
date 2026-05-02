@@ -49,19 +49,27 @@ def clear_data(db):
 def seed_vector_db(policy_col, product_col, resolved_qa_col):
     print("[2/5] Đang nạp kiến thức vào Vector DB (RAG)...")
 
-    # 1. Products — description_for_rag field, deduplicated by product_id.
+    # 1. Products — description_for_rag + usp field, deduplicated by product_id.
     # Multiple variants share the same product_id (e.g. P001 has V00101 and V00104).
     # ChromaDB requires unique IDs, so we only insert one RAG doc per logical product.
+    # USPs (Unique Selling Points) are appended to the RAG document so the AI can
+    # reference them when generating content scripts, chatbot replies, and ad copy.
     products_data = _load("products.json")
     seen_pids, rag_docs, rag_ids = set(), [], []
     for p in products_data["products"]:
         pid = p["catalog_info"]["product_id"]
         if pid not in seen_pids:
             seen_pids.add(pid)
-            rag_docs.append(p["description_for_rag"])
+            rag_text = p["description_for_rag"]
+            # Ghép USP vào RAG document để AI truy xuất được khi generate content/script
+            usps = p.get("usp", [])
+            if usps:
+                usp_lines = "\n".join(f"• {u}" for u in usps)
+                rag_text += f"\n\nĐIỂM BÁN HÀNG NỔI BẬT (USP — dùng cho script quảng cáo & content):\n{usp_lines}"
+            rag_docs.append(rag_text)
             rag_ids.append(pid)
     product_col.add(documents=rag_docs, ids=rag_ids)
-    print(f"  → {len(rag_ids)} sản phẩm nạp vào product_db ({len(products_data['products'])} variants, {len(rag_ids)} unique product IDs)")
+    print(f"  → {len(rag_ids)} sản phẩm nạp vào product_db ({len(products_data['products'])} variants, {len(rag_ids)} unique product IDs, USP embedded)")
 
     # 2. Policies
     policies_data = _load("policies.json")

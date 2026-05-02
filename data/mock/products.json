@@ -40,26 +40,24 @@
       },
       "logistics_and_lifecycle": {
         "weight_gram": 15.0,
-        "dimensions_cm": {
-          "length": 1.5,
-          "width": 1.5,
-          "height": 10.0
-        },
+        "dimensions_cm": {"length": 1.5, "width": 1.5, "height": 10.0},
         "expiration_date": "2026-07-28",
         "warranty_months": 0
       },
       "content_and_seo": {
         "description_length": 550,
-        "missing_attributes": [
-          "Bảng thành phần đầy đủ"
-        ],
+        "missing_attributes": ["Bảng thành phần đầy đủ"],
         "seo_score": 85,
-        "keyword_ranking": {
-          "son bóng": 2,
-          "son bóng lì": 5
-        }
+        "keyword_ranking": {"son bóng": 2, "son bóng lì": 5}
       },
-      "description_for_rag": "Son Bóng GIAO FARA màu đẹp lấp lánh (Mã 01-08): Son bóng nội địa Việt Nam thương hiệu GIAO FARA, có 8 mã màu từ hồng nhạt đến đỏ đậm. Chất son dạng bóng (gloss) dưỡng ẩm môi, cho hiệu ứng lấp lánh tự nhiên. Phù hợp mọi loại da môi. Giá 39.000đ/thỏi. Bền màu 4–5 tiếng. Bảo hành đổi trả 7 ngày nếu lỗi. Không kèn cựa mùi hương nồng. Phù hợp đi học, đi làm hằng ngày."
+      "description_for_rag": "Son Bóng GIAO FARA màu đẹp lấp lánh (Mã 01-08): Son bóng nội địa Việt Nam thương hiệu GIAO FARA, có 8 mã màu từ hồng nhạt đến đỏ đậm. Chất son dạng bóng (gloss) dưỡng ẩm môi, cho hiệu ứng lấp lánh tự nhiên. Phù hợp mọi loại da môi. Giá 39.000đ/thỏi. Bền màu 4–5 tiếng. Bảo hành đổi trả 7 ngày nếu lỗi. Không kèn cựa mùi hương nồng. Phù hợp đi học, đi làm hằng ngày.",
+      "usp": [
+        "Hiệu ứng bóng mướt tức thì, căng môi như lớp filter — không cần son lót hay son nền",
+        "8 mã màu từ hồng baby đến đỏ đậm — phủ hết mọi outfit, phù hợp mọi tông da Việt",
+        "Chất gloss dưỡng ẩm sâu — dùng hàng ngày không lo khô nứt, bong tróc môi",
+        "Không mùi nồng, hương nhẹ dịu — thoải mái đi học, đi làm, không gây khó chịu",
+        "Chỉ 39.000đ/thỏi — rẻ hơn 1 ly trà sữa, đẹp hơn son bóng ngoại nhập cùng phân khúc"
+      ]
     },
     {
       "catalog_info": {
@@ -101,26 +99,24 @@
       },
       "logistics_and_lifecycle": {
         "weight_gram": 15.0,
-        "dimensions_cm": {
-          "length": 1.5,
-          "width": 1.5,
-          "height": 10.0
-        },
+        "dimensions_cm": {"length": 1.5, "width": 1.5, "height": 10.0},
         "expiration_date": "2026-07-28",
         "warranty_months": 0
       },
       "content_and_seo": {
         "description_length": 550,
-        "missing_attributes": [
-          "Bảng thành phần đầy đủ"
-        ],
+        "missing_attributes": ["Bảng thành phần đầy đủ"],
         "seo_score": 85,
-        "keyword_ranking": {
-          "son bóng": 3,
-          "son bóng màu": 6
-        }
+        "keyword_ranking": {"son bóng": 3, "son bóng màu": 6}
       },
-      "description_for_rag": "Son Bóng GIAO FARA màu đẹp lấp lánh (Mã 01-08): Son bóng nội địa Việt Nam thương hiệu GIAO FARA, có 8 mã màu từ hồng nhạt đến đỏ đậm. Chất son dạng bóng (gloss) dưỡng ẩm môi, cho hiệu ứng lấp lánh tự nhiên. Phù hợp mọi loại da môi. Giá 39.000đ/thỏi. Bền màu 4–5 tiếng. Bảo hành đổi trả 7 ngày nếu lỗi. Không kèn cựa mùi hương nồng. Phù hợp đi học, đi làm hằng ngày."
+      "description_for_rag": "Son Bóng GIAO FARA màu đẹp lấp lánh (Mã 01-08): Son bóng nội địa Việt Nam thương hiệu GIAO FARA, có 8 mã màu từ hồng nhạt đến đỏ đậm. Chất son dạng bóng (gloss) dưỡng ẩm môi, cho hiệu ứng lấp lánh tự nhiên. Phù hợp mọi loại da môi. Giá 39.000đ/thỏi. Bền màu 4–5 tiếng. Bảo hành đổi trả 7 ngày nếu lỗi. Không kèn cựa mùi hương nồng. Phù hợp đi học, đi làm hằng ngày.",
+      "usp": [
+        "Hiệu ứng bóng mướt tức thì, căng môi như lớp filter — không cần son lót hay son nền",
+        "8 mã màu từ hồng baby đến đỏ đậm — phủ hết mọi outfit, phù hợp mọi tông da Việt",
+        "Chất gloss dưỡng ẩm sâu — dùng hàng ngày không lo khô nứt, bong tróc môi",
+        "Không mùi nồng, hương nhẹ dịu — thoải mái đi học, đi làm, không gây khó chịu",
+        "Chỉ 39.000đ/thỏi — rẻ hơn 1 ly trà sữa, đẹp hơn son bóng ngoại nhập cùng phân khúc"
+      ]
     },
     {
       "catalog_info": {
@@ -162,11 +158,7 @@
       },
       "logistics_and_lifecycle": {
         "weight_gram": 18.0,
-        "dimensions_cm": {
-          "length": 1.5,
-          "width": 1.5,
-          "height": 11.0
-        },
+        "dimensions_cm": {"length": 1.5, "width": 1.5, "height": 11.0},
         "expiration_date": "2026-07-28",
         "warranty_months": 0
       },
@@ -174,12 +166,16 @@
         "description_length": 600,
         "missing_attributes": [],
         "seo_score": 92,
-        "keyword_ranking": {
-          "son kem lì": 1,
-          "son lì": 4
-        }
+        "keyword_ranking": {"son kem lì": 1, "son lì": 4}
       },
-      "description_for_rag": "Son Kem Lì GIAO FARA Siêu Lì Mịn (Mã 09-16): Son kem lì nội địa GIAO FARA, 8 mã màu từ nude đến đỏ đô. Chất son velvet mịn, khô nhanh, bám màu 6–8 tiếng. Không lem, không trôi khi ăn uống nhẹ. Giá 39.000đ/thỏi. Khuyến cáo tẩy trang kỹ sau khi dùng. Phù hợp da môi bình thường và da môi khô nếu thoa kem dưỡng môi trước."
+      "description_for_rag": "Son Kem Lì GIAO FARA Siêu Lì Mịn (Mã 09-16): Son kem lì nội địa GIAO FARA, 8 mã màu từ nude đến đỏ đô. Chất son velvet mịn, khô nhanh, bám màu 6–8 tiếng. Không lem, không trôi khi ăn uống nhẹ. Giá 39.000đ/thỏi. Khuyến cáo tẩy trang kỹ sau khi dùng. Phù hợp da môi bình thường và da môi khô nếu thoa kem dưỡng môi trước.",
+      "usp": [
+        "Lì mịn velvet chuẩn studio — bám màu 6–8 tiếng, ăn uống vẫn còn màu, không lem khẩu trang",
+        "Khô trong 30 giây, không dính, không tạo vảy — hoàn hảo cho ngày bận rộn cần makeup nhanh",
+        "8 màu từ nude thanh lịch đến đỏ đô quyến rũ — 1 thỏi đủ mọi mood cả tuần",
+        "Chất son siêu mịn, không tạo vân khô hay bong tróc dù môi hơi thiếu nước",
+        "Giá chỉ 39.000đ — tiết kiệm 70% so với son lì ngoại nhập, chất lượng không thua kém"
+      ]
     },
     {
       "catalog_info": {
@@ -221,11 +217,7 @@
       },
       "logistics_and_lifecycle": {
         "weight_gram": 50.0,
-        "dimensions_cm": {
-          "length": 6.5,
-          "width": 6.5,
-          "height": 2.5
-        },
+        "dimensions_cm": {"length": 6.5, "width": 6.5, "height": 2.5},
         "expiration_date": "2027-01-28",
         "warranty_months": 0
       },
@@ -233,12 +225,16 @@
         "description_length": 680,
         "missing_attributes": [],
         "seo_score": 90,
-        "keyword_ranking": {
-          "phấn phủ bột": 1,
-          "phấn phủ": 6
-        }
+        "keyword_ranking": {"phấn phủ bột": 1, "phấn phủ": 6}
       },
-      "description_for_rag": "Phấn Phủ Bột GIAO FARA Kềm Dầu Tự Nhiên: Phấn phủ dạng bột rời kiềm dầu, tông Tự Nhiên phù hợp da vàng ấm Việt Nam. Giúp mịn da, kiểm soát bóng nhờn suốt 6–8 tiếng. Dùng kèm cọ phấn hoặc bông xốp. Giá 129.000đ. Hạn sử dụng: xem đáy hộp. Không chứa paraben. Phù hợp da dầu, da hỗn hợp và da thường."
+      "description_for_rag": "Phấn Phủ Bột GIAO FARA Kềm Dầu Tự Nhiên: Phấn phủ dạng bột rời kiềm dầu, tông Tự Nhiên phù hợp da vàng ấm Việt Nam. Giúp mịn da, kiểm soát bóng nhờn suốt 6–8 tiếng. Dùng kèm cọ phấn hoặc bông xốp. Giá 129.000đ. Hạn sử dụng: xem đáy hộp. Không chứa paraben. Phù hợp da dầu, da hỗn hợp và da thường.",
+      "usp": [
+        "Kiềm dầu cực đỉnh 6–8 tiếng — da luôn mịn như plastic skin, không cần dặm lại giữa ngày",
+        "Tông Tự Nhiên pha chuẩn cho da vàng ấm người Việt — mặc lên không bị trắng bệch hay xám xịt",
+        "Không chứa paraben — an toàn cho da nhạy cảm, da dầu, da hỗn hợp dùng lâu dài",
+        "Che phủ lỗ chân lông và vết thâm nhẹ mà không cần thêm kem nền — tiết kiệm bước makeup",
+        "129.000đ dùng được 3–4 tháng — tính ra chưa đến 1.500đ/ngày cho da đẹp hoàn hảo"
+      ]
     },
     {
       "catalog_info": {
@@ -280,11 +276,7 @@
       },
       "logistics_and_lifecycle": {
         "weight_gram": 80.0,
-        "dimensions_cm": {
-          "length": 15.0,
-          "width": 10.0,
-          "height": 5.0
-        },
+        "dimensions_cm": {"length": 15.0, "width": 10.0, "height": 5.0},
         "expiration_date": "2026-07-28",
         "warranty_months": 0
       },
@@ -292,12 +284,16 @@
         "description_length": 800,
         "missing_attributes": [],
         "seo_score": 95,
-        "keyword_ranking": {
-          "combo trang điểm": 3,
-          "bộ trang điểm son phấn": 7
-        }
+        "keyword_ranking": {"combo trang điểm": 3, "bộ trang điểm son phấn": 7}
       },
-      "description_for_rag": "Combo Kem Lì GIAO FARA và Phấn Phủ Bột: Bộ combo tiết kiệm gồm 1 thỏi son kem lì và 1 hộp phấn phủ bột GIAO FARA. Tiết kiệm hơn mua riêng khoảng 50.000đ. Giá combo 159.000đ. Phù hợp người mới bắt đầu trang điểm hoặc muốn dùng thử cả hai sản phẩm GIAO FARA cùng lúc."
+      "description_for_rag": "Combo Kem Lì GIAO FARA và Phấn Phủ Bột: Bộ combo tiết kiệm gồm 1 thỏi son kem lì và 1 hộp phấn phủ bột GIAO FARA. Tiết kiệm hơn mua riêng khoảng 50.000đ. Giá combo 159.000đ. Phù hợp người mới bắt đầu trang điểm hoặc muốn dùng thử cả hai sản phẩm GIAO FARA cùng lúc.",
+      "usp": [
+        "Tiết kiệm ngay 50.000đ so với mua lẻ — combo xịn nhất tầm giá dưới 200k trên thị trường",
+        "Bộ đôi hoàn hảo: son lì bám màu 6–8 tiếng + phấn kiềm dầu cả ngày — đủ makeup nhẹ hoàn chỉnh",
+        "Lý tưởng cho người mới bắt đầu trang điểm — dễ dùng, không cần kỹ thuật, không sợ lỗi",
+        "Đóng gói đẹp, sang trọng — quà tặng sinh nhật, 8/3, 20/10 không cần mua thêm hộp quà",
+        "Hai sản phẩm GIAO FARA cùng hệ màu — phối hợp chuẩn đẹp, không sợ lệch tông hay clash màu"
+      ]
     },
     {
       "catalog_info": {
@@ -343,11 +339,7 @@
       },
       "logistics_and_lifecycle": {
         "weight_gram": 50.0,
-        "dimensions_cm": {
-          "length": 6.0,
-          "width": 6.0,
-          "height": 3.0
-        },
+        "dimensions_cm": {"length": 6.0, "width": 6.0, "height": 3.0},
         "is_perishable": true,
         "expiration_date": "2026-12-01",
         "warranty_months": 0
@@ -356,12 +348,16 @@
         "description_length": 600,
         "missing_attributes": [],
         "seo_score": 88,
-        "keyword_ranking": {
-          "phấn phủ bột": 2,
-          "phấn phủ kiềm dầu": 5
-        }
+        "keyword_ranking": {"phấn phủ bột": 2, "phấn phủ kiềm dầu": 5}
       },
-      "description_for_rag": "Phấn Phủ Bột GIAO FARA Kềm Dầu (mini/thử): Phiên bản mini 18.000đ của phấn phủ bột GIAO FARA, phù hợp để thử trước khi mua size lớn hoặc bổ sung dặm lại trong ngày. Kiềm dầu hiệu quả. Skin type: da dầu, da hỗn hợp. Finish: Matte."
+      "description_for_rag": "Phấn Phủ Bột GIAO FARA Kềm Dầu (mini/thử): Phiên bản mini 18.000đ của phấn phủ bột GIAO FARA, phù hợp để thử trước khi mua size lớn hoặc bổ sung dặm lại trong ngày. Kiềm dầu hiệu quả. Skin type: da dầu, da hỗn hợp. Finish: Matte.",
+      "usp": [
+        "Siêu mini vừa túi xách, vừa túi quần — dặm phấn tiện lợi bất kỳ đâu không cần ví to",
+        "Chỉ 18.000đ — thử nghiệm không đau ví, ưng rồi mua size lớn mà không lo tiếc",
+        "Kiềm dầu hiệu quả tương đương hộp to — chất lượng không thu nhỏ theo kích thước",
+        "Hoàn hảo bỏ túi gym, túi du lịch, ngăn bàn làm việc — luôn sẵn sàng dặm lại khi cần",
+        "Finish Matte thực sự — da lì nhẹ, không bóng nhờn suốt cả buổi chiều bận rộn"
+      ]
     },
     {
       "catalog_info": {
@@ -407,27 +403,25 @@
       },
       "logistics_and_lifecycle": {
         "weight_gram": 120.0,
-        "dimensions_cm": {
-          "length": 15.0,
-          "width": 10.0,
-          "height": 3.0
-        },
+        "dimensions_cm": {"length": 15.0, "width": 10.0, "height": 3.0},
         "is_perishable": true,
         "expiration_date": "2026-08-15",
         "warranty_months": 0
       },
       "content_and_seo": {
         "description_length": 550,
-        "missing_attributes": [
-          "Bảng màu chi tiết"
-        ],
+        "missing_attributes": ["Bảng màu chi tiết"],
         "seo_score": 82,
-        "keyword_ranking": {
-          "set son kem": 1,
-          "son nội địa": 4
-        }
+        "keyword_ranking": {"set son kem": 1, "son nội địa": 4}
       },
-      "description_for_rag": "Set Son Kem Lì 6 Thỏi: Bộ 6 thỏi son kem lì velvet matte đa màu. Giá 114.000đ/set — chỉ 19.000đ/thỏi. Phù hợp mua làm quà tặng hoặc thử nhiều màu cùng lúc. Bao gồm 6 màu đa dạng từ nude đến đỏ đô. Finish velvet matte, bền màu 5–7 tiếng."
+      "description_for_rag": "Set Son Kem Lì 6 Thỏi: Bộ 6 thỏi son kem lì velvet matte đa màu. Giá 114.000đ/set — chỉ 19.000đ/thỏi. Phù hợp mua làm quà tặng hoặc thử nhiều màu cùng lúc. Bao gồm 6 màu đa dạng từ nude đến đỏ đô. Finish velvet matte, bền màu 5–7 tiếng.",
+      "usp": [
+        "Chỉ 19.000đ/thỏi — giá rẻ nhất phân khúc son kem lì velvet, rẻ hơn cả cốc trà đá vỉa hè",
+        "6 màu đa dạng từ nude thanh lịch đến đỏ đô quyến rũ — đủ thay đổi mood cả tuần không lặp",
+        "Quà tặng gây ấn tượng cực kỳ tiết kiệm — sinh nhật, 8/3, 20/10, tất niên đều hợp lý",
+        "Bền màu 5–7 tiếng, finish velvet matte sang chảnh — vẻ ngoài premium, giá cực bình dân",
+        "1.200 set bán ra trong 30 ngày — bestseller được hàng nghìn chị em tin tưởng lựa chọn"
+      ]
     },
     {
       "catalog_info": {
@@ -473,11 +467,7 @@
       },
       "logistics_and_lifecycle": {
         "weight_gram": 350.0,
-        "dimensions_cm": {
-          "length": 20.0,
-          "width": 15.0,
-          "height": 5.0
-        },
+        "dimensions_cm": {"length": 20.0, "width": 15.0, "height": 5.0},
         "is_perishable": true,
         "expiration_date": "2026-05-10",
         "warranty_months": 0
@@ -486,12 +476,16 @@
         "description_length": 800,
         "missing_attributes": [],
         "seo_score": 90,
-        "keyword_ranking": {
-          "bộ trang điểm": 3,
-          "combo trang điểm": 6
-        }
+        "keyword_ranking": {"bộ trang điểm": 3, "combo trang điểm": 6}
       },
-      "description_for_rag": "Bộ Trang Điểm 6 Món Cơ Bản: Combo đầy đủ 6 sản phẩm trang điểm cơ bản gồm phấn, son, kẻ mắt, mascara và che khuyết điểm. Giá 74.000đ/bộ — lý tưởng cho người mới học trang điểm. Đầy đủ dụng cụ để hoàn thiện một lớp makeup nhẹ đi học, đi làm."
+      "description_for_rag": "Bộ Trang Điểm 6 Món Cơ Bản: Combo đầy đủ 6 sản phẩm trang điểm cơ bản gồm phấn, son, kẻ mắt, mascara và che khuyết điểm. Giá 74.000đ/bộ — lý tưởng cho người mới học trang điểm. Đầy đủ dụng cụ để hoàn thiện một lớp makeup nhẹ đi học, đi làm.",
+      "usp": [
+        "Trọn bộ 6 món: phấn, son, kẻ mắt, mascara, che khuyết điểm — mở hộp ra dùng ngay, không cần mua thêm gì",
+        "Chỉ 74.000đ cho cả bộ — starter kit rẻ nhất thị trường, rẻ hơn 1 thỏi son ngoại nhập lẻ bất kỳ",
+        "Lý tưởng cho người mới học trang điểm — đủ để thực hành mọi bước mà không sợ lãng phí tiền",
+        "Đóng hộp đẹp, tiện bảo quản — làm quà tặng bạn bè hoặc con gái mới lớn rất ý nghĩa",
+        "Hoàn thiện lớp makeup nhẹ đi học, đi làm chỉ trong 5 phút — nhanh gọn, tự nhiên, tự tin"
+      ]
     },
     {
       "catalog_info": {
@@ -538,11 +532,7 @@
       },
       "logistics_and_lifecycle": {
         "weight_gram": 150.0,
-        "dimensions_cm": {
-          "length": 22.0,
-          "width": 12.0,
-          "height": 2.0
-        },
+        "dimensions_cm": {"length": 22.0, "width": 12.0, "height": 2.0},
         "is_perishable": false,
         "expiration_date": "",
         "warranty_months": 1
@@ -551,12 +541,16 @@
         "description_length": 450,
         "missing_attributes": [],
         "seo_score": 95,
-        "keyword_ranking": {
-          "cọ trang điểm": 1,
-          "bộ cọ 13 món": 2
-        }
+        "keyword_ranking": {"cọ trang điểm": 1, "bộ cọ 13 món": 2}
       },
-      "description_for_rag": "Bộ Cọ Trang Điểm 13 Món Lông Mềm: Bộ 13 cọ trang điểm chuyên dụng lông tổng hợp mềm mịn, màu xanh lá. Gồm đủ các loại: cọ phủ nền, cọ tán phấn mắt, cọ tán kem, cọ kẻ mắt, cọ môi... Giá 87.000đ/bộ. Bảo hành 1 tháng. Vệ sinh bằng nước ấm pha dầu dừa hoặc dung dịch vệ sinh cọ chuyên dụng."
+      "description_for_rag": "Bộ Cọ Trang Điểm 13 Món Lông Mềm: Bộ 13 cọ trang điểm chuyên dụng lông tổng hợp mềm mịn, màu xanh lá. Gồm đủ các loại: cọ phủ nền, cọ tán phấn mắt, cọ tán kem, cọ kẻ mắt, cọ môi... Giá 87.000đ/bộ. Bảo hành 1 tháng. Vệ sinh bằng nước ấm pha dầu dừa hoặc dung dịch vệ sinh cọ chuyên dụng.",
+      "usp": [
+        "Bestseller #1: 3.500 bộ bán ra trong 30 ngày — được hàng nghìn chị em beauty reviewer kiểm chứng",
+        "13 loại cọ chuyên dụng đủ bộ — từ cọ phủ nền, tán phấn mắt đến kẻ mắt, tô son, không thiếu món nào",
+        "Lông tổng hợp mềm mịn, không xước da, không rụng lông sau nhiều lần giặt — bền thật sự",
+        "Bảo hành 1 tháng đổi mới — cam kết chất lượng, mua không lo rủi ro",
+        "Màu xanh lá trendy — makeup xịn lên ảnh cũng đẹp, đặt trên bàn phấn y chang beauty blogger"
+      ]
     },
     {
       "catalog_info": {
@@ -601,11 +595,7 @@
       },
       "logistics_and_lifecycle": {
         "weight_gram": 30.0,
-        "dimensions_cm": {
-          "length": 10.0,
-          "width": 4.0,
-          "height": 4.0
-        },
+        "dimensions_cm": {"length": 10.0, "width": 4.0, "height": 4.0},
         "is_perishable": false,
         "expiration_date": "",
         "warranty_months": 1
@@ -614,12 +604,16 @@
         "description_length": 350,
         "missing_attributes": [],
         "seo_score": 85,
-        "keyword_ranking": {
-          "kẹp mi": 2,
-          "bấm mi": 4
-        }
+        "keyword_ranking": {"kẹp mi": 2, "bấm mi": 4}
       },
-      "description_for_rag": "Kẹp Bấm Mi Chuyên Dụng Tự Nhiên: Kẹp bấm mi làm từ thép không gỉ với đệm silicon êm ái, không kẹp đau và không gãy lông mi. Cho kết quả cong mi tự nhiên bền 6–8 tiếng. Giá 54.000đ. Bảo hành 1 tháng đổi mới nếu lỗi đệm silicon. Vệ sinh bằng cồn 70° sau mỗi lần dùng."
+      "description_for_rag": "Kẹp Bấm Mi Chuyên Dụng Tự Nhiên: Kẹp bấm mi làm từ thép không gỉ với đệm silicon êm ái, không kẹp đau và không gãy lông mi. Cho kết quả cong mi tự nhiên bền 6–8 tiếng. Giá 54.000đ. Bảo hành 1 tháng đổi mới nếu lỗi đệm silicon. Vệ sinh bằng cồn 70° sau mỗi lần dùng.",
+      "usp": [
+        "Bestseller tuyệt đối: 5.600 chiếc bán ra trong 30 ngày — uy tín không cần bàn cãi",
+        "Đệm silicon êm ái, không kẹp đau, không gãy lông mi — an toàn tuyệt đối cho mi mắt nhạy cảm",
+        "Cong mi tự nhiên bền 6–8 tiếng — đẹp như mi giả mà không cần tốn tiền dán mi hay thuốc uốn mi",
+        "Thép không gỉ cao cấp, không rỉ sét, không biến dạng — dùng cả năm vẫn như mới",
+        "54.000đ + bảo hành 1 tháng đổi mới nếu lỗi đệm — đầu tư một lần, dùng cả năm không lo"
+      ]
     },
     {
       "catalog_info": {
@@ -666,11 +660,7 @@
       },
       "logistics_and_lifecycle": {
         "weight_gram": 120.0,
-        "dimensions_cm": {
-          "length": 5.0,
-          "width": 5.0,
-          "height": 10.0
-        },
+        "dimensions_cm": {"length": 5.0, "width": 5.0, "height": 10.0},
         "is_perishable": true,
         "expiration_date": "2027-03-01",
         "warranty_months": 0
@@ -679,12 +669,16 @@
         "description_length": 520,
         "missing_attributes": [],
         "seo_score": 80,
-        "keyword_ranking": {
-          "sữa rửa mặt hada labo": 1,
-          "rửa mặt dưỡng ẩm": 4
-        }
+        "keyword_ranking": {"sữa rửa mặt hada labo": 1, "rửa mặt dưỡng ẩm": 4}
       },
-      "description_for_rag": "Kem Rửa Mặt Dưỡng Ẩm Hada Labo Advanced Nourish Hyaluronic Acid Cleanser 80g: Sữa rửa mặt dưỡng ẩm của Hada Labo (Nhật Bản), chứa Hyaluronic Acid giúp làm sạch mà không gây khô căng da. Phù hợp da khô, da thường và da hỗn hợp. Hàng nhập khẩu chính hãng có hoá đơn Guardian. Date xa, không chứa cồn. Giá 180.000đ/80g. Dùng 1–2 lần/ngày với nước ấm, vê bọt trước khi thoa lên mặt."
+      "description_for_rag": "Kem Rửa Mặt Dưỡng Ẩm Hada Labo Advanced Nourish Hyaluronic Acid Cleanser 80g: Sữa rửa mặt dưỡng ẩm của Hada Labo (Nhật Bản), chứa Hyaluronic Acid giúp làm sạch mà không gây khô căng da. Phù hợp da khô, da thường và da hỗn hợp. Hàng nhập khẩu chính hãng có hoá đơn Guardian. Date xa, không chứa cồn. Giá 180.000đ/80g. Dùng 1–2 lần/ngày với nước ấm, vê bọt trước khi thoa lên mặt.",
+      "usp": [
+        "Hyaluronic Acid Nhật Bản giữ ẩm 24/7 — rửa mặt xong da vẫn mềm mịn căng mướt, không khô căng một giây",
+        "Hàng chính hãng nhập khẩu, có hoá đơn Guardian — date xa, nguồn gốc 100% rõ ràng, không lo hàng giả",
+        "Không chứa cồn, không paraben — êm dịu an toàn cho da nhạy cảm, da khô, da mang thai đều dùng được",
+        "Bọt mịn sạch sâu không gây kích ứng — nền skincare vững chắc để serum và kem dưỡng thẩm thấu tốt hơn",
+        "180.000đ/80g dùng được 2–3 tháng — đầu tư thông minh nhất cho bước làm sạch nền tảng skincare"
+      ]
     }
   ]
 }

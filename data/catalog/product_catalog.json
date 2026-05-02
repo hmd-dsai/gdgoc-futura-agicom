@@ -1,8 +1,8 @@
 {
-  "version": "1.1",
+  "version": "1.2",
   "generated": "2026-05-02",
   "shop_name": "Shop Mỹ phẩm GIAO FARA",
-  "note": "Đây là nguồn dữ liệu chính tắc (single source of truth) cho toàn bộ hệ thống. Mọi product_id trong frontend, backend, mock data và AI-generated output đều phải khớp với danh sách này. Khi thêm sản phẩm mới, cập nhật file này trước.",
+  "note": "Đây là nguồn dữ liệu chính tắc (single source of truth) cho toàn bộ hệ thống. Mọi product_id trong frontend, backend, mock data và AI-generated output đều phải khớp với danh sách này. Khi thêm sản phẩm mới, cập nhật file này trước. Field 'usp' là danh sách điểm bán hàng độc đáo — dùng để AI generate script, content quảng cáo và tư vấn khách hàng.",
   "products": [
     {
       "product_id": "P001",
@@ -15,18 +15,16 @@
       "status": "active",
       "variants": ["GF-LGLOSS-M01", "GF-LGLOSS-M04"],
       "aliases": [
-        "p001",
-        "gf-lgloss-m01",
-        "gf-lgloss-m04",
-        "son bong giao fara",
-        "son bóng giao fara",
-        "son bong",
-        "son bóng",
-        "lip gloss giao fara",
-        "giao fara gloss",
-        "son bong laplaplapla",
-        "son bong ma 01",
-        "son bong ma 01-08"
+        "p001", "gf-lgloss-m01", "gf-lgloss-m04", "son bong giao fara",
+        "son bóng giao fara", "son bong", "son bóng", "lip gloss giao fara",
+        "giao fara gloss", "son bong laplaplapla", "son bong ma 01", "son bong ma 01-08"
+      ],
+      "usp": [
+        "Hiệu ứng bóng mướt tức thì, căng môi như lớp filter — không cần son lót hay son nền",
+        "8 mã màu từ hồng baby đến đỏ đậm — phủ hết mọi outfit, phù hợp mọi tông da Việt",
+        "Chất gloss dưỡng ẩm sâu — dùng hàng ngày không lo khô nứt, bong tróc môi",
+        "Không mùi nồng, hương nhẹ dịu — thoải mái đi học, đi làm, không gây khó chịu",
+        "Chỉ 39.000đ/thỏi — rẻ hơn 1 ly trà sữa, đẹp hơn son bóng ngoại nhập cùng phân khúc"
       ]
     },
     {
@@ -40,18 +38,16 @@
       "status": "active",
       "variants": ["GF-MLIPSTICK-M09"],
       "aliases": [
-        "p002",
-        "gf-mlipstick-m09",
-        "son kem li giao fara",
-        "son kem lì giao fara",
-        "son kem li",
-        "son kem lì",
-        "son li giao fara",
-        "son lì giao fara",
-        "giao fara lipstick",
-        "velvet lipstick giao fara",
-        "son ma 09",
-        "son ma 09-16"
+        "p002", "gf-mlipstick-m09", "son kem li giao fara", "son kem lì giao fara",
+        "son kem li", "son kem lì", "son li giao fara", "son lì giao fara",
+        "giao fara lipstick", "velvet lipstick giao fara", "son ma 09", "son ma 09-16"
+      ],
+      "usp": [
+        "Lì mịn velvet chuẩn studio — bám màu 6–8 tiếng, ăn uống vẫn còn màu, không lem khẩu trang",
+        "Khô trong 30 giây, không dính, không tạo vảy — hoàn hảo cho ngày bận rộn cần makeup nhanh",
+        "8 màu từ nude thanh lịch đến đỏ đô quyến rũ — 1 thỏi đủ mọi mood cả tuần",
+        "Chất son siêu mịn, không tạo vân khô hay bong tróc dù môi hơi thiếu nước",
+        "Giá chỉ 39.000đ — tiết kiệm 70% so với son lì ngoại nhập, chất lượng không thua kém"
       ]
     },
     {
@@ -65,16 +61,16 @@
       "status": "active",
       "variants": ["GF-SPOWDER-TN"],
       "aliases": [
-        "p003",
-        "gf-spowder-tn",
-        "phan phu bot giao fara",
-        "phấn phủ bột giao fara",
-        "phan phu giao fara",
-        "phấn phủ giao fara",
-        "setting powder giao fara",
-        "bot phan phu giao fara",
-        "phan phu kem dau tu nhien",
-        "phấn phủ kềm dầu"
+        "p003", "gf-spowder-tn", "phan phu bot giao fara", "phấn phủ bột giao fara",
+        "phan phu giao fara", "phấn phủ giao fara", "setting powder giao fara",
+        "bot phan phu giao fara", "phan phu kem dau tu nhien", "phấn phủ kềm dầu"
+      ],
+      "usp": [
+        "Kiềm dầu cực đỉnh 6–8 tiếng — da luôn mịn như plastic skin, không cần dặm lại giữa ngày",
+        "Tông Tự Nhiên pha chuẩn cho da vàng ấm người Việt — mặc lên không bị trắng bệch hay xám xịt",
+        "Không chứa paraben — an toàn cho da nhạy cảm, da dầu, da hỗn hợp dùng lâu dài",
+        "Che phủ lỗ chân lông và vết thâm nhẹ mà không cần thêm kem nền — tiết kiệm bước makeup",
+        "129.000đ dùng được 3–4 tháng — tính ra chưa đến 1.500đ/ngày cho da đẹp hoàn hảo"
       ]
     },
     {
@@ -88,15 +84,16 @@
       "status": "active",
       "variants": ["GF-CO1-ML-SPOWDER"],
       "aliases": [
-        "p004",
-        "gf-co1-ml-spowder",
-        "combo kem li phan phu",
-        "combo kem lì phấn phủ",
-        "combo son phan giao fara",
-        "combo son phấn giao fara",
-        "bo doi son phan",
-        "bộ đôi son phấn",
-        "combo giao fara"
+        "p004", "gf-co1-ml-spowder", "combo kem li phan phu", "combo kem lì phấn phủ",
+        "combo son phan giao fara", "combo son phấn giao fara", "bo doi son phan",
+        "bộ đôi son phấn", "combo giao fara"
+      ],
+      "usp": [
+        "Tiết kiệm ngay 50.000đ so với mua lẻ — combo xịn nhất tầm giá dưới 200k trên thị trường",
+        "Bộ đôi hoàn hảo: son lì bám màu 6–8 tiếng + phấn kiềm dầu cả ngày — đủ makeup nhẹ hoàn chỉnh",
+        "Lý tưởng cho người mới bắt đầu trang điểm — dễ dùng, không cần kỹ thuật, không sợ lỗi",
+        "Đóng gói đẹp, sang trọng — quà tặng sinh nhật, 8/3, 20/10 không cần mua thêm hộp quà",
+        "Hai sản phẩm GIAO FARA cùng hệ màu — phối hợp chuẩn đẹp, không sợ lệch tông hay clash màu"
       ]
     },
     {
@@ -110,15 +107,16 @@
       "status": "active",
       "variants": ["GF-POWDER-18K"],
       "aliases": [
-        "p006",
-        "gf-powder-18k",
-        "phan phu mini giao fara",
-        "phấn phủ mini giao fara",
-        "phan phu bot 18k",
-        "phấn phủ bột 18k",
-        "phan phu kem dau mini",
-        "phan phu mini",
-        "powder mini giao fara"
+        "p006", "gf-powder-18k", "phan phu mini giao fara", "phấn phủ mini giao fara",
+        "phan phu bot 18k", "phấn phủ bột 18k", "phan phu kem dau mini",
+        "phan phu mini", "powder mini giao fara"
+      ],
+      "usp": [
+        "Siêu mini vừa túi xách, vừa túi quần — dặm phấn tiện lợi bất kỳ đâu không cần ví to",
+        "Chỉ 18.000đ — thử nghiệm không đau ví, ưng rồi mua size lớn mà không lo tiếc",
+        "Kiềm dầu hiệu quả tương đương hộp to — chất lượng không thu nhỏ theo kích thước",
+        "Hoàn hảo bỏ túi gym, túi du lịch, ngăn bàn làm việc — luôn sẵn sàng dặm lại khi cần",
+        "Finish Matte thực sự — da lì nhẹ, không bóng nhờn suốt cả buổi chiều bận rộn"
       ]
     },
     {
@@ -132,17 +130,16 @@
       "status": "active",
       "variants": ["GF-LIPSET-06"],
       "aliases": [
-        "p007",
-        "gf-lipset-06",
-        "set son kem li 6 thoi",
-        "set son kem lì 6 thỏi",
-        "set son 6 thoi",
-        "set son 6 thỏi",
-        "bo 6 thoi son",
-        "bộ 6 thỏi son",
-        "lip set 6",
-        "set son noi dia",
-        "set son nội địa"
+        "p007", "gf-lipset-06", "set son kem li 6 thoi", "set son kem lì 6 thỏi",
+        "set son 6 thoi", "set son 6 thỏi", "bo 6 thoi son", "bộ 6 thỏi son",
+        "lip set 6", "set son noi dia", "set son nội địa"
+      ],
+      "usp": [
+        "Chỉ 19.000đ/thỏi — giá rẻ nhất phân khúc son kem lì velvet, rẻ hơn cả cốc trà đá vỉa hè",
+        "6 màu đa dạng từ nude thanh lịch đến đỏ đô quyến rũ — đủ thay đổi mood cả tuần không lặp",
+        "Quà tặng gây ấn tượng cực kỳ tiết kiệm — sinh nhật, 8/3, 20/10, tất niên đều hợp lý",
+        "Bền màu 5–7 tiếng, finish velvet matte sang chảnh — vẻ ngoài premium, giá cực bình dân",
+        "1.200 set bán ra trong 30 ngày — bestseller được hàng nghìn chị em tin tưởng lựa chọn"
       ]
     },
     {
@@ -156,16 +153,16 @@
       "status": "active",
       "variants": ["GF-MKP-COMBO6"],
       "aliases": [
-        "p008",
-        "gf-mkp-combo6",
-        "bo trang diem 6 mon",
-        "bộ trang điểm 6 món",
-        "combo trang diem co ban",
-        "combo trang điểm cơ bản",
-        "makeup set 6 mon",
-        "bo trang diem co ban",
-        "kit trang diem",
-        "starter kit trang diem"
+        "p008", "gf-mkp-combo6", "bo trang diem 6 mon", "bộ trang điểm 6 món",
+        "combo trang diem co ban", "combo trang điểm cơ bản", "makeup set 6 mon",
+        "bo trang diem co ban", "kit trang diem", "starter kit trang diem"
+      ],
+      "usp": [
+        "Trọn bộ 6 món: phấn, son, kẻ mắt, mascara, che khuyết điểm — mở hộp ra dùng ngay, không cần mua thêm gì",
+        "Chỉ 74.000đ cho cả bộ — starter kit rẻ nhất thị trường, rẻ hơn 1 thỏi son ngoại nhập lẻ bất kỳ",
+        "Lý tưởng cho người mới học trang điểm — đủ để thực hành mọi bước mà không sợ lãng phí tiền",
+        "Đóng hộp đẹp, tiện bảo quản — làm quà tặng bạn bè hoặc con gái mới lớn rất ý nghĩa",
+        "Hoàn thiện lớp makeup nhẹ đi học, đi làm chỉ trong 5 phút — nhanh gọn, tự nhiên, tự tin"
       ]
     },
     {
@@ -179,18 +176,16 @@
       "status": "active",
       "variants": ["GF-TOOL-BRUSH13"],
       "aliases": [
-        "p009",
-        "gf-tool-brush13",
-        "bo co trang diem 13 mon",
-        "bộ cọ trang điểm 13 món",
-        "bo co 13 mon",
-        "bộ cọ 13 món",
-        "co trang diem",
-        "cọ trang điểm",
-        "makeup brush set",
-        "bo co long mem",
-        "bộ cọ lông mềm",
-        "brush set 13"
+        "p009", "gf-tool-brush13", "bo co trang diem 13 mon", "bộ cọ trang điểm 13 món",
+        "bo co 13 mon", "bộ cọ 13 món", "co trang diem", "cọ trang điểm",
+        "makeup brush set", "bo co long mem", "bộ cọ lông mềm", "brush set 13"
+      ],
+      "usp": [
+        "Bestseller #1: 3.500 bộ bán ra trong 30 ngày — được hàng nghìn chị em beauty reviewer kiểm chứng",
+        "13 loại cọ chuyên dụng đủ bộ — từ cọ phủ nền, tán phấn mắt đến kẻ mắt, tô son, không thiếu món nào",
+        "Lông tổng hợp mềm mịn, không xước da, không rụng lông sau nhiều lần giặt — bền thật sự",
+        "Bảo hành 1 tháng đổi mới — cam kết chất lượng, mua không lo rủi ro",
+        "Màu xanh lá trendy — makeup xịn lên ảnh cũng đẹp, đặt trên bàn phấn y chang beauty blogger"
       ]
     },
     {
@@ -204,17 +199,15 @@
       "status": "active",
       "variants": ["GF-TOOL-CURLER"],
       "aliases": [
-        "p010",
-        "gf-tool-curler",
-        "kep bam mi",
-        "kẹp bấm mi",
-        "dung cu bam mi",
-        "dụng cụ bấm mi",
-        "eyelash curler",
-        "bam mi",
-        "bấm mi",
-        "kep mi",
-        "kẹp mi"
+        "p010", "gf-tool-curler", "kep bam mi", "kẹp bấm mi", "dung cu bam mi",
+        "dụng cụ bấm mi", "eyelash curler", "bam mi", "bấm mi", "kep mi", "kẹp mi"
+      ],
+      "usp": [
+        "Bestseller tuyệt đối: 5.600 chiếc bán ra trong 30 ngày — uy tín không cần bàn cãi",
+        "Đệm silicon êm ái, không kẹp đau, không gãy lông mi — an toàn tuyệt đối cho mi mắt nhạy cảm",
+        "Cong mi tự nhiên bền 6–8 tiếng — đẹp như mi giả mà không cần tốn tiền dán mi hay thuốc uốn mi",
+        "Thép không gỉ cao cấp, không rỉ sét, không biến dạng — dùng cả năm vẫn như mới",
+        "54.000đ + bảo hành 1 tháng đổi mới nếu lỗi đệm — đầu tư một lần, dùng cả năm không lo"
       ]
     },
     {
@@ -228,20 +221,17 @@
       "status": "active",
       "variants": ["HL-CLEANSER-80G"],
       "aliases": [
-        "p011",
-        "hl-cleanser-80g",
-        "kem rua mat hada labo",
-        "kem rửa mặt hada labo",
-        "sua rua mat hada labo",
-        "sữa rửa mặt hada labo",
-        "hada labo cleanser",
-        "hada labo 80g",
-        "hada labo",
-        "hadalabo",
-        "rua mat hada labo",
-        "rửa mặt hada labo",
-        "hyaluronic acid cleanser hada labo",
-        "advanced nourish cleanser"
+        "p011", "hl-cleanser-80g", "kem rua mat hada labo", "kem rửa mặt hada labo",
+        "sua rua mat hada labo", "sữa rửa mặt hada labo", "hada labo cleanser",
+        "hada labo 80g", "hada labo", "hadalabo", "rua mat hada labo",
+        "rửa mặt hada labo", "hyaluronic acid cleanser hada labo", "advanced nourish cleanser"
+      ],
+      "usp": [
+        "Hyaluronic Acid Nhật Bản giữ ẩm 24/7 — rửa mặt xong da vẫn mềm mịn căng mướt, không khô căng một giây",
+        "Hàng chính hãng nhập khẩu, có hoá đơn Guardian — date xa, nguồn gốc 100% rõ ràng, không lo hàng giả",
+        "Không chứa cồn, không paraben — êm dịu an toàn cho da nhạy cảm, da khô, da mang thai đều dùng được",
+        "Bọt mịn sạch sâu không gây kích ứng — nền skincare vững chắc để serum và kem dưỡng thẩm thấu tốt hơn",
+        "180.000đ/80g dùng được 2–3 tháng — đầu tư thông minh nhất cho bước làm sạch nền tảng skincare"
       ]
     }
   ]
