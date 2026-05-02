@@ -179,33 +179,35 @@ runScan = async function () {
       document.getElementById('guidanceActiveCmdText')?.textContent?.trim() ||
       'Không có chỉ thị đặc biệt';
 
+    // Sản phẩm scan mặc định: P009 — Bộ Cọ 13 Món (bestseller, 3500 sold/tháng)
+    // product_id phải khớp với data/catalog/product_catalog.json
     const result = await apiCall('/slow-track-strategy', 'POST', {
-      product_id: 'LUMI-SUN-001',
-      product_name: 'Anessa Perfect UV Sunscreen Skincare Milk SPF50+ 60ml',
+      product_id: 'P009',
+      product_name: 'Bộ Cọ Trang Điểm 13 Món Lông Mềm',
       internal_data: {
-        current_price: 590000,
-        stock_level: 38,
-        cost_price: 312000,
-        min_margin_percent: 20,
-        conversion_rate: 0.12,
+        current_price: 87000,
+        stock_level: 850,
+        cost_price: 40000,
+        min_margin_percent: 15,
+        conversion_rate: 0.22,
       },
       market_data: {
-        competitor_min_price: 560000,
-        market_trend: 'Kem chống nắng Nhật đang hot, đối thủ cùng phân khúc giảm nhẹ',
-        competitor_name: 'Guardian / Hasaki',
-        competitor_rating: 4.5,
-        our_rating: 4.8,
-        platform_campaign: 'None',
+        competitor_min_price: 79000,
+        market_trend: 'Dụng cụ trang điểm handmade và brush set đang trending trên TikTok',
+        competitor_name: 'Shopee Mall / BeautyZone',
+        competitor_rating: 4.7,
+        our_rating: 4.9,
+        platform_campaign: 'Shopee Siêu Sale tháng 5',
       },
       customer_context: {
-        recent_sentiment: 'phân vân',
-        frequent_question: 'Anessa có gây bít lỗ chân lông không?',
+        recent_sentiment: 'hài lòng, hỏi về chất lượng lông cọ',
+        frequent_question: 'Cọ có rụng lông không? Vệ sinh cọ bằng gì?',
       },
       shop_profile: {
         target_customers:
-          'Nữ 18-35 tuổi quan tâm skincare, da dầu/hỗn hợp, thu nhập 8-20 triệu/tháng',
-        strategic_vision: 'Tối ưu lợi nhuận dài hạn, định vị chất lượng hàng chính hãng',
-        brand_tone: 'Chuyên nghiệp, nhiệt tình',
+          'Nữ 16-30 tuổi mới học trang điểm, sinh viên và nhân viên văn phòng, thu nhập 5-15 triệu/tháng',
+        strategic_vision: 'Tối ưu lợi nhuận dài hạn, định vị sản phẩm chất lượng giá tốt',
+        brand_tone: 'Thân thiện, gần gũi, tư vấn chân thật',
       },
       manager_directive: directive,
     }, 90000); // LLM call — Gemini Flash có thể mất 15-20s trên Render
@@ -719,7 +721,7 @@ async function sendLiveChatMessage(msg) {
     if (isNegative) {
       const mockReply = 'Dạ em xin lỗi anh/chị về trải nghiệm không tốt này ạ 🙏 Em đã ghi nhận phản hồi của anh/chị và sẽ chuyển ngay cho bộ phận kỹ thuật + CSKH kiểm tra. Anh/chị vui lòng cho em xin số đơn hàng để được hỗ trợ đổi/trả miễn phí ạ.';
       // is_safe=false, nhưng confidence_score bị ẩn (undefined) vì không có AI thật phân tích
-      const mockEval = { is_safe: false, confidence_score: undefined, sentiment_analysis: 'tức giận', identified_product_id: 'LUMI-MOISS-001', risk_level: 'Cao', risk_category: 'Chất lượng sản phẩm', _isDemo: true };
+      const mockEval = { is_safe: false, confidence_score: undefined, sentiment_analysis: 'tức giận', identified_product_id: 'P009', risk_level: 'Cao', risk_category: 'Chất lượng sản phẩm', _isDemo: true };
       appendLiveChatBubble('ai', mockReply + ' <em style="font-size:0.68rem;color:var(--text-muted);">[Demo Mode — Confidence N/A]</em>', mockEval);
       _syncLiveChatToInbox(msg, mockReply, mockEval);
       chatSessionStats.totalAIReplies++;
@@ -1413,8 +1415,8 @@ function injectReviewForm() {
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
       <div class="settings-field">
         <label class="settings-label">ID Sản phẩm</label>
-        <input id="rev_product_id" class="settings-input" value="LUMI-SUN-001"
-          placeholder="VD: LUMI-SUN-001">
+        <input id="rev_product_id" class="settings-input" value="P011"
+          placeholder="VD: P009, P011, GF-LGLOSS-M01">
       </div>
       <div class="settings-field">
         <label class="settings-label">Tên khách hàng</label>
@@ -1842,21 +1844,22 @@ if (_origHandlePageClick) {
  */
 function _applyDemoScenario(scenario) {
   const SCENARIOS = {
+    // product_id phải khớp với data/catalog/product_catalog.json
     anker: {
-      product_id: 'LUMI-MOISS-001',
+      product_id: 'P009',
       customer_name: 'Hoang_Manh_Demo',
       rating: '1',
-      review_text: 'Kem Cosrx Snail mua ở đây về dùng bị nổi mụn hàng loạt, da đỏ ngứa. Hàng có vấn đề gì không? Tôi yêu cầu đổi trả và bồi thường!',
-      chat_msg: 'Shop ơi kem Cosrx Snail tôi mua ở đây dùng bị dị ứng rồi! Da nổi mụn đỏ hết, tôi muốn đổi trả, shop xử lý thế nào?',
-      label: 'Cosrx Snail gây dị ứng'
+      review_text: 'Bộ cọ 13 món mua ở đây về dùng được 1 tuần là lông cọ rụng ào ào, cọ phấn má còn bị gãy cán. Tôi rất thất vọng, yêu cầu đổi trả ngay!',
+      chat_msg: 'Shop ơi bộ cọ 13 món tôi mua ở đây dùng 1 tuần là lông rụng hết rồi! Cọ còn bị gãy cán nữa. Tôi muốn đổi trả, shop xử lý thế nào?',
+      label: 'Cọ 13 Món - Lông rụng, cán gãy'
     },
     shipping: {
-      product_id: 'LUMI-SUN-001',
+      product_id: 'P011',
       customer_name: 'Khach_VIP_Demo',
       rating: '2',
-      review_text: 'Kem chống nắng Anessa giao đến bị móp vỏ, nắp không đóng kín. May mà kem vẫn còn dùng được. Shop cần đóng gói cẩn thận hơn, tôi rất thất vọng.',
-      chat_msg: 'Shop ơi kem Anessa tôi vừa nhận được mà hộp bị móp, nắp bị hở! Tôi rất bức xúc, shop xử lý thế nào đây?',
-      label: 'Vận chuyển hư hỏng'
+      review_text: 'Kem rửa mặt Hada Labo giao đến bị móp vỏ hộp, nắp không đóng kín. May mà tuýp kem vẫn còn dùng được. Shop cần đóng gói cẩn thận hơn, tôi rất thất vọng.',
+      chat_msg: 'Shop ơi kem rửa mặt Hada Labo tôi vừa nhận được mà hộp bị móp, nắp bị hở rồi! Tôi rất bức xúc, shop xử lý thế nào đây?',
+      label: 'Vận chuyển hư hỏng - Hada Labo'
     }
   };
 
@@ -1922,8 +1925,8 @@ function _injectDemoCustomerPage() {
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
         <div class="settings-field">
           <label class="settings-label">ID Sản phẩm</label>
-          <input id="rev_product_id" class="settings-input" value="S24-ULTRA-001"
-            placeholder="VD: ANKER-100W-CAP">
+          <input id="rev_product_id" class="settings-input" value="P011"
+            placeholder="VD: P009, P011, GF-LGLOSS-M01">
         </div>
         <div class="settings-field">
           <label class="settings-label">Tên khách hàng</label>

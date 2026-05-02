@@ -22,6 +22,34 @@ from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_
 import config as _cfg
 from seed_demo import seed_vector_db, seed_sql_db, seed_content_suggestions, seed_customer_profiles
 
+# ---------------------------------------------------------------------------
+# Product catalog — built once at startup from data/catalog/product_catalog.json.
+# Maps every alias (lowercase) → canonical product_id (e.g. "son bong" → "P001").
+# To add a new product: edit the catalog JSON only — no code change needed here.
+# ---------------------------------------------------------------------------
+def _build_product_aliases() -> dict:
+    catalog_path = os.path.normpath(
+        os.path.join(os.path.dirname(__file__), "../data/catalog/product_catalog.json")
+    )
+    try:
+        with open(catalog_path, encoding="utf-8") as f:
+            catalog = json.load(f)
+        aliases: dict = {}
+        for product in catalog.get("products", []):
+            canonical_id = product["product_id"]
+            for alias in product.get("aliases", []):
+                aliases[alias.lower().strip()] = canonical_id
+        print(f"[startup] Product catalog loaded: {len(catalog['products'])} products, {len(aliases)} aliases.")
+        return aliases
+    except FileNotFoundError:
+        print(f"[startup] WARNING: product_catalog.json not found at {catalog_path} — PRODUCT_ALIASES will be empty.")
+        return {}
+    except Exception as e:
+        print(f"[startup] WARNING: Could not load product catalog: {e}")
+        return {}
+
+PRODUCT_ALIASES: dict = _build_product_aliases()
+
 init_db()
 
 # Auto-seed vector DB nếu rỗng (xảy ra sau mỗi cold start của Render vì dùng EphemeralClient)
@@ -350,65 +378,8 @@ async def get_crisis_overview():
             if any(kw in (log.insight or "").lower() for kw in risk_keywords)
         ]
 
-        # Bảng chuẩn hóa product_id: nhiều tên khác nhau → 1 ID chính tắc
-        # Nguồn sự thật: data/mock/products.json
-        PRODUCT_ALIASES: dict = {
-            # LUMI-TONER-001 — Some By Mi AHA BHA PHA Toner
-            "lumi-toner-001":           "LUMI-TONER-001",
-            "some by mi toner":         "LUMI-TONER-001",
-            "aha bha pha toner":        "LUMI-TONER-001",
-            "toner some by mi":         "LUMI-TONER-001",
-            "sbmi toner":               "LUMI-TONER-001",
-            "some by mi":               "LUMI-TONER-001",
-            # LUMI-SERUM-001 — The Ordinary Niacinamide
-            "lumi-serum-001":           "LUMI-SERUM-001",
-            "the ordinary niacinamide": "LUMI-SERUM-001",
-            "serum niacinamide":        "LUMI-SERUM-001",
-            "niacinamide serum":        "LUMI-SERUM-001",
-            "the ordinary":             "LUMI-SERUM-001",
-            "ordinary niacinamide":     "LUMI-SERUM-001",
-            # LUMI-SERUM-002 — Klairs Vitamin C
-            "lumi-serum-002":           "LUMI-SERUM-002",
-            "klairs vitamin c":         "LUMI-SERUM-002",
-            "serum vitamin c klairs":   "LUMI-SERUM-002",
-            "klairs serum":             "LUMI-SERUM-002",
-            "freshly juiced":           "LUMI-SERUM-002",
-            "vitamin drop klairs":      "LUMI-SERUM-002",
-            # LUMI-MOISS-001 — Cosrx Snail Cream
-            "lumi-moiss-001":           "LUMI-MOISS-001",
-            "cosrx snail":              "LUMI-MOISS-001",
-            "kem ốc sên":               "LUMI-MOISS-001",
-            "kem oc sen":               "LUMI-MOISS-001",
-            "snail cream cosrx":        "LUMI-MOISS-001",
-            "cosrx advanced snail":     "LUMI-MOISS-001",
-            "cosrx":                    "LUMI-MOISS-001",
-            # LUMI-SUN-001 — Anessa Sunscreen
-            "lumi-sun-001":             "LUMI-SUN-001",
-            "anessa sunscreen":         "LUMI-SUN-001",
-            "kem chống nắng anessa":    "LUMI-SUN-001",
-            "kem chong nang anessa":    "LUMI-SUN-001",
-            "anessa perfect uv":        "LUMI-SUN-001",
-            "anessa":                   "LUMI-SUN-001",
-            # LUMI-CLEAN-001 — Bioderma Micellar Water
-            "lumi-clean-001":           "LUMI-CLEAN-001",
-            "bioderma":                 "LUMI-CLEAN-001",
-            "sensibio":                 "LUMI-CLEAN-001",
-            "nước tẩy trang bioderma":  "LUMI-CLEAN-001",
-            "nuoc tay trang bioderma":  "LUMI-CLEAN-001",
-            # LUMI-MASK-001 — Laneige Water Sleeping Mask
-            "lumi-mask-001":            "LUMI-MASK-001",
-            "laneige water sleeping mask": "LUMI-MASK-001",
-            "mặt nạ ngủ laneige":       "LUMI-MASK-001",
-            "mat na ngu laneige":       "LUMI-MASK-001",
-            "water sleeping mask":      "LUMI-MASK-001",
-            # LUMI-LIP-001 — Laneige Lip Sleeping Mask
-            "lumi-lip-001":             "LUMI-LIP-001",
-            "laneige lip mask":         "LUMI-LIP-001",
-            "lip sleeping mask":        "LUMI-LIP-001",
-            "mặt nạ ngủ môi":           "LUMI-LIP-001",
-            "mat na ngu moi":           "LUMI-LIP-001",
-            "laneige lip":              "LUMI-LIP-001",
-        }
+        # PRODUCT_ALIASES được nạp từ data/catalog/product_catalog.json lúc khởi động.
+        # Để thêm sản phẩm mới: chỉ cần cập nhật catalog JSON — không cần sửa code ở đây.
         # IDs quá chung chung, không tạo crisis entry riêng
         IGNORED_PIDS = {"general", "none", "unknown", "chat_general", ""}
 
