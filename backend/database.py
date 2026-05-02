@@ -180,6 +180,19 @@ class CustomerProfile(Base):
                                   onupdate=datetime.datetime.utcnow)
 
 
+# Bản sao lưu SQL cho mọi entry được ghi động vào resolved_qa_db (ChromaDB).
+# Mục đích: khi Vector DB bị xóa hoặc Render cold start, hệ thống replay lại
+# toàn bộ kiến thức đã học được (từ review và từ chat) vào ChromaDB.
+# Source values: "review" (từ /learn-from-review) | "chat" (từ /learn-feedback)
+class LearnedQAEntry(Base):
+    __tablename__ = "learned_qa_entries"
+    id         = Column(Integer, primary_key=True, index=True)
+    doc_id     = Column(String, unique=True, index=True)   # ID dùng trong ChromaDB (vd: "rev_abc123")
+    document   = Column(Text,   nullable=False)             # Nội dung đầy đủ lưu trong ChromaDB
+    source     = Column(String, default="review")           # "review" | "chat"
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+
 def get_or_create_customer_profile(db, customer_id: str) -> "CustomerProfile":
     """Lấy hồ sơ khách; tự tạo mới nếu chưa có."""
     profile = db.query(CustomerProfile).filter(

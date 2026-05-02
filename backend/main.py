@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from google.genai import types
 
 # Nhập các thành phần từ file khác
-from config import client, resolved_qa_col
+from config import client
 from models import (
     ProposalApproval, ProductRequest,
     StrategyProposal, ShopProfile, ChatSessionInput, ChatMessage, ReviewData
@@ -18,7 +18,7 @@ from services import (
     learn_from_human_service,
     chat_with_history_service
 )
-from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog, ContentSuggestion, CustomerProfile, get_or_create_customer_profile, StrategyProposalLog
+from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog, ContentSuggestion, CustomerProfile, get_or_create_customer_profile, StrategyProposalLog, LearnedQAEntry
 import config as _cfg
 from seed_demo import seed_vector_db, seed_sql_db, seed_content_suggestions, seed_customer_profiles
 
@@ -58,6 +58,22 @@ try:
         print("[startup] Vector DB trống — đang auto-seed dữ liệu nền...")
         seed_vector_db(_cfg.policy_col, _cfg.product_col, _cfg.resolved_qa_col)
         print("[startup] Auto-seed Vector DB hoàn tất.")
+
+        # Replay các entry đã học động (từ review/chat) — đây là kiến thức KHÔNG có trong seed files.
+        # Dùng upsert (không phải add) để an toàn khi PersistentClient đã có data.
+        _replay_db = SessionLocal()
+        try:
+            _learned = _replay_db.query(LearnedQAEntry).all()
+            if _learned:
+                _cfg.resolved_qa_col.upsert(
+                    documents=[e.document for e in _learned],
+                    ids=[e.doc_id for e in _learned]
+                )
+                print(f"[startup] Đã replay {len(_learned)} learned Q&A entries từ SQL vào resolved_qa_db.")
+        except Exception as _replay_err:
+            print(f"[startup] Cảnh báo: không thể replay learned Q&A entries: {_replay_err}")
+        finally:
+            _replay_db.close()
 except Exception as _seed_err:
     print(f"[startup] Cảnh báo: không thể auto-seed Vector DB: {_seed_err}")
 
@@ -443,16 +459,25 @@ async def process_and_learn_review(review: ReviewData):
         analysis = json.loads(clean_text)
         
         # 2. LƯU BÀI HỌC VÀO VECTOR DB (Dành cho AI Chatbot đọc)
+        # Dùng _cfg.resolved_qa_col (không import trực tiếp) để luôn trỏ đúng collection
+        # sau khi /system/reset-all tạo lại collection mới.
+        _qa_doc_id  = None
+        _qa_doc_txt = None
         if analysis.get("qa_knowledge") and analysis["qa_knowledge"] != "None":
-            doc_id = hashlib.md5(review.review_text.encode()).hexdigest()
-            resolved_qa_col.add(
-                documents=[f"[Kinh nghiệm từ Review {review.rating} sao]: {analysis['qa_knowledge']}"],
-                ids=[f"rev_{doc_id}"]
+            _qa_doc_id  = f"rev_{hashlib.md5(review.review_text.encode()).hexdigest()}"
+            _qa_doc_txt = f"[Kinh nghiệm từ Review {review.rating} sao]: {analysis['qa_knowledge']}"
+            _cfg.resolved_qa_col.add(
+                documents=[_qa_doc_txt],
+                ids=[_qa_doc_id]
             )
 
-        # 3. LƯU REVIEW GỐC & TẠO TASK VÀO SQL (Dành cho Dashboard hiển thị)
+        # 3. LƯU REVIEW GỐC, BACKUP LEARNED Q&A & TẠO TASK VÀO SQL
         db = SessionLocal()
         try:
+            # 3a. Backup entry học được vào SQL (để replay khi vector DB bị xóa)
+            if _qa_doc_id and _qa_doc_txt:
+                db.merge(LearnedQAEntry(doc_id=_qa_doc_id, document=_qa_doc_txt, source="review"))
+
             # Lưu lịch sử Review gốc
             new_review_log = ReviewLog(
                 product_id=review.product_id,
@@ -1072,6 +1097,7 @@ async def reset_all_data():
         db.query(ContentSuggestion).delete()
         db.query(CustomerProfile).delete()
         db.query(StrategyProposalLog).delete()
+        db.query(LearnedQAEntry).delete()   # Xóa kiến thức học được — đồng bộ với ChromaDB reset bên dưới
         db.commit()
 
         # 2. Xóa và tạo lại các Collections trong Vector DB.

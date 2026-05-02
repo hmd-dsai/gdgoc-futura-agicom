@@ -10,7 +10,7 @@ from config import client
 def _get_cols():
     return _cfg.policy_col, _cfg.product_col, _cfg.resolved_qa_col
 from prompts import CHAT_RAG_PROMPT, LEARNING_EXTRACTOR_PROMPT
-from database import SessionLocal, CoordinationTask, ChatLog, CustomerProfile, get_chat_history, save_message, get_or_create_customer_profile
+from database import SessionLocal, CoordinationTask, ChatLog, CustomerProfile, get_chat_history, save_message, get_or_create_customer_profile, LearnedQAEntry
 
 async def analyze_strategy_slow_track(data: dict):
     """THINK -> PLAN: Luồng chậm (Phân tích giá & Nội dung)"""
@@ -84,12 +84,26 @@ async def learn_from_human_service(customer_q: str, human_a: str):
         import hashlib
         doc_id = hashlib.md5(data['question'].encode()).hexdigest()
 
+        chroma_doc_id  = f"qa_{doc_id}"
+        chroma_doc_txt = f"Q: {data['question']} A: {data['answer']}"
+
         _, _, _resolved_qa_col = _get_cols()
         _resolved_qa_col.add(
-            documents=[f"Q: {data['question']} A: {data['answer']}"],
-            ids=[f"qa_{doc_id}"]
+            documents=[chroma_doc_txt],
+            ids=[chroma_doc_id]
         )
-        
+
+        # Backup vào SQL để replay khi vector DB bị xóa hoặc Render cold start
+        _bk_db = SessionLocal()
+        try:
+            _bk_db.merge(LearnedQAEntry(doc_id=chroma_doc_id, document=chroma_doc_txt, source="chat"))
+            _bk_db.commit()
+        except Exception as _bk_err:
+            _bk_db.rollback()
+            print(f"[services] Cảnh báo: không thể backup learned Q&A entry: {_bk_err}")
+        finally:
+            _bk_db.close()
+
         print(f"[*] Đã học thành công kiến thức mới: {data['question']}")
         return {"status": "Learned successfully", "data_saved": data}
 
