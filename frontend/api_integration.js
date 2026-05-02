@@ -1143,6 +1143,27 @@ async function handleResetAll() {
   }
 }
 
+async function handleSeedCrisisDemo() {
+  const confirmed = window.confirm(
+    '🛡 Seed dữ liệu Crisis Demo?\n\n' +
+    'Sẽ chèn thêm vào DB:\n' +
+    '  • 6 review tiêu cực (P011, P002, P003)\n' +
+    '  • 2 RiskManager tasks (P011, P002)\n' +
+    '  • 3 chat log có tín hiệu rủi ro\n\n' +
+    'Dữ liệu hiện có KHÔNG bị xóa.'
+  );
+  if (!confirmed) return;
+
+  try {
+    const res = await apiCall('/system/seed-crisis-demo', 'POST', null, 15000);
+    showToast('✅ ' + (res.message || 'Đã seed crisis demo thành công!'), 'success');
+    // Tự động chuyển sang Crisis Center để xem kết quả
+    setTimeout(() => navigate('crisis-center'), 1200);
+  } catch (err) {
+    showToast('❌ Lỗi seed crisis: ' + err.message, 'danger');
+  }
+}
+
 /* ──────────────────────────────────────────────────────────────────────
    10. INJECT UI VÀO CÁC TRANG — Override navigate()
    ────────────────────────────────────────────────────────────────────── */
@@ -1762,6 +1783,12 @@ function injectResetButton() {
           background:var(--accent-rose-bg);color:var(--accent-rose);
           font-weight:700;cursor:pointer;font-size:0.85rem;">
         🗑 Reset toàn bộ dữ liệu AI
+      </button>
+      <button onclick="handleSeedCrisisDemo()"
+        style="padding:8px 18px;border-radius:8px;border:2px solid #f59e0b;
+          background:rgba(245,158,11,0.08);color:#f59e0b;
+          font-weight:700;cursor:pointer;font-size:0.85rem;">
+        🛡 Seed dữ liệu Crisis Demo
       </button>
       <button onclick="loadDailySummary().catch(()=>{});navigate('dashboard')"
         style="padding:8px 18px;border-radius:8px;border:1px solid var(--border-primary);

@@ -1,0 +1,34 @@
+{
+  "__schema_version": "1.0",
+  "__description": "Crisis signal mock data: negative reviews (rating ≤ 3), RiskManager tasks, and risk chat logs. Loaded by seed_crisis_demo() in seed_demo.py. Add one entry per type to give Crisis Center signal data on a fresh install.",
+
+  "review_logs": [
+    {
+      "product_id": "<string: e.g. 'P011' — must match products.json>",
+      "rating": "<int: 1–3 — must be ≤ 3 to appear as a crisis signal>",
+      "review_text": "<string: the customer's negative review text>",
+      "customer_name": "<string: masked customer name, e.g. 'lan_thao_hcm'>",
+      "ai_insight": "<string: short insight label — used in Crisis Center card display>",
+      "hours_ago": "<int: 1–72 — how many hours before seed time this review was posted>"
+    }
+  ],
+
+  "coordination_tasks": [
+    {
+      "target_agent": "<string: 'RiskManager' — this is what crisis-overview filters on>",
+      "product_id": "<string: e.g. 'P011'>",
+      "instruction": "<string: actionable task description for the human risk manager>",
+      "status": "<string: 'pending' — keeps it visible in crisis-overview>",
+      "hours_ago": "<int: 1–48>"
+    }
+  ],
+
+  "chat_logs": [
+    {
+      "customer_q": "<string: customer message with a complaint or concern>",
+      "ai_a": "<string: AI reply>",
+      "insight": "<string: must contain a risk keyword (lỗi/hỏng/kém/khiếu nại/trả hàng/hoàn tiền/bức xúc) to be picked up by crisis-overview>",
+      "hours_ago": "<int: 1–48>"
+    }
+  ]
+}

@@ -218,6 +218,64 @@ def seed_customer_profiles(db):
     print(f"  → {len(profiles)} customer profiles")
 
 
+def seed_crisis_demo(db):
+    """
+    Chèn dữ liệu tín hiệu khủng hoảng mẫu vào DB — KHÔNG xóa dữ liệu hiện có.
+    Đọc từ data/mock/crisis_signals.json (cùng thư mục với các file mock khác).
+
+    Tín hiệu được chèn:
+      • ReviewLog tiêu cực (rating ≤ 3) cho các sản phẩm GIAO FARA
+      • CoordinationTask target_agent="RiskManager"
+      • ChatLog có risk keywords trong insight
+    """
+    print("[+] Seeding crisis demo signals từ crisis_signals.json...")
+    now = datetime.datetime.utcnow()
+    data = _load("crisis_signals.json")
+
+    # ── 1. Review tiêu cực ───────────────────────────────────────────────
+    crisis_reviews = [
+        ReviewLog(
+            product_id=item["product_id"],
+            rating=item["rating"],
+            review_text=item["review_text"],
+            customer_name=item.get("customer_name", "Ẩn danh"),
+            ai_insight=item.get("ai_insight", ""),
+            timestamp=now - datetime.timedelta(hours=item.get("hours_ago", 24)),
+        )
+        for item in data.get("review_logs", [])
+    ]
+    db.add_all(crisis_reviews)
+
+    # ── 2. Coordination Tasks gửi cho RiskManager ────────────────────────
+    crisis_tasks = [
+        CoordinationTask(
+            target_agent=item["target_agent"],
+            product_id=item["product_id"],
+            instruction=item["instruction"],
+            status=item.get("status", "pending"),
+            created_at=now - datetime.timedelta(hours=item.get("hours_ago", 12)),
+        )
+        for item in data.get("coordination_tasks", [])
+    ]
+    db.add_all(crisis_tasks)
+
+    # ── 3. Chat Logs có tín hiệu rủi ro ──────────────────────────────────
+    crisis_chat_logs = [
+        ChatLog(
+            customer_q=item["customer_q"],
+            ai_a=item["ai_a"],
+            insight=item["insight"],
+            timestamp=now - datetime.timedelta(hours=item.get("hours_ago", 24)),
+            is_archived=False,
+        )
+        for item in data.get("chat_logs", [])
+    ]
+    db.add_all(crisis_chat_logs)
+
+    db.commit()
+    print(f"  → {len(crisis_reviews)} review tiêu cực, {len(crisis_tasks)} RiskManager tasks, {len(crisis_chat_logs)} chat logs")
+
+
 def main():
     print("=== AGICOM DEMO SEEDER ===")
     print(f"Đọc dữ liệu từ: {_MOCK_DIR}\n")

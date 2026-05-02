@@ -1,0 +1,93 @@
+{
+  "__schema_version": "1.0",
+  "__description": "Crisis signal mock data: negative reviews (rating ≤ 3), RiskManager tasks, and risk chat logs for GIAO FARA products. Loaded exclusively by seed_crisis_demo() in seed_demo.py. Included in every full reset (reset-all) and also callable standalone via POST /system/seed-crisis-demo.",
+
+  "review_logs": [
+    {
+      "product_id": "P011",
+      "rating": 2,
+      "review_text": "Kem rửa mặt dùng 3 ngày mặt nổi mụn li ti, da đang ổn mà dùng thêm vào thì hỏng. Không biết có phải do sản phẩm không nhưng thôi dừng dùng an toàn hơn.",
+      "customer_name": "lan_thao_hcm",
+      "ai_insight": "Tiêu cực: phản ứng da, nổi mụn | CS: Cần tư vấn và xem xét đổi trả",
+      "hours_ago": 5
+    },
+    {
+      "product_id": "P011",
+      "rating": 1,
+      "review_text": "Da mình khô nhưng xài kem này xong thấy khô và căng rát hơn hẳn. Shop tư vấn mình da khô dùng được mà sao lại vậy? Muốn đổi hàng.",
+      "customer_name": "user_khanh99",
+      "ai_insight": "Tiêu cực: da khô, căng rát | CS: Khách yêu cầu đổi hàng",
+      "hours_ago": 18
+    },
+    {
+      "product_id": "P011",
+      "rating": 2,
+      "review_text": "Hộp bị móp khi nhận hàng, nắp bị nứt một góc. May mà sản phẩm bên trong chưa bị hỏng nhưng lo lắng về vệ sinh.",
+      "customer_name": "phuong_bt",
+      "ai_insight": "Tiêu cực: đóng gói hỏng, móp méo | CS: Báo lỗi vận chuyển",
+      "hours_ago": 30
+    },
+    {
+      "product_id": "P002",
+      "rating": 1,
+      "review_text": "Son khô môi kinh khủng, dùng 1 tiếng là bong tróc cả lớp son. Màu cũng bay nhanh hơn mình tưởng rất nhiều, không lì như quảng cáo.",
+      "customer_name": "beautylove_hk",
+      "ai_insight": "Tiêu cực: son bong tróc, màu không bền | CS: Chất lượng sản phẩm không đúng mô tả",
+      "hours_ago": 8
+    },
+    {
+      "product_id": "P002",
+      "rating": 2,
+      "review_text": "Đặt màu 12 mà nhận về khác màu hoàn toàn, inbox shop 2 ngày không ai trả lời. Cảm giác bị lừa.",
+      "customer_name": "minhnga_saigon",
+      "ai_insight": "Tiêu cực: sai màu, không được phản hồi | CS: Khiếu nại giao sai sản phẩm",
+      "hours_ago": 14
+    },
+    {
+      "product_id": "P003",
+      "rating": 2,
+      "review_text": "Phấn kềm dầu ghi vậy nhưng mình da dầu dùng xong 2 tiếng là đổ dầu hết rồi. Có thể không hợp với da dầu nhiều quá.",
+      "customer_name": "thanhthao_nt",
+      "ai_insight": "Tiêu cực: không kềm dầu như quảng cáo | CS: Tư vấn da dầu",
+      "hours_ago": 40
+    }
+  ],
+
+  "coordination_tasks": [
+    {
+      "target_agent": "RiskManager",
+      "product_id": "P011",
+      "instruction": "CẢNH BÁO: 3 review tiêu cực liên tiếp cho P011 (Kem Rửa Mặt Hada Labo) trong 48h — phản ứng da (mụn, khô rát) + đóng gói hỏng khi giao. Cần kiểm tra lô hàng hiện tại và liên hệ khách hàng bị ảnh hưởng.",
+      "status": "pending",
+      "hours_ago": 4
+    },
+    {
+      "target_agent": "RiskManager",
+      "product_id": "P002",
+      "instruction": "Khách khiếu nại giao sai màu son (P002 - Son Kem Lì GIAO FARA): đặt màu 12 nhận về màu khác, inbox 2 ngày chưa được phản hồi. Cần xử lý khiếu nại ngay và kiểm tra lại ảnh listing trên sàn.",
+      "status": "pending",
+      "hours_ago": 12
+    }
+  ],
+
+  "chat_logs": [
+    {
+      "customer_q": "Kem rửa mặt mình mua về dùng xong nổi mụn hết mặt rồi, phải làm sao?",
+      "ai_a": "Dạ em xin lỗi anh/chị ạ! Hiện tượng nổi mụn sau khi dùng sản phẩm mới có thể do da đang phản ứng với thành phần. Anh/chị vui lòng ngừng dùng ngay và inbox để em hỗ trợ đổi/hoàn trả nhé!",
+      "insight": "Khách phàn nàn Kem Rửa Mặt gây nổi mụn — cần theo dõi phản ứng da",
+      "hours_ago": 6
+    },
+    {
+      "customer_q": "Tôi mua son màu 12 nhưng màu nhận được khác hẳn, tôi muốn hoàn tiền",
+      "ai_a": "Dạ em xin lỗi anh/chị về sự cố này ạ! Em sẽ chuyển ngay cho bộ phận xử lý khiếu nại để hỗ trợ anh/chị đổi đúng màu hoặc hoàn tiền trong hôm nay nhé.",
+      "insight": "Khách yêu cầu hoàn tiền Son Kem Lì do giao sai màu",
+      "hours_ago": 15
+    },
+    {
+      "customer_q": "Hàng giao hộp bị móp nát, em lo sản phẩm bên trong bị hỏng không biết có an toàn không",
+      "ai_a": "Dạ em xin lỗi anh/chị vì sự cố đóng gói ạ! Nếu sản phẩm bên trong còn nguyên vẹn thì vẫn dùng được, nhưng em sẽ báo lại đơn vị vận chuyển và có thể đề xuất đổi hàng mới cho anh/chị.",
+      "insight": "Khách bức xúc hàng giao hộp bị móp — lỗi vận chuyển",
+      "hours_ago": 32
+    }
+  ]
+}

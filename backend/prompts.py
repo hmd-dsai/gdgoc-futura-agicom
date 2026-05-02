@@ -128,7 +128,7 @@ Nhiệm vụ:
    - category: "apology" | "escalate" | "logistics" | "quality_check" | "marketing" | "monitor"
    - title: Tiêu đề ngắn (≤ 10 từ)
    - detail: Mô tả cụ thể (1–2 câu), nêu rõ ai làm gì và kết quả mong muốn
-   - draft_message: (CHỈ khi category là "apology" hoặc "escalate") Mẫu tin nhắn soạn sẵn tiếng Việt, tự nhiên, thân thiện. LUÔN xưng hô "anh/chị" hoặc "bạn" (trung lập giới tính) — KHÔNG dùng "Nàng", "Bạn thân", hay bất kỳ đại từ thân mật nào khác.
+   - draft_message: (CHỈ khi category là "apology" hoặc "escalate") Mẫu tin nhắn soạn sẵn tiếng Việt, tự nhiên, thân thiện. LUÔN xưng hô "anh/chị" (trung lập giới tính) — KHÔNG dùng "Nàng", "Bạn thân", hay bất kỳ đại từ thân mật nào khác.
 
 Trả về JSON thuần tuý (không markdown):
 {{

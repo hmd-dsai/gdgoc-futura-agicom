@@ -130,9 +130,13 @@ const MOCK = {
   review_tags_neg: ['Shipper thái độ', 'Cáp bị gập', 'Đóng gói móp'],
 
   reviews: [
-    { author: 'khachhang_vip', date: 'Hôm qua', rating: 2, text: 'Giao hàng hộp bị móp nặng, may mà bên trong điện thoại không sao. Mong shop nhắc bên vận chuyển cẩn thận hơn.', tag: { type: 'neg', label: 'Đóng gói / Vận chuyển' } },
-    { author: 'nguyentuan123', date: '2 ngày trước', rating: 5, text: 'Máy móc thì ngon lành, nguyên seal. Nhưng mà shop tư vấn siêu nhiệt tình, tôi hỏi đủ thứ móp méo lúc 1h sáng mà bot vẫn rep mượt như người thật =))) 10 điểm.', tag: { type: 'pos', label: 'AI Chat Support' } },
-    { author: 'minhnguyet', date: '3 ngày trước', rating: 1, text: 'Cáp Anker 100W xài 1 tuần đã hư, sạc rất chậm. Yêu cầu hoàn tiền!', tag: { type: 'neg', label: 'Chất lượng SP' } }
+    { product_id: 'P011', author: 'lan_thao_hcm',   date: 'Hôm qua',       rating: 2, text: 'Kem rửa mặt dùng 3 ngày mặt nổi mụn li ti, da đang ổn mà dùng thêm vào thì hỏng. Không biết có phải do sản phẩm không nhưng thôi dừng an toàn hơn.', tag: { type: 'neg', label: 'Chất lượng SP' } },
+    { product_id: 'P011', author: 'user_khanh99',   date: 'Hôm qua',       rating: 1, text: 'Da mình khô nhưng xài kem này xong thấy khô và căng rát hơn hẳn. Shop tư vấn mình da khô dùng được mà sao lại vậy? Muốn đổi hàng.', tag: { type: 'neg', label: 'Chất lượng SP' } },
+    { product_id: 'P011', author: 'phuong_bt',       date: '2 ngày trước',  rating: 2, text: 'Hộp bị móp khi nhận hàng, nắp bị nứt một góc. May mà sản phẩm bên trong chưa bị hỏng nhưng lo lắng về vệ sinh.', tag: { type: 'neg', label: 'Đóng gói / Vận chuyển' } },
+    { product_id: 'P002', author: 'beautylove_hk',  date: 'Hôm qua',       rating: 1, text: 'Son khô môi kinh khủng, dùng 1 tiếng là bong tróc cả lớp son. Màu cũng bay nhanh hơn mình tưởng, không lì như quảng cáo.', tag: { type: 'neg', label: 'Chất lượng SP' } },
+    { product_id: 'P002', author: 'minhnga_saigon', date: '2 ngày trước',  rating: 2, text: 'Đặt màu 12 mà nhận về khác màu hoàn toàn, inbox shop 2 ngày không ai trả lời. Cảm giác bị lừa.', tag: { type: 'neg', label: 'Giao sai sản phẩm' } },
+    { product_id: 'P003', author: 'thanhthao_nt',   date: '3 ngày trước',  rating: 2, text: 'Phấn kềm dầu ghi vậy nhưng mình da dầu dùng xong 2 tiếng là đổ dầu hết rồi. Có thể không hợp với da dầu nhiều quá.', tag: { type: 'neg', label: 'Chất lượng SP' } },
+    { product_id: 'P001', author: 'nguyentuan123',  date: '3 ngày trước',  rating: 5, text: 'Son bóng màu đẹp lắm, xài mượt không bết. Shop đóng gói cẩn thận, ship nhanh. Mình sẽ mua thêm cho bạn bè.', tag: { type: 'pos', label: 'Chất lượng SP' } },
   ],
 
   // Media & Ads
@@ -196,9 +200,10 @@ const MOCK = {
 
   // Issue clusters from AI pattern detection
   chat_clusters: [
-    { icon: '🔴', label: 'Cáp Anker 100W lỗi', count: 8, impact: 'Cao — rủi ro khủng hoảng', action: 'Tạm dừng bán + liên hệ NCC', urgent: true },
-    { icon: '🟡', label: 'Hỏi thời lượng pin S24 Ultra', count: 23, impact: 'Mất ~30% cơ hội chốt đơn', action: 'Quay video test pin 24h', urgent: false },
-    { icon: '🟡', label: 'Hỏi hàng auth, tem chính hãng', count: 17, impact: 'Giảm tỷ lệ tin tưởng', action: 'Thêm video unbox + tem vào ảnh SP', urgent: false },
+    { icon: '🔴', label: 'Kem Rửa Mặt Hada Labo gây kích ứng da', count: 5, product_id: 'P011', impact: 'Cao — rủi ro khủng hoảng', action: 'Liên hệ khách + kiểm tra lô hàng', urgent: true },
+    { icon: '🟡', label: 'Son Kem Lì giao sai màu / khô môi', count: 7, product_id: 'P002', impact: 'Trung bình — ảnh hưởng rating', action: 'Kiểm tra listing ảnh + xử lý khiếu nại', urgent: true },
+    { icon: '🟡', label: 'Hỏi màu son phù hợp với tone da', count: 18, product_id: 'P001', impact: 'Mất ~25% cơ hội chốt đơn', action: 'Làm video swatches so sánh màu da', urgent: false },
+    { icon: '🔵', label: 'Hỏi Phấn Phủ có hợp da dầu không', count: 12, product_id: 'P003', impact: 'Thấp — cần nội dung giải thích', action: 'Cập nhật mô tả cho từng loại da', urgent: false },
     { icon: '🔵', label: 'Hỏi giá sỉ từ 5 máy trở lên', count: 12, impact: 'Cơ hội B2B mới', action: 'Tạo bảng giá sỉ chính thức', urgent: false },
     { icon: '🔵', label: 'Phàn nàn hộp bị móp khi ship', count: 8, impact: 'Ảnh hưởng review', action: 'Đổi thùng carton 5 lớp (+2k/đơn)', urgent: false }
   ],
@@ -210,170 +215,32 @@ const MOCK = {
     { name: 'Hoàng Đức', reason: 'Đơn hàng #TK-890 ship 5 ngày, chưa nhận — rủi ro khiếu nại', value: 'Phòng ngừa complaint', action: 'Chủ động hỏi thăm' }
   ],
 
-  // Crisis data — dữ liệu tĩnh giả lập đã bị xoá.
-  // Trang crisis-center hoàn toàn dùng dữ liệu thực từ backend (/api/crisis-overview).
-  // Khi backend offline, api_integration.js tự tổng hợp từ MOCK.reviews + MOCK.conversations.
+  // Crisis data — dữ liệu mẫu cho GIAO FARA (dùng khi backend offline).
+  // Khi backend online, Crisis Center tự động dùng /api/crisis-overview.
+  // _buildCrisisFromMockData() đọc MOCK.reviews + MOCK.conversations bên dưới.
   crises: [
     {
-      id: 'cr-001',
-      product: 'Cáp Anker 100W',
-      sku: 'SKU-ANK-100W',
-      severity: 'critical',  // critical | warning | monitoring
-      status: 'active',      // active | in_progress | resolved
-      detected_at: '07:12, 15/04/2026',
-      revenue_at_risk: 28000000,
-      affected_customers: 8,
-      severity_score: 91,
-
-      // Signal từ từng agent
-      signals: [
-        {
-          agent: 'Market Agent',
-          icon: '📊',
-          color: '#ef4444',
-          title: '3 review 1 sao mới trên Shopee',
-          detail: 'Tất cả đề cập "sạc cực chậm sau 1 tuần dùng" — xuất hiện trong 6 giờ qua',
-          detected_at: '06:45',
-          evidence: [
-            { type: 'review', author: 'user_abc', text: 'Cáp xài 1 tuần là chết, sạc rất chậm', rating: 1 },
-            { type: 'review', author: 'hoangmanh92', text: 'Hàng lỗi, pin không vào', rating: 1 },
-            { type: 'review', author: 'lanpham_hcm', text: 'Mua về 10 ngày tự dưng không sạc được', rating: 1 }
-          ]
-        },
-        {
-          agent: 'Chat Agent',
-          icon: '💬',
-          color: '#f59e0b',
-          title: '5 khách inbox phàn nàn cùng vấn đề',
-          detail: 'Pattern: "cáp + không sạc / chậm" — cùng lô hàng T03/2026',
-          detected_at: '07:02',
-          evidence: [
-            { type: 'chat', author: 'Hoàng Mạnh', text: 'Cáp xài 1 tuần hư rồi', time: '08:32' },
-            { type: 'chat', author: 'Lê Văn C', text: 'Mua cáp về không sạc được máy', time: '07:55' },
-            { type: 'chat', author: 'Nguyễn T.D', text: 'Cáp bị lỗi, sạc không vào pin', time: '07:41' },
-            { type: 'chat', author: 'Trịnh Hoa', text: 'Đổi trả giúp em, cáp hỏng rồi', time: '07:20' },
-            { type: 'chat', author: 'Vũ Đình K', text: 'Cáp mua 5 ngày sạc cực chậm', time: '06:58' }
-          ]
-        },
-        {
-          agent: 'Content Agent',
-          icon: '🎵',
-          color: '#0ea5e9',
-          title: '1 video TikTok viral chê sản phẩm',
-          detail: '@techreview_vn đăng video "Cáp Anker 100W hàng shop X bị lỗi" — đang lan nhanh',
-          detected_at: '07:10',
-          evidence: [
-            { type: 'tiktok', account: '@techreview_vn', views: 52000, likes: 3400,
-              comments: 287, text: '"Test thực tế: Cáp Anker 100W mua ở shop X — sau 1 tuần sạc cực chậm, đo thực tế chỉ còn 18W thay vì 100W"',
-              trend: 'Tăng 12k views/giờ' }
-          ]
-        }
-      ],
-
-      // Orchestrator analysis
-      orchestrator: {
-        root_cause: 'Lô hàng Cáp Anker 100W nhập tháng 3/2026 (batch T03) có khả năng lỗi chip sạc — dẫn đến tụt hiệu suất sau 5-10 ngày sử dụng. Cần kiểm tra QC toàn bộ lô.',
-        revenue_projection: 'Nếu không xử lý trong 24h: ước tính mất thêm 15-20 khách, doanh thu rủi ro ~65M, rating Shopee giảm 0.3★',
-        confidence: 94
-      },
-
-      // Action checklist
-      actions: [
-        {
-          id: 'act-1', order: 1, priority: 'critical',
-          title: 'Tạm dừng quảng cáo Cáp Anker 100W',
-          detail: 'Dừng ngay 2 campaign đang chạy trên Shopee Search và TikTok để tránh thu hút thêm khách mua hàng lỗi',
-          status: 'done',
-          done_by: 'AI Agent', done_at: '07:13',
-          draft: null
-        },
-        {
-          id: 'act-2', order: 2, priority: 'critical',
-          title: 'Ẩn sản phẩm khỏi gian hàng tạm thời',
-          detail: 'Không cho phép đặt hàng mới cho đến khi xác nhận vấn đề lô hàng',
-          status: 'pending',
-          draft: null
-        },
-        {
-          id: 'act-3', order: 3, priority: 'high',
-          title: 'Gửi voucher xin lỗi 8 khách bị ảnh hưởng',
-          detail: '8 khách đã mua lô T03 — gửi voucher 50k + tin nhắn xin lỗi cá nhân hoá',
-          status: 'pending',
-          draft: 'Chào anh/chị [Tên], shop PhoneMax thành thật xin lỗi về sự cố với sản phẩm Cáp Anker 100W anh/chị đã mua. Chúng tôi đã phát hiện lỗi trong lô hàng này và đang xử lý gấp. Shop xin gửi anh/chị voucher 50.000đ áp dụng cho đơn hàng tiếp theo, và sẵn sàng hỗ trợ đổi/trả sản phẩm miễn phí. Mong anh/chị thông cảm 🙏'
-        },
-        {
-          id: 'act-4', order: 4, priority: 'high',
-          title: 'Liên hệ nhà cung cấp kiểm tra QC lô T03/2026',
-          detail: 'Email/gọi Anker Vietnam yêu cầu kiểm tra toàn bộ lô T03, xác nhận có lỗi batch hay không',
-          status: 'pending',
-          draft: 'Kính gửi Anker Vietnam,\n\nChúng tôi ghi nhận 8 phản hồi từ khách hàng về sản phẩm Cáp Anker 100W (lô T03/2026) bị giảm hiệu suất sạc sau 5-10 ngày. Đề nghị kiểm tra QC lô hàng này và phản hồi trong 24 giờ.\n\nShop PhoneMax'
-        },
-        {
-          id: 'act-5', order: 5, priority: 'medium',
-          title: 'Soạn thông báo recall lô hàng (nếu NCC xác nhận lỗi)',
-          detail: 'Chuẩn bị sẵn thông báo thu hồi để đăng ngay khi có kết quả từ NCC',
-          status: 'pending',
-          draft: 'THÔNG BÁO: Shop PhoneMax tạm ngừng bán Cáp Anker 100W lô tháng 3/2026 để kiểm tra chất lượng. Khách đã mua sản phẩm trong giai đoạn 01/03-15/04/2026 vui lòng inbox shop để được hỗ trợ đổi hàng hoàn toàn miễn phí.'
-        },
-        {
-          id: 'act-6', order: 6, priority: 'medium',
-          title: 'Phản hồi video TikTok @techreview_vn',
-          detail: 'Comment chuyên nghiệp dưới video, thể hiện trách nhiệm và cam kết xử lý',
-          status: 'pending',
-          draft: 'Cảm ơn bạn đã phản hồi. Shop đã ghi nhận và đang kiểm tra kỹ lô hàng này. Bạn hoặc bất kỳ khách nào gặp sự cố tương tự vui lòng inbox shop để được đổi hàng mới 100% miễn phí. Chúng tôi cam kết xử lý trong 24h. Xin lỗi vì sự bất tiện này 🙏'
-        }
-      ],
-
-      // Affected customers list
-      affected_customers_list: [
-        { name: 'Hoàng Mạnh', platform: 'TikTok', order_date: '07/04', status: 'Chưa liên hệ', value: 350000 },
-        { name: 'Lê Văn C', platform: 'Shopee', order_date: '05/04', status: 'Chưa liên hệ', value: 350000 },
-        { name: 'Nguyễn T.D', platform: 'Shopee', order_date: '03/04', status: 'Chưa liên hệ', value: 350000 },
-        { name: 'Trịnh Hoa', platform: 'Tiki', order_date: '01/04', status: 'Chưa liên hệ', value: 350000 },
-        { name: 'Vũ Đình K', platform: 'Shopee', order_date: '28/03', status: 'Chưa liên hệ', value: 350000 },
-        { name: 'user_abc', platform: 'Shopee', order_date: '25/03', status: 'Đã review 1★', value: 350000 },
-        { name: 'hoangmanh92', platform: 'Shopee', order_date: '22/03', status: 'Đã review 1★', value: 350000 },
-        { name: 'lanpham_hcm', platform: 'Shopee', order_date: '18/03', status: 'Đã review 1★', value: 350000 }
-      ],
-
-      // Event timeline
-      timeline: [
-        { time: '06:45', agent: 'Market Agent', event: 'Phát hiện 3 review 1★ trong 6 giờ — vượt ngưỡng cảnh báo (>2 reviews xấu/6h)' },
-        { time: '07:02', agent: 'Chat Agent', event: 'Phát hiện 5 cuộc hội thoại có pattern "cáp + lỗi" — cluster confidence 94%' },
-        { time: '07:10', agent: 'Content Agent', event: 'Video TikTok @techreview_vn đạt 52k views — vượt ngưỡng viral (>10k views)' },
-        { time: '07:12', agent: 'Orchestrator', event: '3 tín hiệu hội tụ → Severity Score 91/100 → Phát cảnh báo MỨC ĐỎ' },
-        { time: '07:13', agent: 'AI Agent', event: 'Tự động dừng 2 campaign quảng cáo đang chạy (đã thực thi)' },
-        { time: '07:15', agent: 'System', event: 'Push notification đến chủ shop — đang chờ phê duyệt 5 hành động còn lại' }
-      ]
+      id: 'cr-p011',
+      product: 'Kem Rửa Mặt Hada Labo 80g',
+      product_id: 'P011',
+      severity: 'critical',
+      status: 'active',
+      severity_score: 75,
+      neg_review_count: 3,
+      risk_task_count: 1,
+      chat_signal_count: 2,
     },
     {
-      id: 'cr-002',
-      product: 'Mi Band 7 Xanh',
-      sku: 'SKU-MIB7-X',
+      id: 'cr-p002',
+      product: 'Son Kem Lì GIAO FARA Siêu Lì Mịn',
+      product_id: 'P002',
       severity: 'warning',
-      status: 'monitoring',
-      detected_at: '05:30, 15/04/2026',
-      revenue_at_risk: 5800000,
-      affected_customers: 3,
+      status: 'active',
       severity_score: 45,
-      signals: [
-        { agent: 'Market Agent', icon: '📊', color: '#f59e0b',
-          title: '2 review 2 sao về pin yếu', detail: 'Chưa đủ ngưỡng cảnh báo đỏ', detected_at: '05:30', evidence: [] },
-        { agent: 'Chat Agent', icon: '💬', color: '#94a3b8',
-          title: '1 khách hỏi về đổi trả', detail: 'Đơn lẻ, chưa thành pattern', detected_at: '06:10', evidence: [] }
-      ],
-      orchestrator: { root_cause: 'Đang theo dõi — chưa đủ tín hiệu để xác nhận lỗi batch', revenue_projection: 'Rủi ro thấp nếu xử lý sớm', confidence: 45 },
-      actions: [
-        { id: 'act-w1', order: 1, priority: 'medium', title: 'Theo dõi thêm 24h', detail: 'Nếu thêm 2 review xấu → tự động escalate lên MỨC ĐỎ', status: 'done', draft: null },
-        { id: 'act-w2', order: 2, priority: 'low', title: 'Liên hệ chủ động 3 khách', detail: 'Hỏi thăm trải nghiệm sản phẩm', status: 'pending', draft: 'Chào anh/chị, shop PhoneMax xin hỏi thăm trải nghiệm với Mi Band 7 ạ...' }
-      ],
-      affected_customers_list: [],
-      timeline: [
-        { time: '05:30', agent: 'Market Agent', event: 'Phát hiện 2 review 2★ — Severity Score 35' },
-        { time: '06:10', agent: 'Chat Agent', event: 'Phát hiện 1 khách hỏi đổi trả — Severity Score tăng lên 45' },
-        { time: '06:12', agent: 'Orchestrator', event: 'Severity 45 < 70 → Chuyển sang chế độ Monitoring' }
-      ]
-    }
+      neg_review_count: 2,
+      risk_task_count: 1,
+      chat_signal_count: 1,
+    },
   ],
 
   // Chat messages — populated at runtime by api_integration.js

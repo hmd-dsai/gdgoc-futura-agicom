@@ -21,7 +21,7 @@ from services import (
 )
 from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog, ContentSuggestion, CustomerProfile, get_or_create_customer_profile, StrategyProposalLog, LearnedQAEntry, CrisisPlan, CrisisAction
 import config as _cfg
-from seed_demo import seed_vector_db, seed_sql_db, seed_content_suggestions, seed_customer_profiles
+from seed_demo import seed_vector_db, seed_sql_db, seed_content_suggestions, seed_customer_profiles, seed_crisis_demo
 
 # ---------------------------------------------------------------------------
 # Product catalog — built once at startup from data/catalog/product_catalog.json.
@@ -1353,8 +1353,30 @@ async def reset_all_data():
         seed_sql_db(db)
         seed_content_suggestions(db)
         seed_customer_profiles(db)
+        seed_crisis_demo(db)   # Seed tín hiệu khủng hoảng mẫu cho Crisis Center
 
         return {"status": "success", "message": "Hệ thống đã được reset và nạp lại toàn bộ dữ liệu nền thành công."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
+@app.post("/system/seed-crisis-demo")
+async def seed_crisis_demo_endpoint():
+    """
+    Chèn dữ liệu khủng hoảng mẫu (6 review tiêu cực + 2 RiskManager tasks + 3 chat logs)
+    cho sản phẩm GIAO FARA thực tế — KHÔNG xóa dữ liệu hiện có.
+    Dùng để test Crisis Center mà không cần reset toàn bộ hệ thống.
+    """
+    db = SessionLocal()
+    try:
+        seed_crisis_demo(db)
+        return {
+            "status": "success",
+            "message": "Đã chèn dữ liệu crisis demo: 6 review tiêu cực (P011/P002/P003), 2 RiskManager tasks, 3 chat log rủi ro."
+        }
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
