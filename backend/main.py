@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 import hashlib
 import os
+import re
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from google.genai import types
@@ -566,6 +567,34 @@ async def get_shop_profile():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+def _classify_issue(key_issue: str, review_text: str) -> str:
+    """
+    Phân loại vấn đề từ key_issue + review_text thành một category ổn định.
+    Dùng để dedup CoordinationTask: nhiều review cùng loại vấn đề → gộp vào 1 task.
+
+    Categories:
+      quality    — chất lượng sản phẩm (màu, độ bền, thành phần, kích ứng…)
+      shipping   — giao hàng / đóng gói
+      price      — giá cả
+      wrong_item — giao sai hàng / sai màu
+      general    — fallback
+    """
+    text = (key_issue + " " + review_text).lower()
+    if any(w in text for w in ["sai màu", "sai hàng", "sai sản phẩm", "nhầm hàng", "không đúng màu", "không đúng hàng"]):
+        return "wrong_item"
+    if any(w in text for w in ["giao hàng", "ship", "shipper", "đóng gói", "hộp bị", "móp", "vỡ", "rò rỉ", "bao bì"]):
+        return "shipping"
+    if any(w in text for w in ["giá", "đắt", "rẻ", "giảm giá", "chiết khấu", "giá cả", "giá cao"]):
+        return "price"
+    if any(w in text for w in [
+        "chất lượng", "màu bay", "màu phai", "bong tróc", "khô môi", "lông rụng", "gãy cán",
+        "kích ứng", "nổi mụn", "dị ứng", "rát", "không lì", "không bền", "purging",
+        "thành phần", "mùi", "texture", "độ bám", "trôi màu", "kem bị", "son bị"
+    ]):
+        return "quality"
+    return "general"
+
+
 @app.post("/learn-from-review")
 async def process_and_learn_review(review: ReviewData):
     try:
@@ -610,23 +639,52 @@ async def process_and_learn_review(review: ReviewData):
             )
             db.add(new_review_log)
 
-            # Tạo Task nếu Review xấu
+            # Tạo Task nếu Review xấu — với deduplication
             if analysis.get("action_needed") or review.rating <= 3:
-                instruction = f"CẢNH BÁO REVIEW {review.rating} SAO: {analysis.get('key_issue')}. Nội dung: '{review.review_text}'"
-                
+                key_issue = analysis.get('key_issue', '')
+
+                # Xác định agent phù hợp
                 target_agent = "RiskManager"
                 if "giá" in review.review_text.lower():
                     target_agent = "Pricing"
-                elif "màu" in review.review_text.lower():
+                elif "màu" in review.review_text.lower() and "chất lượng" not in review.review_text.lower():
                     target_agent = "Content"
-                    
-                new_task = CoordinationTask(
-                    target_agent=target_agent,
-                    product_id=review.product_id,
-                    instruction=instruction,
-                    status="pending"
-                )
-                db.add(new_task)
+
+                # Phân loại vấn đề thành category ổn định để dedup
+                issue_type = _classify_issue(key_issue, review.review_text)
+
+                # Kiểm tra xem đã có task pending cho cùng sản phẩm + agent + loại vấn đề chưa
+                existing_task = db.query(CoordinationTask).filter(
+                    CoordinationTask.product_id  == review.product_id,
+                    CoordinationTask.target_agent == target_agent,
+                    CoordinationTask.issue_type   == issue_type,
+                    CoordinationTask.status       == "pending"
+                ).first()
+
+                if existing_task:
+                    # Gộp tín hiệu vào task đã có thay vì tạo task mới
+                    existing_task.signal_count = (existing_task.signal_count or 1) + 1
+                    count = existing_task.signal_count
+                    # Cập nhật prefix đếm tín hiệu, giữ nguyên nội dung gốc
+                    base_instruction = existing_task.instruction
+                    # Loại bỏ prefix cũ nếu có (dạng "[N tín hiệu] ")
+                    base_instruction = re.sub(r'^\[\d+ tín hiệu\] ', '', base_instruction)
+                    existing_task.instruction = f"[{count} tín hiệu] {base_instruction}"
+                else:
+                    # Tạo task mới
+                    instruction = (
+                        f"CẢNH BÁO REVIEW {review.rating} SAO: {key_issue}. "
+                        f"Nội dung: '{review.review_text[:200]}'"
+                    )
+                    new_task = CoordinationTask(
+                        target_agent  = target_agent,
+                        product_id    = review.product_id,
+                        instruction   = instruction,
+                        status        = "pending",
+                        signal_count  = 1,
+                        issue_type    = issue_type,
+                    )
+                    db.add(new_task)
             
             db.commit()
         except Exception as db_e:
@@ -730,7 +788,14 @@ async def get_crisis_overview():
                 pid = "unknown"
             if pid not in product_signals:
                 product_signals[pid] = {"neg_reviews": [], "risk_tasks": [], "chat_signals": []}
-            product_signals[pid]["risk_tasks"].append(t.instruction or "")
+            # Bao gồm signal_count để crisis center hiển thị "N tín hiệu gộp"
+            signal_count = t.signal_count if t.signal_count and t.signal_count > 1 else None
+            task_text = t.instruction or ""
+            if signal_count:
+                # Đảm bảo prefix tín hiệu luôn hiển thị dù DB cũ chưa có prefix
+                if not re.match(r'^\[\d+ tín hiệu\]', task_text):
+                    task_text = f"[{signal_count} tín hiệu] {task_text}"
+            product_signals[pid]["risk_tasks"].append(task_text)
 
         for log in risk_chat_insights:
             pid = "chat_general"

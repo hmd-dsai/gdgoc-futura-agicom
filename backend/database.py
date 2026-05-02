@@ -43,11 +43,14 @@ class ReviewLog(Base):
 class CoordinationTask(Base):
     __tablename__ = "coordination_tasks"
     id = Column(Integer, primary_key=True, index=True)
-    target_agent = Column(String) # "Pricing" hoặc "Content"
+    target_agent = Column(String) # "RiskManager", "Pricing", "Content"
     product_id = Column(String)
     instruction = Column(Text)
     status = Column(String, default="pending") # pending, completed, archived
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    # Deduplication fields (thêm từ v1.1)
+    signal_count = Column(Integer, default=1)   # Số review đã gộp vào task này
+    issue_type   = Column(String, nullable=True) # Category: quality/shipping/price/wrong_item/general
 
 # Bảng lưu trữ báo cáo đã xuất
 class DailySummaryArchive(Base):
@@ -248,6 +251,9 @@ def init_db():
             "ALTER TABLE chat_messages ADD COLUMN is_safe BOOLEAN",
             "ALTER TABLE chat_messages ADD COLUMN confidence_score FLOAT",
             "ALTER TABLE chat_messages ADD COLUMN sentiment VARCHAR",
+            # v1.1 — CoordinationTask deduplication
+            "ALTER TABLE coordination_tasks ADD COLUMN signal_count INTEGER DEFAULT 1",
+            "ALTER TABLE coordination_tasks ADD COLUMN issue_type VARCHAR",
         ]
         for sql in migrations:
             try:
