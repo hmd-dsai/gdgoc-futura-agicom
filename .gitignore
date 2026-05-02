@@ -1,5 +1,7 @@
 # Databases & Vector Stores
 agicom_system.db
+*.db-shm
+*.db-wal
 chroma_db/
 chroma_data/
 
