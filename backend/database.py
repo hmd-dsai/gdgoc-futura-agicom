@@ -180,6 +180,39 @@ class CustomerProfile(Base):
                                   onupdate=datetime.datetime.utcnow)
 
 
+# ── Crisis Management ───────────────────────────────────────────────────────
+
+# Kế hoạch xử lý khủng hoảng do AI sinh ra, lưu per-product.
+# Được tạo khi chủ shop bấm "Generate Plan" hoặc lần đầu vào crisis-center.
+# Tái tạo được qua nút "Regenerate".
+class CrisisPlan(Base):
+    __tablename__ = "crisis_plans"
+    id                 = Column(Integer, primary_key=True, index=True)
+    plan_id            = Column(String, unique=True, index=True)   # vd: "plan_P011_1746200000"
+    product_id         = Column(String, index=True)
+    root_cause_summary = Column(Text)
+    urgency            = Column(String, default="medium")           # critical | high | medium | low
+    crisis_snapshot    = Column(Text)                               # JSON của signals dùng để sinh plan
+    generated_at       = Column(DateTime, default=datetime.datetime.utcnow)
+
+
+# Từng hành động trong kế hoạch khủng hoảng — có thể check-off, trạng thái lưu vào DB.
+class CrisisAction(Base):
+    __tablename__ = "crisis_actions"
+    id            = Column(Integer, primary_key=True, index=True)
+    action_id     = Column(String, unique=True, index=True)  # vd: "act_P011_0_1746200000"
+    plan_id       = Column(String, index=True)
+    product_id    = Column(String, index=True)
+    type          = Column(String)           # immediate | mid_term
+    category      = Column(String)           # apology | escalate | logistics | quality_check | marketing | monitor
+    title         = Column(Text)
+    detail        = Column(Text)
+    draft_message = Column(Text, nullable=True)
+    status        = Column(String, default="pending")   # pending | done | skipped
+    updated_at    = Column(DateTime, default=datetime.datetime.utcnow,
+                           onupdate=datetime.datetime.utcnow)
+
+
 # Bản sao lưu SQL cho mọi entry được ghi động vào resolved_qa_db (ChromaDB).
 # Mục đích: khi Vector DB bị xóa hoặc Render cold start, hệ thống replay lại
 # toàn bộ kiến thức đã học được (từ review và từ chat) vào ChromaDB.

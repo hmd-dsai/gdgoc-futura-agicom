@@ -2,19 +2,29 @@
   // ── VS Code Live Server — bỏ qua các file backend để tránh auto-reload khi DB thay đổi ──
   // Vấn đề: Live Server theo dõi toàn bộ thư mục dự án. Mỗi khi FastAPI ghi vào
   // agicom_system.db hoặc chroma_data/, Live Server phát hiện thay đổi và reload trang,
-  // khiến app quay về trang "Tổng quan". Fix: bỏ qua các file/folder backend bên dưới.
+  // khiến app quay về trang "Tổng quan".
+  //
+  // ⚠️  SAU KHI SỬA FILE NÀY: phải Stop Live Server rồi mở lại
+  //     Ctrl+Shift+P → "Live Server: Stop" → mở lại file HTML với Live Server
   "liveServer.settings.ignoreFiles": [
     "**/*.db",
     "**/*.db-shm",
     "**/*.db-wal",
+    "**/*.db-journal",
     "**/chroma_data/**",
     "**/chroma_db/**",
+    "**/backend/**",
     "**/__pycache__/**",
     "**/*.pyc",
-    "**/backend/**",
-    "**/.env"
+    "**/*.pyo",
+    "**/.env",
+    "**/logs/**",
+    "**/*.log"
   ],
 
-  // Chỉ serve từ thư mục frontend/ — tránh expose file backend
-  "liveServer.settings.root": "/frontend"
+  // Chỉ serve từ thư mục frontend/ — Live Server chỉ watch frontend/
+  "liveServer.settings.root": "/frontend",
+
+  // Tắt thông báo khởi động
+  "liveServer.settings.donotShowInfoMsg": true
 }

@@ -210,7 +210,9 @@ const MOCK = {
     { name: 'Hoàng Đức', reason: 'Đơn hàng #TK-890 ship 5 ngày, chưa nhận — rủi ro khiếu nại', value: 'Phòng ngừa complaint', action: 'Chủ động hỏi thăm' }
   ],
 
-  // Crisis data
+  // Crisis data — dữ liệu tĩnh giả lập đã bị xoá.
+  // Trang crisis-center hoàn toàn dùng dữ liệu thực từ backend (/api/crisis-overview).
+  // Khi backend offline, api_integration.js tự tổng hợp từ MOCK.reviews + MOCK.conversations.
   crises: [
     {
       id: 'cr-001',
@@ -1690,184 +1692,31 @@ function renderChat() {
 
 
 // ===== Crisis Center Page =====
-let currentCrisisId = 'cr-001';
-let crisisActionDraft = null;
+// Toàn bộ dữ liệu và UI được quản lý bởi loadCrisisFromBackend() trong api_integration.js.
+// Hàm này chỉ trả về container rỗng để api_integration.js điền vào sau khi tải dữ liệu.
+let currentCrisisProductId = null;   // ID sản phẩm đang chọn (dạng "P011", không còn dùng cr-001)
 
 function renderCrisisCenter() {
-  const crisis = MOCK.crises.find(c => c.id === currentCrisisId) || MOCK.crises[0];
-  const sevColor = crisis.severity === 'critical' ? '#ef4444' : crisis.severity === 'warning' ? '#f59e0b' : '#10b981';
-  const sevBg = crisis.severity === 'critical' ? 'rgba(239,68,68,0.1)' : crisis.severity === 'warning' ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)';
-  const sevLabel = crisis.severity === 'critical' ? '🔴 MỨC ĐỎ' : crisis.severity === 'warning' ? '🟡 MỨC VÀNG' : '🟢 THEO DÕI';
-  const doneCount = crisis.actions.filter(a=>a.status==='done').length;
+  // ĐÃ DEPRECATED — giữ lại để ROUTES không bị lỗi; nội dung thực do loadCrisisFromBackend() sinh.
+  const crisis = null; // không dùng MOCK.crises nữa
 
   return `
-    <!-- Crisis Selector Tabs -->
-    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
-      ${MOCK.crises.map(cr => {
-        const c = cr.severity==='critical'?'#ef4444':cr.severity==='warning'?'#f59e0b':'#10b981';
-        return `<button data-crisisid="${cr.id}" style="padding:10px 18px;border-radius:10px;border:2px solid ${cr.id===currentCrisisId?c:'var(--border-primary)'};background:${cr.id===currentCrisisId?c+'18':'var(--bg-card)'};font-weight:700;font-size:0.83rem;cursor:pointer;color:${cr.id===currentCrisisId?c:'var(--text-secondary)'};display:flex;align-items:center;gap:8px;">
-          ${cr.severity==='critical'?'🔴':cr.severity==='warning'?'🟡':'🟢'} ${cr.product}
-          <span style="background:${c};color:white;border-radius:10px;padding:1px 7px;font-size:0.7rem;">${cr.severity_score}</span>
-        </button>`;
-      }).join('')}
-    </div>
-
-    <!-- Header Card -->
-    <div style="background:linear-gradient(135deg,${crisis.severity==='critical'?'#450a0a,#7f1d1d':'#451a03,#78350f'});border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:20px;border:1px solid ${sevColor};">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
-        <div>
-          <div style="color:${sevColor};font-size:0.72rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">${sevLabel} · Phát hiện lúc ${crisis.detected_at}</div>
-          <div style="color:#fff;font-size:1.4rem;font-weight:800;margin:6px 0;">${crisis.product}</div>
-          <div style="color:#fca5a5;font-size:0.82rem;">${crisis.sku} · ${crisis.orchestrator.root_cause.substring(0,80)}...</div>
+    <!-- Shell container — api_integration.js sẽ điền nội dung thực vào đây -->
+    <div id="crisisCenterShell">
+      <div class="content-card" style="text-align:center;padding:32px 20px;">
+        <div style="font-size:2rem;margin-bottom:10px;">🛡</div>
+        <div style="font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:6px;">
+          Trung tâm Khủng hoảng
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;flex-shrink:0;">
-          <div style="text-align:center;padding:12px;background:rgba(0,0,0,0.3);border-radius:10px;">
-            <div style="font-size:1.6rem;font-weight:900;color:${sevColor};">${crisis.severity_score}</div>
-            <div style="font-size:0.68rem;color:#fca5a5;margin-top:2px;">Severity Score</div>
-          </div>
-          <div style="text-align:center;padding:12px;background:rgba(0,0,0,0.3);border-radius:10px;">
-            <div style="font-size:1.6rem;font-weight:900;color:#f87171;">${crisis.affected_customers}</div>
-            <div style="font-size:0.68rem;color:#fca5a5;margin-top:2px;">Khách ảnh hưởng</div>
-          </div>
-          <div style="text-align:center;padding:12px;background:rgba(0,0,0,0.3);border-radius:10px;">
-            <div style="font-size:1.3rem;font-weight:900;color:#fb923c;">${fmt.currency(crisis.revenue_at_risk)}đ</div>
-            <div style="font-size:0.68rem;color:#fca5a5;margin-top:2px;">Doanh thu rủi ro</div>
-          </div>
-        </div>
-      </div>
-      <div style="margin-top:16px;padding:12px 16px;background:rgba(0,0,0,0.25);border-radius:10px;font-size:0.82rem;color:#fecaca;line-height:1.7;">
-        ${ICON.brain} <strong style="color:#f87171;">Orchestrator phân tích:</strong> ${crisis.orchestrator.root_cause}
-        <span style="margin-left:12px;background:rgba(239,68,68,0.3);color:#f87171;padding:2px 8px;border-radius:6px;font-size:0.72rem;">Độ tin cậy: ${crisis.orchestrator.confidence}%</span>
-      </div>
-    </div>
-
-    <!-- 3 Agent Signals -->
-    <div style="margin-bottom:20px;">
-      <div style="font-weight:700;font-size:0.85rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">📡 Tín hiệu từ các AI Agent</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;">
-        ${crisis.signals.map((sig, si) => `
-          <div style="background:var(--bg-card);border:1px solid ${sig.color}44;border-radius:var(--radius-lg);padding:18px;border-left:4px solid ${sig.color};">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-              <div style="font-size:1.5rem;">${sig.icon}</div>
-              <div>
-                <div style="font-weight:800;font-size:0.88rem;color:${sig.color};">${sig.agent}</div>
-                <div style="font-size:0.7rem;color:var(--text-muted);">Phát hiện lúc ${sig.detected_at}</div>
-              </div>
-              <div style="margin-left:auto;background:${sig.color}18;color:${sig.color};padding:3px 8px;border-radius:6px;font-size:0.7rem;font-weight:700;">ACTIVE</div>
-            </div>
-            <div style="font-weight:700;font-size:0.88rem;margin-bottom:6px;">${sig.title}</div>
-            <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:12px;">${sig.detail}</div>
-            ${sig.evidence && sig.evidence.length ? `
-              <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">Bằng chứng (${sig.evidence.length}):</div>
-              <div style="display:flex;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto;">
-                ${sig.evidence.map(ev => `
-                  <div style="background:var(--bg-glass);border-radius:8px;padding:8px 10px;font-size:0.76rem;border-left:2px solid ${sig.color}66;">
-                    ${ev.type === 'review' ? `<span style="color:var(--accent-rose);">${'★'.repeat(ev.rating)}${'☆'.repeat(5-ev.rating)}</span> <strong>${ev.author}:</strong> "${ev.text}"` : ''}
-                    ${ev.type === 'chat' ? `💬 <strong>${ev.author}</strong> · ${ev.time}: "${ev.text}"` : ''}
-                    ${ev.type === 'tiktok' ? `🎵 <strong>${ev.account}</strong> — ${ev.views.toLocaleString()} views · ${ev.likes.toLocaleString()} likes · ${ev.comments} bình luận<br><span style="color:var(--accent-rose);font-weight:600;">${ev.trend}</span><br><em style="color:var(--text-muted);">${ev.text.substring(0,80)}...</em>` : ''}
-                  </div>
-                `).join('')}
-              </div>
-            ` : '<div style="font-size:0.78rem;color:var(--text-muted);font-style:italic;">Đang thu thập thêm bằng chứng...</div>'}
-          </div>
-        `).join('')}
-      </div>
-    </div>
-
-    <!-- Main Grid: Action Plan + Affected Customers -->
-    <div style="display:grid;grid-template-columns:1fr 340px;gap:16px;margin-bottom:20px;">
-
-      <!-- Action Checklist -->
-      <div class="content-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-          <div class="content-card-title" style="margin:0;">✅ Kế hoạch xử lý khủng hoảng</div>
-          <div style="font-size:0.8rem;color:var(--text-muted);">${doneCount}/${crisis.actions.length} hoàn thành</div>
-        </div>
-        <div style="height:6px;background:var(--bg-glass);border-radius:3px;margin-bottom:18px;overflow:hidden;">
-          <div style="height:100%;width:${Math.round(doneCount/crisis.actions.length*100)}%;background:var(--gradient-success);border-radius:3px;transition:width 0.5s;"></div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          ${crisis.actions.map((act, ai) => {
-            const prioColor = act.priority==='critical'?'#ef4444':act.priority==='high'?'#f59e0b':act.priority==='medium'?'#0ea5e9':'#94a3b8';
-            const prioLabel = act.priority==='critical'?'KHẨN':act.priority==='high'?'CAO':act.priority==='medium'?'TRUNG BÌNH':'THẤP';
-            return `
-              <div style="border:1px solid ${act.status==='done'?'var(--accent-emerald)':'var(--border-primary)'};border-radius:12px;padding:14px 16px;background:${act.status==='done'?'var(--accent-emerald-bg)':'var(--bg-card)'};transition:all 0.2s;">
-                <div style="display:flex;align-items:flex-start;gap:12px;">
-                  <div style="width:28px;height:28px;border-radius:50%;background:${act.status==='done'?'var(--accent-emerald)':prioColor+'22'};border:2px solid ${act.status==='done'?'var(--accent-emerald)':prioColor};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.75rem;font-weight:800;color:${act.status==='done'?'white':prioColor};">
-                    ${act.status==='done'?'✓':act.order}
-                  </div>
-                  <div style="flex:1;min-width:0;">
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
-                      <span style="font-weight:700;font-size:0.88rem;${act.status==='done'?'text-decoration:line-through;color:var(--text-muted);':''}">${act.title}</span>
-                      <span style="background:${prioColor}18;color:${prioColor};font-size:0.65rem;font-weight:700;padding:2px 6px;border-radius:4px;">${prioLabel}</span>
-                      ${act.status==='done'?`<span style="color:var(--accent-emerald);font-size:0.72rem;">✓ ${act.done_by} · ${act.done_at}</span>`:''}
-                    </div>
-                    <div style="font-size:0.78rem;color:var(--text-muted);">${act.detail}</div>
-                    ${act.status !== 'done' ? `
-                      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
-                        <button class="btn-crisis-action" data-actid="${act.id}" data-crisisid="${crisis.id}" style="background:${prioColor};color:white;border:none;padding:7px 14px;border-radius:7px;font-size:0.78rem;font-weight:700;cursor:pointer;">
-                          ${act.id==='act-2'?'🙈 Ẩn sản phẩm':act.id==='act-3'?'💌 Gửi voucher ngay':act.id==='act-4'?'📧 Gửi email NCC':act.id==='act-5'?'📢 Đăng thông báo':act.id==='act-6'?'💬 Comment TikTok':'✅ Thực hiện'}
-                        </button>
-                        ${act.draft ? `<button class="btn-crisis-draft" data-actid="${act.id}" data-crisisid="${crisis.id}" style="background:var(--bg-glass);color:var(--text-secondary);border:1px solid var(--border-primary);padding:7px 14px;border-radius:7px;font-size:0.78rem;cursor:pointer;">📝 Xem nháp AI</button>` : ''}
-                      </div>
-                    ` : ''}
-                  </div>
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      </div>
-
-      <!-- Right Column: Customers + Timeline -->
-      <div style="display:flex;flex-direction:column;gap:14px;">
-
-        <!-- Affected Customers -->
-        <div class="content-card">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-            <div class="content-card-title" style="margin:0;font-size:0.85rem;">👥 Khách bị ảnh hưởng (${crisis.affected_customers_list.length})</div>
-            <button class="btn-approve" style="font-size:0.72rem;padding:5px 10px;">Gửi tất cả</button>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;">
-            ${crisis.affected_customers_list.map(cu => `
-              <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg-glass);border-radius:8px;">
-                <div style="width:30px;height:30px;border-radius:50%;background:var(--accent-rose-bg);color:var(--accent-rose);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;flex-shrink:0;">${cu.name[0]}</div>
-                <div style="flex:1;min-width:0;">
-                  <div style="font-size:0.8rem;font-weight:600;">${cu.name}</div>
-                  <div style="font-size:0.68rem;color:var(--text-muted);">${cu.platform} · ${cu.order_date}</div>
-                </div>
-                <div style="text-align:right;flex-shrink:0;">
-                  <div style="font-size:0.65rem;color:${cu.status.includes('★')?'var(--accent-rose)':'var(--accent-amber)'};font-weight:700;">${cu.status}</div>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-
-        <!-- Event Timeline -->
-        <div class="content-card">
-          <div class="content-card-title" style="font-size:0.85rem;margin-bottom:12px;">⏱ Timeline phát hiện</div>
-          <div style="display:flex;flex-direction:column;gap:0;position:relative;">
-            <div style="position:absolute;left:18px;top:0;bottom:0;width:2px;background:var(--border-primary);"></div>
-            ${crisis.timeline.map((ev, ti) => {
-              const agColor = ev.agent==='Market Agent'?'#ef4444':ev.agent==='Chat Agent'?'#f59e0b':ev.agent==='Content Agent'?'#0ea5e9':ev.agent==='Orchestrator'?'#8b5cf6':'#10b981';
-              return `
-              <div style="display:flex;gap:12px;padding-bottom:14px;position:relative;">
-                <div style="width:38px;height:38px;border-radius:50%;background:${agColor}18;border:2px solid ${agColor};display:flex;align-items:center;justify-content:center;font-size:0.62rem;font-weight:700;color:${agColor};flex-shrink:0;z-index:1;background:white;">${ev.time}</div>
-                <div style="padding-top:6px;">
-                  <div style="font-size:0.72rem;font-weight:700;color:${agColor};">${ev.agent}</div>
-                  <div style="font-size:0.75rem;color:var(--text-secondary);line-height:1.4;">${ev.event}</div>
-                </div>
-              </div>`;
-            }).join('')}
-          </div>
+        <div style="color:var(--text-muted);font-size:0.82rem;">
+          ⏳ Đang tải dữ liệu tín hiệu rủi ro...
         </div>
       </div>
     </div>
-
-    <!-- AI Draft Modal placeholder (shown inline) -->
-    <div id="crisisDraftPanel" style="display:none;"></div>
   `;
+  // --- DEAD CODE BELOW (được giữ lại như bản lưu trữ, không bao giờ chạy) ---
+  const _DEAD_crisis_id_DO_NOT_USE = 'cr-001';
+  const c = '#ef4444';
 }
 
 // ===== Settings Page (4 Tabs) =====
@@ -3700,49 +3549,20 @@ function handlePageClick(e) {
     return; // handled by change event
   }
 
-  // Crisis Center events
-  if (target.dataset.crisisid && target.dataset.actid) {
-    const crisis = MOCK.crises.find(c => c.id === target.dataset.crisisid);
-    const act = crisis && crisis.actions.find(a => a.id === target.dataset.actid);
-    if (target.classList.contains('btn-crisis-action') && act) {
-      act.status = 'done';
-      act.done_by = 'Chủ shop';
-      act.done_at = new Date().toLocaleTimeString('vi-VN', {hour:'2-digit',minute:'2-digit'});
-      showToast(`✅ Đã thực hiện: "${act.title}"`, 'success');
-      setTimeout(() => navigate('crisis-center'), 600);
-    }
-    if (target.classList.contains('btn-crisis-draft') && act && act.draft) {
-      crisisActionDraft = act;
-      const panel = document.getElementById('crisisDraftPanel');
-      if (panel) {
-        panel.style.display = 'block';
-        panel.innerHTML = `<div class="content-card" style="border:2px solid var(--accent-emerald);margin-top:0;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-            <div class="content-card-title" style="margin:0;color:var(--accent-emerald);">📝 Nháp AI — ${act.title}</div>
-            <button onclick="document.getElementById('crisisDraftPanel').style.display='none'" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1.1rem;">✕</button>
-          </div>
-          <div style="background:var(--bg-glass);padding:14px;border-radius:10px;font-size:0.85rem;line-height:1.7;white-space:pre-line;margin-bottom:14px;">${act.draft}</div>
-          <div style="display:flex;gap:10px;">
-            <button class="btn-approve" onclick="showToast('✅ Đã gửi thành công!','success');document.getElementById('crisisDraftPanel').style.display='none';" style="flex:1;">✅ Gửi ngay</button>
-            <button class="btn-modal-cancel" onclick="document.getElementById('crisisDraftPanel').style.display='none'">Đóng</button>
-          </div>
-        </div>`;
-        panel.scrollIntoView({behavior:'smooth', block:'nearest'});
-      }
-    }
-    return;
-  }
+  // Crisis Center events — toàn bộ xử lý action và tab đã chuyển sang api_integration.js.
+  // app4.js chỉ giữ lại việc điều hướng từ banner (btn-crisis-view).
 
   // Crisis banner click → navigate to crisis center
   if (target.classList.contains('btn-crisis-view')) {
-    currentCrisisId = target.dataset.crisis || 'cr-001';
+    currentCrisisProductId = target.dataset.crisis || null;  // product_id thực (P011, v.v.)
     navigate('crisis-center');
     return;
   }
 
-  // Crisis tab selector
+  // Crisis tab selector — được xử lý trong api_integration.js (data-crisisproduct)
+  // Giữ lại selector cũ (data-crisisid) để không bị lỗi nếu còn sót ở đâu
   if (target.dataset.crisisid && !target.dataset.actid) {
-    currentCrisisId = target.dataset.crisisid;
+    currentCrisisProductId = target.dataset.crisisid;
     navigate('crisis-center');
     return;
   }

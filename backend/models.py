@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 class ShopProfile(BaseModel):
     target_customers: str = "Khách hàng phổ thông"
@@ -61,6 +61,22 @@ class ReviewData(BaseModel):
     rating: int          # Số sao (1-5)
     review_text: str     # Nội dung đánh giá
     customer_name: str = "Khách hàng Ẩn danh"
+
+class CrisisPlanRequest(BaseModel):
+    product_id:        str
+    product_name:      str = "Sản phẩm"
+    neg_review_count:  int = 0
+    risk_task_count:   int = 0
+    chat_signal_count: int = 0
+    reviews:           List[dict] = []
+    risk_tasks:        List[str]  = []
+    chat_signals:      List[str]  = []
+    force_regenerate:  bool = False   # True = bỏ qua cache, sinh plan mới
+
+
+class ActionStatusUpdate(BaseModel):
+    status: str   # pending | done | skipped
+
 
 class ReviewExtractedInsight(BaseModel):
     sentiment: str       # Tiêu cực, Tích cực, Bình thường

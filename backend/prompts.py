@@ -102,6 +102,50 @@ Dữ liệu: {chat_log}
 Trả về JSON: {{"question": "...", "answer": "..."}}
 """
 
+CRISIS_PLAN_PROMPT = """
+Bạn là Chuyên gia Quản lý Khủng hoảng TMĐT của Agicom — shop mỹ phẩm GIAO FARA (son, phấn, cọ trang điểm, dưỡng da).
+
+DỮ LIỆU TÍN HIỆU TIÊU CỰC cho sản phẩm {product_id} ({product_name}):
+
+REVIEWS TIÊU CỰC ({neg_review_count} đánh giá):
+{reviews_text}
+
+TÁC VỤ RỦI RO ({risk_task_count} tác vụ):
+{risk_tasks_text}
+
+TÍN HIỆU CHAT ({chat_signal_count} tín hiệu):
+{chat_signals_text}
+
+Nhiệm vụ:
+1. root_cause_summary: Tóm tắt nguyên nhân gốc rễ khả năng cao nhất (1–2 câu, tiếng Việt, cụ thể với sản phẩm trên).
+2. urgency: "critical" (cần xử lý trong 2–4h) | "high" (trong ngày) | "medium" (2–3 ngày) | "low" (theo dõi).
+3. actions: TỐI ĐA 6 hành động, chia thành:
+   - "immediate" (0–4h): phản hồi review, liên hệ khách, tạm dừng quảng cáo nếu cần
+   - "mid_term" (1–7 ngày): kiểm tra lô hàng, cải tiến quy trình, cập nhật KB chatbot
+
+   Mỗi action:
+   - type: "immediate" | "mid_term"
+   - category: "apology" | "escalate" | "logistics" | "quality_check" | "marketing" | "monitor"
+   - title: Tiêu đề ngắn (≤ 10 từ)
+   - detail: Mô tả cụ thể (1–2 câu), nêu rõ ai làm gì và kết quả mong muốn
+   - draft_message: (CHỈ khi category là "apology" hoặc "escalate") Mẫu tin nhắn soạn sẵn tiếng Việt, tự nhiên, thân thiện. LUÔN xưng hô "anh/chị" hoặc "bạn" (trung lập giới tính) — KHÔNG dùng "Nàng", "Bạn thân", hay bất kỳ đại từ thân mật nào khác.
+
+Trả về JSON thuần tuý (không markdown):
+{{
+  "root_cause_summary": "...",
+  "urgency": "...",
+  "actions": [
+    {{
+      "type": "immediate",
+      "category": "apology",
+      "title": "...",
+      "detail": "...",
+      "draft_message": "..."
+    }}
+  ]
+}}
+"""
+
 REVIEW_LEARNING_PROMPT = """
 Bạn là Chuyên gia Phân tích Đánh giá Khách hàng (Review Analyst).
 Tôi sẽ đưa cho bạn 1 lượt đánh giá (review) của khách hàng về sản phẩm.

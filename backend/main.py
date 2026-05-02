@@ -10,24 +10,26 @@ from google.genai import types
 from config import client
 from models import (
     ProposalApproval, ProductRequest,
-    StrategyProposal, ShopProfile, ChatSessionInput, ChatMessage, ReviewData
+    StrategyProposal, ShopProfile, ChatSessionInput, ChatMessage, ReviewData,
+    CrisisPlanRequest, ActionStatusUpdate
 )
-from prompts import STRATEGY_SYSTEM_PROMPT, REVIEW_LEARNING_PROMPT
+from prompts import STRATEGY_SYSTEM_PROMPT, REVIEW_LEARNING_PROMPT, CRISIS_PLAN_PROMPT
 from services import (
     analyze_strategy_slow_track,
     learn_from_human_service,
     chat_with_history_service
 )
-from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog, ContentSuggestion, CustomerProfile, get_or_create_customer_profile, StrategyProposalLog, LearnedQAEntry
+from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog, ContentSuggestion, CustomerProfile, get_or_create_customer_profile, StrategyProposalLog, LearnedQAEntry, CrisisPlan, CrisisAction
 import config as _cfg
 from seed_demo import seed_vector_db, seed_sql_db, seed_content_suggestions, seed_customer_profiles
 
 # ---------------------------------------------------------------------------
 # Product catalog — built once at startup from data/catalog/product_catalog.json.
-# Maps every alias (lowercase) → canonical product_id (e.g. "son bong" → "P001").
+# PRODUCT_ALIASES : alias (lowercase) → canonical product_id ("son bong" → "P001")
+# PRODUCT_NAMES   : product_id → display name          ("P001" → "Son Bóng GIAO FARA")
 # To add a new product: edit the catalog JSON only — no code change needed here.
 # ---------------------------------------------------------------------------
-def _build_product_aliases() -> dict:
+def _build_product_catalog() -> tuple:
     catalog_path = os.path.normpath(
         os.path.join(os.path.dirname(__file__), "../data/catalog/product_catalog.json")
     )
@@ -35,20 +37,24 @@ def _build_product_aliases() -> dict:
         with open(catalog_path, encoding="utf-8") as f:
             catalog = json.load(f)
         aliases: dict = {}
+        names:   dict = {}
         for product in catalog.get("products", []):
             canonical_id = product["product_id"]
+            names[canonical_id] = product.get("short_name") or product.get("name", canonical_id)
             for alias in product.get("aliases", []):
                 aliases[alias.lower().strip()] = canonical_id
         print(f"[startup] Product catalog loaded: {len(catalog['products'])} products, {len(aliases)} aliases.")
-        return aliases
+        return aliases, names
     except FileNotFoundError:
-        print(f"[startup] WARNING: product_catalog.json not found at {catalog_path} — PRODUCT_ALIASES will be empty.")
-        return {}
+        print(f"[startup] WARNING: product_catalog.json not found at {catalog_path} — catalog dicts will be empty.")
+        return {}, {}
     except Exception as e:
         print(f"[startup] WARNING: Could not load product catalog: {e}")
-        return {}
+        return {}, {}
 
-PRODUCT_ALIASES: dict = _build_product_aliases()
+PRODUCT_ALIASES: dict
+PRODUCT_NAMES:   dict
+PRODUCT_ALIASES, PRODUCT_NAMES = _build_product_catalog()
 
 init_db()
 
@@ -616,10 +622,10 @@ async def get_crisis_overview():
                 product_signals[pid] = {"neg_reviews": [], "risk_tasks": [], "chat_signals": []}
             product_signals[pid]["chat_signals"].append(log.insight or "")
 
-        # 5. Tính severity cho từng sản phẩm
+        # 5. Tính severity + gắn plan metadata cho từng sản phẩm
         crises = []
         for pid, data in product_signals.items():
-            neg_count = len(data["neg_reviews"])
+            neg_count  = len(data["neg_reviews"])
             task_count = len(data["risk_tasks"])
             chat_count = len(data["chat_signals"])
 
@@ -633,17 +639,44 @@ async def get_crisis_overview():
             else:
                 severity = "monitoring"
 
+            # Gắn tên sản phẩm từ catalog (fallback về pid nếu không có)
+            product_name = PRODUCT_NAMES.get(pid, pid)
+
+            # Kiểm tra xem đã có AI plan chưa (truy vấn DB nhanh)
+            existing_plan = db.query(CrisisPlan).filter(
+                CrisisPlan.product_id == pid
+            ).order_by(CrisisPlan.generated_at.desc()).first()
+
+            plan_meta = None
+            if existing_plan:
+                done_count  = db.query(CrisisAction).filter(
+                    CrisisAction.plan_id == existing_plan.plan_id,
+                    CrisisAction.status  == "done"
+                ).count()
+                total_count = db.query(CrisisAction).filter(
+                    CrisisAction.plan_id == existing_plan.plan_id
+                ).count()
+                plan_meta = {
+                    "plan_id":      existing_plan.plan_id,
+                    "urgency":      existing_plan.urgency,
+                    "done_actions": done_count,
+                    "total_actions": total_count,
+                    "generated_at": existing_plan.generated_at.isoformat() if existing_plan.generated_at else None
+                }
+
             crises.append({
-                "product_id": pid,
-                "severity": severity,
-                "severity_score": score,
-                "neg_review_count": neg_count,
-                "risk_task_count": task_count,
+                "product_id":        pid,
+                "product_name":      product_name,
+                "severity":          severity,
+                "severity_score":    score,
+                "neg_review_count":  neg_count,
+                "risk_task_count":   task_count,
                 "chat_signal_count": chat_count,
-                "reviews": data["neg_reviews"][:3],
-                "risk_tasks": data["risk_tasks"][:5],
-                "chat_signals": data["chat_signals"][:3],
-                "detected_from": "live_backend"
+                "reviews":           data["neg_reviews"][:5],   # tăng từ 3 → 5 để frontend có đủ data
+                "risk_tasks":        data["risk_tasks"][:5],
+                "chat_signals":      data["chat_signals"][:5],
+                "plan":              plan_meta,
+                "detected_from":     "live_backend"
             })
 
         # Sắp xếp theo severity score giảm dần
@@ -670,6 +703,204 @@ async def get_crisis_overview():
         }
 
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
+# ---------------------------------------------------------------------------
+# CRISIS PLAN ENDPOINTS
+# POST /api/crisis-plan          — sinh kế hoạch AI, lưu vào DB (có cache 1h)
+# GET  /api/crisis-plan/{pid}    — lấy plan + actions đã lưu cho product
+# PATCH /api/crisis-action/{aid} — cập nhật trạng thái 1 action (done/skipped/pending)
+# ---------------------------------------------------------------------------
+
+@app.post("/api/crisis-plan")
+async def generate_crisis_plan(req: CrisisPlanRequest):
+    """
+    Gọi Gemini để sinh kế hoạch xử lý khủng hoảng có cấu trúc.
+    Lưu CrisisPlan + CrisisActions vào SQL để frontend có thể check-off.
+    Nếu plan cho product_id này đã tồn tại và < 1h tuổi, trả về plan cũ
+    (trừ khi force_regenerate=True).
+    """
+    db = SessionLocal()
+    try:
+        # ── Kiểm tra cache (tránh gọi LLM mỗi page load) ──
+        if not req.force_regenerate:
+            from datetime import timedelta
+            cutoff = datetime.utcnow() - timedelta(hours=1)
+            cached = db.query(CrisisPlan).filter(
+                CrisisPlan.product_id == req.product_id,
+                CrisisPlan.generated_at >= cutoff
+            ).order_by(CrisisPlan.generated_at.desc()).first()
+            if cached:
+                actions = db.query(CrisisAction).filter(
+                    CrisisAction.plan_id == cached.plan_id
+                ).order_by(CrisisAction.id).all()
+                return {
+                    "plan_id":            cached.plan_id,
+                    "product_id":         cached.product_id,
+                    "root_cause_summary": cached.root_cause_summary,
+                    "urgency":            cached.urgency,
+                    "generated_at":       cached.generated_at.isoformat(),
+                    "from_cache":         True,
+                    "actions": [{
+                        "action_id":     a.action_id,
+                        "type":          a.type,
+                        "category":      a.category,
+                        "title":         a.title,
+                        "detail":        a.detail,
+                        "draft_message": a.draft_message,
+                        "status":        a.status
+                    } for a in actions]
+                }
+
+        # ── Chuẩn bị dữ liệu cho prompt ──
+        reviews_text = "\n".join(
+            f"- [{r.get('rating',0)}★] {r.get('customer','Ẩn danh')}: {r.get('text','')}"
+            + (f" | AI insight: {r.get('insight','')}" if r.get('insight') else "")
+            for r in req.reviews
+        ) or "Không có review tiêu cực."
+
+        risk_tasks_text = "\n".join(f"- {t}" for t in req.risk_tasks) or "Không có tác vụ rủi ro."
+        chat_signals_text = "\n".join(f"- {s}" for s in req.chat_signals) or "Không có tín hiệu chat."
+
+        prompt = CRISIS_PLAN_PROMPT.format(
+            product_id=req.product_id,
+            product_name=req.product_name,
+            neg_review_count=req.neg_review_count,
+            risk_task_count=req.risk_task_count,
+            chat_signal_count=req.chat_signal_count,
+            reviews_text=reviews_text,
+            risk_tasks_text=risk_tasks_text,
+            chat_signals_text=chat_signals_text,
+        )
+
+        response = await client.aio.models.generate_content(
+            model="gemini-flash-latest",
+            contents=prompt,
+            config=types.GenerateContentConfig(response_mime_type="application/json")
+        )
+        clean = response.text.replace("```json","").replace("```","").strip()
+        plan_data = json.loads(clean)
+
+        # ── Lưu vào SQL ──
+        ts = int(datetime.utcnow().timestamp())
+        plan_id = f"plan_{req.product_id}_{ts}"
+
+        # Xóa plan cũ cho cùng product_id (giữ DB gọn)
+        old_plans = db.query(CrisisPlan).filter(CrisisPlan.product_id == req.product_id).all()
+        for op in old_plans:
+            db.query(CrisisAction).filter(CrisisAction.plan_id == op.plan_id).delete()
+        db.query(CrisisPlan).filter(CrisisPlan.product_id == req.product_id).delete()
+
+        new_plan = CrisisPlan(
+            plan_id=plan_id,
+            product_id=req.product_id,
+            root_cause_summary=plan_data.get("root_cause_summary",""),
+            urgency=plan_data.get("urgency","medium"),
+            crisis_snapshot=json.dumps({"reviews": req.reviews, "risk_tasks": req.risk_tasks,
+                                        "chat_signals": req.chat_signals}, ensure_ascii=False)
+        )
+        db.add(new_plan)
+
+        saved_actions = []
+        for i, act in enumerate(plan_data.get("actions", [])):
+            action_id = f"act_{req.product_id}_{i}_{ts}"
+            new_action = CrisisAction(
+                action_id=action_id,
+                plan_id=plan_id,
+                product_id=req.product_id,
+                type=act.get("type","immediate"),
+                category=act.get("category","monitor"),
+                title=act.get("title",""),
+                detail=act.get("detail",""),
+                draft_message=act.get("draft_message") or None,
+                status="pending"
+            )
+            db.add(new_action)
+            saved_actions.append({
+                "action_id":     action_id,
+                "type":          new_action.type,
+                "category":      new_action.category,
+                "title":         new_action.title,
+                "detail":        new_action.detail,
+                "draft_message": new_action.draft_message,
+                "status":        "pending"
+            })
+
+        db.commit()
+        return {
+            "plan_id":            plan_id,
+            "product_id":         req.product_id,
+            "root_cause_summary": new_plan.root_cause_summary,
+            "urgency":            new_plan.urgency,
+            "generated_at":       new_plan.generated_at.isoformat() if new_plan.generated_at else None,
+            "from_cache":         False,
+            "actions":            saved_actions
+        }
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
+@app.get("/api/crisis-plan/{product_id}")
+async def get_crisis_plan(product_id: str):
+    """Trả về plan + actions mới nhất đã lưu cho một sản phẩm. 404 nếu chưa có."""
+    db = SessionLocal()
+    try:
+        plan = db.query(CrisisPlan).filter(
+            CrisisPlan.product_id == product_id
+        ).order_by(CrisisPlan.generated_at.desc()).first()
+
+        if not plan:
+            raise HTTPException(status_code=404, detail="Chưa có kế hoạch xử lý cho sản phẩm này.")
+
+        actions = db.query(CrisisAction).filter(
+            CrisisAction.plan_id == plan.plan_id
+        ).order_by(CrisisAction.id).all()
+
+        return {
+            "plan_id":            plan.plan_id,
+            "product_id":         plan.product_id,
+            "root_cause_summary": plan.root_cause_summary,
+            "urgency":            plan.urgency,
+            "generated_at":       plan.generated_at.isoformat() if plan.generated_at else None,
+            "from_cache":         True,
+            "actions": [{
+                "action_id":     a.action_id,
+                "type":          a.type,
+                "category":      a.category,
+                "title":         a.title,
+                "detail":        a.detail,
+                "draft_message": a.draft_message,
+                "status":        a.status
+            } for a in actions]
+        }
+    finally:
+        db.close()
+
+
+@app.patch("/api/crisis-action/{action_id}")
+async def update_crisis_action_status(action_id: str, update: ActionStatusUpdate):
+    """Cập nhật trạng thái một action (pending → done / skipped / pending)."""
+    if update.status not in ("pending", "done", "skipped"):
+        raise HTTPException(status_code=400, detail="status phải là: pending | done | skipped")
+    db = SessionLocal()
+    try:
+        action = db.query(CrisisAction).filter(CrisisAction.action_id == action_id).first()
+        if not action:
+            raise HTTPException(status_code=404, detail=f"Không tìm thấy action {action_id}")
+        action.status = update.status
+        db.commit()
+        return {"action_id": action_id, "status": update.status}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
@@ -1098,6 +1329,8 @@ async def reset_all_data():
         db.query(CustomerProfile).delete()
         db.query(StrategyProposalLog).delete()
         db.query(LearnedQAEntry).delete()   # Xóa kiến thức học được — đồng bộ với ChromaDB reset bên dưới
+        db.query(CrisisAction).delete()    # Xóa actions trước (FK-like dependency trên plan_id)
+        db.query(CrisisPlan).delete()
         db.commit()
 
         # 2. Xóa và tạo lại các Collections trong Vector DB.

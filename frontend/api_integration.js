@@ -2281,9 +2281,14 @@ async function _reloadChatHistoryFromBackend(customerId) {
 }
 
 /* ──────────────────────────────────────────────────────────────────────
-   11b. CRISIS CENTER — /api/crisis-overview
+   11b. CRISIS CENTER — /api/crisis-overview + /api/crisis-plan
    ────────────────────────────────────────────────────────────────────── */
 
+// ── Module-level state ──────────────────────────────────────────────────
+let _crisisOverviewData = null;   // data from /api/crisis-overview
+let _crisisSelectedPid  = null;   // product_id of active tab
+
+// ── Keep _renderCrisisCard for internal evidence rendering ───────────────
 /** Render một thẻ sản phẩm có tín hiệu khủng hoảng (dùng chung cho live + mock). */
 function _renderCrisisCard(c) {
   const csev = c.severity === 'critical' ? { color: '#ef4444', label: '🔴 Khẩn cấp' }
@@ -2377,6 +2382,608 @@ function _renderCrisisCard(c) {
 }
 
 /**
+ * Gọi /api/crisis-overview. Fallback sang MOCK khi offline.
+ * Điền vào #crisisCenterShell với UI thống nhất.
+ */
+async function loadCrisisFromBackend() {
+  const shell = document.getElementById('crisisCenterShell');
+  if (!shell) return;
+
+  shell.innerHTML = `
+    <div class="content-card" style="text-align:center;padding:32px 20px;">
+      <div style="font-size:2rem;margin-bottom:10px;">🛡</div>
+      <div style="color:var(--text-muted);font-size:0.85rem;">⏳ Đang phân tích tín hiệu rủi ro...</div>
+    </div>`;
+
+  let data = null;
+  let isFromMock = false;
+
+  try {
+    if (!_backendConnected) throw new Error('Backend offline');
+    data = await apiCall('/api/crisis-overview');
+  } catch (err) {
+    console.warn('[Agicom] Crisis backend offline — dùng MOCK:', err.message);
+    try {
+      data = _buildCrisisFromMockData();
+      isFromMock = true;
+    } catch (mockErr) {
+      shell.innerHTML = `<div class="content-card">
+        <div style="color:var(--accent-rose);padding:12px;font-size:0.83rem;">
+          ❌ Không thể tải dữ liệu khủng hoảng.<br>
+          <small style="color:var(--text-muted);">${mockErr.message}</small>
+        </div></div>`;
+      return;
+    }
+  }
+
+  _crisisOverviewData = data;
+
+  try {
+    _renderCrisisFullPage(shell, data, isFromMock);
+  } catch (err) {
+    shell.innerHTML = `<div class="content-card">
+      <div style="color:var(--accent-rose);padding:12px;font-size:0.83rem;">
+        ❌ Lỗi hiển thị.<br><small style="color:var(--text-muted);">${err.message}</small>
+      </div></div>`;
+  }
+}
+
+/**
+ * Build the complete unified crisis center UI inside `shell`.
+ * Single-page layout: KPI header → tabs per product → detail area.
+ */
+function _renderCrisisFullPage(shell, data, isFromMock) {
+  const statusMap = {
+    critical:   { color: '#ef4444', bg: 'rgba(239,68,68,0.08)',   icon: '🔴', label: 'CẢNH BÁO KHẨN CẤP' },
+    warning:    { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)',  icon: '🟡', label: 'CẦN THEO DÕI' },
+    monitoring: { color: '#6366f1', bg: 'rgba(99,102,241,0.08)', icon: '🔵', label: 'ĐANG QUAN SÁT' },
+    safe:       { color: '#10b981', bg: 'rgba(16,185,129,0.08)', icon: '🟢', label: 'AN TOÀN' },
+  };
+  const st = statusMap[data.overall_status] || statusMap.safe;
+
+  // Update MOCK.alerts for sidebar badge
+  if (data.total_neg_reviews > 0 || data.total_risk_tasks > 0) {
+    const liveAlert = {
+      level: data.overall_status === 'critical' ? 'critical' : 'warning',
+      icon: st.icon,
+      text: `${isFromMock ? '[DEMO] ' : '[LIVE] '}${data.total_neg_reviews} review tiêu cực & ${data.total_risk_tasks} tác vụ rủi ro đang chờ xử lý`,
+      cta: 'Xem ngay', cta_page: 'crisis-center', _fromBackend: !isFromMock
+    };
+    if (typeof MOCK !== 'undefined' && MOCK.alerts) {
+      MOCK.alerts = MOCK.alerts.filter(a => !a._fromBackend);
+      MOCK.alerts.unshift(liveAlert);
+    }
+    if (!isFromMock) {
+      if (data.overall_status === 'critical') {
+        showToast(`🔴 Phát hiện ${data.total_neg_reviews} review xấu & ${data.total_risk_tasks} cảnh báo rủi ro!`, 'danger');
+      } else if (data.overall_status === 'warning') {
+        showToast(`🟡 ${data.total_neg_reviews} review tiêu cực được ghi nhận`, 'warning');
+      }
+    }
+  }
+
+  const sourceBadge = isFromMock
+    ? `<span style="font-size:0.65rem;padding:2px 8px;border-radius:6px;background:rgba(245,158,11,0.15);color:#f59e0b;font-weight:700;border:1px solid rgba(245,158,11,0.3);">🟡 Demo Data (Backend offline)</span>`
+    : `<span style="font-size:0.65rem;padding:2px 8px;border-radius:6px;background:rgba(16,185,129,0.12);color:#10b981;font-weight:700;border:1px solid rgba(16,185,129,0.3);">🟢 Live Backend</span>`;
+
+  const kpiHeader = `
+    <div class="content-card" style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <div>
+          <div class="content-card-title" style="margin:0;color:${st.color};">🛡 Trung tâm Khủng hoảng</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">
+            Tổng hợp từ Reviews · Chat Signals · RiskManager Tasks
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          ${sourceBadge}
+          <span style="font-size:0.65rem;color:var(--text-muted);">⏱ ${new Date(data.last_updated).toLocaleString('vi-VN')}</span>
+          <button onclick="loadCrisisFromBackend()" class="btn-approve" style="font-size:0.72rem;padding:5px 12px;">🔄 Làm mới</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+        <div style="background:${st.bg};border-radius:8px;padding:10px;text-align:center;border:1px solid ${st.color}30;">
+          <div style="font-size:1.3rem;font-weight:800;color:${st.color};">${st.icon}</div>
+          <div style="font-size:0.65rem;color:${st.color};font-weight:700;margin-top:2px;">${st.label}</div>
+        </div>
+        <div style="background:rgba(239,68,68,0.07);border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(239,68,68,0.2);">
+          <div style="font-size:1.3rem;font-weight:800;color:#ef4444;">${data.total_neg_reviews}</div>
+          <div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px;">Review tiêu cực</div>
+        </div>
+        <div style="background:rgba(245,158,11,0.07);border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(245,158,11,0.2);">
+          <div style="font-size:1.3rem;font-weight:800;color:#f59e0b;">${data.total_risk_tasks}</div>
+          <div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px;">Tác vụ rủi ro</div>
+        </div>
+        <div style="background:rgba(99,102,241,0.07);border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(99,102,241,0.2);">
+          <div style="font-size:1.3rem;font-weight:800;color:#6366f1;">${data.total_chat_signals}</div>
+          <div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px;">Tín hiệu chat</div>
+        </div>
+      </div>
+    </div>`;
+
+  // ── Safe state ──
+  if (data.crises.length === 0) {
+    shell.innerHTML = kpiHeader + `
+      <div class="content-card" style="text-align:center;padding:24px;border:1px solid rgba(16,185,129,0.3);">
+        <div style="font-size:2.5rem;margin-bottom:8px;">✅</div>
+        <div style="font-weight:700;color:#10b981;font-size:0.95rem;">Hệ thống ổn định</div>
+        <div style="color:var(--text-muted);font-size:0.78rem;margin-top:6px;">
+          Không phát hiện tín hiệu tiêu cực nào từ reviews & chat trong thời gian gần đây.
+        </div>
+      </div>`;
+    return;
+  }
+
+  // ── Preserve or reset selected product tab ──
+  if (!_crisisSelectedPid || !data.crises.find(c => c.product_id === _crisisSelectedPid)) {
+    _crisisSelectedPid = data.crises[0].product_id;
+  }
+
+  const tabsHtml = data.crises.map(c => {
+    const tc = c.severity === 'critical' ? { color: '#ef4444' }
+             : c.severity === 'warning'  ? { color: '#f59e0b' }
+             :                              { color: '#6366f1' };
+    const sevIcon = c.severity === 'critical' ? '🔴' : c.severity === 'warning' ? '🟡' : '🔵';
+    const isActive = c.product_id === _crisisSelectedPid;
+    const planInfo = c.plan ? ` · ${c.plan.done_actions}/${c.plan.total_actions}` : '';
+    return `
+      <button onclick="window._selectCrisisProduct('${c.product_id}')"
+        data-crisis-tab="${c.product_id}"
+        style="padding:7px 14px;border-radius:8px;font-size:0.74rem;font-weight:700;cursor:pointer;white-space:nowrap;
+          border:2px solid ${isActive ? tc.color : 'transparent'};
+          background:${isActive ? tc.color + '18' : 'var(--bg-secondary)'};
+          color:${isActive ? tc.color : 'var(--text-secondary)'};transition:all 0.15s;">
+        ${sevIcon} ${c.product_name || c.product_id}
+        <span style="font-size:0.62rem;opacity:0.75;margin-left:4px;">${c.severity_score}${planInfo}</span>
+      </button>`;
+  }).join('');
+
+  shell.innerHTML = kpiHeader + `
+    <div class="content-card" style="margin-bottom:0;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:12px;
+        border-bottom:1px solid var(--border-primary);">
+        ${tabsHtml}
+      </div>
+      <div id="crisisDetailArea">
+        <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.83rem;">⏳ Đang tải...</div>
+      </div>
+    </div>`;
+
+  const selectedCrisis = data.crises.find(c => c.product_id === _crisisSelectedPid);
+  if (selectedCrisis) _renderCrisisDetail(selectedCrisis, isFromMock);
+}
+
+/** Switch tab: update highlight + reload detail area. */
+window._selectCrisisProduct = function(product_id, forceRegenerate = false) {
+  if (!_crisisOverviewData) return;
+  const crisis = _crisisOverviewData.crises.find(c => c.product_id === product_id);
+  if (!crisis) return;
+  _crisisSelectedPid = product_id;
+
+  // Update tab highlight
+  document.querySelectorAll('[data-crisis-tab]').forEach(btn => {
+    const c2 = _crisisOverviewData.crises.find(c => c.product_id === btn.dataset.crisisTab);
+    if (!c2) return;
+    const tc = c2.severity === 'critical' ? '#ef4444' : c2.severity === 'warning' ? '#f59e0b' : '#6366f1';
+    const isActive = btn.dataset.crisisTab === product_id;
+    btn.style.border       = `2px solid ${isActive ? tc : 'transparent'}`;
+    btn.style.background   = isActive ? tc + '18' : 'var(--bg-secondary)';
+    btn.style.color        = isActive ? tc : 'var(--text-secondary)';
+  });
+
+  _renderCrisisDetail(crisis, false, forceRegenerate);
+};
+
+/**
+ * Render detail area for a selected crisis:
+ * product header + evidence (reviews/tasks/chat) + AI plan (loaded async).
+ */
+function _renderCrisisDetail(crisis, isFromMock, forceRegenerate = false) {
+  const detailEl = document.getElementById('crisisDetailArea');
+  if (!detailEl) return;
+
+  const csev = crisis.severity === 'critical'
+    ? { color: '#ef4444', label: '🔴 Khẩn cấp',  bg: 'rgba(239,68,68,0.08)', icon: '🚨' }
+    : crisis.severity === 'warning'
+    ? { color: '#f59e0b', label: '🟡 Cảnh báo',   bg: 'rgba(245,158,11,0.08)', icon: '⚠️' }
+    : { color: '#6366f1', label: '🔵 Theo dõi',   bg: 'rgba(99,102,241,0.08)', icon: '🔵' };
+
+  const reviews      = Array.isArray(crisis.reviews)      ? crisis.reviews      : [];
+  const risk_tasks   = Array.isArray(crisis.risk_tasks)   ? crisis.risk_tasks   : [];
+  const chat_signals = Array.isArray(crisis.chat_signals) ? crisis.chat_signals : [];
+
+  // ── Evidence: reviews ──
+  const reviewItemHtml = (r) => `
+    <div style="padding:6px 10px;background:rgba(239,68,68,0.05);border-radius:6px;
+      font-size:0.77rem;margin-bottom:4px;border-left:3px solid #ef4444;">
+      <strong style="color:#ef4444;">${r.rating || '?'}★ — ${r.customer || 'Ẩn danh'}</strong>
+      <span style="color:var(--text-muted);font-size:0.7rem;margin-left:6px;">${r.time || ''}</span>
+      <div style="color:var(--text-secondary);margin-top:2px;line-height:1.4;">${r.text || ''}</div>
+      ${r.insight ? `<div style="font-size:0.7rem;color:var(--accent-indigo);margin-top:2px;">💡 ${r.insight}</div>` : ''}
+    </div>`;
+
+  const PREVIEW = 3;
+  const cardId  = 'cd_' + crisis.product_id.replace(/\W/g, '_');
+  let reviewsHtml = '';
+  if (reviews.length > 0) {
+    const vis = reviews.slice(0, PREVIEW);
+    const hid = reviews.slice(PREVIEW);
+    reviewsHtml = vis.map(reviewItemHtml).join('');
+    if (hid.length > 0) {
+      reviewsHtml += `
+        <div id="${cardId}_extra" style="display:none;">${hid.map(reviewItemHtml).join('')}</div>
+        <button onclick="var e=document.getElementById('${cardId}_extra');var b=this;
+          if(e.style.display==='none'){e.style.display='block';b.textContent='▲ Ẩn bớt';}
+          else{e.style.display='none';b.textContent='▼ Xem thêm ${hid.length} review';}"
+          style="margin-top:4px;font-size:0.72rem;padding:4px 12px;border:1px solid rgba(239,68,68,0.35);
+            border-radius:6px;background:rgba(239,68,68,0.07);color:#ef4444;cursor:pointer;font-weight:600;">
+          ▼ Xem thêm ${hid.length} review
+        </button>`;
+    }
+  }
+
+  const tasksHtml = risk_tasks.map(t => `
+    <div style="padding:6px 10px;background:rgba(245,158,11,0.07);border-radius:6px;
+      font-size:0.76rem;margin-bottom:3px;border-left:3px solid #f59e0b;color:var(--text-secondary);">
+      ⚠️ ${t}
+    </div>`).join('');
+
+  const chatHtml = chat_signals.map(s => `
+    <div style="padding:5px 10px;background:rgba(99,102,241,0.06);border-radius:6px;
+      font-size:0.75rem;margin-bottom:3px;border-left:3px solid #6366f1;color:var(--text-muted);">
+      💬 ${s}
+    </div>`).join('');
+
+  const hasSideCol = risk_tasks.length > 0 || chat_signals.length > 0;
+  const evidenceHtml = `
+    <div style="display:grid;grid-template-columns:${hasSideCol ? '1fr 1fr' : '1fr'};gap:14px;margin-bottom:18px;">
+      ${reviews.length > 0 ? `
+        <div>
+          <div style="font-size:0.73rem;font-weight:700;color:#ef4444;margin-bottom:6px;">
+            📋 ${crisis.neg_review_count} Review tiêu cực
+          </div>
+          ${reviewsHtml}
+        </div>` : ''}
+      ${hasSideCol ? `
+        <div>
+          ${risk_tasks.length ? `
+            <div style="font-size:0.73rem;font-weight:700;color:#f59e0b;margin-bottom:6px;">⚠️ Tác vụ rủi ro</div>
+            ${tasksHtml}` : ''}
+          ${chat_signals.length ? `
+            <div style="font-size:0.73rem;font-weight:700;color:#6366f1;margin-top:10px;margin-bottom:6px;">💬 Tín hiệu chat</div>
+            ${chatHtml}` : ''}
+        </div>` : ''}
+    </div>`;
+
+  // Plan progress badge (from crisis-overview metadata)
+  const planMeta = crisis.plan;
+  const planBadge = planMeta
+    ? `<span style="font-size:0.65rem;padding:2px 8px;border-radius:6px;
+        background:rgba(99,102,241,0.1);color:#6366f1;border:1px solid rgba(99,102,241,0.3);">
+        ✅ Có plan · ${planMeta.done_actions}/${planMeta.total_actions} xong</span>`
+    : `<span style="font-size:0.65rem;padding:2px 8px;border-radius:6px;
+        background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);">
+        ⏳ Chưa có plan</span>`;
+
+  const safePid = crisis.product_id.replace(/\W/g, '_');
+  detailEl.innerHTML = `
+    <!-- Product severity header -->
+    <div style="background:${csev.bg};border:1px solid ${csev.color}30;border-radius:10px;
+      padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <span style="font-size:1.4rem;">${csev.icon}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:0.85rem;font-weight:800;color:${csev.color};">
+          ${csev.label} — ${crisis.product_name || crisis.product_id}
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">
+          Score: <strong style="color:${csev.color};">${crisis.severity_score}/100</strong>
+          &nbsp;·&nbsp; ${planBadge}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        ${crisis.neg_review_count  > 0 ? `<span style="font-size:0.7rem;padding:3px 8px;border-radius:6px;background:rgba(239,68,68,0.1);color:#ef4444;font-weight:700;">📋 ${crisis.neg_review_count} review</span>` : ''}
+        ${crisis.risk_task_count   > 0 ? `<span style="font-size:0.7rem;padding:3px 8px;border-radius:6px;background:rgba(245,158,11,0.1);color:#f59e0b;font-weight:700;">⚠️ ${crisis.risk_task_count} tác vụ</span>` : ''}
+        ${crisis.chat_signal_count > 0 ? `<span style="font-size:0.7rem;padding:3px 8px;border-radius:6px;background:rgba(99,102,241,0.1);color:#6366f1;font-weight:700;">💬 ${crisis.chat_signal_count} chat</span>` : ''}
+      </div>
+    </div>
+
+    <!-- Evidence -->
+    ${evidenceHtml}
+
+    <!-- AI Plan (loaded async) -->
+    <div id="crisisPlanArea_${safePid}" style="margin-top:4px;">
+      <div style="font-size:0.83rem;color:var(--text-muted);text-align:center;padding:16px;">
+        ⏳ Đang tải kế hoạch xử lý AI...
+      </div>
+    </div>`;
+
+  if (!isFromMock) {
+    _loadAndRenderPlan(crisis, forceRegenerate);
+  } else {
+    const planArea = document.getElementById(`crisisPlanArea_${safePid}`);
+    if (planArea) planArea.innerHTML = `
+      <div style="background:rgba(245,158,11,0.07);border:1px dashed rgba(245,158,11,0.4);
+        border-radius:10px;padding:14px;text-align:center;">
+        <div style="color:#f59e0b;font-size:0.8rem;font-weight:700;">🟡 Demo Mode</div>
+        <div style="color:var(--text-muted);font-size:0.75rem;margin-top:4px;">
+          Kế hoạch AI chỉ khả dụng khi backend online.
+        </div>
+      </div>`;
+  }
+}
+
+/**
+ * Load existing plan via GET /api/crisis-plan/{product_id}.
+ * If 404, generate via POST /api/crisis-plan.
+ * If forceRegenerate=true, skip GET and call POST with force_regenerate=true.
+ */
+async function _loadAndRenderPlan(crisis, forceRegenerate = false) {
+  const pid       = crisis.product_id;
+  const safePid   = pid.replace(/\W/g, '_');
+  const planArea  = document.getElementById(`crisisPlanArea_${safePid}`);
+  if (!planArea) return;
+
+  let planData = null;
+
+  if (!forceRegenerate) {
+    try {
+      planData = await apiCall(`/api/crisis-plan/${pid}`);
+    } catch (err) {
+      const is404 = err?.status === 404 || (err?.message || '').includes('404') || String(err).includes('404');
+      if (!is404) {
+        planArea.innerHTML = `<div style="color:var(--accent-rose);font-size:0.8rem;padding:10px;border-radius:8px;
+          background:var(--accent-rose-bg);">❌ Lỗi tải plan: ${err.message}</div>`;
+        return;
+      }
+      // 404 → need to generate
+    }
+  }
+
+  if (!planData) {
+    planArea.innerHTML = `
+      <div style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.2);
+        border-radius:10px;padding:16px;text-align:center;">
+        <div style="font-size:1.5rem;margin-bottom:6px;">🤖</div>
+        <div style="font-size:0.8rem;color:var(--accent-indigo);font-weight:700;">
+          AI đang phân tích & tạo kế hoạch xử lý...
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;">Quá trình này mất 5–15 giây</div>
+      </div>`;
+
+    try {
+      planData = await apiCall('/api/crisis-plan', 'POST', {
+        product_id:        pid,
+        product_name:      crisis.product_name || pid,
+        neg_review_count:  crisis.neg_review_count  || 0,
+        risk_task_count:   crisis.risk_task_count   || 0,
+        chat_signal_count: crisis.chat_signal_count || 0,
+        reviews:           (crisis.reviews || []).map(r => ({
+          rating: r.rating, review_text: r.text, customer_name: r.customer
+        })),
+        risk_tasks:        crisis.risk_tasks   || [],
+        chat_signals:      crisis.chat_signals || [],
+        force_regenerate:  forceRegenerate,
+      });
+    } catch (genErr) {
+      planArea.innerHTML = `
+        <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);
+          border-radius:10px;padding:14px;text-align:center;">
+          <div style="color:#ef4444;font-size:0.8rem;font-weight:700;">❌ Không thể tạo kế hoạch AI</div>
+          <div style="color:var(--text-muted);font-size:0.72rem;margin-top:4px;">${genErr.message}</div>
+          <button onclick="window._selectCrisisProduct('${pid}', true)"
+            class="btn-approve" style="font-size:0.72rem;padding:5px 12px;margin-top:10px;">
+            🔄 Thử lại
+          </button>
+        </div>`;
+      return;
+    }
+  }
+
+  if (planData) _renderPlanSection(planArea, planData, crisis);
+}
+
+/**
+ * Render AI plan into planArea:
+ * urgency header + root cause + progress bar + immediate actions + mid-term actions.
+ * Each action has status checkboxes that call PATCH /api/crisis-action/{action_id}.
+ */
+function _renderPlanSection(planArea, planData, crisis) {
+  const urgencyMap = {
+    critical: { color: '#ef4444', label: '🚨 Khẩn cấp — xử lý trong 2–4h',      bg: 'rgba(239,68,68,0.08)'   },
+    high:     { color: '#f97316', label: '🔶 Cao — xử lý trong ngày',             bg: 'rgba(249,115,22,0.08)'  },
+    medium:   { color: '#f59e0b', label: '🟡 Trung bình — xử lý trong 2–3 ngày', bg: 'rgba(245,158,11,0.08)'  },
+    low:      { color: '#6366f1', label: '🔵 Thấp — theo dõi',                   bg: 'rgba(99,102,241,0.08)'  },
+  };
+  const urg = urgencyMap[planData.urgency] || urgencyMap.medium;
+
+  const actions   = Array.isArray(planData.actions) ? planData.actions : [];
+  const immediate = actions.filter(a => a.type === 'immediate');
+  const midTerm   = actions.filter(a => a.type === 'mid_term');
+  const doneCount    = actions.filter(a => a.status === 'done').length;
+  const skippedCount = actions.filter(a => a.status === 'skipped').length;
+  const progressPct  = actions.length ? Math.round((doneCount / actions.length) * 100) : 0;
+  const generatedAt  = planData.generated_at
+    ? new Date(planData.generated_at).toLocaleString('vi-VN') : 'Vừa tạo';
+
+  const catIcon  = { apology: '🙏', escalate: '📞', logistics: '📦', quality_check: '🔍', marketing: '📢', monitor: '👀' };
+  const catLabel = { apology: 'Xin lỗi', escalate: 'Leo thang', logistics: 'Vận chuyển', quality_check: 'Kiểm tra CL', marketing: 'Marketing', monitor: 'Theo dõi' };
+
+  // Store draft messages in a window map — avoids any HTML-attribute escaping issues
+  // with quotes, newlines or special chars inside the draft text.
+  window._crisisDraftMessages = window._crisisDraftMessages || {};
+  actions.forEach(a => {
+    if (a.draft_message) window._crisisDraftMessages[a.action_id] = a.draft_message;
+  });
+
+  const renderActionItem = (a) => {
+    const isDone    = a.status === 'done';
+    const isSkipped = a.status === 'skipped';
+    const actionColor = a.type === 'immediate' ? '#ef4444' : '#f59e0b';
+    const safeAid = (a.action_id || '').replace(/['"\\]/g, '');
+
+    return `
+      <div id="act_row_${safeAid.replace(/\W/g, '_')}"
+        style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:8px;
+          margin-bottom:6px;transition:all 0.2s;
+          border:1px solid ${isDone ? 'rgba(16,185,129,0.25)' : isSkipped ? 'rgba(100,116,139,0.2)' : actionColor + '25'};
+          background:${isDone ? 'rgba(16,185,129,0.05)' : isSkipped ? 'rgba(100,116,139,0.04)' : actionColor + '06'};
+          opacity:${isSkipped ? '0.55' : '1'};">
+        <!-- Checkbox -->
+        <button onclick="_toggleCrisisAction('${safeAid}','${a.status}','${isDone ? 'pending' : 'done'}')"
+          title="${isDone ? 'Bỏ đánh dấu' : 'Đánh dấu hoàn thành'}"
+          style="min-width:22px;height:22px;border-radius:5px;cursor:pointer;flex-shrink:0;margin-top:1px;
+            display:flex;align-items:center;justify-content:center;font-size:0.75rem;transition:all 0.15s;
+            border:2px solid ${isDone ? '#10b981' : isSkipped ? '#94a3b8' : actionColor};
+            background:${isDone ? '#10b981' : 'transparent'};">
+          ${isDone ? '<span style="color:white;font-weight:800;">✓</span>' : isSkipped ? '<span style="color:#94a3b8;font-size:0.9rem;">–</span>' : ''}
+        </button>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;">
+            <span style="font-size:0.68rem;padding:1px 7px;border-radius:5px;font-weight:700;
+              background:${actionColor}18;color:${actionColor};">
+              ${catIcon[a.category] || '✅'} ${catLabel[a.category] || a.category}
+            </span>
+            <span style="font-size:0.78rem;font-weight:700;
+              color:${isDone ? '#10b981' : isSkipped ? '#94a3b8' : 'var(--text-primary)'};
+              text-decoration:${isSkipped ? 'line-through' : 'none'};">${a.title || ''}</span>
+          </div>
+          <div style="font-size:0.74rem;color:var(--text-muted);line-height:1.5;">${a.detail || ''}</div>
+          ${a.draft_message ? `
+            <div style="margin-top:7px;background:var(--bg-secondary);border:1px dashed var(--border-primary);
+              border-radius:7px;padding:8px 10px;font-size:0.74rem;color:var(--text-secondary);
+              line-height:1.6;font-style:italic;">${a.draft_message}
+              <button onclick="window._copyDraftMessage('${safeAid}')"
+                style="display:block;margin-top:6px;font-size:0.68rem;padding:3px 10px;border-radius:5px;
+                  border:1px solid var(--accent-indigo);background:rgba(99,102,241,0.08);
+                  color:var(--accent-indigo);cursor:pointer;font-weight:600;">
+                📋 Copy tin nhắn
+              </button>
+            </div>` : ''}
+          <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+            ${!isSkipped ? `<button onclick="_toggleCrisisAction('${safeAid}','${a.status}','skipped')"
+              style="font-size:0.68rem;padding:2px 9px;border-radius:5px;cursor:pointer;font-weight:600;
+                border:1px solid #94a3b8;background:rgba(100,116,139,0.07);color:#94a3b8;">– Bỏ qua</button>` : ''}
+            ${(isDone || isSkipped) ? `<button onclick="_toggleCrisisAction('${safeAid}','${a.status}','pending')"
+              style="font-size:0.68rem;padding:2px 9px;border-radius:5px;cursor:pointer;font-weight:600;
+                border:1px solid var(--accent-indigo);background:rgba(99,102,241,0.06);color:var(--accent-indigo);">↩ Hoàn tác</button>` : ''}
+          </div>
+        </div>
+      </div>`;
+  };
+
+  planArea.innerHTML = `
+    <!-- Plan header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-size:0.82rem;font-weight:800;color:var(--text-primary);">
+          🛡 Kế hoạch xử lý — AI tạo
+        </div>
+        <div style="font-size:0.68rem;color:var(--text-muted);margin-top:2px;">
+          Tạo lúc ${generatedAt}
+          ${planData.from_cache
+            ? ' · <span style="color:#10b981;">Từ cache</span>'
+            : ' · <span style="color:#6366f1;">Mới tạo</span>'}
+        </div>
+      </div>
+      <button onclick="window._selectCrisisProduct('${crisis.product_id}', true)"
+        class="btn-modal-cancel" style="font-size:0.7rem;padding:4px 10px;white-space:nowrap;">
+        🔄 Làm mới plan
+      </button>
+    </div>
+
+    <!-- Root cause + urgency -->
+    <div style="background:${urg.bg};border:1px solid ${urg.color}30;border-radius:10px;
+      padding:12px 14px;margin-bottom:14px;">
+      <div style="font-size:0.75rem;font-weight:800;color:${urg.color};margin-bottom:5px;">
+        ${urg.label}
+      </div>
+      <div style="font-size:0.79rem;color:var(--text-secondary);line-height:1.6;">
+        ${planData.root_cause_summary || 'Chưa có phân tích.'}
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+        <span style="font-size:0.7rem;color:var(--text-muted);">
+          Tiến độ: ${doneCount}/${actions.length} hành động đã xong
+          ${skippedCount > 0 ? ` · ${skippedCount} bỏ qua` : ''}
+        </span>
+        <span style="font-size:0.7rem;font-weight:700;
+          color:${progressPct >= 80 ? '#10b981' : progressPct >= 40 ? '#f59e0b' : 'var(--text-muted)'};">
+          ${progressPct}%
+        </span>
+      </div>
+      <div style="height:6px;background:var(--bg-secondary);border-radius:4px;overflow:hidden;">
+        <div style="height:100%;width:${progressPct}%;border-radius:4px;transition:width 0.3s;
+          background:${progressPct >= 80 ? '#10b981' : '#6366f1'};"></div>
+      </div>
+    </div>
+
+    <!-- Immediate actions -->
+    ${immediate.length > 0 ? `
+      <div style="margin-bottom:14px;">
+        <div style="font-size:0.76rem;font-weight:800;color:var(--text-primary);margin-bottom:8px;
+          display:flex;align-items:center;gap:8px;">
+          <span style="background:#ef4444;color:white;padding:2px 9px;border-radius:6px;
+            font-size:0.67rem;font-weight:800;">NGAY · 0–4h</span>
+          Hành động ngay lập tức
+        </div>
+        ${immediate.map(renderActionItem).join('')}
+      </div>` : ''}
+
+    <!-- Mid-term actions -->
+    ${midTerm.length > 0 ? `
+      <div>
+        <div style="font-size:0.76rem;font-weight:800;color:var(--text-primary);margin-bottom:8px;
+          display:flex;align-items:center;gap:8px;">
+          <span style="background:#f59e0b;color:white;padding:2px 9px;border-radius:6px;
+            font-size:0.67rem;font-weight:800;">1–7 NGÀY</span>
+          Xử lý trung hạn
+        </div>
+        ${midTerm.map(renderActionItem).join('')}
+      </div>` : ''}`;
+}
+
+/**
+ * Toggle an action's status. Calls PATCH /api/crisis-action/{action_id}.
+ * On success, reloads the plan section for the current product.
+ */
+window._toggleCrisisAction = async function(action_id, currentStatus, targetStatus) {
+  if (!targetStatus) {
+    targetStatus = currentStatus === 'done' ? 'pending' : 'done';
+  }
+  try {
+    await apiCall(`/api/crisis-action/${action_id}`, 'PATCH', { status: targetStatus });
+    const toastMsg = targetStatus === 'done'    ? '✅ Đã đánh dấu hoàn thành'
+                   : targetStatus === 'skipped' ? '– Đã bỏ qua hành động'
+                   :                              '↩ Đã hoàn tác';
+    showToast(toastMsg, 'success');
+
+    // Reload plan section without reloading the whole page
+    if (_crisisSelectedPid && _crisisOverviewData) {
+      const crisis = _crisisOverviewData.crises.find(c => c.product_id === _crisisSelectedPid);
+      if (crisis) _loadAndRenderPlan(crisis, false);
+    }
+  } catch (err) {
+    showToast(`❌ Lỗi cập nhật: ${err.message}`, 'danger');
+  }
+};
+
+/** Copy a draft message by action_id from the window map (avoids HTML-attribute escaping). */
+window._copyDraftMessage = function(action_id) {
+  const text = window._crisisDraftMessages?.[action_id];
+  if (!text) { showToast('⚠️ Không tìm thấy nội dung tin nhắn', 'warning'); return; }
+  navigator.clipboard?.writeText(text)
+    .then(() => showToast('✅ Đã copy tin nhắn!', 'success'))
+    .catch(() => showToast('⚠️ Trình duyệt chặn clipboard — hãy copy thủ công', 'warning'));
+};
+
+/* ──────────────────────────────────────────────────────────────────────
+   11c. MOCK DATA FALLBACK — xây dựng crisis data khi backend offline
+   ────────────────────────────────────────────────────────────────────── */
+
+/**
  * Xây dựng cấu trúc dữ liệu crisis từ MOCK data (khi backend offline).
  * Phân tích: MOCK.reviews (rating ≤ 3), MOCK.chat_clusters (urgent),
  *            MOCK.conversations (status=escalate hoặc angry=true).
@@ -2458,353 +3065,6 @@ function _buildCrisisFromMockData() {
   return { overall_status, total_crisis_products: crises.length,
            total_neg_reviews, total_risk_tasks, total_chat_signals,
            crises, last_updated: new Date().toISOString() };
-}
-
-/** Render nội dung panel crisis (dùng chung cho live backend và mock data). */
-function _renderCrisisPanel(contentEl, data, isFromMock) {
-  const statusMap = {
-    critical:   { color: '#ef4444', bg: 'rgba(239,68,68,0.08)',   icon: '🔴', label: 'CẢNH BÁO KHẨN CẤP' },
-    warning:    { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)',  icon: '🟡', label: 'CẦN THEO DÕI' },
-    monitoring: { color: '#6366f1', bg: 'rgba(99,102,241,0.08)', icon: '🔵', label: 'ĐANG QUAN SÁT' },
-    safe:       { color: '#10b981', bg: 'rgba(16,185,129,0.08)', icon: '🟢', label: 'AN TOÀN' },
-  };
-  const st = statusMap[data.overall_status] || statusMap.safe;
-
-  // Cập nhật MOCK.alerts
-  if (data.total_neg_reviews > 0 || data.total_risk_tasks > 0) {
-    const liveAlert = {
-      level: data.overall_status === 'critical' ? 'critical' : 'warning',
-      icon: st.icon,
-      text: `${isFromMock ? '[DEMO] ' : '[LIVE] '}${data.total_neg_reviews} review tiêu cực & ${data.total_risk_tasks} tác vụ rủi ro đang chờ xử lý`,
-      cta: 'Xem ngay', cta_page: 'crisis-center', _fromBackend: !isFromMock
-    };
-    if (typeof MOCK !== 'undefined' && MOCK.alerts) {
-      MOCK.alerts = MOCK.alerts.filter(a => !a._fromBackend);
-      MOCK.alerts.unshift(liveAlert);
-    }
-    // Toast chỉ khi có dữ liệu live thật
-    if (!isFromMock) {
-      if (data.overall_status === 'critical') {
-        showToast(`🔴 Phát hiện ${data.total_neg_reviews} review xấu & ${data.total_risk_tasks} cảnh báo rủi ro — Kiểm tra ngay!`, 'danger');
-      } else if (data.overall_status === 'warning') {
-        showToast(`🟡 ${data.total_neg_reviews} review tiêu cực được ghi nhận — Theo dõi chặt chẽ hơn`, 'warning');
-      }
-    }
-  }
-
-  // Badge nguồn dữ liệu
-  const sourceBadge = isFromMock
-    ? `<span style="font-size:0.65rem;padding:2px 8px;border-radius:6px;background:rgba(245,158,11,0.15);color:#f59e0b;font-weight:700;border:1px solid rgba(245,158,11,0.3);">🟡 Demo Data (Backend offline)</span>`
-    : `<span style="font-size:0.65rem;padding:2px 8px;border-radius:6px;background:rgba(16,185,129,0.12);color:#10b981;font-weight:700;border:1px solid rgba(16,185,129,0.3);">🟢 Live Backend</span>`;
-
-  if (data.crises.length === 0) {
-    contentEl.innerHTML = `
-      <div style="text-align:right;margin-bottom:8px;">${sourceBadge}</div>
-      <div style="text-align:center;padding:20px;background:rgba(16,185,129,0.06);border-radius:10px;border:1px solid rgba(16,185,129,0.2);">
-        <div style="font-size:2rem;margin-bottom:6px;">✅</div>
-        <div style="font-weight:700;color:#10b981;font-size:0.9rem;">Hệ thống ổn định</div>
-        <div style="color:var(--text-muted);font-size:0.78rem;margin-top:4px;">
-          Không phát hiện tín hiệu tiêu cực nào từ reviews & chat trong thời gian gần đây.
-        </div>
-      </div>`;
-    return;
-  }
-
-  const kpiBar = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
-      <div>${sourceBadge}</div>
-      <div style="font-size:0.68rem;color:var(--text-muted);">⏱ ${new Date(data.last_updated).toLocaleString('vi-VN')}</div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">
-      <div style="background:${st.bg};border-radius:8px;padding:10px;text-align:center;border:1px solid ${st.color}30;">
-        <div style="font-size:1.3rem;font-weight:800;color:${st.color};">${st.icon}</div>
-        <div style="font-size:0.68rem;color:${st.color};font-weight:700;margin-top:2px;">${st.label}</div>
-      </div>
-      <div style="background:rgba(239,68,68,0.07);border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(239,68,68,0.2);">
-        <div style="font-size:1.3rem;font-weight:800;color:#ef4444;">${data.total_neg_reviews}</div>
-        <div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px;">Review tiêu cực</div>
-      </div>
-      <div style="background:rgba(245,158,11,0.07);border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(245,158,11,0.2);">
-        <div style="font-size:1.3rem;font-weight:800;color:#f59e0b;">${data.total_risk_tasks}</div>
-        <div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px;">Tác vụ rủi ro</div>
-      </div>
-      <div style="background:rgba(99,102,241,0.07);border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(99,102,241,0.2);">
-        <div style="font-size:1.3rem;font-weight:800;color:#6366f1;">${data.total_chat_signals}</div>
-        <div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px;">Tín hiệu chat</div>
-      </div>
-    </div>`;
-
-  contentEl.innerHTML = kpiBar + data.crises.map(_renderCrisisCard).join('');
-}
-
-/**
- * Gọi /api/crisis-overview để lấy tín hiệu tiêu cực từ reviews + chat.
- * Khi backend offline, tự động fallback sang MOCK data để demo vẫn hoạt động.
- */
-async function loadCrisisFromBackend() {
-  const pageContent = document.getElementById('pageContent');
-  if (!pageContent) return;
-
-  // Xóa panel cũ nếu có để tránh duplicate
-  const existing = document.getElementById('crisisLivePanel');
-  if (existing) existing.remove();
-
-  const panel = document.createElement('div');
-  panel.id = 'crisisLivePanel';
-  panel.className = 'content-card';
-  panel.style.cssText = 'margin-bottom:20px;border:2px solid var(--accent-indigo);';
-  panel.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-      <div>
-        <div class="content-card-title" style="margin:0;color:var(--accent-indigo);">
-          🔴 Phát hiện Khủng hoảng — Dữ liệu Thực từ Backend
-        </div>
-        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">
-          Tổng hợp từ Reviews tiêu cực + Chat Signals + RiskManager Tasks
-        </div>
-      </div>
-      <button onclick="loadCrisisFromBackend()" class="btn-approve" style="font-size:0.75rem;padding:6px 12px;">
-        🔄 Làm mới
-      </button>
-    </div>
-    <div id="crisisLiveContent" style="color:var(--text-muted);font-size:0.83rem;text-align:center;padding:16px;">
-      ⏳ Đang phân tích tín hiệu...
-    </div>
-  `;
-  pageContent.insertBefore(panel, pageContent.firstChild);
-
-  const contentEl = document.getElementById('crisisLiveContent');
-  if (!contentEl) return;
-
-  // ── Thử backend trước, fallback sang MOCK nếu lỗi hoặc offline ──
-  let data = null;
-  let isFromMock = false;
-
-  try {
-    if (!_backendConnected) throw new Error('Backend offline');
-    data = await apiCall('/api/crisis-overview');
-  } catch (err) {
-    console.warn('[Agicom] Backend offline — dùng MOCK data cho Crisis panel:', err.message);
-    try {
-      data = _buildCrisisFromMockData();
-      isFromMock = true;
-    } catch (mockErr) {
-      contentEl.innerHTML = `
-        <div style="color:var(--accent-rose);font-size:0.83rem;padding:10px;
-          background:var(--accent-rose-bg);border-radius:8px;">
-          ❌ Không thể tải dữ liệu khủng hoảng.<br>
-          <small style="color:var(--text-muted);">Backend offline và MOCK data lỗi: ${mockErr.message}</small>
-        </div>`;
-      return;
-    }
-  }
-
-  try {
-    _renderCrisisPanel(contentEl, data, isFromMock);
-    // Sinh kế hoạch xử lý khủng hoảng ngay sau panel cảnh báo
-    if (data.crises.length > 0) {
-      window._lastCrisisData = data;
-      setTimeout(() => _renderCrisisResponsePlan(panel, data), 50);
-    }
-  } catch (renderErr) {
-    contentEl.innerHTML = `
-      <div style="color:var(--accent-rose);font-size:0.83rem;padding:10px;
-        background:var(--accent-rose-bg);border-radius:8px;">
-        ❌ Lỗi hiển thị dữ liệu khủng hoảng.<br>
-        <small style="color:var(--text-muted);">${renderErr.message}</small>
-      </div>`;
-  }
-}
-
-/* ──────────────────────────────────────────────────────────────────────
-   11c. CRISIS RESPONSE PLAN — Kế hoạch xử lý khủng hoảng tự động
-   ────────────────────────────────────────────────────────────────────── */
-
-/**
- * Sinh kế hoạch xử lý khủng hoảng dựa trên tín hiệu đã phát hiện.
- * Chèn vào ngay sau crisisLivePanel.
- * @param {HTMLElement} panelEl - element crisisLivePanel để tính vị trí insert
- * @param {object} data - dữ liệu crisis (cùng cấu trúc với /api/crisis-overview)
- */
-function _renderCrisisResponsePlan(panelEl, data) {
-  // Xóa kế hoạch cũ nếu có
-  document.getElementById('crisisResponsePlan')?.remove();
-
-  if (!data || !data.crises || data.crises.length === 0) return;
-
-  const topCrisis = data.crises[0];
-  // Lọc bỏ ID quá chung chung và dedup trước khi hiển thị
-  const _SKIP_PIDS = new Set(['general', 'none', 'unknown', 'chat_general', '']);
-  const affectedProducts = [
-    ...new Set(
-      data.crises
-        .map(c => c.product_id)
-        .filter(pid => !_SKIP_PIDS.has((pid || '').toLowerCase()))
-    )
-  ].join(', ') || 'sản phẩm liên quan';
-  const statusColor = topCrisis.severity === 'critical' ? '#ef4444' : '#f59e0b';
-
-  // Phân tích loại vấn đề từ insights trong reviews
-  const allInsights = data.crises.flatMap(c =>
-    (Array.isArray(c.reviews) ? c.reviews : []).map(r => r.insight || '').filter(Boolean)
-  ).join(' ').toLowerCase();
-
-  const hasQuality  = allInsights.includes('chất lượng') || allInsights.includes('hư') || allInsights.includes('lỗi');
-  const hasShipping = allInsights.includes('vận chuyển') || allInsights.includes('đóng gói') || allInsights.includes('móp');
-  const hasChatRisk = data.total_chat_signals > 0 || data.total_risk_tasks > 0;
-
-  // ── Hành động ngay (0–4h) ──
-  const immediateActions = [];
-  if (data.total_neg_reviews > 0)
-    immediateActions.push(`Phản hồi công khai <strong>${data.total_neg_reviews} review tiêu cực</strong> trong 2 giờ tới bằng template bên dưới`);
-  if (hasChatRisk)
-    immediateActions.push(`Chủ động liên hệ lại <strong>${data.total_chat_signals + data.total_risk_tasks} khách</strong> đang bức xúc qua inbox`);
-  if (hasQuality)
-    immediateActions.push(`Tạm dừng quảng cáo sản phẩm <strong>${affectedProducts}</strong> để tránh thêm khách mua hàng lỗi`);
-  if (hasShipping)
-    immediateActions.push('Liên hệ đơn vị vận chuyển — yêu cầu đổi quy trình đóng gói, thêm lớp bảo vệ');
-  if (topCrisis.severity === 'critical')
-    immediateActions.push('Báo cáo khẩn lên quản lý và chuẩn bị phương án <strong>hoàn tiền / đổi hàng</strong> cho khách bị ảnh hưởng');
-  if (immediateActions.length === 0)
-    immediateActions.push(`Theo dõi sát sản phẩm <strong>${affectedProducts}</strong> và chuẩn bị phản hồi nhanh nếu có thêm khiếu nại`);
-
-  // ── Xử lý trung hạn (1–7 ngày) ──
-  const midTermActions = [
-    hasQuality  ? `Liên hệ nhà cung cấp <strong>${affectedProducts}</strong> — yêu cầu kiểm tra QC lô hàng và phương án bảo hành` : `Rà soát quy trình kiểm tra chất lượng đầu vào cho <strong>${affectedProducts}</strong>`,
-    hasShipping ? 'Nâng cấp vật liệu đóng gói (thùng carton 5 lớp) — tăng chi phí ~2.000đ/đơn, giảm rủi ro review xấu' : 'Chuẩn bị tài liệu hướng dẫn đóng gói chuẩn cho nhân viên kho',
-    'Cập nhật Knowledge Base chatbot với Q&A mới từ sự cố này để AI trả lời tốt hơn lần sau',
-    `Theo dõi biến động rating sản phẩm <strong>${affectedProducts}</strong> hàng ngày trong 7 ngày tới`,
-    'Tổng kết sự cố thành case study nội bộ, xây dựng SOP phòng ngừa cho tương lai'
-  ];
-
-  // ── Template phản hồi review ──
-  const replyTemplate = hasQuality
-    ? `"Dạ anh/chị ơi, em xin lỗi về trải nghiệm không tốt này ạ 🙏 Shop đã ghi nhận và phát hiện có thể lô hàng này gặp vấn đề chất lượng. Anh/chị vui lòng inbox để em hỗ trợ đổi sản phẩm mới hoặc hoàn tiền 100% nhé ạ. Cảm ơn anh/chị đã phản hồi để shop cải thiện ạ!"`
-    : hasShipping
-    ? `"Dạ anh/chị ơi, em thành thật xin lỗi vì sự cố đóng gói này ạ 🙏 Shop đã ghi nhận và sẽ báo ngay đơn vị vận chuyển. Nếu sản phẩm bên trong bị ảnh hưởng, anh/chị inbox để em hỗ trợ đổi/hoàn miễn phí nhé. Shop rất trân trọng phản hồi của anh/chị ạ!"`
-    : `"Dạ anh/chị ơi, em xin lỗi về trải nghiệm này ạ 🙏 Shop đã ghi nhận phản hồi và sẽ liên hệ anh/chị trong vòng 24h để hỗ trợ. Xin anh/chị thông cảm ạ!"`;
-
-  const replyTemplateRaw = replyTemplate.replace(/<[^>]+>/g, '');
-
-  // ── Mốc thời gian xử lý ──
-  const now = new Date();
-  const h2 = new Date(now.getTime() + 2*3600000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-  const h24 = new Date(now.getTime() + 24*3600000).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
-
-  const planEl = document.createElement('div');
-  planEl.id = 'crisisResponsePlan';
-  planEl.className = 'content-card';
-  planEl.style.cssText = `margin-bottom:20px;border:2px solid ${statusColor};`;
-  planEl.innerHTML = `
-    <!-- Header -->
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-      <div>
-        <div class="content-card-title" style="margin:0;color:${statusColor};">
-          🛡 Kế hoạch Xử lý Khủng hoảng — AI tự động tạo
-        </div>
-        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:3px;">
-          Dựa trên ${data.total_neg_reviews} review · ${data.total_risk_tasks} tác vụ rủi ro · ${data.total_chat_signals} tín hiệu chat
-          &nbsp;·&nbsp; Tạo lúc ${now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-        </div>
-      </div>
-      <button onclick="window._lastCrisisData && _renderCrisisResponsePlan(document.getElementById('crisisLivePanel'), window._lastCrisisData)"
-        class="btn-modal-cancel" style="font-size:0.72rem;padding:5px 10px;white-space:nowrap;">
-        🔄 Làm mới kế hoạch
-      </button>
-    </div>
-
-    <!-- Tình trạng tổng thể -->
-    <div style="background:${statusColor}10;border:1px solid ${statusColor}30;border-radius:10px;
-      padding:12px 16px;margin-bottom:14px;display:flex;align-items:flex-start;gap:12px;">
-      <span style="font-size:1.5rem;line-height:1;">${topCrisis.severity === 'critical' ? '🚨' : '⚠️'}</span>
-      <div>
-        <div style="font-size:0.82rem;font-weight:800;color:${statusColor};margin-bottom:4px;">
-          ${topCrisis.severity === 'critical' ? 'KHẨN CẤP — Cần hành động trong 2-4 giờ' : 'CẦN THEO DÕI — Xử lý trong ngày hôm nay'}
-        </div>
-        <div style="font-size:0.76rem;color:var(--text-secondary);line-height:1.55;">
-          <strong>${data.crises.length} sản phẩm</strong> có tín hiệu tiêu cực.
-          Nghiêm trọng nhất: <code style="background:var(--bg-glass);padding:1px 6px;border-radius:4px;font-size:0.72rem;">${topCrisis.product_id}</code>
-          (Score: <strong style="color:${statusColor};">${topCrisis.severity_score}/100</strong>).
-          Deadline phản hồi đề xuất: <strong>${h2}</strong> — Hoàn tất xử lý trước: <strong>${h24}</strong>.
-        </div>
-      </div>
-    </div>
-
-    <!-- Bước 1: Hành động ngay -->
-    <div style="margin-bottom:14px;">
-      <div style="font-size:0.78rem;font-weight:800;color:var(--text-primary);margin-bottom:8px;
-        display:flex;align-items:center;gap:8px;">
-        <span style="background:#ef4444;color:white;padding:2px 9px;border-radius:6px;font-size:0.67rem;font-weight:800;">NGAY · 0–4h</span>
-        Hành động ngay lập tức
-      </div>
-      <div style="display:flex;flex-direction:column;gap:5px;">
-        ${immediateActions.map((a, i) => `
-          <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;
-            background:rgba(239,68,68,0.05);border-radius:8px;border-left:3px solid #ef4444;">
-            <span style="min-width:20px;height:20px;background:#ef4444;color:white;border-radius:50%;
-              font-size:0.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">${i+1}</span>
-            <span style="font-size:0.77rem;color:var(--text-secondary);line-height:1.55;">${a}</span>
-          </div>`).join('')}
-      </div>
-    </div>
-
-    <!-- Bước 2: Trung hạn -->
-    <div style="margin-bottom:14px;">
-      <div style="font-size:0.78rem;font-weight:800;color:var(--text-primary);margin-bottom:8px;
-        display:flex;align-items:center;gap:8px;">
-        <span style="background:#f59e0b;color:white;padding:2px 9px;border-radius:6px;font-size:0.67rem;font-weight:800;">1–7 NGÀY</span>
-        Xử lý trung hạn
-      </div>
-      <div style="display:flex;flex-direction:column;gap:5px;">
-        ${midTermActions.map((a, i) => `
-          <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;
-            background:rgba(245,158,11,0.05);border-radius:8px;border-left:3px solid #f59e0b;">
-            <span style="min-width:20px;height:20px;background:#f59e0b;color:white;border-radius:50%;
-              font-size:0.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">${i+1}</span>
-            <span style="font-size:0.77rem;color:var(--text-secondary);line-height:1.55;">${a}</span>
-          </div>`).join('')}
-      </div>
-    </div>
-
-    <!-- Template phản hồi review -->
-    <div>
-      <div style="font-size:0.78rem;font-weight:800;color:var(--text-primary);margin-bottom:8px;
-        display:flex;align-items:center;gap:8px;">
-        <span style="background:#6366f1;color:white;padding:2px 9px;border-radius:6px;font-size:0.67rem;font-weight:800;">TEMPLATE</span>
-        Mẫu phản hồi review công khai — sẵn sàng copy
-      </div>
-      <div style="background:var(--bg-secondary);border:1px dashed var(--border-primary);border-radius:10px;padding:14px;position:relative;">
-        <div id="crisisReplyTemplate" style="font-size:0.8rem;color:var(--text-secondary);line-height:1.75;font-style:italic;">
-          ${replyTemplate}
-        </div>
-        <button id="crisisCopyTemplateBtn"
-          style="margin-top:10px;font-size:0.72rem;padding:5px 14px;border-radius:7px;cursor:pointer;
-            border:1px solid var(--accent-indigo);background:rgba(99,102,241,0.08);
-            color:var(--accent-indigo);font-weight:600;">
-          📋 Copy template
-        </button>
-      </div>
-    </div>`;
-
-  // Chèn ngay sau crisisLivePanel
-  const crisisPanel = document.getElementById('crisisLivePanel');
-  if (crisisPanel?.parentElement) {
-    crisisPanel.parentElement.insertBefore(planEl, crisisPanel.nextSibling);
-  } else {
-    // Fallback: chèn vào pageContent
-    const pc = document.getElementById('pageContent');
-    if (pc) pc.insertBefore(planEl, pc.firstChild);
-  }
-
-  // Gắn event listener sau khi đã insert vào DOM (tránh bug inline onclick với dynamic text)
-  const copyBtn = document.getElementById('crisisCopyTemplateBtn');
-  if (copyBtn) {
-    copyBtn.addEventListener('click', () => {
-      navigator.clipboard?.writeText(replyTemplateRaw)
-        .then(() => showToast('✅ Đã copy template phản hồi!', 'success'))
-        .catch(() => showToast('⚠️ Trình duyệt chặn clipboard — hãy copy thủ công', 'warning'));
-    });
-  }
 }
 
 /* ──────────────────────────────────────────────────────────────────────
