@@ -109,6 +109,26 @@ def save_message(db, customer_id: str, role: str, content: str,
     db.add(new_msg)
     db.commit()
 
+# Lưu lịch sử đề xuất chiến lược từ AI (slow-track-strategy).
+# /act-and-learn tra cứu theo proposal_id để lấy nội dung đề xuất khi duyệt/từ chối.
+class StrategyProposalLog(Base):
+    __tablename__ = "strategy_proposal_logs"
+    id                        = Column(Integer, primary_key=True, index=True)
+    proposal_id               = Column(String, unique=True, index=True)  # VD: PROP-P009-001
+    product_id                = Column(String, index=True)
+    product_name              = Column(String)
+    proposed_price            = Column(Float)
+    expected_margin_percent   = Column(Float)
+    pricing_reasoning         = Column(Text)
+    content_update_suggestion = Column(Text)
+    urgency_level             = Column(String)
+    action_required           = Column(Boolean, default=True)
+    status                    = Column(String, default="pending")  # pending | approved | declined
+    feedback                  = Column(Text)   # Lý do từ chối (nếu declined)
+    created_at                = Column(DateTime, default=datetime.datetime.utcnow)
+    resolved_at               = Column(DateTime, nullable=True)   # Thời điểm duyệt/từ chối
+
+
 # Bảng lưu trữ đề xuất content đã được xác nhận / đang theo dõi
 class ContentSuggestion(Base):
     __tablename__ = "content_suggestions"

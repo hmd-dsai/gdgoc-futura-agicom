@@ -18,7 +18,7 @@ from services import (
     learn_from_human_service,
     chat_with_history_service
 )
-from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog, ContentSuggestion, CustomerProfile, get_or_create_customer_profile
+from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog, ContentSuggestion, CustomerProfile, get_or_create_customer_profile, StrategyProposalLog
 import config as _cfg
 from seed_demo import seed_vector_db, seed_sql_db, seed_content_suggestions, seed_customer_profiles
 
@@ -98,18 +98,158 @@ async def health_check():
 @app.post("/act-and-learn")
 async def human_approval_flow(approval: ProposalApproval):
     """
-    ACT -> HUMAN APPROVAL -> LEARN
-    Mô phỏng thao tác của Chủ shop trên Dashboard.
+    ACT → HUMAN APPROVAL → LEARN
+    Xử lý quyết định duyệt/từ chối đề xuất chiến lược của chủ shop.
+
+    approved:
+      - ACT:   Tạo CoordinationTask gửi lệnh cập nhật giá cho Pricing Agent
+               (thay thế cho Shopee API call thực tế trong giai đoạn này)
+      - LEARN: Lưu chiến lược thành công vào Vector DB để AI học hỏi
+               và tránh đề xuất lại những gì đã được chứng minh đúng
+
+    declined:
+      - LEARN: Lưu chiến lược bị từ chối + lý do vào Vector DB
+               để AI tránh lặp lại sai lầm tương tự
+      - ACT:   Tạo CoordinationTask yêu cầu AI tính toán lại với feedback
     """
-    if approval.status == "approved":
-        print(f"[*] ACT: Execute on Platforms (Gửi lệnh cập nhật giá lên Shopee API)")
-        print(f"[*] LEARN: Store in Vector Database (Lưu chiến lược thành công)")
-        return {"status": "Executed & Learned", "message": "Đã đồng bộ lên sàn và lưu vào ChromaDB"}
-    
-    elif approval.status == "declined":
-        print(f"[*] ACT: Declined. User Feedback: {approval.feedback}")
-        print(f"[*] RE-EVALUATE: Gửi feedback '{approval.feedback}' về lại LLM Framework")
-        return {"status": "Re-evaluating", "message": "Đang tính toán lại dựa trên phản hồi của bạn"}
+    if approval.status not in ("approved", "declined"):
+        raise HTTPException(status_code=400, detail="status phải là 'approved' hoặc 'declined'")
+
+    db = SessionLocal()
+    try:
+        # ── 1. Tra cứu đề xuất gốc từ DB ────────────────────────────────────
+        proposal = db.query(StrategyProposalLog).filter(
+            StrategyProposalLog.proposal_id == approval.proposal_id
+        ).first()
+
+        # Xây dựng context để lưu vào Vector DB.
+        # Dùng dữ liệu từ DB nếu có; nếu proposal cũ (trước migration) thì dùng fallback.
+        if proposal:
+            product_id   = proposal.product_id   or "unknown"
+            product_name = proposal.product_name or "unknown"
+            reasoning    = proposal.pricing_reasoning or ""
+            content_sug  = proposal.content_update_suggestion or ""
+            price_str    = f"{proposal.proposed_price:,.0f}đ" if proposal.proposed_price else "N/A"
+            margin_str   = f"{proposal.expected_margin_percent:.1f}%" if proposal.expected_margin_percent else "N/A"
+            urgency      = proposal.urgency_level or ""
+        else:
+            # Proposal chưa được lưu (trước khi triển khai migration này)
+            product_id = product_name = "unknown"
+            reasoning = content_sug = urgency = ""
+            price_str = margin_str = "N/A"
+            print(f"[act-and-learn] Cảnh báo: không tìm thấy proposal {approval.proposal_id} trong DB")
+
+        now = datetime.utcnow()
+
+        # ── 2. Nhánh APPROVED ────────────────────────────────────────────────
+        if approval.status == "approved":
+
+            # 2a. LEARN — Lưu chiến lược thành công vào Vector DB
+            import hashlib
+            doc_id = hashlib.md5(approval.proposal_id.encode()).hexdigest()
+            learn_doc = (
+                f"[Chiến lược được duyệt] Sản phẩm: {product_name} ({product_id}). "
+                f"Giá đề xuất: {price_str}. Margin: {margin_str}. Mức độ khẩn: {urgency}. "
+                f"Lập luận: {reasoning}. "
+                f"Đề xuất nội dung: {content_sug}. "
+                f"Kết quả: Chủ shop PHÊ DUYỆT — đây là chiến lược đúng hướng."
+            )
+            # Ghi vào strategy_col — collection riêng cho lịch sử chiến lược.
+            # Chatbot KHÔNG đọc collection này; chỉ /slow-track-strategy dùng để tham khảo.
+            _cfg.strategy_col.add(
+                documents=[learn_doc],
+                ids=[f"strategy_approved_{doc_id}"]
+            )
+            print(f"[act-and-learn] LEARN: Đã lưu chiến lược được duyệt vào strategy_learnings_db (proposal: {approval.proposal_id})")
+
+            # 2b. ACT — Tạo CoordinationTask để Pricing Agent "thực thi" trên sàn
+            # (Trong production: đây sẽ là lời gọi Shopee/Tiki API thực sự)
+            platform_task = CoordinationTask(
+                target_agent="Pricing",
+                product_id=product_id,
+                instruction=(
+                    f"[ĐÃ DUYỆT - CẬP NHẬT GIÁ] {product_name} ({product_id}): "
+                    f"Giá mới {price_str} (margin {margin_str}). "
+                    f"Lý do: {reasoning[:200]}. "
+                    f"Proposal: {approval.proposal_id}"
+                ),
+                status="pending",
+            )
+            db.add(platform_task)
+
+            # 2c. Cập nhật trạng thái proposal
+            if proposal:
+                proposal.status = "approved"
+                proposal.resolved_at = now
+
+            db.commit()
+            print(f"[act-and-learn] ACT: Đã tạo Pricing task cho sàn (product: {product_id})")
+
+            return {
+                "status": "approved",
+                "message": f"Đã lưu chiến lược vào bộ nhớ AI và gửi lệnh cập nhật giá cho {product_name}.",
+                "learned": True,
+                "platform_task_created": True,
+                "product_id": product_id,
+            }
+
+        # ── 3. Nhánh DECLINED ────────────────────────────────────────────────
+        elif approval.status == "declined":
+            feedback_text = approval.feedback or "Không có lý do cụ thể"
+
+            # 3a. LEARN — Lưu bài học "điều không nên làm" vào Vector DB
+            import hashlib
+            doc_id = hashlib.md5(f"{approval.proposal_id}_declined".encode()).hexdigest()
+            learn_doc = (
+                f"[Chiến lược bị từ chối] Sản phẩm: {product_name} ({product_id}). "
+                f"Giá đề xuất: {price_str}. Margin: {margin_str}. Mức độ khẩn: {urgency}. "
+                f"Lập luận AI: {reasoning}. "
+                f"Lý do từ chối của chủ shop: {feedback_text}. "
+                f"Bài học: Tránh đề xuất chiến lược tương tự cho sản phẩm này trong tương lai."
+            )
+            _cfg.strategy_col.add(
+                documents=[learn_doc],
+                ids=[f"strategy_declined_{doc_id}"]
+            )
+            print(f"[act-and-learn] LEARN: Đã lưu chiến lược bị từ chối vào strategy_learnings_db (proposal: {approval.proposal_id})")
+
+            # 3b. ACT — Tạo CoordinationTask yêu cầu tính toán lại với feedback
+            reeval_task = CoordinationTask(
+                target_agent="Pricing",
+                product_id=product_id,
+                instruction=(
+                    f"[TỪ CHỐI - TÍNH TOÁN LẠI] {product_name} ({product_id}): "
+                    f"Đề xuất {approval.proposal_id} bị từ chối. "
+                    f"Lý do: {feedback_text}. "
+                    f"Yêu cầu: Phân tích lại chiến lược định giá có tính đến phản hồi này."
+                ),
+                status="pending",
+            )
+            db.add(reeval_task)
+
+            # 3c. Cập nhật trạng thái proposal
+            if proposal:
+                proposal.status = "declined"
+                proposal.feedback = feedback_text
+                proposal.resolved_at = now
+
+            db.commit()
+            print(f"[act-and-learn] ACT: Đã tạo re-evaluation task (product: {product_id})")
+
+            return {
+                "status": "declined",
+                "message": f"Đã ghi nhận phản hồi và yêu cầu AI tính toán lại chiến lược cho {product_name}.",
+                "learned": True,
+                "reeval_task_created": True,
+                "product_id": product_id,
+            }
+
+    except Exception as e:
+        db.rollback()
+        print(f"[act-and-learn] LỖI: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
 
 @app.post("/slow-track-strategy")
 async def process_market_strategy(product: ProductRequest):
@@ -140,13 +280,44 @@ async def process_market_strategy(product: ProductRequest):
         clean_text = response.text.replace("```json", "").replace("```", "").strip()
         strategy_result = json.loads(clean_text)
 
-        # New Logic: Routing based on "Action Required"
+        # Routing based on "Action Required"
         routing_msg = "Sent to Dashboard for Human Approval" if strategy_result.get("action_required") else "No Action Needed - Monitored"
+        proposal_id = f"PROP-{product.product_id}-{int(datetime.now().timestamp())}"
+
+        # Lưu đề xuất vào SQL để /act-and-learn có thể tra cứu nội dung khi duyệt/từ chối
+        db = SessionLocal()
+        try:
+            # Nếu đã có pending proposal cho cùng product_id, đánh dấu cũ là superseded
+            existing = db.query(StrategyProposalLog).filter(
+                StrategyProposalLog.product_id == product.product_id,
+                StrategyProposalLog.status == "pending"
+            ).all()
+            for old in existing:
+                old.status = "superseded"
+
+            db.add(StrategyProposalLog(
+                proposal_id=proposal_id,
+                product_id=product.product_id,
+                product_name=product.product_name,
+                proposed_price=strategy_result.get("proposed_price", 0),
+                expected_margin_percent=strategy_result.get("expected_margin_percent", 0),
+                pricing_reasoning=strategy_result.get("pricing_reasoning", ""),
+                content_update_suggestion=strategy_result.get("content_update_suggestion", ""),
+                urgency_level=strategy_result.get("urgency_level", ""),
+                action_required=bool(strategy_result.get("action_required", False)),
+                status="pending",
+            ))
+            db.commit()
+        except Exception as db_err:
+            db.rollback()
+            print(f"[slow-track-strategy] Cảnh báo: không lưu được proposal log: {db_err}")
+        finally:
+            db.close()
 
         return {
             "status": "success",
             "routing_action": routing_msg,
-            "proposal_id": f"PROP-{product.product_id}-001",
+            "proposal_id": proposal_id,
             "data": strategy_result
         }
     except Exception as e:
@@ -900,21 +1071,23 @@ async def reset_all_data():
         db.query(ReviewLog).delete()
         db.query(ContentSuggestion).delete()
         db.query(CustomerProfile).delete()
+        db.query(StrategyProposalLog).delete()
         db.commit()
 
         # 2. Xóa và tạo lại các Collections trong Vector DB.
-        #    QUAN TRỌNG: Phải cập nhật lại module globals _cfg.policy_col / product_col /
-        #    resolved_qa_col để services.py (dùng _get_cols()) luôn nhận đúng collection
-        #    mới sau khi reset, tránh lỗi "Collection đã bị xóa" khi query/add.
-        for col_name in ["policy_db", "product_db", "resolved_qa_db"]:
+        #    QUAN TRỌNG: Phải cập nhật lại module globals sau khi delete để services.py
+        #    luôn nhận đúng collection mới, tránh lỗi "Collection đã bị xóa".
+        #    strategy_learnings_db cũng được reset để lịch sử phê duyệt đồng bộ với SQL.
+        for col_name in ["policy_db", "product_db", "resolved_qa_db", "strategy_learnings_db"]:
             try:
                 _cfg.chroma_client.delete_collection(col_name)
             except Exception:
                 pass
 
-        _cfg.policy_col      = _cfg.chroma_client.get_or_create_collection(name="policy_db",      embedding_function=_cfg.default_ef)
-        _cfg.product_col     = _cfg.chroma_client.get_or_create_collection(name="product_db",     embedding_function=_cfg.default_ef)
-        _cfg.resolved_qa_col = _cfg.chroma_client.get_or_create_collection(name="resolved_qa_db", embedding_function=_cfg.default_ef)
+        _cfg.policy_col      = _cfg.chroma_client.get_or_create_collection(name="policy_db",              embedding_function=_cfg.default_ef)
+        _cfg.product_col     = _cfg.chroma_client.get_or_create_collection(name="product_db",             embedding_function=_cfg.default_ef)
+        _cfg.resolved_qa_col = _cfg.chroma_client.get_or_create_collection(name="resolved_qa_db",         embedding_function=_cfg.default_ef)
+        _cfg.strategy_col    = _cfg.chroma_client.get_or_create_collection(name="strategy_learnings_db",  embedding_function=_cfg.default_ef)
 
         # 3. Nạp lại toàn bộ dữ liệu nền từ data/mock/
         seed_vector_db(_cfg.policy_col, _cfg.product_col, _cfg.resolved_qa_col)

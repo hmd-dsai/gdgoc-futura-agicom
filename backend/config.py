@@ -36,6 +36,10 @@ default_ef = embedding_functions.DefaultEmbeddingFunction()
 # gemini_ef = GeminiEmbeddingFunction()
 
 # Tạo/Lấy các Collections
-policy_col = chroma_client.get_or_create_collection(name="policy_db", embedding_function=default_ef)
-product_col = chroma_client.get_or_create_collection(name="product_db", embedding_function=default_ef)
+policy_col      = chroma_client.get_or_create_collection(name="policy_db",      embedding_function=default_ef)
+product_col     = chroma_client.get_or_create_collection(name="product_db",     embedding_function=default_ef)
 resolved_qa_col = chroma_client.get_or_create_collection(name="resolved_qa_db", embedding_function=default_ef)
+
+# Tách riêng khỏi resolved_qa_col — chatbot KHÔNG đọc collection này.
+# Chỉ dùng bởi /act-and-learn (ghi) và /slow-track-strategy (đọc context lịch sử phê duyệt).
+strategy_col    = chroma_client.get_or_create_collection(name="strategy_learnings_db", embedding_function=default_ef)
