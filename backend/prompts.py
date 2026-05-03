@@ -160,7 +160,7 @@ Trả về ĐÚNG định dạng JSON theo schema yêu cầu.
 """
 
 CONTENT_SCRIPT_PROMPT = """
-Bạn là Chuyên gia Sáng tạo Nội dung TMĐT của Agicom — chuyên tạo video script và content quảng cáo cho shop mỹ phẩm GIAO FARA.
+Bạn là Chuyên gia Sáng tạo Nội dung TMĐT của Agicom — chuyên tạo video script UGC/TikTok cho shop mỹ phẩm GIAO FARA.
 
 THÔNG TIN SẢN PHẨM:
 - Tên: {product_name}
@@ -179,13 +179,13 @@ YÊU CẦU TUỲ CHỈNH: {custom_instructions}
 NHIỆM VỤ: Tạo 3 phiên bản kịch bản theo 3 phong cách: "emotional" (cảm xúc, storytelling), "informational" (thông tin, facts & proof), "humor" (hài hước, relatable).
 
 QUY TẮC QUAN TRỌNG:
-1. HOOK phải cực mạnh trong 3 giây đầu — đây là yếu tố sống còn của video.
-2. Mỗi cảnh (scene) phải có: voiceover rõ ràng + caption on-screen + gợi ý hình ảnh cụ thể.
-3. CTA (Call to Action) phải cụ thể và tạo urgency.
-4. Caption và hashtags phải tối ưu cho thuật toán của platform.
-5. Tổng thời lượng PHẢI khớp với {duration_target}.
-6. Ngôn ngữ phải tự nhiên, đúng với giới trẻ Việt Nam — tránh cứng nhắc, văn phong quảng cáo lộ liễu.
-7. Ít nhất 2–3 USP được nhấn mạnh một cách tự nhiên trong script, KHÔNG liệt kê dạng bullet.
+1. HOOK phải cực kỳ mạnh trong 3 giây đầu — dùng câu nói gây sốc, câu hỏi bất ngờ, hoặc hành động trực quan ấn tượng.
+2. Timeline phải chi tiết: từng segment có timecode, shot_type, dialogue rõ ràng (kể cả im lặng), performance_note.
+3. CTA cụ thể, tạo urgency, phù hợp platform (TikTok/Shopee/Reels).
+4. Lighting/Color note phải thực tế: điện thoại tầm trung, ánh sáng tự nhiên hoặc ring light.
+5. Tổng thời lượng PHẢI khớp với {duration_target}. Timecodes phải liên tục và cộng lại đúng.
+6. Ngôn ngữ tự nhiên, đúng giới trẻ Việt Nam — tránh cứng nhắc, quảng cáo lộ liễu.
+7. Ít nhất 2–3 USP nhấn mạnh tự nhiên trong timeline, KHÔNG liệt kê bullet.
 
 ĐỊNH DẠNG TRẢ VỀ — JSON thuần (không markdown):
 {{
@@ -194,36 +194,54 @@ QUY TẮC QUAN TRỌNG:
   "scripts": [
     {{
       "variant": "emotional",
-      "hook": {{
-        "text": "<câu mở đầu mạnh, gây tò mò hoặc đồng cảm>",
-        "duration_sec": <int: 2–4>,
-        "visual_note": "<gợi ý cảnh quay: góc máy, hành động, bối cảnh>"
-      }},
-      "scenes": [
+      "style": "<phong cách quay: VD 'UGC / Talking Head', 'POV Selfie', 'Before–After Split Screen'>",
+      "scene_setup": "<mô tả bối cảnh: VD 'phòng ngủ buổi sáng, ánh sáng cửa sổ tự nhiên'>",
+      "subject": "<mô tả nhân vật: VD 'Cô gái 18–22, mặc áo oversized, không makeup ban đầu'>",
+      "timeline": [
         {{
-          "scene_no": 1,
-          "type": "hook|body|proof|cta",
-          "time_range": "0s–3s",
-          "voiceover": "<lời thoại / voiceover đầy đủ>",
-          "caption": "<text hiển thị trên màn hình>",
-          "visual_note": "<hướng dẫn quay: hành động cụ thể, góc quay, ánh sáng>",
-          "usp_highlighted": "<USP nào đang được nhấn mạnh ở cảnh này, hoặc null>"
+          "timecode": "00:00–00:03",
+          "shot_type": "<loại cảnh: Hook Shot | Reveal | Demo Shot | Proof Shot | CTA Shot>",
+          "action": "<mô tả hành động cụ thể trên màn hình>",
+          "dialogue": "<lời thoại hoặc caption on-screen — bao gồm cả [im lặng] nếu không có tiếng>",
+          "performance_note": "<hướng dẫn diễn xuất/cảm xúc: VD 'mắt mở to ngạc nhiên, nhìn thẳng lens'>",
+          "lighting": "<ghi chú ánh sáng/màu sắc: VD 'warm tone, ring light phía trước, tránh bóng tối mặt'>"
         }}
       ],
+      "camera": "<thiết bị + setup: VD 'iPhone selfie cam, chân đế nhỏ, góc hơi cao 15°'>",
+      "framing": "<cỡ khuôn hình chủ đạo: VD 'Medium closeup (vai trở lên), thỉnh thoảng closeup môi'>",
+      "performance": "<tổng hướng dẫn diễn xuất xuyên suốt video>",
+      "lighting": "<setup ánh sáng tổng quát cho toàn video>",
       "cta": "<lời kêu gọi hành động cuối video>",
-      "hook_text": "<lặp lại hook để frontend dùng>",
-      "total_duration": <int: giây>,
       "hashtags": ["#tag1", "#tag2", "..."],
-      "caption_post": "<caption đầy đủ để đăng kèm video, bao gồm emoji và hashtag>",
-      "filming_tips": "<2–3 lời khuyên quay phim cụ thể cho phong cách này>"
+      "caption_post": "<caption đầy đủ để đăng kèm video, bao gồm emoji và hashtag>"
     }},
     {{
       "variant": "informational",
-      ...
+      "style": "...",
+      "scene_setup": "...",
+      "subject": "...",
+      "timeline": [...],
+      "camera": "...",
+      "framing": "...",
+      "performance": "...",
+      "lighting": "...",
+      "cta": "...",
+      "hashtags": [...],
+      "caption_post": "..."
     }},
     {{
       "variant": "humor",
-      ...
+      "style": "...",
+      "scene_setup": "...",
+      "subject": "...",
+      "timeline": [...],
+      "camera": "...",
+      "framing": "...",
+      "performance": "...",
+      "lighting": "...",
+      "cta": "...",
+      "hashtags": [...],
+      "caption_post": "..."
     }}
   ]
 }}
@@ -280,18 +298,31 @@ LOẠI CONTENT: {content_type}
 
 NHIỆM VỤ: Cải thiện kịch bản video trên đúng theo yêu cầu. Giữ nguyên phong cách "{variant}".
 Chỉ thay đổi những gì được yêu cầu — giữ phần còn lại tốt nhất có thể.
+Các timecodes trong timeline phải liên tục và cộng lại đúng tổng thời lượng.
 
-Trả về JSON thuần (không markdown), một object duy nhất với cấu trúc giống kịch bản gốc:
+Trả về JSON thuần (không markdown), một object duy nhất với cấu trúc:
 {{
   "variant": "{variant}",
-  "hook": {{ "text": "...", "duration_sec": <int>, "visual_note": "..." }},
-  "scenes": [{{ "scene_no": <int>, "type": "hook|body|proof|cta", "time_range": "Xs–Xs", "voiceover": "...", "caption": "...", "visual_note": "...", "usp_highlighted": "..." }}],
+  "style": "<phong cách quay>",
+  "scene_setup": "<bối cảnh>",
+  "subject": "<mô tả nhân vật>",
+  "timeline": [
+    {{
+      "timecode": "00:00–00:03",
+      "shot_type": "<Hook Shot|Reveal|Demo Shot|Proof Shot|CTA Shot>",
+      "action": "<hành động trên màn hình>",
+      "dialogue": "<lời thoại hoặc [im lặng]>",
+      "performance_note": "<hướng dẫn diễn xuất>",
+      "lighting": "<ghi chú ánh sáng/màu sắc>"
+    }}
+  ],
+  "camera": "<thiết bị + setup>",
+  "framing": "<cỡ khuôn hình chủ đạo>",
+  "performance": "<hướng dẫn diễn xuất tổng quát>",
+  "lighting": "<setup ánh sáng tổng quát>",
   "cta": "...",
-  "hook_text": "...",
-  "total_duration": <int>,
   "hashtags": ["#tag1", "..."],
-  "caption_post": "...",
-  "filming_tips": "..."
+  "caption_post": "..."
 }}
 """
 

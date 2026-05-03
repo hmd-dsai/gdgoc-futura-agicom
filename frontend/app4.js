@@ -418,7 +418,7 @@ MOCK.products_detail = [
 
 MOCK.content_suggestions_generated = [
   {
-    id: 'cs-001', priority: 'high', status: 'pending', type: 'video',
+    id: 'cs-001', priority: 'high', status: 'pending', type: 'tiktok_30s',
     title: 'Video swatches Son Kem Lì GIAO FARA — 8 màu trên 3 tone da thực tế',
     platform: 'TikTok + Shopee Video',
     source_product_id: 'P002',
@@ -430,7 +430,7 @@ MOCK.content_suggestions_generated = [
     angle: 'Test thực tế: 3 người mẫu tone da sáng / vàng trung / ngăm tối — quẹt trực tiếp, quay cận chi tiết để khách chọn màu không sai'
   },
   {
-    id: 'cs-002', priority: 'high', status: 'pending', type: 'blog_faq',
+    id: 'cs-002', priority: 'high', status: 'pending', type: 'tiktok_60s',
     title: '"Phấn Phủ GIAO FARA da dầu dùng được không?" — FAQ + Video test 8 tiếng',
     platform: 'Blog + TikTok',
     source_product_id: 'P003',
@@ -442,7 +442,7 @@ MOCK.content_suggestions_generated = [
     angle: 'Test thực tế: đánh phấn 8h sáng, check da lúc 12h và 4h chiều — chụp ảnh macro và video gần để khách thấy thực tế'
   },
   {
-    id: 'cs-003', priority: 'high', status: 'pending', type: 'guide',
+    id: 'cs-003', priority: 'high', status: 'pending', type: 'tiktok_60s',
     title: '"Kem Rửa Mặt Hada Labo có purging không?" — Giải thích khoa học + timeline',
     platform: 'Blog + TikTok',
     source_product_id: 'P011',
@@ -454,7 +454,7 @@ MOCK.content_suggestions_generated = [
     angle: 'Giải thích rõ purging vs dị ứng thật: timeline, triệu chứng, cách phân biệt — đính kèm thành phần an toàn của Hada Labo'
   },
   {
-    id: 'cs-004', priority: 'medium', status: 'pending', type: 'guide',
+    id: 'cs-004', priority: 'medium', status: 'pending', type: 'facebook_post',
     title: '"Bảng giá sỉ GIAO FARA chính thức" — Dành cho spa, salon, đại lý',
     platform: 'Website + Zalo OA',
     source_product_id: '',
@@ -466,7 +466,7 @@ MOCK.content_suggestions_generated = [
     angle: 'Tạo landing page riêng với bảng giá sỉ theo bậc (10/20/50 thỏi), form đặt hàng và hotline Zalo riêng cho đại lý'
   },
   {
-    id: 'cs-005', priority: 'medium', status: 'saved', type: 'video',
+    id: 'cs-005', priority: 'medium', status: 'saved', type: 'tiktok_30s',
     title: '"Son GIAO FARA có an toàn không?" — Video review thành phần + chứng nhận',
     platform: 'TikTok + Shopee Video',
     source_product_id: 'P001',
@@ -2090,9 +2090,28 @@ function renderContentSuggestions() {
   const clusters = MOCK.chat_clusters;
   const inv = MOCK.content_inventory;
 
-  const typeLabel = { video: '🎬 Video', blog_faq: '📝 Blog/FAQ', comparison: '⚖️ So sánh', guide: '📋 Hướng dẫn' };
-  const typeColor = { video: '#6366f1', blog_faq: '#10b981', comparison: '#f59e0b', guide: '#0ea5e9' };
-  const typeBg = { video: '#eef2ff', blog_faq: '#f0fdf4', comparison: '#fffbeb', guide: '#f0f9ff' };
+  const typeLabel = {
+    tiktok_15s: '⚡ TikTok 15s', tiktok_30s: '🎵 TikTok 30s', tiktok_60s: '🎬 TikTok 60s',
+    reels_30s: '📱 Reels 30s', reels_60s: '📱 Reels 60s',
+    youtube_short: '▶️ YT Short', shopee_video: '🛒 Shopee Video',
+    facebook_post: '📘 FB Post', caption_instagram: '📷 Caption IG',
+    // legacy fallbacks
+    video: '🎬 Video', blog_faq: '📝 Blog/FAQ', comparison: '⚖️ So sánh', guide: '📋 Hướng dẫn',
+  };
+  const typeColor = {
+    tiktok_15s: '#6366f1', tiktok_30s: '#6366f1', tiktok_60s: '#6366f1',
+    reels_30s: '#e1306c', reels_60s: '#e1306c',
+    youtube_short: '#ef4444', shopee_video: '#ee4d2d',
+    facebook_post: '#1877f2', caption_instagram: '#c13584',
+    video: '#6366f1', blog_faq: '#10b981', comparison: '#f59e0b', guide: '#0ea5e9',
+  };
+  const typeBg = {
+    tiktok_15s: '#eef2ff', tiktok_30s: '#eef2ff', tiktok_60s: '#eef2ff',
+    reels_30s: '#fdf2f8', reels_60s: '#fdf2f8',
+    youtube_short: '#fff1f2', shopee_video: '#fff7f0',
+    facebook_post: '#eff6ff', caption_instagram: '#fdf4ff',
+    video: '#eef2ff', blog_faq: '#f0fdf4', comparison: '#fffbeb', guide: '#f0f9ff',
+  };
 
   function scoreRing(score) {
     const c = score > 85 ? '#ef4444' : score > 70 ? '#f59e0b' : '#10b981';
@@ -2198,13 +2217,19 @@ function renderContentSuggestions() {
     var tColor = typeColor[sug.type] || '#94a3b8';
     var tBg = typeBg[sug.type] || '#f8fafc';
     var isHigh = sug.priority === 'high';
-    var sid = (sug.id || '').replace(/'/g, "\\'");
-    // Encode angle for prefill (strip HTML entities, cap length)
-    var angleForPrefill = ((sug.angle || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;').substring(0, 200));
-    // Map suggestion type → script content_type
-    var ctMap = { video: 'tiktok_30s', blog_faq: 'facebook_post', comparison: 'tiktok_30s', guide: 'facebook_post' };
+    var rawId = sug.id || '';
+    var sid = rawId.replace(/'/g, "\\'");
+    // Store in global map so onclick can retrieve full sug without encoding issues
+    window._suggestionsMap = window._suggestionsMap || {};
+    window._suggestionsMap[rawId] = sug;
+    // type IS the content_type code (e.g. 'tiktok_30s'); legacy fallback via platformMap
+    var legacyCtMap = { video: 'tiktok_30s', blog_faq: 'facebook_post', comparison: 'tiktok_30s', guide: 'facebook_post' };
     var platformMap = { TikTok: 'tiktok_30s', Facebook: 'facebook_post', Shopee: 'shopee_video', Instagram: 'reels_30s' };
-    var mappedCt = platformMap[(sug.platform||'').split(' ')[0]] || ctMap[sug.type] || 'tiktok_30s';
+    var TEXT_POST_TYPES = ['facebook_post', 'caption_instagram'];
+    var ALL_CONTENT_TYPES = ['tiktok_15s','tiktok_30s','tiktok_60s','reels_30s','reels_60s','youtube_short','shopee_video','facebook_post','caption_instagram'];
+    var mappedCt = ALL_CONTENT_TYPES.indexOf(sug.type) >= 0 ? sug.type
+                 : platformMap[(sug.platform||'').split(' ')[0]]
+                 || legacyCtMap[sug.type] || 'tiktok_30s';
     var productId = sug.source_product_id || sug.product_id || '';
 
     // Border theo trạng thái
@@ -2277,14 +2302,15 @@ function renderContentSuggestions() {
     out += '</div>';
     out += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
     // 📋 Xem script (if already saved) — otherwise 🎬 Tạo script
+    // NOTE: use caScriptFromSuggId(sid) — angle is looked up from window._suggestionsMap to avoid HTML entity encoding bugs
     if (sug.has_script) {
       out += '<button class="alert-cta" style="background:rgba(16,185,129,0.12);color:#059669;border:1px solid rgba(16,185,129,0.35);" '
-        + 'onclick="caViewSavedScript(\'' + (sid||'').replace(/'/g,"\\'") + '\')">📋 Xem script</button>';
+        + 'onclick="caViewSavedScript(\'' + sid + '\')">📋 Xem script</button>';
       out += '<button class="alert-cta" style="background:rgba(99,102,241,0.08);color:#818cf8;border:1px solid rgba(99,102,241,0.2);font-size:0.72rem;" '
-        + 'onclick="caPrefillFromSuggestion(\'' + (productId||'').replace(/'/g,"\\'") + '\',\'' + mappedCt + '\',\'' + angleForPrefill + '\',\'' + (sid||'').replace(/'/g,"\\'") + '\')">🔄 Tạo lại</button>';
+        + 'onclick="caScriptFromSuggId(\'' + sid + '\')">🔄 Tạo lại</button>';
     } else {
       out += '<button class="alert-cta" style="background:rgba(99,102,241,0.12);color:#818cf8;border:1px solid rgba(99,102,241,0.3);" '
-        + 'onclick="caPrefillFromSuggestion(\'' + (productId||'').replace(/'/g,"\\'") + '\',\'' + mappedCt + '\',\'' + angleForPrefill + '\',\'' + (sid||'').replace(/'/g,"\\'") + '\')">🎬 Tạo script</button>';
+        + 'onclick="caScriptFromSuggId(\'' + sid + '\')">🎬 Tạo script</button>';
     }
     if (sug.status === 'scheduled') {
       out += '<button class="alert-cta" style="background:#f0fdf4;color:#10b981;border:1px solid #10b981;" onclick="restoreSuggestion(\'' + sid + '\')">↩ Chuyển lại Pending</button>';
@@ -2695,6 +2721,23 @@ window._ca = window._ca || {
 };
 
 /**
+ * Được gọi từ nút "🎬 Tạo script" / "🔄 Tạo lại" trong suggestion cards.
+ * Tránh HTML entity encoding bug bằng cách lookup sug từ window._suggestionsMap theo ID.
+ */
+function caScriptFromSuggId(sid) {
+  var sug = (window._suggestionsMap || {})[sid];
+  if (!sug) { showToast('Không tìm được đề xuất', 'warning'); return; }
+  var TEXT_POST_TYPES = ['facebook_post', 'caption_instagram'];
+  var ALL_CT = ['tiktok_15s','tiktok_30s','tiktok_60s','reels_30s','reels_60s','youtube_short','shopee_video','facebook_post','caption_instagram'];
+  var legacyCtMap = { video: 'tiktok_30s', blog_faq: 'facebook_post', comparison: 'tiktok_30s', guide: 'facebook_post' };
+  var platformMap = { TikTok: 'tiktok_30s', Facebook: 'facebook_post', Shopee: 'shopee_video', Instagram: 'reels_30s' };
+  var mappedCt = ALL_CT.indexOf(sug.type) >= 0 ? sug.type
+               : platformMap[(sug.platform||'').split(' ')[0]]
+               || legacyCtMap[sug.type] || 'tiktok_30s';
+  caPrefillFromSuggestion(sug.source_product_id || sug.product_id || '', mappedCt, sug.angle || '', sug.id || '');
+}
+
+/**
  * Được gọi từ nút "🎬 Tạo script" trong Đề xuất AI.
  * Lưu prefill vào window._ca._prefill rồi chuyển sang tab Script.
  */
@@ -2916,7 +2959,13 @@ function renderContentAgent() {
       return '<button data-ca-variant="' + v + '" style="flex:1;padding:10px;border-radius:10px;font-weight:700;font-size:0.82rem;cursor:pointer;border:' + (isActive ? '2px solid var(--accent-amber)' : '1.5px solid var(--border-primary)') + ';background:' + (isActive ? 'rgba(234,179,8,0.12)' : 'var(--bg-glass)') + ';color:' + (isActive ? 'var(--accent-amber)' : 'var(--text-secondary)') + ';">' + (variantLabels[v]||v) + '</button>';
     }).join('');
 
-    var isTextPost = window._ca.is_text_post || false;
+    // Detect from actual script fields — never trust window._ca.is_text_post alone,
+    // because old DB suggestions may have wrong type labels that cause backend to return wrong value.
+    // Text post: has "body" field, no "timeline" or "scenes".
+    // Video post: has "timeline" (new) or "scenes" (legacy).
+    var isTextPost = script
+      ? (typeof script.body !== 'undefined' && !Array.isArray(script.timeline) && !script.scenes)
+      : (window._ca.is_text_post || false);
     var tagsHtml = script && script.hashtags ? script.hashtags.map(function(h) {
       return '<span style="padding:4px 10px;background:rgba(14,165,233,0.12);color:#38bdf8;border-radius:20px;font-size:0.75rem;font-weight:600;">' + h + '</span>';
     }).join('') : '';
@@ -2940,38 +2989,98 @@ function renderContentAgent() {
             + '<div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.65;white-space:pre-wrap;">' + script.caption_post + '</div></div>' : '')
         + '</div>';
     } else {
-      // ── VIDEO SCRIPT layout ──
-      var scenesHtml = '';
-      if (script.scenes) {
-        var typeColors = { hook: '#ef4444', body: '#0ea5e9', proof: '#10b981', cta: '#d97706' };
-        var typeLabels2 = { hook: 'HOOK', body: 'NỘI DUNG', proof: 'BẰNG CHỨNG', cta: 'CTA' };
-        scenesHtml = script.scenes.map(function(scene) {
-          var color = typeColors[scene.type] || '#6366f1';
-          return '<div style="display:flex;gap:14px;padding:14px;background:var(--bg-glass);border-radius:12px;border-left:3px solid ' + color + ';">'
-            + '<div style="flex-shrink:0;text-align:center;min-width:56px;">'
-            + '<div style="font-size:0.7rem;font-weight:800;color:' + color + ';text-transform:uppercase;">' + (typeLabels2[scene.type]||scene.type) + '</div>'
-            + '<div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">' + scene.time_range + '</div></div>'
-            + '<div style="flex:1;">'
-            + '<div style="font-size:0.85rem;color:var(--text-primary);margin-bottom:6px;line-height:1.5;">🎙 <b>VO:</b> ' + scene.voiceover + '</div>'
-            + '<div style="font-size:0.8rem;color:var(--accent-amber);margin-bottom:4px;">📝 <b>Caption:</b> ' + scene.caption + '</div>'
-            + '<div style="font-size:0.78rem;color:var(--text-muted);">🎥 ' + scene.visual_note + '</div>'
-            + '</div></div>';
-        }).join('');
+      // ── VIDEO SCRIPT layout — UGC TikTok skeletal format ──
+
+      // ── Scene Setup / Subject strip ──
+      var setupHtml = '';
+      if (script.style || script.scene_setup || script.subject) {
+        setupHtml = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">';
+        if (script.style)       setupHtml += '<div style="background:rgba(99,102,241,0.07);border-radius:8px;padding:8px 10px;"><div style="font-size:0.65rem;font-weight:800;color:#818cf8;text-transform:uppercase;margin-bottom:3px;">🎭 Style</div><div style="font-size:0.78rem;color:var(--text-primary);line-height:1.4;">' + script.style + '</div></div>';
+        if (script.scene_setup) setupHtml += '<div style="background:rgba(16,185,129,0.07);border-radius:8px;padding:8px 10px;"><div style="font-size:0.65rem;font-weight:800;color:#10b981;text-transform:uppercase;margin-bottom:3px;">🏠 Scene Setup</div><div style="font-size:0.78rem;color:var(--text-primary);line-height:1.4;">' + script.scene_setup + '</div></div>';
+        if (script.subject)     setupHtml += '<div style="background:rgba(234,179,8,0.07);border-radius:8px;padding:8px 10px;"><div style="font-size:0.65rem;font-weight:800;color:#d97706;text-transform:uppercase;margin-bottom:3px;">🧍 Subject</div><div style="font-size:0.78rem;color:var(--text-primary);line-height:1.4;">' + script.subject + '</div></div>';
+        setupHtml += '</div>';
       }
+
+      // ── Timeline ──
+      var timelineHtml = '';
+      var shotColors = { 'Hook Shot': '#ef4444', 'Reveal': '#6366f1', 'Demo Shot': '#0ea5e9', 'Proof Shot': '#10b981', 'CTA Shot': '#d97706' };
+      if (Array.isArray(script.timeline) && script.timeline.length > 0) {
+        timelineHtml = '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">';
+        script.timeline.forEach(function(seg) {
+          var shotType = seg.shot_type || '';
+          var borderColor = shotColors[shotType] || '#6366f1';
+          var bgColor = borderColor + '0d'; // ~5% opacity hex
+          timelineHtml += '<div style="border-left:3px solid ' + borderColor + ';border-radius:0 10px 10px 0;background:var(--bg-glass);padding:12px 14px;">';
+          // Timecode + Shot type header
+          timelineHtml += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">';
+          timelineHtml += '<code style="background:rgba(0,0,0,0.06);color:var(--text-primary);font-size:0.75rem;font-weight:700;padding:2px 8px;border-radius:6px;letter-spacing:0.04em;">' + (seg.timecode||'') + '</code>';
+          timelineHtml += '<span style="font-size:0.72rem;font-weight:800;color:' + borderColor + ';text-transform:uppercase;letter-spacing:0.03em;">' + shotType + '</span>';
+          timelineHtml += '</div>';
+          // Action
+          if (seg.action) timelineHtml += '<div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:6px;">🎬 ' + seg.action + '</div>';
+          // Dialogue
+          if (seg.dialogue) timelineHtml += '<div style="font-size:0.85rem;color:var(--text-primary);font-weight:600;margin-bottom:6px;padding:6px 10px;background:rgba(234,179,8,0.06);border-radius:6px;">💬 "' + seg.dialogue + '"</div>';
+          // Performance + Lighting in 2-col
+          if (seg.performance_note || seg.lighting) {
+            timelineHtml += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">';
+            if (seg.performance_note) timelineHtml += '<div style="font-size:0.72rem;color:#818cf8;">🎭 ' + seg.performance_note + '</div>';
+            if (seg.lighting)         timelineHtml += '<div style="font-size:0.72rem;color:#f59e0b;">💡 ' + seg.lighting + '</div>';
+            timelineHtml += '</div>';
+          }
+          timelineHtml += '</div>';
+        });
+        timelineHtml += '</div>';
+      } else if (script.scenes) {
+        // Legacy format fallback (scenes with voiceover/caption/visual_note)
+        var legacyColors = { hook: '#ef4444', body: '#0ea5e9', proof: '#10b981', cta: '#d97706' };
+        var legacyLabels = { hook: 'HOOK', body: 'NỘI DUNG', proof: 'BẰNG CHỨNG', cta: 'CTA' };
+        timelineHtml = '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">';
+        script.scenes.forEach(function(scene) {
+          var c = legacyColors[scene.type] || '#6366f1';
+          timelineHtml += '<div style="display:flex;gap:14px;padding:12px 14px;background:var(--bg-glass);border-radius:10px;border-left:3px solid ' + c + ';">'
+            + '<div style="flex-shrink:0;text-align:center;min-width:52px;"><div style="font-size:0.65rem;font-weight:800;color:' + c + ';text-transform:uppercase;">' + (legacyLabels[scene.type]||scene.type) + '</div><div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">' + (scene.time_range||'') + '</div></div>'
+            + '<div style="flex:1;"><div style="font-size:0.83rem;color:var(--text-primary);margin-bottom:5px;line-height:1.5;">🎙 ' + (scene.voiceover||'') + '</div>'
+            + '<div style="font-size:0.78rem;color:var(--accent-amber);margin-bottom:3px;">📝 ' + (scene.caption||'') + '</div>'
+            + '<div style="font-size:0.74rem;color:var(--text-muted);">🎥 ' + (scene.visual_note||'') + '</div>'
+            + '</div></div>';
+        });
+        timelineHtml += '</div>';
+      }
+
+      // ── Camera / Framing / Performance / Lighting strip ──
+      var techHtml = '';
+      var techFields = [
+        { key: 'camera',      icon: '📷', label: 'Camera' },
+        { key: 'framing',     icon: '🔲', label: 'Framing' },
+        { key: 'performance', icon: '🎭', label: 'Performance' },
+        { key: 'lighting',    icon: '💡', label: 'Lighting' },
+      ];
+      var techItems = techFields.filter(function(f) { return script[f.key]; });
+      if (techItems.length > 0) {
+        techHtml = '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;">';
+        techItems.forEach(function(f) {
+          techHtml += '<div style="background:var(--bg-glass);border-radius:8px;padding:8px 10px;border:1px solid var(--border-primary);">'
+            + '<div style="font-size:0.65rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">' + f.icon + ' ' + f.label + '</div>'
+            + '<div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.4;">' + script[f.key] + '</div>'
+            + '</div>';
+        });
+        techHtml += '</div>';
+      }
+
       scriptCardHtml = '<div class="content-card">'
-        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:16px;">'
-        + '<div>'
-        + '<div class="content-card-title" style="margin-bottom:4px;">🎬 Kịch bản — ' + (variantLabels[activeVariant]||activeVariant) + ' · ' + (script.total_duration||30) + 's</div>'
-        + '<div style="font-size:0.85rem;color:var(--accent-amber);font-weight:700;">🪝 ' + (script.hook_text||'') + '</div>'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px;">'
+        + '<div class="content-card-title" style="margin-bottom:0;">🎬 Kịch bản — ' + (variantLabels[activeVariant]||activeVariant) + '</div>'
         + '</div>'
-        + '<button id="caFilmingBtn" style="padding:9px 16px;background:rgba(16,185,129,0.12);color:var(--accent-emerald);border:1.5px solid var(--accent-emerald);border-radius:10px;font-weight:700;font-size:0.82rem;cursor:pointer;white-space:nowrap;">🎥 Hướng dẫn quay</button>'
-        + '</div>'
-        + '<div style="display:flex;flex-direction:column;gap:10px;">' + scenesHtml + '</div>'
-        + (script.cta ? '<div style="margin-top:12px;padding:12px;background:rgba(217,119,6,0.08);border-radius:10px;border-left:3px solid #d97706;">'
-          + '<span style="font-size:0.75rem;font-weight:800;color:#d97706;text-transform:uppercase;">Call to Action</span>'
+        + setupHtml
+        + timelineHtml
+        + techHtml
+        + (script.cta ? '<div style="margin-bottom:12px;padding:12px;background:rgba(217,119,6,0.08);border-radius:10px;border-left:3px solid #d97706;">'
+          + '<span style="font-size:0.72rem;font-weight:800;color:#d97706;text-transform:uppercase;">📣 Call to Action</span>'
           + '<div style="font-size:0.88rem;color:var(--text-primary);margin-top:4px;">' + script.cta + '</div></div>' : '')
-        + (tagsHtml ? '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">' + tagsHtml + '</div>' : '')
-        + (script.caption_post ? '<div style="margin-top:12px;padding:12px;background:var(--bg-glass);border-radius:10px;font-size:0.82rem;color:var(--text-secondary);font-style:italic;">📱 ' + script.caption_post + '</div>' : '')
+        + (tagsHtml ? '<div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;">' + tagsHtml + '</div>' : '')
+        + (script.caption_post ? '<div style="padding:12px;background:rgba(99,102,241,0.06);border-radius:10px;border:1px solid rgba(99,102,241,0.15);">'
+          + '<div style="font-size:0.68rem;font-weight:800;color:#818cf8;margin-bottom:6px;text-transform:uppercase;">📋 Caption hoàn chỉnh</div>'
+          + '<div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.65;white-space:pre-wrap;">' + script.caption_post + '</div></div>' : '')
         + '</div>';
     }
 
@@ -2982,7 +3091,8 @@ function renderContentAgent() {
     var actionBarHtml = '<div class="content-card" style="padding:12px 16px;">'
       + '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">'
       + '<button id="caSaveScriptBtn" style="padding:9px 16px;background:rgba(16,185,129,0.12);color:var(--accent-emerald);border:1.5px solid var(--accent-emerald);border-radius:10px;font-weight:700;font-size:0.82rem;cursor:pointer;">' + saveLabel + '</button>'
-      + '<span style="font-size:0.75rem;color:var(--text-muted);">Lưu kịch bản vào Đề xuất AI để xem lại sau</span>'
+      + (!isTextPost ? '<button id="caFilmingBtn" style="padding:9px 16px;background:rgba(234,179,8,0.1);color:var(--accent-amber);border:1.5px solid var(--accent-amber);border-radius:10px;font-weight:700;font-size:0.82rem;cursor:pointer;">🎥 Hướng dẫn quay</button>' : '')
+      + '<span style="font-size:0.75rem;color:var(--text-muted);">Lưu kịch bản đang xem vào Đề xuất AI để truy cập lại sau</span>'
       + '</div></div>';
 
     bodyHtml = '<div style="display:flex;flex-direction:column;gap:20px;">'
@@ -3419,37 +3529,59 @@ function caSimulateScripts() {
   setTimeout(function() {
     window._ca.scripts = [
       {
-        variant: 'emotional', total_duration: 30, hook_text: '❤️ Lần đầu thoa son này lên — tôi không còn muốn cất đi nữa...',
-        scenes: [
-          { scene_no:1, time_range:'0-3s', type:'hook', voiceover:'Tôi đã thử hơn 20 cây son kem lì mà không cây nào ở lại lâu hơn 3 tiếng', caption:'😤 Ai đồng cảnh ngộ không?', visual_note:'Góc gần, cận môi nhợt nhạt sau giữa ngày, biểu cảm thất vọng' },
-          { scene_no:2, time_range:'3-18s', type:'body', voiceover:'Rồi tôi thử Son Kem Lì GIAO FARA — thoa lúc 7 giờ sáng, đến 5 giờ chiều vẫn còn màu. Thậm chí sau khi ăn trưa.', caption:'Bền màu cả ngày 💄', visual_note:'Close-up môi trước–sau, slow motion ánh sáng tự nhiên, biểu cảm bất ngờ thích thú' },
-          { scene_no:3, time_range:'18-25s', type:'proof', voiceover:'Thành phần thuần chay, không chì — kiểm nghiệm an toàn. 92% người dùng nói môi không bị khô sau 8 tiếng', caption:'📊 Đã kiểm chứng thực tế', visual_note:'Text overlay chứng nhận an toàn, đan xen cảnh swatch tay' },
-          { scene_no:4, time_range:'25-30s', type:'cta', voiceover:'Link ở bio — giao nhanh trong ngày, đổi trả 7 ngày nếu không vừa ý', caption:'🛒 Mua ngay — hết màu là hết!', visual_note:'Sản phẩm trên nền trắng sạch, text CTA nổi bật' }
+        variant: 'emotional',
+        style: 'UGC / Talking Head — Honest Review',
+        scene_setup: 'Phòng ngủ ban ngày, ánh sáng tự nhiên từ cửa sổ, bàn trang điểm gọn gàng',
+        subject: 'Cô gái 19–22 tuổi, mặc áo trắng casual, không makeup ban đầu',
+        timeline: [
+          { timecode: '00:00–00:03', shot_type: 'Hook Shot', action: 'Cận môi nhợt nhạt sau buổi trưa, biểu cảm thất vọng nhìn gương', dialogue: 'Tôi đã thử hơn 20 cây son kem lì — không cây nào ở được quá 3 tiếng...', performance_note: 'Thở dài, mắt hơi nhăn — cảm giác quen thuộc thất vọng', lighting: 'Warm tone, ánh sáng cửa sổ chiều tà, tránh flash cứng' },
+          { timecode: '00:03–00:14', shot_type: 'Reveal', action: 'Cầm lên cây Son Kem Lì GIAO FARA, mỉm cười nhẹ, thoa lên môi', dialogue: 'Rồi tôi thử cái này. Thoa lúc 7 giờ sáng — bây giờ là 5 chiều.', performance_note: 'Giọng bình thản tự nhiên, không cố quảng cáo — như kể cho bạn bè', lighting: 'Tăng sáng nhẹ khi cận môi — dùng reflector hoặc đèn bàn nhỏ' },
+          { timecode: '00:14–00:22', shot_type: 'Demo Shot', action: 'So sánh môi trước–sau (split screen hoặc transition nhanh)', dialogue: 'Sau khi ăn trưa, sau cà phê — vẫn còn màu. Tôi không hiểu tại sao nữa 😅', performance_note: 'Cười nhẹ, lắc đầu kiểu "không thể tin được"', lighting: 'Closeup môi, ánh sáng đều, tông màu trung tính để màu son hiện thực' },
+          { timecode: '00:22–00:27', shot_type: 'Proof Shot', action: 'Flick nhanh qua thành phần bao bì / chứng nhận an toàn', dialogue: 'Không chì, có dưỡng Vitamin E. Môi tôi không bị khô sau cả ngày dài.', performance_note: 'Nói nhanh, tự tin, cầm hộp hướng camera', lighting: 'Flat lay sản phẩm trên nền trắng, ánh sáng đều từ trên' },
+          { timecode: '00:27–00:30', shot_type: 'CTA Shot', action: 'Nhìn thẳng lens, chỉ tay lên/xuống về phía bio/giỏ hàng', dialogue: 'Link ở bio — giao trong ngày, đổi trả 7 ngày nếu không vừa ý.', performance_note: 'Mắt sáng, giọng ấm áp và chân thật — không cứng như đọc kịch bản', lighting: 'Giữ nguyên ánh sáng tự nhiên ấm — consistency xuyên suốt video' }
         ],
+        camera: 'iPhone selfie cam hoặc điện thoại tầm trung, chân đế nhỏ, góc hơi cao 10–15° so với mắt',
+        framing: 'Medium closeup (vai trở lên) là chủ đạo; chuyển closeup môi khi demo',
+        performance: 'Cảm xúc chân thật, tự nhiên như nói chuyện bạn bè — không đọc kịch bản cứng, cho phép dừng ngập ngừng tự nhiên',
+        lighting: 'Ánh sáng cửa sổ tự nhiên (hướng đông/tây buổi sáng/chiều), thêm reflector trắng phía đối diện để fill bóng mặt',
         cta: 'Nhấn link bio để xem đủ 12 màu Son Kem Lì GIAO FARA — giao trong ngày, đổi trả miễn phí!',
         hashtags: ['#sonkemlì', '#giaofara', '#sonbenmau', '#reviewson', '#lipswatch'],
         caption_post: 'Từ ngày dùng Son Kem Lì GIAO FARA, tôi không còn lo touch-up giữa ngày nữa 💄 Bền màu thật sự, môi không khô, giá hợp lý. Ai cần tag ngay bạn thân! 👇 Link trong bio nhé'
       },
       {
-        variant: 'informational', total_duration: 30, hook_text: '📊 3 điều bạn cần biết trước khi mua son kem lì',
-        scenes: [
-          { scene_no:1, time_range:'0-3s', type:'hook', voiceover:'3 tiêu chí đánh giá son kem lì mà ít người để ý', caption:'Tiêu chí số 2 quan trọng nhất 👇', visual_note:'Text animation "3 2 1" trên nền gradient hồng' },
-          { scene_no:2, time_range:'3-18s', type:'body', voiceover:'Một: độ bền màu sau ăn uống. Hai: thành phần — có chì không, có dưỡng môi không. Ba: độ phủ — lì hoàn toàn hay còn bóng?', caption:'📋 Checklist trước khi xuống tiền', visual_note:'Split screen: text checklist bên trái, demo swatch bên phải' },
-          { scene_no:3, time_range:'18-25s', type:'proof', voiceover:'Son Kem Lì GIAO FARA đạt cả 3 tiêu chí: bền 8h, không chì – có dưỡng Vitamin E, lì mịn hoàn toàn sau 2 phút', caption:'⚖️ So sánh khách quan', visual_note:'Bảng so sánh nhanh với 2 đối thủ cùng phân khúc' },
-          { scene_no:4, time_range:'25-30s', type:'cta', voiceover:'Shop GIAO FARA — link bio. Tư vấn chọn màu theo tone da miễn phí 24/7', caption:'📩 Inbox shop để được tư vấn màu!', visual_note:'Logo shop + grid 12 màu son' }
+        variant: 'informational',
+        style: 'Talking Head — Expert/Review Format với B-roll insert',
+        scene_setup: 'Bàn trắng sạch, bố cục tối giản, sản phẩm + bảng màu swatch bày sẵn',
+        subject: 'Bất kỳ ai — giọng điệu như beauty reviewer trên TikTok, phong thái bình tĩnh và có kiến thức',
+        timeline: [
+          { timecode: '00:00–00:03', shot_type: 'Hook Shot', action: 'Text animation "3 tiêu chí" xuất hiện, người quay nhìn thẳng', dialogue: '3 tiêu chí đánh giá son kem lì mà ít người để ý — và cái số 2 quyết định mọi thứ.', performance_note: 'Dừng ngắn trước câu cuối — tạo tension', lighting: 'Sáng đều, studio-look đơn giản với nền trắng hoặc xám nhạt' },
+          { timecode: '00:03–00:16', shot_type: 'Demo Shot', action: 'Lần lượt demo từng tiêu chí: bôi son, ăn thử, lật bao bì, swatch tay', dialogue: 'Một — bền màu sau ăn uống. Hai — thành phần: có chì không, dưỡng môi không. Ba — độ phủ: lì hoàn toàn hay còn bóng?', performance_note: 'Nói từng điểm dứt khoát, dùng ngón tay đếm 1-2-3', lighting: 'Đèn ring light nhỏ hoặc softbox — đảm bảo sản phẩm sắc nét khi insert' },
+          { timecode: '00:16–00:24', shot_type: 'Proof Shot', action: 'Bảng so sánh nhanh hiện lên / cầm 2 sản phẩm so sánh trực tiếp', dialogue: 'Son Kem Lì GIAO FARA đạt cả 3: bền 8h test thực tế, không chì có Vitamin E, lì mịn sau 2 phút thoa.', performance_note: 'Tự tin, chỉ thẳng vào sản phẩm — không vội vã', lighting: 'Flat lay insert: 2 sản phẩm cạnh nhau trên nền trắng, ánh sáng từ trên xuống' },
+          { timecode: '00:24–00:30', shot_type: 'CTA Shot', action: 'Nhìn camera, giơ sản phẩm lên, chỉ xuống bio', dialogue: 'Inbox shop để được tư vấn chọn màu theo tone da — miễn phí 24/7.', performance_note: 'Mỉm cười ngắn, giọng thân thiện nhưng chuyên nghiệp', lighting: 'Giữ nguyên ánh sáng chính — consistency' }
         ],
+        camera: 'Đặt trên tripod thẳng góc, ngang tầm mắt, distance 70–90cm từ mặt người quay',
+        framing: 'Medium shot (ngang ngực trở lên); insert B-roll closeup sản phẩm khi demo',
+        performance: 'Bình tĩnh, có kiến thức, không cố thân mật quá — như review beauty channel uy tín',
+        lighting: 'Ring light 10 inch hoặc softbox nhỏ, đặt ngang tầm mắt, cách mặt 80cm; nền sáng trung tính',
         cta: 'Để lại tone da trong comment hoặc inbox để được tư vấn màu son phù hợp miễn phí!',
         hashtags: ['#sonkemlìreview', '#chonson', '#giaofara', '#muagidung', '#lipswatch'],
         caption_post: 'Son kem lì có thực sự xứng đáng không? Tôi đã test 30 ngày và đây là kết quả thực tế 📊 Đặc biệt màu Mã 12 — lì cực mịn, bền cả ngày. Xem trước khi xuống tiền nhé!'
       },
       {
-        variant: 'humor', total_duration: 30, hook_text: '😂 POV: Ăn bún bò xong mà son vẫn còn nguyên...',
-        scenes: [
-          { scene_no:1, time_range:'0-3s', type:'hook', voiceover:'POV: Bạn vừa ăn xong một tô bún bò mà nhìn xuống gương thấy son vẫn còn', caption:'Không tin được 😂', visual_note:'Selfie góc hơi trên, biểu cảm ngơ ngác nhìn gương sau bữa ăn' },
-          { scene_no:2, time_range:'3-18s', type:'body', voiceover:'Canh nóng — vẫn còn. Nước chanh — vẫn còn. Bánh tráng trộn — vẫn còn. Tôi bắt đầu lo lắng cho chính bản thân mình', caption:'Son hay là mực xăm vậy 😭', visual_note:'Chuỗi cảnh hài: ăn các món khác nhau, mỗi lần nhìn vào gương son vẫn nguyên — hiệu ứng hài' },
-          { scene_no:3, time_range:'18-25s', type:'proof', voiceover:'Không phải ma thuật, là công thức transfer-proof của GIAO FARA đấy. Khoa học chứng minh bền 8 tiếng.', caption:'📢 Khoa học xác nhận', visual_note:'Text "Bền 8 tiếng" với hiệu ứng hài hước đóng dấu' },
-          { scene_no:4, time_range:'25-30s', type:'cta', voiceover:'Mua Son Kem Lì GIAO FARA — link bio. Mọi hậu quả về bữa ăn không dừng được, shop không chịu trách nhiệm!', caption:'🛒 Shop từ chối mọi trách nhiệm 😂', visual_note:'Text CTA với disclaimer hài hước' }
+        variant: 'humor',
+        style: 'POV Selfie — Situational Comedy / Relatable Skit',
+        scene_setup: 'Quán ăn / bàn ăn nhà, bố cục tự nhiên bộn bề một chút cho authenticity',
+        subject: 'Bất kỳ ai — năng lượng hài hước, hay biểu cảm phóng đại vừa phải',
+        timeline: [
+          { timecode: '00:00–00:04', shot_type: 'Hook Shot', action: 'Selfie sau bữa ăn bún bò, cận mặt ngơ ngác nhìn gương điện thoại', dialogue: 'POV: vừa ăn xong một tô bún bò mà son vẫn... còn nguyên???', performance_note: 'Mắt mở to, cằm hơi hạ — biểu cảm "không thể tin được" phóng đại nhẹ', lighting: 'Ánh sáng quán hoặc nhà bếp tự nhiên — cứ để tự nhiên, đừng chỉnh quá' },
+          { timecode: '00:04–00:18', shot_type: 'Demo Shot', action: 'Montage nhanh: ăn canh nóng → nhìn gương (còn), uống trà đá → nhìn gương (còn), ăn bánh tráng trộn → nhìn gương (vẫn còn)', dialogue: 'Canh nóng — còn. Nước chanh — còn. Bánh tráng trộn — VẪN CÒN. Tôi bắt đầu lo lắng cho chính bản thân mình.', performance_note: 'Mỗi lần nhìn gương tăng dần mức độ bất ngờ — từ ngạc nhiên → hoang mang → gần như sợ hãi', lighting: 'Tự nhiên, không cần thêm gì — tông màu ấm của quán ăn thực tế rất cinematic' },
+          { timecode: '00:18–00:24', shot_type: 'Proof Shot', action: 'Cut sang cầm hộp son GIAO FARA nhìn thẳng camera, gật đầu nghiêm túc', dialogue: 'Không phải ma thuật — là công thức transfer-proof của GIAO FARA. Bền 8 tiếng, có kiểm chứng.', performance_note: 'Chuyển sang "serious face" đột ngột — tương phản hài hước với các scene trước', lighting: 'Chuyển sang ánh sáng hơi sáng hơn, clean hơn — tạo contrast với scenes hài phía trên' },
+          { timecode: '00:24–00:30', shot_type: 'CTA Shot', action: 'Nhìn camera, chỉ xuống, lắc đầu cười', dialogue: 'Link ở bio. Mọi hậu quả ăn quá nhiều vì tự tin son không lem — shop không chịu trách nhiệm đâu nhé 😂', performance_note: 'Nháy mắt hoặc cười nhẹ ở cuối — "wink" kết video', lighting: 'Giữ nguyên ánh sáng scene trước' }
         ],
+        camera: 'Selfie cam cầm tay hoặc gắn selfie stick ngắn — không cần tripod, handheld movement tự nhiên là tốt',
+        framing: 'Selfie angle hơi cao (15–20°), portrait mode; đôi khi wide hơn để thấy ngữ cảnh bàn ăn',
+        performance: 'Năng lượng tự nhiên, hài hước không cố, cho phép cười xịt — đó là content tốt nhất',
+        lighting: 'Dùng ánh sáng thực tế nơi quay — ánh sáng quán ăn ấm thực ra rất đẹp và authentic',
         cta: 'Mua về rồi ăn nhiều quá mà son vẫn còn thì... đó là tính năng chứ không phải lỗi nhé 😂',
         hashtags: ['#sonkemlì', '#giaofara', '#benhmau', '#trend', '#haihuoc'],
         caption_post: 'Shop xin miễn trách nhiệm nếu bạn ăn quá nhiều vì tự tin son không lem 😂 Bền thật sự rồi, không tin thì thử! 💄 Link mua trong bio nha cả nhà'
@@ -3481,16 +3613,28 @@ function caGetFilmingGuide() {
 }
 
 function caSimulateFilmingGuide(script) {
-  var guideScenes = (script.scenes || []).map(function(s, i) {
-    var setups = ['Đặt điện thoại trên tripod cách 60-80cm, ngang tầm mắt', 'Cầm điện thoại tay, di chuyển chậm từ trái sang phải', 'Đặt sản phẩm trên bàn trắng, quay từ trên xuống (flat lay)'];
-    var lightings = ['Ánh sáng tự nhiên từ cửa sổ — đặt nhân vật đối diện cửa', 'Đèn ring light 10 inch đặt ngang mặt, cách 80cm', 'Ánh sáng phòng bình thường, thêm đèn bàn chiếu sản phẩm'];
-    var angles = ['Eye-level — thẳng mắt tạo cảm giác kết nối', 'Close-up 45° từ trên xuống — làm nổi bật sản phẩm', 'Wide shot — thu gọn toàn cảnh bối cảnh'];
-    var tips = ['Giữ điện thoại bằng 2 tay và khuỷu tay tì vào người để tránh rung', 'Quay nhiều takes, chọn cái tự nhiên nhất', 'Mặc đồ tối màu để sản phẩm nổi bật hơn'];
+  // Support new timeline format; fall back to legacy scenes
+  var segments = Array.isArray(script.timeline) && script.timeline.length > 0
+    ? script.timeline
+    : (script.scenes || []).map(function(s) {
+        return { timecode: s.time_range, shot_type: s.type, action: s.voiceover };
+      });
+  var setups = ['Đặt điện thoại trên tripod cách 60-80cm, ngang tầm mắt', 'Cầm điện thoại tay, di chuyển chậm từ trái sang phải', 'Đặt sản phẩm trên bàn trắng, quay từ trên xuống (flat lay)'];
+  var lightings = [
+    script.lighting || 'Ánh sáng tự nhiên từ cửa sổ — đặt nhân vật đối diện cửa',
+    'Đèn ring light 10 inch đặt ngang mặt, cách 80cm',
+    'Ánh sáng phòng bình thường, thêm đèn bàn chiếu sản phẩm'
+  ];
+  var angles = ['Eye-level — thẳng mắt tạo cảm giác kết nối', 'Close-up 45° từ trên xuống — làm nổi bật sản phẩm', 'Wide shot — thu gọn toàn cảnh bối cảnh'];
+  var tips = ['Giữ điện thoại bằng 2 tay và khuỷu tay tì vào người để tránh rung', 'Quay nhiều takes, chọn cái tự nhiên nhất', 'Mặc đồ tối màu để sản phẩm nổi bật hơn'];
+  var guideScenes = segments.map(function(s, i) {
     return {
-      scene_no: s.scene_no, duration: s.time_range,
-      setup: setups[i % setups.length], lighting: lightings[i % lightings.length],
+      scene_no: i + 1,
+      duration: s.timecode || ('Segment ' + (i+1)),
+      setup: (script.camera || setups[i % setups.length]),
+      lighting: (s.lighting || lightings[i % lightings.length]),
       angle: angles[i % angles.length],
-      props: i === 0 ? ['Son GIAO FARA', 'Gương trang điểm nhỏ'] : (i === 1 ? ['Son GIAO FARA', 'Bảng màu swatch', 'Bàn trắng sạch'] : ['Hộp sản phẩm', 'Tờ rơi chính hãng']),
+      props: i === 0 ? ['Sản phẩm GIAO FARA', 'Gương trang điểm nhỏ'] : (i === 1 ? ['Sản phẩm', 'Bàn trắng sạch'] : ['Hộp sản phẩm', 'Tờ rơi chính hãng']),
       tip: tips[i % tips.length]
     };
   });
@@ -3542,10 +3686,16 @@ function caImproveScript(feedback) {
   });
 }
 
-// Task #29/#30: Lưu kịch bản — cập nhật đề xuất gốc nếu có, hoặc tạo mới nếu không
+// Task #29/#30/#32: Lưu kịch bản — chỉ lưu phiên bản đang active, cập nhật đề xuất gốc nếu có
 function caSaveScript() {
   var btn = document.getElementById('caSaveScriptBtn');
   if (btn) { btn.textContent = '⏳ Đang lưu...'; btn.disabled = true; }
+
+  // Chỉ lưu variant đang xem — không lưu cả 3 để tránh script bị ngắn khi xem lại
+  var activeVariant = window._ca.activeVariant || 'emotional';
+  var activeScript = (window._ca.scripts || []).find(function(s) { return s.variant === activeVariant; })
+                  || (window._ca.scripts || [])[0];
+  var scriptToSave = JSON.stringify(activeScript ? [activeScript] : []);
 
   var sid = window._ca._sourceSuggestionId;
   if (sid) {
@@ -3553,7 +3703,7 @@ function caSaveScript() {
     fetch(API_BASE + '/api/content-suggestions/' + encodeURIComponent(sid) + '/save-script', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ script_json: JSON.stringify(window._ca.scripts || []) })
+      body: JSON.stringify({ script_json: scriptToSave })
     }).then(function(r) {
       if (r.status === 404) {
         // Đề xuất chưa có trong DB (chỉ có trong demo) → tạo mới
@@ -3579,6 +3729,10 @@ function caSaveScript() {
 
 function _caCreateNewSuggestionWithScript(btn) {
   var req = window._ca._lastRequest || {};
+  // Chỉ lưu variant đang active
+  var activeVariant = window._ca.activeVariant || 'emotional';
+  var activeScript = (window._ca.scripts || []).find(function(s) { return s.variant === activeVariant; })
+                  || (window._ca.scripts || [])[0];
   return fetch(API_BASE + '/api/content-suggestions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -3586,7 +3740,7 @@ function _caCreateNewSuggestionWithScript(btn) {
       product_id:   req.product_id   || '',
       product_name: req.product_name || 'Sản phẩm',
       content_type: req.content_type || 'tiktok_30s',
-      scripts:      window._ca.scripts || [],
+      scripts:      activeScript ? [activeScript] : [],
       is_text_post: window._ca.is_text_post || false,
     })
   }).then(function(r) { return r.json(); }).then(function(data) {
@@ -3612,10 +3766,16 @@ function caViewSavedScript(sid) {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.status === 'ok' && Array.isArray(data.scripts) && data.scripts.length > 0) {
-        window._ca.scripts       = data.scripts;
-        window._ca.is_text_post  = data.is_text_post || false;
+        window._ca.scripts = data.scripts;
+        // Detect is_text_post from actual script content — not from backend flag (may be stale for old suggestions)
+        var firstScript = data.scripts[0] || {};
+        window._ca.is_text_post = (
+          typeof firstScript.body !== 'undefined'
+          && !Array.isArray(firstScript.timeline)
+          && !firstScript.scenes
+        );
         window._ca.step          = 4;
-        window._ca.activeVariant = (data.scripts[0] || {}).variant || 'emotional';
+        window._ca.activeVariant = firstScript.variant || 'emotional';
         window._ca._sourceSuggestionId = sid;
         // Gợi lại lastRequest để caImproveScript có context
         window._ca._lastRequest = window._ca._lastRequest || {

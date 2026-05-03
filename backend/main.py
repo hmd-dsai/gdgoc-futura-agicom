@@ -1318,22 +1318,37 @@ async def get_content_suggestions():
 
         # -- Từ CoordinationTask target_agent=Content (chưa có trong DB) --
         def _detect_type(text):
+            """Return a content_type code matching CONTENT_TYPES in models.py."""
             t = (text or "").lower()
-            if any(k in t for k in ["video", "quay", "tiktok", "youtube"]):
-                return "video"
-            if any(k in t for k in ["so sánh", " vs ", "compare"]):
-                return "comparison"
-            if any(k in t for k in ["faq", "blog", "hướng dẫn", "câu hỏi", "giải đáp"]):
-                return "blog_faq"
-            return "guide"
+            if "15s" in t or "15 giây" in t:
+                return "tiktok_15s"
+            if "60s" in t or "60 giây" in t or "dài" in t:
+                return "tiktok_60s"
+            if any(k in t for k in ["reels", "instagram"]):
+                return "reels_30s"
+            if any(k in t for k in ["youtube", "yt short"]):
+                return "youtube_short"
+            if any(k in t for k in ["shopee video", "shopee"]):
+                return "shopee_video"
+            if any(k in t for k in ["facebook", "fb post", "bài đăng"]):
+                return "facebook_post"
+            if any(k in t for k in ["caption"]):
+                return "caption_instagram"
+            # default short TikTok for video-related tasks
+            if any(k in t for k in ["video", "quay", "tiktok"]):
+                return "tiktok_30s"
+            # text/blog tasks → facebook_post
+            return "facebook_post"
 
         def _platform_for(t):
             return {
-                "video": "TikTok + YouTube",
-                "blog_faq": "Blog + Website",
-                "comparison": "Blog + YouTube",
-                "guide": "Website + Shopee"
-            }.get(t, "Đa nền tảng")
+                "tiktok_15s": "TikTok", "tiktok_30s": "TikTok", "tiktok_60s": "TikTok",
+                "reels_30s": "Instagram", "reels_60s": "Instagram",
+                "youtube_short": "YouTube",
+                "shopee_video": "Shopee",
+                "facebook_post": "Facebook",
+                "caption_instagram": "Instagram",
+            }.get(t, "TikTok")
 
         neg_by_product = {}
         for r in neg_reviews:
@@ -1841,15 +1856,28 @@ async def get_suggestion_script(suggestion_id: str):
             raise HTTPException(status_code=404, detail="Đề xuất này chưa có kịch bản được lưu")
 
         scripts = json.loads(sug.script_json)
-        # Xác định is_text_post từ type của suggestion
-        is_text_post = sug.type in ("blog_faq",) or sug.platform in ("Facebook", "Instagram")
+        # Detect is_text_post từ NỘI DUNG script thực tế — KHÔNG dùng sug.type vì có thể là giá trị cũ.
+        # Text-post script có field "body"; video script có "timeline" hoặc "scenes".
+        first = scripts[0] if scripts else {}
+        is_text_post = (
+            "body" in first
+            and "timeline" not in first
+            and "scenes" not in first
+        )
+
+        # content_type: ưu tiên từ sug.type nếu là code mới, fallback tiktok_30s
+        KNOWN_CONTENT_TYPES = {
+            "tiktok_15s","tiktok_30s","tiktok_60s","reels_30s","reels_60s",
+            "youtube_short","shopee_video","facebook_post","caption_instagram",
+        }
+        content_type = sug.type if sug.type in KNOWN_CONTENT_TYPES else "tiktok_30s"
 
         return {
             "status":           "ok",
             "suggestion_id":    suggestion_id,
             "product_id":       sug.source_product_id or "",
-            "product_name":     sug.title or "",          # best effort
-            "content_type":     sug.type or "tiktok_30s",
+            "product_name":     sug.title or "",
+            "content_type":     content_type,
             "is_text_post":     is_text_post,
             "scripts":          scripts,
         }
@@ -1967,19 +1995,17 @@ async def create_content_suggestion(body: dict):
 
         suggestion_id = f"manual-{product_id}-{ts}"
 
-        # Map content_type → loại đề xuất và nền tảng
-        type_platform_map = {
-            "tiktok_15s":        ("video",    "TikTok"),
-            "tiktok_30s":        ("video",    "TikTok"),
-            "tiktok_60s":        ("video",    "TikTok"),
-            "reels_30s":         ("video",    "Instagram"),
-            "reels_60s":         ("video",    "Instagram"),
-            "youtube_short":     ("video",    "YouTube"),
-            "shopee_video":      ("video",    "Shopee"),
-            "facebook_post":     ("blog_faq", "Facebook"),
-            "caption_instagram": ("blog_faq", "Instagram"),
+        # Lưu content_type trực tiếp làm sug_type (không dùng "video"/"blog_faq" nữa)
+        platform_map = {
+            "tiktok_15s": "TikTok",   "tiktok_30s": "TikTok",   "tiktok_60s": "TikTok",
+            "reels_30s":  "Instagram", "reels_60s":  "Instagram",
+            "youtube_short": "YouTube",
+            "shopee_video":  "Shopee",
+            "facebook_post": "Facebook",
+            "caption_instagram": "Instagram",
         }
-        sug_type, platform = type_platform_map.get(content_type, ("video", "Social Media"))
+        sug_type = content_type  # store as-is so get_suggestion_script can use KNOWN_CONTENT_TYPES check
+        platform = platform_map.get(content_type, "Social Media")
 
         ct_label = {
             "tiktok_15s": "TikTok 15s", "tiktok_30s": "TikTok 30s", "tiktok_60s": "TikTok 60s",
