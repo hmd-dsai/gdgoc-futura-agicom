@@ -96,6 +96,17 @@ CONTENT_TYPES = [
     "caption_instagram",
 ]
 
+class ScriptImproveRequest(BaseModel):
+    """Input cho endpoint cải thiện một phiên bản kịch bản cụ thể."""
+    product_id: str
+    product_name: str
+    content_type: str = "tiktok_30s"
+    variant: str = "emotional"      # Phong cách muốn cải thiện
+    current_script: dict = {}       # Object kịch bản hiện tại của variant này
+    feedback: str                   # Yêu cầu cải thiện từ người dùng
+    is_text_post: bool = False
+
+
 class ContentScriptRequest(BaseModel):
     """
     Input cho Content Agent generate-script endpoint.

@@ -154,6 +154,7 @@ class ContentSuggestion(Base):
     estimated_production = Column(String)
     source           = Column(String)                                   # content_task | mock_cluster | daily_summary
     source_product_id = Column(String)
+    script_json      = Column(Text, nullable=True)                      # JSON của scripts đã tạo (lưu kịch bản)
     created_at       = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at       = Column(DateTime, default=datetime.datetime.utcnow)
 
@@ -254,6 +255,8 @@ def init_db():
             # v1.1 — CoordinationTask deduplication
             "ALTER TABLE coordination_tasks ADD COLUMN signal_count INTEGER DEFAULT 1",
             "ALTER TABLE coordination_tasks ADD COLUMN issue_type VARCHAR",
+            # v1.3 — ContentSuggestion script persistence
+            "ALTER TABLE content_suggestions ADD COLUMN script_json TEXT",
         ]
         for sql in migrations:
             try:

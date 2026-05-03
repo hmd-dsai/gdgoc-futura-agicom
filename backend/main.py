@@ -12,11 +12,12 @@ from config import client
 from models import (
     ProposalApproval, ProductRequest,
     StrategyProposal, ShopProfile, ChatSessionInput, ChatMessage, ReviewData,
-    CrisisPlanRequest, ActionStatusUpdate, ContentScriptRequest
+    CrisisPlanRequest, ActionStatusUpdate, ContentScriptRequest, ScriptImproveRequest
 )
 from prompts import (
     STRATEGY_SYSTEM_PROMPT, REVIEW_LEARNING_PROMPT, CRISIS_PLAN_PROMPT,
-    CONTENT_SCRIPT_PROMPT, CONTENT_INTEL_PROMPT
+    CONTENT_SCRIPT_PROMPT, CONTENT_INTEL_PROMPT, TEXT_POST_PROMPT,
+    SCRIPT_IMPROVE_VIDEO_PROMPT, SCRIPT_IMPROVE_TEXT_PROMPT
 )
 from services import (
     analyze_strategy_slow_track,
@@ -1657,18 +1658,34 @@ async def generate_content_script(req: ContentScriptRequest):
         usp_focus_text = "\n".join(f"• {u}" for u in usp_list) if usp_list else "(Không có USP cụ thể — AI sẽ tự phân tích từ mô tả)"
         duration_sec, duration_label = _duration_for_type(req.content_type)
 
-        # 2. Gọi AI generate script
-        prompt = CONTENT_SCRIPT_PROMPT.format(
-            product_name=req.product_name,
-            product_description=req.product_description,
-            product_price=catalog_price or "Xem mô tả sản phẩm",
-            usp_focus_text=usp_focus_text,
-            content_type=req.content_type,
-            duration_target=f"{duration_label} ({duration_sec}s)" if duration_sec else duration_label,
-            brand_tone=req.brand_tone,
-            target_audience=req.target_audience or "Phụ nữ 18–35 tuổi, yêu thích làm đẹp",
-            custom_instructions=req.custom_instructions or "Không có yêu cầu đặc biệt",
-        )
+        # Phân biệt loại nội dung: video script vs text post
+        TEXT_POST_TYPES = {"facebook_post", "caption_instagram"}
+        is_text_post = req.content_type in TEXT_POST_TYPES
+
+        # 2. Gọi AI — dùng prompt phù hợp với loại content
+        if is_text_post:
+            prompt = TEXT_POST_PROMPT.format(
+                product_name=req.product_name,
+                product_description=req.product_description,
+                product_price=catalog_price or "Xem mô tả sản phẩm",
+                usp_focus_text=usp_focus_text,
+                content_type=req.content_type,
+                brand_tone=req.brand_tone,
+                target_audience=req.target_audience or "Phụ nữ 18–35 tuổi, yêu thích làm đẹp",
+                custom_instructions=req.custom_instructions or "Không có yêu cầu đặc biệt",
+            )
+        else:
+            prompt = CONTENT_SCRIPT_PROMPT.format(
+                product_name=req.product_name,
+                product_description=req.product_description,
+                product_price=catalog_price or "Xem mô tả sản phẩm",
+                usp_focus_text=usp_focus_text,
+                content_type=req.content_type,
+                duration_target=f"{duration_label} ({duration_sec}s)" if duration_sec else duration_label,
+                brand_tone=req.brand_tone,
+                target_audience=req.target_audience or "Phụ nữ 18–35 tuổi, yêu thích làm đẹp",
+                custom_instructions=req.custom_instructions or "Không có yêu cầu đặc biệt",
+            )
 
         response = await client.aio.models.generate_content(
             model="gemini-flash-latest",
@@ -1677,6 +1694,12 @@ async def generate_content_script(req: ContentScriptRequest):
         raw = response.text.strip()
         clean = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
         script_data = json.loads(clean)
+
+        # Normalise: text post prompt returns a list directly; video prompt returns {"scripts": [...]}
+        if is_text_post:
+            scripts_list = script_data if isinstance(script_data, list) else script_data.get("scripts", [])
+        else:
+            scripts_list = script_data.get("scripts", []) if isinstance(script_data, dict) else script_data
 
         # 3. Đánh dấu CoordinationTask đã hoàn thành nếu kích hoạt từ task
         if req.source_task_id:
@@ -1696,14 +1719,15 @@ async def generate_content_script(req: ContentScriptRequest):
             db.commit()
 
         return {
-            "status": "ok",
-            "product_id":     req.product_id,
-            "product_name":   req.product_name,
-            "content_type":   req.content_type,
-            "trigger_source": req.trigger_source,
-            "usp_used":       usp_list,
-            "scripts":        script_data.get("scripts", []),
-            "duration_seconds": script_data.get("duration_seconds", duration_sec),
+            "status":           "ok",
+            "product_id":       req.product_id,
+            "product_name":     req.product_name,
+            "content_type":     req.content_type,
+            "is_text_post":     is_text_post,
+            "trigger_source":   req.trigger_source,
+            "usp_used":         usp_list,
+            "scripts":          scripts_list,
+            "duration_seconds": duration_sec,
         }
 
     except json.JSONDecodeError as e:
@@ -1794,6 +1818,161 @@ async def deprecated_crawl_analyze(body: dict):
 async def deprecated_script_generate(body: dict):
     """[DEPRECATED] Thay bằng POST /api/content-agent/generate-script"""
     return await deprecated_crawl_analyze(body)
+
+
+# ─── Task #28: Cải thiện kịch bản ────────────────────────────────────────────
+
+@app.post("/api/content-agent/script/improve")
+async def improve_content_script(req: ScriptImproveRequest):
+    """
+    [Content Agent] Cải thiện một phiên bản kịch bản cụ thể dựa trên feedback người dùng.
+    Thay thế endpoint /api/v1/content-agent/script/feedback (cũ, không tồn tại).
+
+    Input (ScriptImproveRequest):
+      - product_id, product_name, content_type: metadata sản phẩm/content
+      - variant: phiên bản cần cải thiện ("emotional" | "informational" | "humor")
+      - current_script: object kịch bản hiện tại của variant đó
+      - feedback: yêu cầu cải thiện từ người dùng (text tự do)
+      - is_text_post: True nếu là bài đăng văn bản (Facebook/Instagram)
+
+    Output:
+      - script: object kịch bản đã cải thiện (cùng cấu trúc với current_script)
+    """
+    try:
+        current_script_json = json.dumps(req.current_script, ensure_ascii=False, indent=2)
+
+        if req.is_text_post:
+            prompt = SCRIPT_IMPROVE_TEXT_PROMPT.format(
+                variant=req.variant,
+                current_script_json=current_script_json,
+                feedback=req.feedback,
+                product_name=req.product_name,
+                content_type=req.content_type,
+            )
+        else:
+            prompt = SCRIPT_IMPROVE_VIDEO_PROMPT.format(
+                variant=req.variant,
+                current_script_json=current_script_json,
+                feedback=req.feedback,
+                product_name=req.product_name,
+                content_type=req.content_type,
+            )
+
+        response = await client.aio.models.generate_content(
+            model="gemini-flash-latest",
+            contents=prompt,
+        )
+        raw = response.text.strip()
+        clean = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+        improved_script = json.loads(clean)
+
+        return {
+            "status":       "ok",
+            "variant":      req.variant,
+            "is_text_post": req.is_text_post,
+            "script":       improved_script,
+        }
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=502, detail=f"AI trả về JSON không hợp lệ: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── Task #29: Lưu kịch bản vào ContentSuggestion ────────────────────────────
+
+@app.patch("/api/content-suggestions/{suggestion_id}/save-script")
+async def save_script_to_suggestion(suggestion_id: str, body: dict):
+    """
+    Lưu JSON kịch bản đã tạo vào ContentSuggestion tương ứng.
+    Body: { "script_json": "<JSON string of scripts array>" }
+    """
+    db = SessionLocal()
+    try:
+        sug = db.query(ContentSuggestion).filter(
+            ContentSuggestion.suggestion_id == suggestion_id
+        ).first()
+        if not sug:
+            raise HTTPException(status_code=404, detail=f"Không tìm thấy đề xuất {suggestion_id}")
+
+        sug.script_json = body.get("script_json", "[]")
+        sug.updated_at = datetime.utcnow()
+        db.commit()
+        return {"status": "ok", "suggestion_id": suggestion_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
+# ─── Task #30: Tạo ContentSuggestion mới từ kịch bản thủ công ────────────────
+
+@app.post("/api/content-suggestions")
+async def create_content_suggestion(body: dict):
+    """
+    Tạo ContentSuggestion mới từ kịch bản đã tạo thủ công (nút "Thêm vào Đề xuất AI").
+    Body: product_id, product_name, content_type, scripts (list), is_text_post (bool)
+    """
+    import time
+    db = SessionLocal()
+    try:
+        ts = int(time.time())
+        product_id   = body.get("product_id",   "unknown")
+        product_name = body.get("product_name", "Sản phẩm")
+        content_type = body.get("content_type", "tiktok_30s")
+        scripts      = body.get("scripts",      [])
+
+        suggestion_id = f"manual-{product_id}-{ts}"
+
+        # Map content_type → loại đề xuất và nền tảng
+        type_platform_map = {
+            "tiktok_15s":        ("video",    "TikTok"),
+            "tiktok_30s":        ("video",    "TikTok"),
+            "tiktok_60s":        ("video",    "TikTok"),
+            "reels_30s":         ("video",    "Instagram"),
+            "reels_60s":         ("video",    "Instagram"),
+            "youtube_short":     ("video",    "YouTube"),
+            "shopee_video":      ("video",    "Shopee"),
+            "facebook_post":     ("blog_faq", "Facebook"),
+            "caption_instagram": ("blog_faq", "Instagram"),
+        }
+        sug_type, platform = type_platform_map.get(content_type, ("video", "Social Media"))
+
+        ct_label = {
+            "tiktok_15s": "TikTok 15s", "tiktok_30s": "TikTok 30s", "tiktok_60s": "TikTok 60s",
+            "reels_30s": "Reels 30s",   "reels_60s": "Reels 60s",   "youtube_short": "YouTube Short",
+            "shopee_video": "Shopee Video",
+            "facebook_post": "Facebook Post", "caption_instagram": "Caption Instagram",
+        }
+        title = f"{ct_label.get(content_type, content_type)} — {product_name}"
+
+        new_sug = ContentSuggestion(
+            suggestion_id     = suggestion_id,
+            title             = title,
+            type              = sug_type,
+            platform          = platform,
+            priority          = "medium",
+            status            = "saved",           # Đã có kịch bản → trạng thái "đã lưu"
+            source            = "manual_script",
+            source_product_id = product_id,
+            script_json       = json.dumps(scripts, ensure_ascii=False),
+        )
+        db.add(new_sug)
+        db.commit()
+        db.refresh(new_sug)
+
+        return {
+            "status":        "ok",
+            "suggestion_id": suggestion_id,
+            "title":         title,
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
 
 
 @app.post("/system/reset-all")

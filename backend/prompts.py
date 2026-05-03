@@ -265,3 +265,98 @@ Trả về JSON thuần:
   ]
 }}
 """
+
+SCRIPT_IMPROVE_VIDEO_PROMPT = """
+Bạn là Chuyên gia Sáng tạo Nội dung TMĐT của Agicom.
+
+KỊCH BẢN VIDEO HIỆN TẠI (phong cách "{variant}"):
+{current_script_json}
+
+YÊU CẦU CẢI THIỆN TỪ NGƯỜI DÙNG:
+{feedback}
+
+SẢN PHẨM: {product_name}
+LOẠI CONTENT: {content_type}
+
+NHIỆM VỤ: Cải thiện kịch bản video trên đúng theo yêu cầu. Giữ nguyên phong cách "{variant}".
+Chỉ thay đổi những gì được yêu cầu — giữ phần còn lại tốt nhất có thể.
+
+Trả về JSON thuần (không markdown), một object duy nhất với cấu trúc giống kịch bản gốc:
+{{
+  "variant": "{variant}",
+  "hook": {{ "text": "...", "duration_sec": <int>, "visual_note": "..." }},
+  "scenes": [{{ "scene_no": <int>, "type": "hook|body|proof|cta", "time_range": "Xs–Xs", "voiceover": "...", "caption": "...", "visual_note": "...", "usp_highlighted": "..." }}],
+  "cta": "...",
+  "hook_text": "...",
+  "total_duration": <int>,
+  "hashtags": ["#tag1", "..."],
+  "caption_post": "...",
+  "filming_tips": "..."
+}}
+"""
+
+SCRIPT_IMPROVE_TEXT_PROMPT = """
+Bạn là Chuyên gia Sáng tạo Nội dung mạng xã hội của Agicom.
+
+BÀI ĐĂNG HIỆN TẠI (phong cách "{variant}"):
+{current_script_json}
+
+YÊU CẦU CẢI THIỆN TỪ NGƯỜI DÙNG:
+{feedback}
+
+SẢN PHẨM: {product_name}
+LOẠI CONTENT: {content_type}
+
+NHIỆM VỤ: Cải thiện bài đăng văn bản trên đúng theo yêu cầu. Giữ nguyên phong cách "{variant}".
+Chỉ thay đổi những gì được yêu cầu — giữ phần còn lại tốt nhất có thể.
+
+Trả về JSON thuần (không markdown), một object duy nhất:
+{{
+  "variant": "{variant}",
+  "body": "<nội dung bài đăng đã cải thiện>",
+  "cta": "<lời kêu gọi hành động>",
+  "hashtags": ["#tag1", "..."],
+  "caption_post": "<toàn bộ caption hoàn chỉnh sẵn sàng đăng>"
+}}
+"""
+
+TEXT_POST_PROMPT = """
+Bạn là Chuyên gia Sáng tạo Nội dung mạng xã hội của Agicom — chuyên viết bài đăng văn bản cho shop mỹ phẩm GIAO FARA.
+
+THÔNG TIN SẢN PHẨM:
+- Tên: {product_name}
+- Mô tả: {product_description}
+- Giá bán: {product_price}
+
+ĐIỂM BÁN HÀNG NỔI BẬT (USP):
+{usp_focus_text}
+
+LOẠI NỘI DUNG: {content_type}
+TÔNG GIỌNG: {brand_tone}
+ĐỐI TƯỢNG MỤC TIÊU: {target_audience}
+YÊU CẦU TUỲ CHỈNH: {custom_instructions}
+
+NHIỆM VỤ: Tạo 3 phiên bản bài đăng văn bản theo 3 phong cách:
+- "emotional": Cảm xúc, storytelling, kết nối với người đọc
+- "informational": Thông tin, facts, bằng chứng, so sánh
+- "humor": Hài hước, relatable, dễ viral
+
+QUY TẮC:
+1. Mỗi bài đăng phải có: body (nội dung chính), cta (lời kêu gọi hành động), hashtags (5–8 thẻ), caption_post (toàn bộ caption sẵn sàng dán).
+2. Không có scenes hay voiceover — đây là bài TEXT, không phải kịch bản video.
+3. Ngôn ngữ tự nhiên, đúng phong cách mạng xã hội Việt Nam.
+4. Caption_post phải hoàn chỉnh, sẵn sàng đăng ngay.
+
+Trả về JSON theo đúng schema:
+[
+  {{
+    "variant": "emotional",
+    "body": "<nội dung bài đăng, 3-5 đoạn>",
+    "cta": "<lời kêu gọi hành động>",
+    "hashtags": ["#tag1", "#tag2"],
+    "caption_post": "<toàn bộ caption đã format sẵn, bao gồm body + cta + hashtags>"
+  }},
+  {{ "variant": "informational", ... }},
+  {{ "variant": "humor", ... }}
+]
+"""

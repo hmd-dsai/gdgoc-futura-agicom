@@ -2184,86 +2184,119 @@ function renderContentSuggestions() {
   // ---- SECTION 2: AI Content Recommendations ----
   html += '<div style="margin-bottom:8px;font-size:0.82rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">🤖 Đề xuất AI — Ưu tiên theo Combined Signal Score</div>';
 
-  visible.forEach(function(sug) {
+  // Tách thành 2 nhóm: live backend vs demo
+  var liveSugs = visible.filter(function(s){ return s._fromBackend || s._fromDailySummary; });
+  var demoSugs = visible.filter(function(s){ return !s._fromBackend && !s._fromDailySummary; });
+
+  function renderSugCard(sug) {
     var tLabel = typeLabel[sug.type] || sug.type;
     var tColor = typeColor[sug.type] || '#94a3b8';
     var tBg = typeBg[sug.type] || '#f8fafc';
     var isHigh = sug.priority === 'high';
     var sid = (sug.id || '').replace(/'/g, "\\'");
+    // Encode angle for prefill (strip HTML entities, cap length)
+    var angleForPrefill = ((sug.angle || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;').substring(0, 200));
+    // Map suggestion type → script content_type
+    var ctMap = { video: 'tiktok_30s', blog_faq: 'facebook_post', comparison: 'tiktok_30s', guide: 'facebook_post' };
+    var platformMap = { TikTok: 'tiktok_30s', Facebook: 'facebook_post', Shopee: 'shopee_video', Instagram: 'reels_30s' };
+    var mappedCt = platformMap[(sug.platform||'').split(' ')[0]] || ctMap[sug.type] || 'tiktok_30s';
+    var productId = sug.source_product_id || sug.product_id || '';
 
     // Border theo trạng thái
     var borderColor = sug.status === 'scheduled' ? '#10b981'
                     : sug.status === 'saved' ? '#f59e0b'
                     : isHigh ? '#fca5a5' : 'var(--border-primary)';
 
-    html += '<div style="background:var(--bg-primary);border:1px solid ' + borderColor + ';border-radius:12px;padding:16px;margin-bottom:14px;">';
-    html += '<div style="display:flex;align-items:flex-start;gap:14px;">';
-    html += scoreRing(sug.combined_score);
-    html += '<div style="flex:1;">';
+    var out = '<div style="background:var(--bg-primary);border:1px solid ' + borderColor + ';border-radius:12px;padding:16px;margin-bottom:14px;">';
+    out += '<div style="display:flex;align-items:flex-start;gap:14px;">';
+    out += scoreRing(sug.combined_score);
+    out += '<div style="flex:1;">';
     // Title + badges
-    html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">';
-    html += '<strong style="font-size:0.9rem;">' + sug.title + '</strong>';
-    html += '<span style="background:' + tBg + ';color:' + tColor + ';font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;">' + tLabel + '</span>';
-    html += '<span style="background:#f1f5f9;color:#64748b;font-size:0.68rem;padding:2px 8px;border-radius:10px;">' + sug.platform + '</span>';
-    if (sug.status === 'saved')      html += '<span style="background:#fffbeb;color:#f59e0b;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;">📌 Đã lưu</span>';
-    if (sug.status === 'scheduled')  html += '<span style="background:#f0fdf4;color:#10b981;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;">🗓 Đã lên lịch</span>';
-    if (sug._fromBackend)            html += '<span style="background:#dcfce7;color:#16a34a;font-size:0.62rem;padding:2px 6px;border-radius:8px;">↓ Backend</span>';
-    html += '</div>';
+    out += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">';
+    out += '<strong style="font-size:0.9rem;">' + sug.title + '</strong>';
+    out += '<span style="background:' + tBg + ';color:' + tColor + ';font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;">' + tLabel + '</span>';
+    out += '<span style="background:#f1f5f9;color:#64748b;font-size:0.68rem;padding:2px 8px;border-radius:10px;">' + sug.platform + '</span>';
+    if (sug.status === 'saved')     out += '<span style="background:#fffbeb;color:#f59e0b;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;">📌 Đã lưu</span>';
+    if (sug.status === 'scheduled') out += '<span style="background:#f0fdf4;color:#10b981;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;">🗓 Đã lên lịch</span>';
+    out += '</div>';
     // Two signals
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">';
-    // Chatbot signal
-    html += '<div style="background:#eef2ff;border-radius:8px;padding:10px;">';
-    html += '<div style="font-size:0.7rem;font-weight:700;color:#6366f1;margin-bottom:4px;">💬 Tín hiệu Chatbot</div>';
-    html += '<div style="font-size:0.78rem;font-weight:700;color:var(--text-primary);">' + (sug.chatbot_signal.count || 0) + ' câu hỏi</div>';
-    html += '<div style="font-size:0.72rem;color:var(--text-muted);">' + (sug.chatbot_signal.topic || '') + '</div>';
-    html += '<div style="margin-top:6px;">' + (sug.chatbot_signal.sample_questions || []).slice(0,2).map(function(q) {
+    out += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">';
+    out += '<div style="background:#eef2ff;border-radius:8px;padding:10px;">';
+    out += '<div style="font-size:0.7rem;font-weight:700;color:#6366f1;margin-bottom:4px;">💬 Tín hiệu Chatbot</div>';
+    out += '<div style="font-size:0.78rem;font-weight:700;color:var(--text-primary);">' + ((sug.chatbot_signal||{}).count || 0) + ' câu hỏi</div>';
+    out += '<div style="font-size:0.72rem;color:var(--text-muted);">' + ((sug.chatbot_signal||{}).topic || '') + '</div>';
+    out += '<div style="margin-top:6px;">' + ((sug.chatbot_signal||{}).sample_questions || []).slice(0,2).map(function(q) {
       return '<div style="font-size:0.68rem;color:#6366f1;padding:2px 0;">› "' + q + '"</div>';
     }).join('') + '</div>';
-    html += '</div>';
-    // Review signal
-    if ((sug.review_signal.count || 0) > 0) {
-      html += '<div style="background:#f0fdf4;border-radius:8px;padding:10px;">';
-      html += '<div style="font-size:0.7rem;font-weight:700;color:#10b981;margin-bottom:4px;">⭐ Tín hiệu Review</div>';
-      html += '<div style="font-size:0.78rem;font-weight:700;color:var(--text-primary);">' + sug.review_signal.count + ' đánh giá</div>';
-      html += '<div style="font-size:0.72rem;color:var(--text-muted);">' + (sug.review_signal.neg_pct || 0) + '% lo ngại về chủ đề này</div>';
-      html += '<div style="margin-top:6px;">' + (sug.review_signal.sample_reviews || []).slice(0,2).map(function(r) {
+    out += '</div>';
+    if (((sug.review_signal||{}).count || 0) > 0) {
+      out += '<div style="background:#f0fdf4;border-radius:8px;padding:10px;">';
+      out += '<div style="font-size:0.7rem;font-weight:700;color:#10b981;margin-bottom:4px;">⭐ Tín hiệu Review</div>';
+      out += '<div style="font-size:0.78rem;font-weight:700;color:var(--text-primary);">' + (sug.review_signal||{}).count + ' đánh giá</div>';
+      out += '<div style="font-size:0.72rem;color:var(--text-muted);">' + ((sug.review_signal||{}).neg_pct || 0) + '% lo ngại về chủ đề này</div>';
+      out += '<div style="margin-top:6px;">' + ((sug.review_signal||{}).sample_reviews || []).slice(0,2).map(function(r) {
         return '<div style="font-size:0.68rem;color:#10b981;padding:2px 0;">› "' + r + '"</div>';
       }).join('') + '</div>';
-      html += '</div>';
+      out += '</div>';
     } else {
-      html += '<div style="background:#f0f9ff;border-radius:8px;padding:10px;">';
-      html += '<div style="font-size:0.7rem;font-weight:700;color:#0ea5e9;margin-bottom:4px;">💼 Tín hiệu Thị trường</div>';
-      html += '<div style="font-size:0.78rem;color:var(--text-muted);">Chưa có review — tín hiệu từ chatbot</div>';
-      html += '<div style="font-size:0.72rem;color:#0ea5e9;margin-top:4px;">› Cơ hội chiếm lĩnh content trước</div>';
-      html += '</div>';
+      out += '<div style="background:#f0f9ff;border-radius:8px;padding:10px;">';
+      out += '<div style="font-size:0.7rem;font-weight:700;color:#0ea5e9;margin-bottom:4px;">💼 Tín hiệu Thị trường</div>';
+      out += '<div style="font-size:0.78rem;color:var(--text-muted);">Chưa có review — tín hiệu từ chatbot</div>';
+      out += '<div style="font-size:0.72rem;color:#0ea5e9;margin-top:4px;">› Cơ hội chiếm lĩnh content trước</div>';
+      out += '</div>';
     }
-    html += '</div>';
+    out += '</div>';
     // Angle
-    html += '<div style="background:#f8fafc;border-radius:8px;padding:10px;margin-bottom:10px;">';
-    html += '<div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:3px;">🎯 Góc tiếp cận đề xuất:</div>';
-    html += '<div style="font-size:0.78rem;color:var(--text-secondary);">' + (sug.angle || '—') + '</div>';
-    html += '</div>';
+    out += '<div style="background:#f8fafc;border-radius:8px;padding:10px;margin-bottom:10px;">';
+    out += '<div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:3px;">🎯 Góc tiếp cận đề xuất:</div>';
+    out += '<div style="font-size:0.78rem;color:var(--text-secondary);">' + (sug.angle || '—') + '</div>';
+    out += '</div>';
     // Impact + action buttons
-    html += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">';
-    html += '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
-    html += '<div style="font-size:0.72rem;color:#10b981;"><strong>📈 Impact:</strong> ' + (sug.estimated_impact || '') + '</div>';
-    html += '<div style="font-size:0.72rem;color:var(--text-muted);"><strong>⏱ Sản xuất:</strong> ' + (sug.estimated_production || '') + '</div>';
-    html += '</div>';
-    html += '<div style="display:flex;gap:8px;">';
+    out += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">';
+    out += '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
+    out += '<div style="font-size:0.72rem;color:#10b981;"><strong>📈 Impact:</strong> ' + (sug.estimated_impact || '') + '</div>';
+    out += '<div style="font-size:0.72rem;color:var(--text-muted);"><strong>⏱ Sản xuất:</strong> ' + (sug.estimated_production || '') + '</div>';
+    out += '</div>';
+    out += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
+    // 🎬 Tạo script button — always visible
+    out += '<button class="alert-cta" style="background:rgba(99,102,241,0.12);color:#818cf8;border:1px solid rgba(99,102,241,0.3);" '
+      + 'onclick="caPrefillFromSuggestion(\'' + (productId||'').replace(/'/g,"\\'") + '\',\'' + mappedCt + '\',\'' + angleForPrefill + '\',\'' + (sid||'').replace(/'/g,"\\'") + '\')">🎬 Tạo script</button>';
     if (sug.status === 'scheduled') {
-      html += '<button class="alert-cta" style="background:#f0fdf4;color:#10b981;border:1px solid #10b981;" onclick="restoreSuggestion(\'' + sid + '\')">↩ Chuyển lại Pending</button>';
+      out += '<button class="alert-cta" style="background:#f0fdf4;color:#10b981;border:1px solid #10b981;" onclick="restoreSuggestion(\'' + sid + '\')">↩ Chuyển lại Pending</button>';
     } else if (sug.status === 'saved') {
-      html += '<button class="alert-cta" style="background:var(--accent-emerald-bg);color:var(--accent-emerald);border:1px solid var(--accent-emerald);" onclick="scheduleSuggestion(\'' + sid + '\')">🗓 Lên lịch</button>';
-      html += '<button class="alert-cta" style="background:var(--accent-rose-bg);color:var(--accent-rose);border:1px solid var(--accent-rose);" onclick="ignoreSuggestion(\'' + sid + '\')">✕ Bỏ qua</button>';
+      out += '<button class="alert-cta" style="background:var(--accent-emerald-bg);color:var(--accent-emerald);border:1px solid var(--accent-emerald);" onclick="scheduleSuggestion(\'' + sid + '\')">🗓 Lên lịch</button>';
+      out += '<button class="alert-cta" style="background:var(--accent-rose-bg);color:var(--accent-rose);border:1px solid var(--accent-rose);" onclick="ignoreSuggestion(\'' + sid + '\')">✕ Bỏ qua</button>';
     } else {
-      // pending
-      html += '<button class="alert-cta" style="background:var(--accent-emerald-bg);color:var(--accent-emerald);border:1px solid var(--accent-emerald);" onclick="scheduleSuggestion(\'' + sid + '\')">✅ Lên lịch</button>';
-      html += '<button class="alert-cta" style="background:#fffbeb;color:#f59e0b;border:1px solid #f59e0b;" onclick="saveSuggestion(\'' + sid + '\')">📌 Lưu lại</button>';
-      html += '<button class="alert-cta" style="background:var(--accent-rose-bg);color:var(--accent-rose);border:1px solid var(--accent-rose);" onclick="ignoreSuggestion(\'' + sid + '\')">✕ Bỏ qua</button>';
+      out += '<button class="alert-cta" style="background:var(--accent-emerald-bg);color:var(--accent-emerald);border:1px solid var(--accent-emerald);" onclick="scheduleSuggestion(\'' + sid + '\')">✅ Lên lịch</button>';
+      out += '<button class="alert-cta" style="background:#fffbeb;color:#f59e0b;border:1px solid #f59e0b;" onclick="saveSuggestion(\'' + sid + '\')">📌 Lưu lại</button>';
+      out += '<button class="alert-cta" style="background:var(--accent-rose-bg);color:var(--accent-rose);border:1px solid var(--accent-rose);" onclick="ignoreSuggestion(\'' + sid + '\')">✕ Bỏ qua</button>';
     }
-    html += '</div></div>';
-    html += '</div></div></div>';
-  });
+    out += '</div></div>';
+    out += '</div></div></div>';
+    return out;
+  } // end renderSugCard
+
+  // ---- Render LIVE suggestions (from backend/daily summary) ----
+  if (liveSugs.length > 0) {
+    html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
+      + '<span style="display:inline-flex;align-items:center;gap:5px;background:#dcfce7;color:#15803d;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;">● LIVE — Từ dữ liệu thực</span>'
+      + '<span style="font-size:0.75rem;color:var(--text-muted);">' + liveSugs.length + ' đề xuất từ backend</span>'
+      + '</div>';
+    liveSugs.forEach(function(sug) { html += renderSugCard(sug); });
+  }
+
+  // ---- Render DEMO suggestions ----
+  if (demoSugs.length > 0) {
+    html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;' + (liveSugs.length > 0 ? 'margin-top:20px;' : '') + '">'
+      + '<span style="display:inline-flex;align-items:center;gap:5px;background:#f1f5f9;color:#64748b;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;">📋 Demo — Dữ liệu mẫu</span>'
+      + '<span style="font-size:0.75rem;color:var(--text-muted);">' + demoSugs.length + ' đề xuất minh họa · không phản ánh dữ liệu thực</span>'
+      + '</div>';
+    demoSugs.forEach(function(sug) { html += renderSugCard(sug); });
+  }
+
+  if (liveSugs.length === 0 && demoSugs.length === 0) {
+    html += '<div style="text-align:center;padding:32px;color:var(--text-muted);">Không có đề xuất nào</div>';
+  }
 
   // Hiện số lượng đã bỏ qua (nếu có) + nút khôi phục
   if (ignored.length > 0) {
@@ -2636,6 +2669,22 @@ window._ca = window._ca || {
   _lastRequest: null
 };
 
+/**
+ * Được gọi từ nút "🎬 Tạo script" trong Đề xuất AI.
+ * Lưu prefill vào window._ca._prefill rồi chuyển sang tab Script.
+ */
+function caPrefillFromSuggestion(productId, contentType, angle, suggestionId) {
+  window._ca._prefill = {
+    product_id:          productId   || '',
+    content_type:        contentType || 'tiktok_30s',
+    custom_instructions: angle ? 'Góc tiếp cận đề xuất: ' + angle : '',
+    suggestion_id:       suggestionId || null,
+  };
+  window._ca.step = 1;
+  window._csTab = 'script';
+  navigate('content-suggestions');
+}
+
 // Chuyển sang tab Script trong trang Đề xuất Content
 function navContentScript() {
   window._csTab = 'script';
@@ -2648,7 +2697,8 @@ function caReset() {
   var cachedProducts = window._ca.catalogProducts;
   window._ca = { step: 1, jobId: null, pollTimer: null, intel: null, scripts: [],
     activeVariant: 'emotional', filmingGuide: null, filmingScript: null,
-    catalogProducts: cachedProducts, _selectedProduct: null, _selectedUsps: null, _lastRequest: null };
+    catalogProducts: cachedProducts, _selectedProduct: null, _selectedUsps: null, _lastRequest: null,
+    _sourceSuggestionId: null, _prefill: null };
 }
 
 function renderContentAgent() {
@@ -2841,31 +2891,49 @@ function renderContentAgent() {
       return '<button data-ca-variant="' + v + '" style="flex:1;padding:10px;border-radius:10px;font-weight:700;font-size:0.82rem;cursor:pointer;border:' + (isActive ? '2px solid var(--accent-amber)' : '1.5px solid var(--border-primary)') + ';background:' + (isActive ? 'rgba(234,179,8,0.12)' : 'var(--bg-glass)') + ';color:' + (isActive ? 'var(--accent-amber)' : 'var(--text-secondary)') + ';">' + (variantLabels[v]||v) + '</button>';
     }).join('');
 
-    var scenesHtml = '';
-    if (script && script.scenes) {
-      var typeColors = { hook: '#ef4444', body: '#0ea5e9', proof: '#10b981', cta: '#d97706' };
-      var typeLabels = { hook: 'HOOK', body: 'NỘI DUNG', proof: 'BẰNG CHỨNG', cta: 'CTA' };
-      scenesHtml = script.scenes.map(function(scene) {
-        var color = typeColors[scene.type] || '#6366f1';
-        return '<div style="display:flex;gap:14px;padding:14px;background:var(--bg-glass);border-radius:12px;border-left:3px solid ' + color + ';">'
-          + '<div style="flex-shrink:0;text-align:center;min-width:56px;">'
-          + '<div style="font-size:0.7rem;font-weight:800;color:' + color + ';text-transform:uppercase;">' + (typeLabels[scene.type]||scene.type) + '</div>'
-          + '<div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">' + scene.time_range + '</div></div>'
-          + '<div style="flex:1;">'
-          + '<div style="font-size:0.85rem;color:var(--text-primary);margin-bottom:6px;line-height:1.5;">🎙 <b>VO:</b> ' + scene.voiceover + '</div>'
-          + '<div style="font-size:0.8rem;color:var(--accent-amber);margin-bottom:4px;">📝 <b>Caption:</b> ' + scene.caption + '</div>'
-          + '<div style="font-size:0.78rem;color:var(--text-muted);">🎥 ' + scene.visual_note + '</div>'
-          + '</div></div>';
-      }).join('');
-    }
-
+    var isTextPost = window._ca.is_text_post || false;
     var tagsHtml = script && script.hashtags ? script.hashtags.map(function(h) {
       return '<span style="padding:4px 10px;background:rgba(14,165,233,0.12);color:#38bdf8;border-radius:20px;font-size:0.75rem;font-weight:600;">' + h + '</span>';
     }).join('') : '';
 
-    bodyHtml = '<div style="display:flex;flex-direction:column;gap:20px;">'
-      + '<div style="display:flex;gap:10px;">' + variantTabs + '</div>'
-      + (script ? '<div class="content-card">'
+    var scriptCardHtml = '';
+    if (!script) {
+      scriptCardHtml = '<div class="content-card"><div style="color:var(--text-muted);text-align:center;padding:24px;">Không có nội dung cho phiên bản này</div></div>';
+    } else if (isTextPost) {
+      // ── TEXT POST layout (Facebook / Instagram caption) ──
+      scriptCardHtml = '<div class="content-card">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;">'
+        + '<div class="content-card-title" style="margin-bottom:0;">📘 Bài đăng — ' + (variantLabels[activeVariant]||activeVariant) + '</div>'
+        + '</div>'
+        + (script.body ? '<div style="background:var(--bg-glass);border-radius:10px;padding:14px;font-size:0.88rem;color:var(--text-primary);line-height:1.7;white-space:pre-wrap;margin-bottom:12px;">' + script.body + '</div>' : '')
+        + (script.cta ? '<div style="padding:12px;background:rgba(217,119,6,0.08);border-radius:10px;border-left:3px solid #d97706;margin-bottom:12px;">'
+            + '<span style="font-size:0.75rem;font-weight:800;color:#d97706;text-transform:uppercase;">Call to Action</span>'
+            + '<div style="font-size:0.88rem;color:var(--text-primary);margin-top:4px;">' + script.cta + '</div></div>' : '')
+        + (tagsHtml ? '<div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">' + tagsHtml + '</div>' : '')
+        + (script.caption_post ? '<div style="padding:12px;background:rgba(99,102,241,0.06);border-radius:10px;border:1px solid rgba(99,102,241,0.15);">'
+            + '<div style="font-size:0.7rem;font-weight:700;color:#818cf8;margin-bottom:6px;text-transform:uppercase;">📋 Caption hoàn chỉnh — sẵn sàng đăng</div>'
+            + '<div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.65;white-space:pre-wrap;">' + script.caption_post + '</div></div>' : '')
+        + '</div>';
+    } else {
+      // ── VIDEO SCRIPT layout ──
+      var scenesHtml = '';
+      if (script.scenes) {
+        var typeColors = { hook: '#ef4444', body: '#0ea5e9', proof: '#10b981', cta: '#d97706' };
+        var typeLabels2 = { hook: 'HOOK', body: 'NỘI DUNG', proof: 'BẰNG CHỨNG', cta: 'CTA' };
+        scenesHtml = script.scenes.map(function(scene) {
+          var color = typeColors[scene.type] || '#6366f1';
+          return '<div style="display:flex;gap:14px;padding:14px;background:var(--bg-glass);border-radius:12px;border-left:3px solid ' + color + ';">'
+            + '<div style="flex-shrink:0;text-align:center;min-width:56px;">'
+            + '<div style="font-size:0.7rem;font-weight:800;color:' + color + ';text-transform:uppercase;">' + (typeLabels2[scene.type]||scene.type) + '</div>'
+            + '<div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">' + scene.time_range + '</div></div>'
+            + '<div style="flex:1;">'
+            + '<div style="font-size:0.85rem;color:var(--text-primary);margin-bottom:6px;line-height:1.5;">🎙 <b>VO:</b> ' + scene.voiceover + '</div>'
+            + '<div style="font-size:0.8rem;color:var(--accent-amber);margin-bottom:4px;">📝 <b>Caption:</b> ' + scene.caption + '</div>'
+            + '<div style="font-size:0.78rem;color:var(--text-muted);">🎥 ' + scene.visual_note + '</div>'
+            + '</div></div>';
+        }).join('');
+      }
+      scriptCardHtml = '<div class="content-card">'
         + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:16px;">'
         + '<div>'
         + '<div class="content-card-title" style="margin-bottom:4px;">🎬 Kịch bản — ' + (variantLabels[activeVariant]||activeVariant) + ' · ' + (script.total_duration||30) + 's</div>'
@@ -2879,7 +2947,22 @@ function renderContentAgent() {
           + '<div style="font-size:0.88rem;color:var(--text-primary);margin-top:4px;">' + script.cta + '</div></div>' : '')
         + (tagsHtml ? '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">' + tagsHtml + '</div>' : '')
         + (script.caption_post ? '<div style="margin-top:12px;padding:12px;background:var(--bg-glass);border-radius:10px;font-size:0.82rem;color:var(--text-secondary);font-style:italic;">📱 ' + script.caption_post + '</div>' : '')
-        + '</div>' : '<div class="content-card"><div style="color:var(--text-muted);text-align:center;padding:24px;">Không có kịch bản cho phiên bản này</div></div>')
+        + '</div>';
+    }
+
+    // Save / Add-to-suggestions action bar
+    var actionBarHtml = '<div class="content-card" style="padding:12px 16px;">'
+      + '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">';
+    if (window._ca._sourceSuggestionId) {
+      actionBarHtml += '<button id="caSaveScriptBtn" style="padding:9px 16px;background:rgba(16,185,129,0.12);color:var(--accent-emerald);border:1.5px solid var(--accent-emerald);border-radius:10px;font-weight:700;font-size:0.82rem;cursor:pointer;">💾 Lưu kịch bản vào đề xuất gốc</button>';
+    }
+    actionBarHtml += '<button id="caAddToSugBtn" style="padding:9px 16px;background:rgba(99,102,241,0.1);color:#818cf8;border:1.5px solid rgba(99,102,241,0.3);border-radius:10px;font-weight:700;font-size:0.82rem;cursor:pointer;">➕ Thêm vào Đề xuất AI</button>';
+    actionBarHtml += '</div></div>';
+
+    bodyHtml = '<div style="display:flex;flex-direction:column;gap:20px;">'
+      + '<div style="display:flex;gap:10px;">' + variantTabs + '</div>'
+      + scriptCardHtml
+      + actionBarHtml
       // Feedback section
       + '<div class="content-card">'
       + '<div class="content-card-title">✏️ Cải thiện kịch bản này</div>'
@@ -2994,6 +3077,33 @@ function initContentAgentEvents() {
     };
   }
 
+  // ── Áp dụng prefill từ "Tạo script" trong Đề xuất AI ──
+  var prefill = window._ca._prefill;
+  if (prefill) {
+    // Chọn sản phẩm theo product_id
+    var productSelectEl2 = document.getElementById('caProductSelect');
+    if (productSelectEl2 && prefill.product_id) {
+      // Thử chọn theo value, nếu không khớp thì thử chứa chuỗi
+      var opts = Array.from(productSelectEl2.options);
+      var match = opts.find(function(o) { return o.value === prefill.product_id; })
+                || opts.find(function(o) { return o.value.indexOf(prefill.product_id) !== -1; });
+      if (match) {
+        productSelectEl2.value = match.value;
+        productSelectEl2.dispatchEvent(new Event('change'));
+      }
+    }
+    // Chọn content type
+    var ctEl = document.getElementById('caContentType');
+    if (ctEl && prefill.content_type) ctEl.value = prefill.content_type;
+    // Điền custom instructions từ góc tiếp cận đề xuất
+    var instrEl = document.getElementById('caCustomInstructions');
+    if (instrEl && prefill.custom_instructions) instrEl.value = prefill.custom_instructions;
+    // Lưu suggestion ID gốc để nút "Lưu kịch bản" biết đề xuất nào cần cập nhật
+    window._ca._sourceSuggestionId = prefill.suggestion_id || null;
+    // Xoá prefill sau khi đã áp dụng
+    window._ca._prefill = null;
+  }
+
   // ── Nút Phân tích & Tạo Script ──
   var analyzeBtn = document.getElementById('caAnalyzeBtn');
   if (analyzeBtn) {
@@ -3060,6 +3170,12 @@ function initContentAgentEvents() {
     };
   }
 
+  var saveScriptBtn = document.getElementById('caSaveScriptBtn');
+  if (saveScriptBtn) { saveScriptBtn.onclick = function() { caSaveScript(); }; }
+
+  var addToSugBtn = document.getElementById('caAddToSugBtn');
+  if (addToSugBtn) { addToSugBtn.onclick = function() { caAddToSuggestions(); }; }
+
   // Variant tab buttons
   document.querySelectorAll('[data-ca-variant]').forEach(function(btn) {
     btn.onclick = function() {
@@ -3109,11 +3225,13 @@ function caStartAnalysis(req) {
         body: JSON.stringify(req),
       }).then(function(r2) { return r2.json(); }).then(function(scriptData) {
         window._ca.scripts = scriptData.scripts || [];
+        window._ca.is_text_post = scriptData.is_text_post || false;
         window._ca.activeVariant = 'emotional';
         window._ca.progress = 100;
-        window._ca.step = 4;  // Nhảy thẳng vào bước kịch bản
+        window._ca.step = 4;
         navContentScript();
-        showToast('✅ Đã tạo ' + (scriptData.scripts||[]).length + ' phiên bản kịch bản!', 'success');
+        var label = window._ca.is_text_post ? 'bài đăng văn bản' : 'kịch bản';
+        showToast('✅ Đã tạo ' + (scriptData.scripts||[]).length + ' phiên bản ' + label + '!', 'success');
       }).catch(function() { caSimulateScripts(); });
     } else {
       showToast('Lỗi phân tích: ' + (data.detail || 'Không có dữ liệu'), 'danger');
@@ -3346,27 +3464,102 @@ function caSimulateFilmingGuide(script) {
 }
 
 function caImproveScript(feedback) {
+  var activeVariant = window._ca.activeVariant;
   var scripts = window._ca.scripts;
-  var script = scripts.find(function(s){ return s.variant === window._ca.activeVariant; }) || scripts[0];
+  var script = scripts.find(function(s){ return s.variant === activeVariant; }) || scripts[0];
   if (!script) return;
+
   showToast('🤖 AI đang cải thiện kịch bản...', 'info');
   var feedbackBtn = document.getElementById('caFeedbackBtn');
   if (feedbackBtn) { feedbackBtn.textContent = '⏳ Đang xử lý...'; feedbackBtn.disabled = true; }
 
-  fetch(API_BASE + '/api/v1/content-agent/script/feedback', {
+  var req = window._ca._lastRequest || {};
+  fetch(API_BASE + '/api/content-agent/script/improve', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ script_id: 'demo', variant: window._ca.activeVariant, feedback: feedback })
+    body: JSON.stringify({
+      product_id:     req.product_id    || '',
+      product_name:   req.product_name  || '',
+      content_type:   req.content_type  || 'tiktok_30s',
+      variant:        activeVariant,
+      current_script: script,
+      feedback:       feedback,
+      is_text_post:   window._ca.is_text_post || false,
+    })
   }).then(function(r) { return r.json(); }).then(function(data) {
-    if (data.scenes) {
-      var idx = window._ca.scripts.findIndex(function(s){ return s.variant === window._ca.activeVariant; });
-      if (idx >= 0) window._ca.scripts[idx] = Object.assign({}, window._ca.scripts[idx], data);
+    if (data.script) {
+      var idx = window._ca.scripts.findIndex(function(s){ return s.variant === activeVariant; });
+      if (idx >= 0) {
+        window._ca.scripts[idx] = Object.assign({}, window._ca.scripts[idx], data.script);
+      } else {
+        window._ca.scripts.push(data.script);
+      }
       showToast('✅ Kịch bản đã được cải thiện!', 'success');
-      navContentScript();
-    } else { showToast('✅ Đã ghi nhận phản hồi! AI sẽ học và cải thiện.', 'success'); navContentScript(); }
-  }).catch(function() {
-    showToast('✅ Đã ghi nhận phản hồi! AI sẽ học và cải thiện.', 'success');
+    } else {
+      showToast('⚠️ AI không trả về kịch bản hợp lệ', 'warning');
+    }
     navContentScript();
+  }).catch(function() {
+    showToast('❌ Không thể kết nối backend — vui lòng thử lại', 'error');
+    if (feedbackBtn) { feedbackBtn.textContent = '🔄 Cải thiện với AI'; feedbackBtn.disabled = false; }
+    navContentScript();
+  });
+}
+
+// Task #29: Lưu kịch bản vào đề xuất gốc (từ "Tạo script" của suggestion card có ID)
+function caSaveScript() {
+  var sid = window._ca._sourceSuggestionId;
+  if (!sid) { showToast('Không có đề xuất gốc để lưu', 'warning'); return; }
+  var btn = document.getElementById('caSaveScriptBtn');
+  if (btn) { btn.textContent = '⏳ Đang lưu...'; btn.disabled = true; }
+
+  fetch(API_BASE + '/api/content-suggestions/' + encodeURIComponent(sid) + '/save-script', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ script_json: JSON.stringify(window._ca.scripts || []) })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.status === 'ok') {
+      showToast('✅ Đã lưu kịch bản vào đề xuất!', 'success');
+      if (btn) { btn.textContent = '✅ Đã lưu'; }
+    } else {
+      showToast('⚠️ Lưu không thành công', 'warning');
+      if (btn) { btn.textContent = '💾 Lưu kịch bản vào đề xuất gốc'; btn.disabled = false; }
+    }
+  }).catch(function() {
+    showToast('❌ Không thể kết nối backend', 'error');
+    if (btn) { btn.textContent = '💾 Lưu kịch bản vào đề xuất gốc'; btn.disabled = false; }
+  });
+}
+
+// Task #30: Tạo ContentSuggestion mới từ kịch bản hiện tại (nếu chưa có source suggestion)
+function caAddToSuggestions() {
+  var btn = document.getElementById('caAddToSugBtn');
+  if (btn) { btn.textContent = '⏳ Đang tạo...'; btn.disabled = true; }
+
+  var req = window._ca._lastRequest || {};
+  fetch(API_BASE + '/api/content-suggestions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      product_id:   req.product_id   || '',
+      product_name: req.product_name || 'Sản phẩm',
+      content_type: req.content_type || 'tiktok_30s',
+      scripts:      window._ca.scripts || [],
+      is_text_post: window._ca.is_text_post || false,
+    })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.status === 'ok') {
+      showToast('✅ Đã thêm vào Đề xuất AI!', 'success');
+      // Lưu ID mới để nút "Lưu kịch bản" có thể dùng từ đây
+      window._ca._sourceSuggestionId = data.suggestion_id || null;
+      if (btn) { btn.textContent = '✅ Đã thêm vào Đề xuất AI'; }
+    } else {
+      showToast('⚠️ Không thể tạo đề xuất', 'warning');
+      if (btn) { btn.textContent = '➕ Thêm vào Đề xuất AI'; btn.disabled = false; }
+    }
+  }).catch(function() {
+    showToast('❌ Không thể kết nối backend', 'error');
+    if (btn) { btn.textContent = '➕ Thêm vào Đề xuất AI'; btn.disabled = false; }
   });
 }
 
