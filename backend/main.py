@@ -1310,6 +1310,8 @@ async def get_content_suggestions():
                 "angle": s.angle or "",
                 "estimated_impact": s.estimated_impact or "Cải thiện trải nghiệm khách hàng",
                 "estimated_production": s.estimated_production or "1-2 ngày",
+                "source_product_id": s.source_product_id or "",   # ← needed for prefill
+                "has_script": bool(s.script_json),                 # ← show "Xem script" button
                 "_fromBackend": True,
                 "_source": s.source or "db"
             })
@@ -1818,6 +1820,45 @@ async def deprecated_crawl_analyze(body: dict):
 async def deprecated_script_generate(body: dict):
     """[DEPRECATED] Thay bằng POST /api/content-agent/generate-script"""
     return await deprecated_crawl_analyze(body)
+
+
+# ─── Xem kịch bản đã lưu của đề xuất ────────────────────────────────────────
+
+@app.get("/api/content-suggestions/{suggestion_id}/script")
+async def get_suggestion_script(suggestion_id: str):
+    """
+    Lấy kịch bản đã lưu của ContentSuggestion — dùng khi user nhấn "Xem script".
+    Trả về danh sách scripts đã lưu + metadata để frontend restore _ca.scripts.
+    """
+    db = SessionLocal()
+    try:
+        sug = db.query(ContentSuggestion).filter(
+            ContentSuggestion.suggestion_id == suggestion_id
+        ).first()
+        if not sug:
+            raise HTTPException(status_code=404, detail=f"Không tìm thấy đề xuất {suggestion_id}")
+        if not sug.script_json:
+            raise HTTPException(status_code=404, detail="Đề xuất này chưa có kịch bản được lưu")
+
+        scripts = json.loads(sug.script_json)
+        # Xác định is_text_post từ type của suggestion
+        is_text_post = sug.type in ("blog_faq",) or sug.platform in ("Facebook", "Instagram")
+
+        return {
+            "status":           "ok",
+            "suggestion_id":    suggestion_id,
+            "product_id":       sug.source_product_id or "",
+            "product_name":     sug.title or "",          # best effort
+            "content_type":     sug.type or "tiktok_30s",
+            "is_text_post":     is_text_post,
+            "scripts":          scripts,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
 
 
 # ─── Task #28: Cải thiện kịch bản ────────────────────────────────────────────

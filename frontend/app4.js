@@ -421,6 +421,7 @@ MOCK.content_suggestions_generated = [
     id: 'cs-001', priority: 'high', status: 'pending', type: 'video',
     title: 'Video swatches Son Kem Lì GIAO FARA — 8 màu trên 3 tone da thực tế',
     platform: 'TikTok + Shopee Video',
+    source_product_id: 'P002',
     chatbot_signal: { count: 18, topic: 'Hỏi màu son phù hợp tone da', sample_questions: ['Màu nào hợp da ngăm tối?', 'Màu 12 có hợp da trắng không?', 'Màu nào dùng được đi học đi làm?'] },
     review_signal: { count: 7, neg_pct: 71, sample_reviews: ['Màu thực nhạt hơn ảnh một chút', 'Không biết màu nào phù hợp da mình'] },
     combined_score: 94,
@@ -432,6 +433,7 @@ MOCK.content_suggestions_generated = [
     id: 'cs-002', priority: 'high', status: 'pending', type: 'blog_faq',
     title: '"Phấn Phủ GIAO FARA da dầu dùng được không?" — FAQ + Video test 8 tiếng',
     platform: 'Blog + TikTok',
+    source_product_id: 'P003',
     chatbot_signal: { count: 12, topic: 'Hỏi phấn có hợp da dầu không', sample_questions: ['Da dầu nhiều dùng có bị trôi không?', 'Kềm dầu được mấy tiếng?', 'Dùng xong có bóng nhờn không?'] },
     review_signal: { count: 10, neg_pct: 60, sample_reviews: ['Da dầu cực nhiều kiềm chỉ được 4 tiếng', 'Kềm dầu không tốt bằng kỳ vọng'] },
     combined_score: 88,
@@ -443,6 +445,7 @@ MOCK.content_suggestions_generated = [
     id: 'cs-003', priority: 'high', status: 'pending', type: 'guide',
     title: '"Kem Rửa Mặt Hada Labo có purging không?" — Giải thích khoa học + timeline',
     platform: 'Blog + TikTok',
+    source_product_id: 'P011',
     chatbot_signal: { count: 9, topic: 'Hỏi kích ứng / nổi mụn sau dùng', sample_questions: ['Dùng 3 ngày mặt nổi mụn có phải lỗi sản phẩm?', 'Purging là gì? Bao lâu thì hết?', 'Da nhạy cảm dùng có sao không?'] },
     review_signal: { count: 10, neg_pct: 40, sample_reviews: ['Dùng 3 ngày mặt nổi mụn li ti', 'Da mình không hợp sản phẩm này'] },
     combined_score: 82,
@@ -454,6 +457,7 @@ MOCK.content_suggestions_generated = [
     id: 'cs-004', priority: 'medium', status: 'pending', type: 'guide',
     title: '"Bảng giá sỉ GIAO FARA chính thức" — Dành cho spa, salon, đại lý',
     platform: 'Website + Zalo OA',
+    source_product_id: '',
     chatbot_signal: { count: 8, topic: 'Hỏi giá sỉ từ 10 thỏi trở lên', sample_questions: ['Lấy 20 thỏi son có giảm không?', 'Bảng giá sỉ của shop?', 'Mua sỉ cho salon được không?'] },
     review_signal: { count: 0, neg_pct: 0, sample_reviews: [] },
     combined_score: 67,
@@ -465,6 +469,7 @@ MOCK.content_suggestions_generated = [
     id: 'cs-005', priority: 'medium', status: 'saved', type: 'video',
     title: '"Son GIAO FARA có an toàn không?" — Video review thành phần + chứng nhận',
     platform: 'TikTok + Shopee Video',
+    source_product_id: 'P001',
     chatbot_signal: { count: 11, topic: 'Hỏi thành phần an toàn / không paraben', sample_questions: ['Son có paraben không?', 'Mang thai dùng son này được không?', 'Thành phần có hóa chất độc hại không?'] },
     review_signal: { count: 5, neg_pct: 20, sample_reviews: ['Da nhạy cảm dùng không bị gì', 'Yên tâm vì không chứa hóa chất độc'] },
     combined_score: 72,
@@ -2211,13 +2216,26 @@ function renderContentSuggestions() {
     out += '<div style="display:flex;align-items:flex-start;gap:14px;">';
     out += scoreRing(sug.combined_score);
     out += '<div style="flex:1;">';
+    // Product name lookup (catalog or short map)
+    var pidShortNames = {
+      'P001': 'Son Bóng', 'P002': 'Son Kem Lì', 'P003': 'Phấn Phủ Bột',
+      'P004': 'Combo Son+Phấn', 'P006': 'Phấn Mini', 'P007': 'Set Son 6 Thỏi',
+      'P008': 'Bộ 6 Món', 'P009': 'Bộ Cọ 13 Món', 'P011': 'Kem Rửa Mặt',
+    };
+    var productName = productId
+      ? (((window._ca||{}).catalogProducts||[]).find(function(p){ return p.product_id === productId; }) || {}).short_name
+        || pidShortNames[productId] || productId
+      : null;
+
     // Title + badges
     out += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">';
     out += '<strong style="font-size:0.9rem;">' + sug.title + '</strong>';
     out += '<span style="background:' + tBg + ';color:' + tColor + ';font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;">' + tLabel + '</span>';
     out += '<span style="background:#f1f5f9;color:#64748b;font-size:0.68rem;padding:2px 8px;border-radius:10px;">' + sug.platform + '</span>';
+    if (productName) out += '<span style="background:rgba(234,179,8,0.08);color:#b45309;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;border:1px solid rgba(234,179,8,0.2);">📦 ' + productName + '</span>';
     if (sug.status === 'saved')     out += '<span style="background:#fffbeb;color:#f59e0b;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;">📌 Đã lưu</span>';
     if (sug.status === 'scheduled') out += '<span style="background:#f0fdf4;color:#10b981;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;">🗓 Đã lên lịch</span>';
+    if (sug.has_script)             out += '<span style="background:rgba(16,185,129,0.08);color:#059669;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;border:1px solid rgba(16,185,129,0.2);">📋 Có kịch bản</span>';
     out += '</div>';
     // Two signals
     out += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">';
@@ -2258,9 +2276,16 @@ function renderContentSuggestions() {
     out += '<div style="font-size:0.72rem;color:var(--text-muted);"><strong>⏱ Sản xuất:</strong> ' + (sug.estimated_production || '') + '</div>';
     out += '</div>';
     out += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
-    // 🎬 Tạo script button — always visible
-    out += '<button class="alert-cta" style="background:rgba(99,102,241,0.12);color:#818cf8;border:1px solid rgba(99,102,241,0.3);" '
-      + 'onclick="caPrefillFromSuggestion(\'' + (productId||'').replace(/'/g,"\\'") + '\',\'' + mappedCt + '\',\'' + angleForPrefill + '\',\'' + (sid||'').replace(/'/g,"\\'") + '\')">🎬 Tạo script</button>';
+    // 📋 Xem script (if already saved) — otherwise 🎬 Tạo script
+    if (sug.has_script) {
+      out += '<button class="alert-cta" style="background:rgba(16,185,129,0.12);color:#059669;border:1px solid rgba(16,185,129,0.35);" '
+        + 'onclick="caViewSavedScript(\'' + (sid||'').replace(/'/g,"\\'") + '\')">📋 Xem script</button>';
+      out += '<button class="alert-cta" style="background:rgba(99,102,241,0.08);color:#818cf8;border:1px solid rgba(99,102,241,0.2);font-size:0.72rem;" '
+        + 'onclick="caPrefillFromSuggestion(\'' + (productId||'').replace(/'/g,"\\'") + '\',\'' + mappedCt + '\',\'' + angleForPrefill + '\',\'' + (sid||'').replace(/'/g,"\\'") + '\')">🔄 Tạo lại</button>';
+    } else {
+      out += '<button class="alert-cta" style="background:rgba(99,102,241,0.12);color:#818cf8;border:1px solid rgba(99,102,241,0.3);" '
+        + 'onclick="caPrefillFromSuggestion(\'' + (productId||'').replace(/'/g,"\\'") + '\',\'' + mappedCt + '\',\'' + angleForPrefill + '\',\'' + (sid||'').replace(/'/g,"\\'") + '\')">🎬 Tạo script</button>';
+    }
     if (sug.status === 'scheduled') {
       out += '<button class="alert-cta" style="background:#f0fdf4;color:#10b981;border:1px solid #10b981;" onclick="restoreSuggestion(\'' + sid + '\')">↩ Chuyển lại Pending</button>';
     } else if (sug.status === 'saved') {
@@ -2950,14 +2975,15 @@ function renderContentAgent() {
         + '</div>';
     }
 
-    // Save / Add-to-suggestions action bar
+    // Action bar: unified save button (always visible)
+    var saveLabel = window._ca._sourceSuggestionId
+      ? '💾 Cập nhật kịch bản đã lưu'
+      : '💾 Lưu kịch bản';
     var actionBarHtml = '<div class="content-card" style="padding:12px 16px;">'
-      + '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">';
-    if (window._ca._sourceSuggestionId) {
-      actionBarHtml += '<button id="caSaveScriptBtn" style="padding:9px 16px;background:rgba(16,185,129,0.12);color:var(--accent-emerald);border:1.5px solid var(--accent-emerald);border-radius:10px;font-weight:700;font-size:0.82rem;cursor:pointer;">💾 Lưu kịch bản vào đề xuất gốc</button>';
-    }
-    actionBarHtml += '<button id="caAddToSugBtn" style="padding:9px 16px;background:rgba(99,102,241,0.1);color:#818cf8;border:1.5px solid rgba(99,102,241,0.3);border-radius:10px;font-weight:700;font-size:0.82rem;cursor:pointer;">➕ Thêm vào Đề xuất AI</button>';
-    actionBarHtml += '</div></div>';
+      + '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">'
+      + '<button id="caSaveScriptBtn" style="padding:9px 16px;background:rgba(16,185,129,0.12);color:var(--accent-emerald);border:1.5px solid var(--accent-emerald);border-radius:10px;font-weight:700;font-size:0.82rem;cursor:pointer;">' + saveLabel + '</button>'
+      + '<span style="font-size:0.75rem;color:var(--text-muted);">Lưu kịch bản vào Đề xuất AI để xem lại sau</span>'
+      + '</div></div>';
 
     bodyHtml = '<div style="display:flex;flex-direction:column;gap:20px;">'
       + '<div style="display:flex;gap:10px;">' + variantTabs + '</div>'
@@ -3020,11 +3046,24 @@ function renderContentAgent() {
     + '</div>';
 }
 
-// Chuyển đổi MOCK.products_detail sang format catalog dùng cho Content Agent
+// Chuyển đổi MOCK.products_detail sang format catalog dùng cho Content Agent.
+// Map SKU → canonical P-ID để prefill từ suggestions hoạt động dù offline.
 function _mockToCatalogProducts() {
+  var skuToPid = {
+    'GF-LGLOSS-M01':      'P001',
+    'GF-MLIPSTICK-M09':   'P002',
+    'GF-SPOWDER-TN':      'P003',
+    'GF-CO1-ML-SPOWDER':  'P004',
+    'GF-POWDER-18K':      'P006',
+    'GF-LIPSET-06':       'P007',
+    'GF-MKP-COMBO6':      'P008',
+    'GF-BRUSH-13':        'P009',
+    'HL-CLEANSER-80G':    'P011',
+  };
   return (MOCK.products_detail || []).map(function(p, i) {
+    var pid = skuToPid[p.sku] || p.sku || ('MOCK-' + i);
     return {
-      product_id: p.sku || ('MOCK-' + i),
+      product_id: pid,
       name: p.name,
       short_name: p.name.length > 30 ? p.name.substring(0, 30) + '…' : p.name,
       category: p.category || '',
@@ -3172,9 +3211,6 @@ function initContentAgentEvents() {
 
   var saveScriptBtn = document.getElementById('caSaveScriptBtn');
   if (saveScriptBtn) { saveScriptBtn.onclick = function() { caSaveScript(); }; }
-
-  var addToSugBtn = document.getElementById('caAddToSugBtn');
-  if (addToSugBtn) { addToSugBtn.onclick = function() { caAddToSuggestions(); }; }
 
   // Variant tab buttons
   document.querySelectorAll('[data-ca-variant]').forEach(function(btn) {
@@ -3506,38 +3542,44 @@ function caImproveScript(feedback) {
   });
 }
 
-// Task #29: Lưu kịch bản vào đề xuất gốc (từ "Tạo script" của suggestion card có ID)
+// Task #29/#30: Lưu kịch bản — cập nhật đề xuất gốc nếu có, hoặc tạo mới nếu không
 function caSaveScript() {
-  var sid = window._ca._sourceSuggestionId;
-  if (!sid) { showToast('Không có đề xuất gốc để lưu', 'warning'); return; }
   var btn = document.getElementById('caSaveScriptBtn');
   if (btn) { btn.textContent = '⏳ Đang lưu...'; btn.disabled = true; }
 
-  fetch(API_BASE + '/api/content-suggestions/' + encodeURIComponent(sid) + '/save-script', {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ script_json: JSON.stringify(window._ca.scripts || []) })
-  }).then(function(r) { return r.json(); }).then(function(data) {
-    if (data.status === 'ok') {
-      showToast('✅ Đã lưu kịch bản vào đề xuất!', 'success');
-      if (btn) { btn.textContent = '✅ Đã lưu'; }
-    } else {
-      showToast('⚠️ Lưu không thành công', 'warning');
-      if (btn) { btn.textContent = '💾 Lưu kịch bản vào đề xuất gốc'; btn.disabled = false; }
-    }
-  }).catch(function() {
-    showToast('❌ Không thể kết nối backend', 'error');
-    if (btn) { btn.textContent = '💾 Lưu kịch bản vào đề xuất gốc'; btn.disabled = false; }
-  });
+  var sid = window._ca._sourceSuggestionId;
+  if (sid) {
+    // Thử cập nhật đề xuất gốc (PATCH)
+    fetch(API_BASE + '/api/content-suggestions/' + encodeURIComponent(sid) + '/save-script', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ script_json: JSON.stringify(window._ca.scripts || []) })
+    }).then(function(r) {
+      if (r.status === 404) {
+        // Đề xuất chưa có trong DB (chỉ có trong demo) → tạo mới
+        return _caCreateNewSuggestionWithScript(btn);
+      }
+      return r.json().then(function(data) {
+        if (data.status === 'ok') {
+          showToast('✅ Đã cập nhật kịch bản!', 'success');
+          if (btn) { btn.textContent = '✅ Đã lưu — Cập nhật tiếp'; btn.disabled = false; }
+        } else {
+          showToast('⚠️ Lưu không thành công', 'warning');
+          if (btn) { btn.textContent = '💾 Cập nhật kịch bản đã lưu'; btn.disabled = false; }
+        }
+      });
+    }).catch(function() {
+      showToast('❌ Không thể kết nối backend', 'error');
+      if (btn) { btn.textContent = '💾 Cập nhật kịch bản đã lưu'; btn.disabled = false; }
+    });
+  } else {
+    _caCreateNewSuggestionWithScript(btn);
+  }
 }
 
-// Task #30: Tạo ContentSuggestion mới từ kịch bản hiện tại (nếu chưa có source suggestion)
-function caAddToSuggestions() {
-  var btn = document.getElementById('caAddToSugBtn');
-  if (btn) { btn.textContent = '⏳ Đang tạo...'; btn.disabled = true; }
-
+function _caCreateNewSuggestionWithScript(btn) {
   var req = window._ca._lastRequest || {};
-  fetch(API_BASE + '/api/content-suggestions', {
+  return fetch(API_BASE + '/api/content-suggestions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -3549,18 +3591,46 @@ function caAddToSuggestions() {
     })
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (data.status === 'ok') {
-      showToast('✅ Đã thêm vào Đề xuất AI!', 'success');
-      // Lưu ID mới để nút "Lưu kịch bản" có thể dùng từ đây
       window._ca._sourceSuggestionId = data.suggestion_id || null;
-      if (btn) { btn.textContent = '✅ Đã thêm vào Đề xuất AI'; }
+      showToast('✅ Đã lưu kịch bản vào Đề xuất AI!', 'success');
+      if (btn) { btn.textContent = '✅ Đã lưu — Cập nhật tiếp'; btn.disabled = false; }
     } else {
-      showToast('⚠️ Không thể tạo đề xuất', 'warning');
-      if (btn) { btn.textContent = '➕ Thêm vào Đề xuất AI'; btn.disabled = false; }
+      showToast('⚠️ Không thể lưu kịch bản', 'warning');
+      if (btn) { btn.textContent = '💾 Lưu kịch bản'; btn.disabled = false; }
     }
   }).catch(function() {
     showToast('❌ Không thể kết nối backend', 'error');
-    if (btn) { btn.textContent = '➕ Thêm vào Đề xuất AI'; btn.disabled = false; }
+    if (btn) { btn.textContent = '💾 Lưu kịch bản'; btn.disabled = false; }
   });
+}
+
+// Xem kịch bản đã lưu của một đề xuất (thay "Tạo script" bằng "Xem script" khi has_script=true)
+function caViewSavedScript(sid) {
+  if (!sid) { showToast('Không tìm được đề xuất', 'warning'); return; }
+  showToast('🔄 Đang tải kịch bản...', 'info');
+  fetch(API_BASE + '/api/content-suggestions/' + encodeURIComponent(sid) + '/script')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.status === 'ok' && Array.isArray(data.scripts) && data.scripts.length > 0) {
+        window._ca.scripts       = data.scripts;
+        window._ca.is_text_post  = data.is_text_post || false;
+        window._ca.step          = 4;
+        window._ca.activeVariant = (data.scripts[0] || {}).variant || 'emotional';
+        window._ca._sourceSuggestionId = sid;
+        // Gợi lại lastRequest để caImproveScript có context
+        window._ca._lastRequest = window._ca._lastRequest || {
+          product_id:   data.product_id   || '',
+          product_name: data.product_name || '',
+          content_type: data.content_type || 'tiktok_30s',
+        };
+        window._csTab = 'script';
+        navigate('content-suggestions');
+      } else {
+        showToast('⚠️ Kịch bản chưa được lưu hoặc không hợp lệ', 'warning');
+      }
+    }).catch(function() {
+      showToast('❌ Không thể tải kịch bản từ backend', 'error');
+    });
 }
 
 const ROUTES = {
