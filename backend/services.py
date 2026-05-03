@@ -155,7 +155,7 @@ async def maybe_summarize_chat(customer_id: str):
         )
 
         # Bỏ 6 tin nhắn cuối cùng — giữ chúng trong recent history
-        msgs_to_summarize = all_msgs[:-6] if len(all_msgs) > 6 else []
+        msgs_to_summarize = all_msgs if all_msgs else []
         if not msgs_to_summarize:
             return
 
@@ -190,7 +190,7 @@ async def maybe_summarize_chat(customer_id: str):
 
 async def chat_with_history_service(db, customer_id: str, user_text: str, brand_tone: str):
     # BƯỚC 1: Lấy lịch sử chat gần nhất (6 tin nhắn cuối)
-    history_msgs = get_chat_history(db, customer_id, limit=6)
+    history_msgs = get_chat_history(db, customer_id, limit=10)
 
     # BƯỚC 2: Định dạng lịch sử thành chuỗi văn bản
     history_context = ""
