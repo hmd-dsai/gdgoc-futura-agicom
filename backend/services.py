@@ -9,8 +9,12 @@ from config import client
 # (tránh trường hợp clear_data() recreate collections nhưng services.py vẫn giữ old refs)
 def _get_cols():
     return _cfg.policy_col, _cfg.product_col, _cfg.resolved_qa_col
-from prompts import CHAT_RAG_PROMPT, LEARNING_EXTRACTOR_PROMPT
-from database import SessionLocal, CoordinationTask, ChatLog, CustomerProfile, get_chat_history, save_message, get_or_create_customer_profile, LearnedQAEntry
+from prompts import CHAT_RAG_PROMPT, LEARNING_EXTRACTOR_PROMPT, CHAT_SUMMARY_PROMPT
+from database import (
+    SessionLocal, CoordinationTask, ChatLog, CustomerProfile,
+    get_chat_history, save_message, get_or_create_customer_profile, LearnedQAEntry,
+    ChatMessage, get_chat_summary, upsert_chat_summary,
+)
 
 async def analyze_strategy_slow_track(data: dict):
     """THINK -> PLAN: Luồng chậm (Phân tích giá & Nội dung)"""
@@ -114,15 +118,92 @@ async def learn_from_human_service(customer_q: str, human_a: str):
         print(f"LỖI HỌC TẬP: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+async def maybe_summarize_chat(customer_id: str):
+    """
+    Gọi sau khi lưu tin nhắn AI. Tự động tóm tắt hội thoại theo rolling strategy:
+    - Kích hoạt mỗi khi tổng số tin nhắn đạt bội số của 10
+    - Tóm tắt tất cả tin nhắn trừ 6 tin gần nhất (giữ lại cho context trực tiếp)
+    - Sử dụng tóm tắt cũ + tin nhắn mới để tạo tóm tắt rolling
+    """
+    db = SessionLocal()
+    try:
+        from sqlalchemy import func, asc
+        total_count = db.query(func.count(ChatMessage.id)).filter(
+            ChatMessage.customer_id == customer_id
+        ).scalar() or 0
+
+        # Chỉ chạy khi đạt bội số 10
+        if total_count == 0 or total_count % 10 != 0:
+            return
+
+        # Lấy tóm tắt cũ nếu có
+        existing_summary = get_chat_summary(db, customer_id)
+        previous_summary_text = existing_summary.summary_text if existing_summary else "(Chưa có tóm tắt trước)"
+        last_summarized_id = existing_summary.summarized_up_to_id if existing_summary else 0
+
+        # Lấy các tin nhắn chưa được tóm tắt, trừ 6 tin gần nhất
+        # Tổng: total_count tin — giữ lại 6 cuối => tóm tắt (total_count - 6) tin đầu
+        # Nhưng chỉ xử lý các tin nhắn MỚI (id > last_summarized_id)
+        all_msgs = (
+            db.query(ChatMessage)
+            .filter(
+                ChatMessage.customer_id == customer_id,
+                ChatMessage.id > last_summarized_id,
+            )
+            .order_by(asc(ChatMessage.timestamp))
+            .all()
+        )
+
+        # Bỏ 6 tin nhắn cuối cùng — giữ chúng trong recent history
+        msgs_to_summarize = all_msgs[:-6] if len(all_msgs) > 6 else []
+        if not msgs_to_summarize:
+            return
+
+        # Format thành chuỗi hội thoại
+        new_messages_text = "\n".join(
+            f"{'Khách' if m.role == 'user' else 'AI'}: {m.content}"
+            for m in msgs_to_summarize
+        )
+
+        # Gọi Gemini để tóm tắt
+        summary_prompt = CHAT_SUMMARY_PROMPT.format(
+            previous_summary=previous_summary_text,
+            new_messages=new_messages_text,
+        )
+        response = await client.aio.models.generate_content(
+            model="gemini-flash-latest",
+            contents=[summary_prompt],
+        )
+        new_summary_text = (response.text or "").strip()
+        if not new_summary_text:
+            return
+
+        last_msg_id = msgs_to_summarize[-1].id
+        upsert_chat_summary(db, customer_id, new_summary_text, last_msg_id, total_count)
+        print(f"[chat_summary] Đã cập nhật tóm tắt cho {customer_id} (total={total_count}, last_id={last_msg_id})")
+
+    except Exception as e:
+        print(f"[chat_summary] Lỗi khi tóm tắt hội thoại: {e}")
+    finally:
+        db.close()
+
+
 async def chat_with_history_service(db, customer_id: str, user_text: str, brand_tone: str):
-    # BƯỚC 1: Lấy lịch sử chat cũ (10 câu gần nhất)
-    history_msgs = get_chat_history(db, customer_id, limit=10)
+    # BƯỚC 1: Lấy lịch sử chat gần nhất (6 tin nhắn cuối)
+    history_msgs = get_chat_history(db, customer_id, limit=6)
 
     # BƯỚC 2: Định dạng lịch sử thành chuỗi văn bản
     history_context = ""
     for msg in history_msgs:
         prefix = "Khách" if msg.role == "user" else "AI"
         history_context += f"{prefix}: {msg.content}\n"
+
+    # BƯỚC 2b: Lấy tóm tắt hội thoại cũ (nếu có)
+    try:
+        summary_row = get_chat_summary(db, customer_id)
+        chat_summary_context = summary_row.summary_text if summary_row else "(Chưa có — đây là đoạn hội thoại đầu tiên hoặc chưa đủ 10 tin nhắn)"
+    except Exception:
+        chat_summary_context = "(Không thể tải tóm tắt)"
 
     # BƯỚC 3: Lấy hồ sơ khách hàng từ DB và format thành chuỗi cho prompt
     # Bọc trong try/except: nếu bảng chưa migrate, chat vẫn tiếp tục với hồ sơ mặc định
@@ -193,9 +274,10 @@ async def chat_with_history_service(db, customer_id: str, user_text: str, brand_
     Kinh nghiệm: {get_valid_hits(qa_hits)}
     """
 
-    # BƯỚC 5: Generate — truyền customer_profile vào prompt
+    # BƯỚC 5: Generate — truyền customer_profile + chat_summary vào prompt
     user_prompt = CHAT_RAG_PROMPT.format(
         customer_profile=customer_profile_context,
+        chat_summary=chat_summary_context,
         chat_history=history_context,
         context=context,
         brand_tone=brand_tone,

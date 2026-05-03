@@ -52,7 +52,10 @@ QUY TẮC TỐI CAO:
 HỒ SƠ KHÁCH HÀNG (từ cơ sở dữ liệu shop):
 {customer_profile}
 
-LỊCH SỬ HỘI THOẠI (Quá khứ):
+TÓM TẮT HỘI THOẠI CŨ (AI đã xử lý và rút gọn — dùng để nhớ bối cảnh dài hạn):
+{chat_summary}
+
+LỊCH SỬ HỘI THOẠI GẦN ĐÂY (6 tin nhắn cuối):
 {chat_history}
 
 NGỮ CẢNH TRUY XUẤT (CONTEXT):
@@ -390,4 +393,28 @@ Trả về JSON theo đúng schema:
   {{ "variant": "informational", ... }},
   {{ "variant": "humor", ... }}
 ]
+"""
+
+# ── Chat Summary Prompt ──────────────────────────────────────────────────────
+# Dùng để tóm tắt lịch sử hội thoại dài — rolling summary.
+# Được gọi khi tổng số tin nhắn đạt bội số của 10.
+CHAT_SUMMARY_PROMPT = """
+Bạn là trợ lý tóm tắt hội thoại CSKH của shop mỹ phẩm Agicom.
+
+Nhiệm vụ: Tạo một bản TÓM TẮT ngắn gọn (~150–250 từ) về nội dung hội thoại giữa khách hàng và AI hỗ trợ.
+Bản tóm tắt phải giữ lại:
+- Vấn đề / khiếu nại chính mà khách đã nêu (nếu có)
+- Sản phẩm liên quan (mã sản phẩm, tên sản phẩm)
+- Giải pháp hoặc câu trả lời đã cung cấp
+- Trạng thái cảm xúc / mức độ hài lòng của khách
+- Bất kỳ yêu cầu chưa giải quyết hoặc chủ đề đang dở dang
+
+TÓM TẮT CŨ (nếu có — tích hợp vào bản mới, không được bỏ thông tin quan trọng):
+{previous_summary}
+
+HỘI THOẠI MỚI CẦN TÓM TẮT:
+{new_messages}
+
+Hãy trả về một đoạn văn tóm tắt thuần túy (KHÔNG phải JSON, KHÔNG có heading, KHÔNG có bullet list).
+Tóm tắt phải ngắn gọn, rõ ràng, và đủ để AI CSKH hiểu bối cảnh mà không cần đọc lại toàn bộ lịch sử.
 """

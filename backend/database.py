@@ -230,6 +230,51 @@ class LearnedQAEntry(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 
+# ── Chat Summary ────────────────────────────────────────────────────────────
+
+# Lưu tóm tắt cuộc hội thoại theo customer_id.
+# Được tạo/cập nhật mỗi khi tổng số tin nhắn đạt bội số của 10.
+# summarized_up_to_id: id của ChatMessage cuối cùng đã được đưa vào summary.
+class ChatSummary(Base):
+    __tablename__ = "chat_summaries"
+    id                    = Column(Integer, primary_key=True, index=True)
+    customer_id           = Column(String, unique=True, index=True, nullable=False)
+    summary_text          = Column(Text, nullable=False)
+    summarized_up_to_id   = Column(Integer, nullable=False)   # ChatMessage.id cuối cùng đã tóm tắt
+    total_messages_at_update = Column(Integer, default=0)
+    updated_at            = Column(DateTime, default=datetime.datetime.utcnow,
+                                   onupdate=datetime.datetime.utcnow)
+
+
+def get_chat_summary(db, customer_id: str):
+    """Trả về ChatSummary hoặc None nếu chưa có."""
+    return db.query(ChatSummary).filter(
+        ChatSummary.customer_id == customer_id
+    ).first()
+
+
+def upsert_chat_summary(db, customer_id: str, summary_text: str,
+                        last_msg_id: int, total_count: int):
+    """Tạo mới hoặc cập nhật bản tóm tắt hội thoại cho customer_id."""
+    row = db.query(ChatSummary).filter(
+        ChatSummary.customer_id == customer_id
+    ).first()
+    if row:
+        row.summary_text = summary_text
+        row.summarized_up_to_id = last_msg_id
+        row.total_messages_at_update = total_count
+        row.updated_at = datetime.datetime.utcnow()
+    else:
+        row = ChatSummary(
+            customer_id=customer_id,
+            summary_text=summary_text,
+            summarized_up_to_id=last_msg_id,
+            total_messages_at_update=total_count,
+        )
+        db.add(row)
+    db.commit()
+
+
 def get_or_create_customer_profile(db, customer_id: str) -> "CustomerProfile":
     """Lấy hồ sơ khách; tự tạo mới nếu chưa có."""
     profile = db.query(CustomerProfile).filter(
@@ -257,6 +302,7 @@ def init_db():
             "ALTER TABLE coordination_tasks ADD COLUMN issue_type VARCHAR",
             # v1.3 — ContentSuggestion script persistence
             "ALTER TABLE content_suggestions ADD COLUMN script_json TEXT",
+            # v1.4 — Chat summary (table is created by create_all; migration is a no-op guard)
         ]
         for sql in migrations:
             try:

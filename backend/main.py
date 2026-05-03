@@ -22,7 +22,8 @@ from prompts import (
 from services import (
     analyze_strategy_slow_track,
     learn_from_human_service,
-    chat_with_history_service
+    chat_with_history_service,
+    maybe_summarize_chat,
 )
 from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog, ContentSuggestion, CustomerProfile, get_or_create_customer_profile, StrategyProposalLog, LearnedQAEntry, CrisisPlan, CrisisAction
 import config as _cfg
@@ -1110,7 +1111,11 @@ async def process_chat_with_history(data: ChatSessionInput):
             sentiment=ai_response.get("sentiment_analysis"),
         )
 
-        # 4. Trả về cho Frontend
+        # 4. Kích hoạt tóm tắt hội thoại nền (rolling, mỗi 10 tin nhắn)
+        import asyncio
+        asyncio.create_task(maybe_summarize_chat(data.customer_id))
+
+        # 5. Trả về cho Frontend
         return {
             "status": "success",
             "customer_id": data.customer_id,
