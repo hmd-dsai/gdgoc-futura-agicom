@@ -32,12 +32,16 @@ class ChatLog(Base):
 class ReviewLog(Base):
     __tablename__ = "review_logs"
     id = Column(Integer, primary_key=True, index=True)
-    product_id = Column(String, index=True)
-    rating = Column(Integer)
-    review_text = Column(Text)
+    product_id    = Column(String, index=True)
+    rating        = Column(Integer)
+    review_text   = Column(Text)
     customer_name = Column(String, default="Ẩn danh")
-    ai_insight = Column(String) # Bài học mà AI rút ra được từ review này
-    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    ai_insight    = Column(String)            # Bài học CSKH rút ra để dạy chatbot
+    # ── Trường mới: AI điền sau khi phân tích ──────────────────────────────────
+    sentiment     = Column(String, nullable=True)  # "Tích cực" | "Bình thường" | "Tiêu cực"
+    key_issue     = Column(String, nullable=True)  # Vấn đề cốt lõi ngắn gọn
+    sentiment_tag = Column(String, nullable=True)  # Nhãn ngắn ≤ 4 từ để hiển thị tag UI
+    timestamp     = Column(DateTime, default=datetime.datetime.utcnow)
 
 # Lưu các Task mà Agent CSKH giao cho Agent khác
 class CoordinationTask(Base):
@@ -68,6 +72,23 @@ class DailySummaryArchive(Base):
     
     total_tasks = Column(Integer, default=0)
     total_insights = Column(Integer, default=0)
+
+# Lưu phản hồi tự động do AI soạn cho từng review
+# public_reply: phản hồi công khai ngay trên trang review
+# inbox_message: tin nhắn riêng gửi trực tiếp cho khách (chỉ có với review tiêu cực)
+# status: pending (chờ duyệt) | approved (đã duyệt) | sent (đã gửi)
+class ReviewAutoReply(Base):
+    __tablename__ = "review_auto_replies"
+    id             = Column(Integer, primary_key=True, index=True)
+    review_log_id  = Column(Integer, index=True, nullable=False)
+    customer_name  = Column(String, default="Ẩn danh")
+    product_id     = Column(String, index=True)
+    rating         = Column(Integer)
+    public_reply   = Column(Text, nullable=False)
+    inbox_message  = Column(Text, nullable=True)    # Chỉ có với review 1-3 sao
+    reply_type     = Column(String)                 # 'positive' | 'negative'
+    status         = Column(String, default="pending")  # pending | approved | sent
+    created_at     = Column(DateTime, default=datetime.datetime.utcnow)
 
 # SQLite cần check_same_thread=False, Postgres thì không cần
 if "sqlite" in SQLALCHEMY_DATABASE_URL:
@@ -303,6 +324,11 @@ def init_db():
             # v1.3 — ContentSuggestion script persistence
             "ALTER TABLE content_suggestions ADD COLUMN script_json TEXT",
             # v1.4 — Chat summary (table is created by create_all; migration is a no-op guard)
+            # v1.5 — ReviewAutoReply (table is created by create_all; migration is a no-op guard)
+            # v1.6 — ReviewLog: thêm cột phân tích cảm xúc do AI điền
+            "ALTER TABLE review_logs ADD COLUMN sentiment VARCHAR",
+            "ALTER TABLE review_logs ADD COLUMN key_issue VARCHAR",
+            "ALTER TABLE review_logs ADD COLUMN sentiment_tag VARCHAR",
         ]
         for sql in migrations:
             try:

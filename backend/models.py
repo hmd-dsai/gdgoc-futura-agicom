@@ -79,8 +79,9 @@ class ActionStatusUpdate(BaseModel):
 
 
 class ReviewExtractedInsight(BaseModel):
-    sentiment: str       # Tiêu cực, Tích cực, Bình thường
-    key_issue: str       # Vấn đề cốt lõi (vd: "Giao hàng chậm", "Lỗi móp méo")
+    sentiment: str       # "Tích cực" | "Bình thường" | "Tiêu cực"
+    key_issue: str       # Vấn đề cốt lõi (vd: "Giao hàng chậm") hoặc "Không có vấn đề"
+    sentiment_tag: str   # Nhãn ngắn ≤ 4 từ để hiển thị tag UI (vd: "Giao hàng nhanh", "Hộp bị móp")
     action_needed: bool  # Có cần agent khác xử lý không?
     qa_knowledge: str    # Bài học rút ra (ví dụ: "Nếu khách hỏi về móp méo, hãy báo do vận chuyển và xin lỗi")
 

@@ -15,7 +15,7 @@ from models import (
     CrisisPlanRequest, ActionStatusUpdate, ContentScriptRequest, ScriptImproveRequest
 )
 from prompts import (
-    STRATEGY_SYSTEM_PROMPT, REVIEW_LEARNING_PROMPT, CRISIS_PLAN_PROMPT,
+    STRATEGY_SYSTEM_PROMPT, REVIEW_LEARNING_PROMPT, REVIEW_AUTO_REPLY_PROMPT, CRISIS_PLAN_PROMPT,
     CONTENT_SCRIPT_PROMPT, CONTENT_INTEL_PROMPT, TEXT_POST_PROMPT,
     SCRIPT_IMPROVE_VIDEO_PROMPT, SCRIPT_IMPROVE_TEXT_PROMPT
 )
@@ -25,7 +25,7 @@ from services import (
     chat_with_history_service,
     maybe_summarize_chat,
 )
-from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog, ContentSuggestion, CustomerProfile, get_or_create_customer_profile, StrategyProposalLog, LearnedQAEntry, CrisisPlan, CrisisAction
+from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog, ReviewAutoReply, ContentSuggestion, CustomerProfile, get_or_create_customer_profile, StrategyProposalLog, LearnedQAEntry, CrisisPlan, CrisisAction
 import config as _cfg
 from seed_demo import seed_vector_db, seed_sql_db, seed_content_suggestions, seed_customer_profiles, seed_crisis_demo
 
@@ -297,8 +297,8 @@ async def process_market_strategy(product: ProductRequest):
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
                 response_schema=StrategyProposal,
-                http_options={'timeout': 60000} # 60s timeout
-            )
+                http_options={'timeout': 60000},
+            ),
         )
 
         if not response.text:
@@ -599,63 +599,132 @@ def _classify_issue(key_issue: str, review_text: str) -> str:
 
 @app.post("/learn-from-review")
 async def process_and_learn_review(review: ReviewData):
+    import asyncio
     try:
-        # 1. AI Phân tích Review
+        # ── BƯỚC 1: Chuẩn bị CẢ 2 prompt trước khi gọi LLM ──────────────────
         user_prompt = f"Sản phẩm ID: {review.product_id}\nSố sao: {review.rating}/5\nNội dung: '{review.review_text}'"
-        response = await client.aio.models.generate_content(
-            model="gemini-flash-latest",
-            contents=[REVIEW_LEARNING_PROMPT, user_prompt],
-            config=types.GenerateContentConfig(response_mime_type="application/json")
+        reply_prompt = REVIEW_AUTO_REPLY_PROMPT.format(
+            customer_name=review.customer_name,
+            product_id=review.product_id,
+            rating=review.rating,
+            review_text=review.review_text,
         )
-        
-        clean_text = response.text.replace("```json", "").replace("```", "").strip()
-        analysis = json.loads(clean_text)
-        
-        # 2. LƯU BÀI HỌC VÀO VECTOR DB (Dành cho AI Chatbot đọc)
-        # Dùng _cfg.resolved_qa_col (không import trực tiếp) để luôn trỏ đúng collection
-        # sau khi /system/reset-all tạo lại collection mới.
+
+        # ── BƯỚC 2: Gọi 2 LLM SONG SONG — giảm 50% thời gian chờ ─────────────
+        analysis_response, reply_response = await asyncio.gather(
+            client.aio.models.generate_content(
+                model="gemini-flash-latest",
+                contents=[REVIEW_LEARNING_PROMPT, user_prompt],
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                ),
+            ),
+            client.aio.models.generate_content(
+                model="gemini-flash-latest",
+                contents=[reply_prompt],
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                ),
+            ),
+        )
+
+        # Parse kết quả phân tích sentiment
+        raw_analysis_text = analysis_response.text or ""
+        clean_text = raw_analysis_text.replace("```json", "").replace("```", "").strip()
+        if not clean_text:
+            print(f"[review] Cảnh báo: LLM trả về rỗng cho analysis (finish_reason={getattr(analysis_response, 'candidates', [{}])[0].get('finish_reason', '?') if analysis_response.candidates else '?'}). Dùng fallback.")
+            clean_text = '{"sentiment": "Bình thường", "key_issue": "Không rõ", "sentiment_tag": "Cần xem lại", "action_needed": false, "qa_knowledge": "None"}'
+        try:
+            analysis = json.loads(clean_text)
+        except json.JSONDecodeError as parse_err:
+            print(f"[review] Lỗi parse JSON analysis: {parse_err} — raw: {clean_text[:200]!r}")
+            analysis = {"sentiment": "Bình thường", "key_issue": "Không rõ", "sentiment_tag": "Cần xem lại", "action_needed": False, "qa_knowledge": "None"}
+
+        # Parse kết quả auto-reply (có thể lỗi riêng, không làm hỏng luồng chính)
+        auto_reply_data: dict = {"public_reply": None, "inbox_message": None}
+        try:
+            clean_reply = reply_response.text.replace("```json", "").replace("```", "").strip()
+            auto_reply_data = json.loads(clean_reply)
+        except Exception as parse_reply_err:
+            print(f"[auto-reply] Lỗi parse JSON phản hồi: {parse_reply_err}")
+
+        # ── BƯỚC 3: Lưu bài học vào Vector DB ────────────────────────────────
         _qa_doc_id  = None
         _qa_doc_txt = None
         if analysis.get("qa_knowledge") and analysis["qa_knowledge"] != "None":
             _qa_doc_id  = f"rev_{hashlib.md5(review.review_text.encode()).hexdigest()}"
             _qa_doc_txt = f"[Kinh nghiệm từ Review {review.rating} sao]: {analysis['qa_knowledge']}"
-            _cfg.resolved_qa_col.add(
+            _cfg.resolved_qa_col.upsert(
                 documents=[_qa_doc_txt],
                 ids=[_qa_doc_id]
             )
 
-        # 3. LƯU REVIEW GỐC, BACKUP LEARNED Q&A & TẠO TASK VÀO SQL
+        # ── BƯỚC 4: Lưu toàn bộ vào SQL trong 1 session duy nhất ─────────────
         db = SessionLocal()
         try:
-            # 3a. Backup entry học được vào SQL (để replay khi vector DB bị xóa)
+            # 4a. Backup Q&A vào SQL (replay khi vector DB bị xóa)
             if _qa_doc_id and _qa_doc_txt:
                 db.merge(LearnedQAEntry(doc_id=_qa_doc_id, document=_qa_doc_txt, source="review"))
 
-            # Lưu lịch sử Review gốc
+            # 4b. Lưu ReviewLog với đầy đủ sentiment fields
             new_review_log = ReviewLog(
                 product_id=review.product_id,
                 rating=review.rating,
                 review_text=review.review_text,
                 customer_name=review.customer_name,
-                ai_insight=analysis.get('qa_knowledge', "Không có insight nổi bật")
+                ai_insight=analysis.get('qa_knowledge', "Không có insight nổi bật"),
+                sentiment=analysis.get('sentiment'),
+                key_issue=analysis.get('key_issue'),
+                sentiment_tag=analysis.get('sentiment_tag'),
             )
             db.add(new_review_log)
+            db.flush()  # lấy new_review_log.id ngay
 
-            # Tạo Task nếu Review xấu — với deduplication
+            # 4c. Lưu ReviewAutoReply
+            if auto_reply_data.get("public_reply"):
+                reply_type = "positive" if review.rating >= 4 else "negative"
+                new_auto_reply = ReviewAutoReply(
+                    review_log_id=new_review_log.id,
+                    customer_name=review.customer_name,
+                    product_id=review.product_id,
+                    rating=review.rating,
+                    public_reply=auto_reply_data.get("public_reply", ""),
+                    inbox_message=auto_reply_data.get("inbox_message"),
+                    reply_type=reply_type,
+                    status="pending",
+                )
+                db.add(new_auto_reply)
+
+            # 4d. Với review tiêu cực: tạo ChatMessage trong inbox
+            if review.rating <= 3 and auto_reply_data.get("inbox_message"):
+                get_or_create_customer_profile(db, review.customer_name)
+                db.add(DB_ChatMessage(
+                    customer_id=review.customer_name,
+                    role="user",
+                    content=f"[Review {review.rating}★] {review.review_text}",
+                    is_safe=None,
+                    confidence_score=None,
+                    sentiment="tiêu cực",
+                ))
+                db.add(DB_ChatMessage(
+                    customer_id=review.customer_name,
+                    role="assistant",
+                    content=auto_reply_data["inbox_message"],
+                    is_safe=False,
+                    confidence_score=0.88,
+                    sentiment="tiêu cực",
+                ))
+
+            # 4e. Tạo CoordinationTask nếu review xấu (với deduplication)
             if analysis.get("action_needed") or review.rating <= 3:
-                key_issue = analysis.get('key_issue', '')
-
-                # Xác định agent phù hợp
+                key_issue_val = analysis.get('key_issue', '')
                 target_agent = "RiskManager"
                 if "giá" in review.review_text.lower():
                     target_agent = "Pricing"
                 elif "màu" in review.review_text.lower() and "chất lượng" not in review.review_text.lower():
                     target_agent = "Content"
 
-                # Phân loại vấn đề thành category ổn định để dedup
-                issue_type = _classify_issue(key_issue, review.review_text)
-
-                # Kiểm tra xem đã có task pending cho cùng sản phẩm + agent + loại vấn đề chưa
+                issue_type = _classify_issue(key_issue_val, review.review_text)
                 existing_task = db.query(CoordinationTask).filter(
                     CoordinationTask.product_id  == review.product_id,
                     CoordinationTask.target_agent == target_agent,
@@ -664,41 +733,99 @@ async def process_and_learn_review(review: ReviewData):
                 ).first()
 
                 if existing_task:
-                    # Gộp tín hiệu vào task đã có thay vì tạo task mới
                     existing_task.signal_count = (existing_task.signal_count or 1) + 1
                     count = existing_task.signal_count
-                    # Cập nhật prefix đếm tín hiệu, giữ nguyên nội dung gốc
-                    base_instruction = existing_task.instruction
-                    # Loại bỏ prefix cũ nếu có (dạng "[N tín hiệu] ")
-                    base_instruction = re.sub(r'^\[\d+ tín hiệu\] ', '', base_instruction)
+                    base_instruction = re.sub(r'^\[\d+ tín hiệu\] ', '', existing_task.instruction)
                     existing_task.instruction = f"[{count} tín hiệu] {base_instruction}"
                 else:
-                    # Tạo task mới
-                    instruction = (
-                        f"CẢNH BÁO REVIEW {review.rating} SAO: {key_issue}. "
-                        f"Nội dung: '{review.review_text[:200]}'"
-                    )
-                    new_task = CoordinationTask(
+                    db.add(CoordinationTask(
                         target_agent  = target_agent,
                         product_id    = review.product_id,
-                        instruction   = instruction,
+                        instruction   = (
+                            f"CẢNH BÁO REVIEW {review.rating} SAO: {key_issue_val}. "
+                            f"Nội dung: '{review.review_text[:200]}'"
+                        ),
                         status        = "pending",
                         signal_count  = 1,
                         issue_type    = issue_type,
-                    )
-                    db.add(new_task)
-            
+                    ))
+
             db.commit()
+            print(f"[review] Đã xử lý review của {review.customer_name} (rating={review.rating})")
         except Exception as db_e:
             db.rollback()
-            print("Lỗi Database:", db_e)
+            print(f"[review] Lỗi Database: {db_e}")
         finally:
             db.close()
 
-        return {"status": "success", "message": "Đã lưu Review & Cập nhật trí nhớ AI"}
-        
+        return {
+            "status": "success",
+            "message": "Đã lưu Review & Cập nhật trí nhớ AI",
+            "auto_reply": {
+                "public_reply": auto_reply_data.get("public_reply"),
+                "inbox_message": auto_reply_data.get("inbox_message"),
+                "reply_type": "positive" if review.rating >= 4 else "negative",
+                "inbox_queued": review.rating <= 3 and bool(auto_reply_data.get("inbox_message")),
+            }
+        }
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/review-replies")
+async def get_review_replies(status: str = "pending", limit: int = 30):
+    """Lấy danh sách phản hồi tự động đã sinh cho review, lọc theo status."""
+    db = SessionLocal()
+    try:
+        query = db.query(ReviewAutoReply)
+        if status != "all":
+            query = query.filter(ReviewAutoReply.status == status)
+        replies = query.order_by(ReviewAutoReply.created_at.desc()).limit(limit).all()
+        return {
+            "status": "success",
+            "total": len(replies),
+            "data": [
+                {
+                    "id": r.id,
+                    "review_log_id": r.review_log_id,
+                    "customer_name": r.customer_name,
+                    "product_id": r.product_id,
+                    "rating": r.rating,
+                    "public_reply": r.public_reply,
+                    "inbox_message": r.inbox_message,
+                    "reply_type": r.reply_type,
+                    "status": r.status,
+                    "created_at": r.created_at.isoformat() if r.created_at else None,
+                }
+                for r in replies
+            ],
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
+@app.patch("/api/review-replies/{reply_id}/approve")
+async def approve_review_reply(reply_id: int):
+    """Duyệt phản hồi review — đổi status từ pending → approved."""
+    db = SessionLocal()
+    try:
+        reply = db.query(ReviewAutoReply).filter(ReviewAutoReply.id == reply_id).first()
+        if not reply:
+            raise HTTPException(status_code=404, detail="Không tìm thấy phản hồi")
+        reply.status = "approved"
+        db.commit()
+        return {"status": "success", "message": f"Đã duyệt phản hồi #{reply_id}"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
 
 @app.get("/api/reviews")
 async def get_all_reviews(product_id: str = None, limit: int = 20):
@@ -723,6 +850,62 @@ async def get_all_reviews(product_id: str = None, limit: int = 20):
         }
     finally:
         db.close()
+
+@app.get("/api/reviews/sentiment-stats")
+async def get_sentiment_stats(product_id: str = None):
+    """
+    Trả về thống kê cảm xúc thực từ ReviewLog:
+    - Tỉ lệ % Tích cực / Bình thường / Tiêu cực
+    - Top tags theo từng nhóm cảm xúc
+    - Tổng số review đã có sentiment data
+    """
+    from sqlalchemy import func
+    db = SessionLocal()
+    try:
+        query = db.query(ReviewLog).filter(ReviewLog.sentiment.isnot(None))
+        if product_id:
+            query = query.filter(ReviewLog.product_id == product_id)
+
+        reviews = query.all()
+        total = len(reviews)
+
+        if total == 0:
+            return {
+                "total": 0,
+                "positive_pct": 0,
+                "neutral_pct": 0,
+                "negative_pct": 0,
+                "tags_positive": [],
+                "tags_neutral": [],
+                "tags_negative": [],
+            }
+
+        counts = {"Tích cực": 0, "Bình thường": 0, "Tiêu cực": 0}
+        tags = {"Tích cực": {}, "Bình thường": {}, "Tiêu cực": {}}
+
+        for r in reviews:
+            s = r.sentiment or "Bình thường"
+            if s not in counts:
+                s = "Bình thường"
+            counts[s] += 1
+            if r.sentiment_tag:
+                tags[s][r.sentiment_tag] = tags[s].get(r.sentiment_tag, 0) + 1
+
+        def top_tags(tag_dict, n=5):
+            return [{"tag": k, "count": v} for k, v in sorted(tag_dict.items(), key=lambda x: -x[1])[:n]]
+
+        return {
+            "total": total,
+            "positive_pct": round(counts["Tích cực"] / total * 100, 1),
+            "neutral_pct": round(counts["Bình thường"] / total * 100, 1),
+            "negative_pct": round(counts["Tiêu cực"] / total * 100, 1),
+            "tags_positive": top_tags(tags["Tích cực"]),
+            "tags_neutral": top_tags(tags["Bình thường"]),
+            "tags_negative": top_tags(tags["Tiêu cực"]),
+        }
+    finally:
+        db.close()
+
 
 @app.get("/api/crisis-overview")
 async def get_crisis_overview():
@@ -962,7 +1145,10 @@ async def generate_crisis_plan(req: CrisisPlanRequest):
         response = await client.aio.models.generate_content(
             model="gemini-flash-latest",
             contents=prompt,
-            config=types.GenerateContentConfig(response_mime_type="application/json")
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+
+            ),
         )
         clean = response.text.replace("```json","").replace("```","").strip()
         plan_data = json.loads(clean)
@@ -1622,6 +1808,7 @@ async def analyze_product_intel(req: ContentScriptRequest):
         response = await client.aio.models.generate_content(
             model="gemini-flash-latest",
             contents=prompt,
+            config=types.GenerateContentConfig(),
         )
         raw = response.text.strip()
         clean = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
@@ -1709,9 +1896,11 @@ async def generate_content_script(req: ContentScriptRequest):
                 custom_instructions=req.custom_instructions or "Không có yêu cầu đặc biệt",
             )
 
+        # Text post cần ít token hơn video script (không có timeline chi tiết)
         response = await client.aio.models.generate_content(
             model="gemini-flash-latest",
             contents=prompt,
+            config=types.GenerateContentConfig(),
         )
         raw = response.text.strip()
         clean = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
@@ -1935,6 +2124,7 @@ async def improve_content_script(req: ScriptImproveRequest):
         response = await client.aio.models.generate_content(
             model="gemini-flash-latest",
             contents=prompt,
+            config=types.GenerateContentConfig(),
         )
         raw = response.text.strip()
         clean = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
@@ -2062,6 +2252,7 @@ async def reset_all_data():
         db.query(LearnedQAEntry).delete()   # Xóa kiến thức học được — đồng bộ với ChromaDB reset bên dưới
         db.query(CrisisAction).delete()    # Xóa actions trước (FK-like dependency trên plan_id)
         db.query(CrisisPlan).delete()
+        db.query(ReviewAutoReply).delete() # Xóa draft phản hồi để đồng bộ với ReviewLog đã xóa
         db.commit()
 
         # 2. Xóa và tạo lại các Collections trong Vector DB.

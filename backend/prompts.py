@@ -154,12 +154,49 @@ Bạn là Chuyên gia Phân tích Đánh giá Khách hàng (Review Analyst).
 Tôi sẽ đưa cho bạn 1 lượt đánh giá (review) của khách hàng về sản phẩm.
 
 Nhiệm vụ của bạn:
-1. Đánh giá cảm xúc (sentiment).
-2. Trích xuất vấn đề cốt lõi (key_issue) nếu có. Nếu khen thì ghi "Không có lỗi".
-3. action_needed = true nếu đánh giá từ 1-3 sao hoặc có lời lẽ phàn nàn gay gắt.
-4. qa_knowledge: Rút ra một "Kinh nghiệm CSKH" ngắn gọn từ review này để dạy cho Chatbot. Ví dụ: "Review than phiền pin yếu -> Kinh nghiệm: Tư vấn khách sạc đầy 8h trong lần đầu tiên."
+1. sentiment: Phân loại cảm xúc — chọn 1 trong 3 giá trị: "Tích cực", "Bình thường", "Tiêu cực".
+2. key_issue: Trích xuất vấn đề cốt lõi ngắn gọn (≤ 5 từ). Nếu tích cực thì ghi "Không có vấn đề".
+3. sentiment_tag: Nhãn ngắn hiển thị UI (≤ 4 từ) — với review tích cực: điều khách khen nhất (VD: "Giao hàng nhanh", "Màu chuẩn ảnh", "Đóng gói cẩn thận"); với review tiêu cực/bình thường: vấn đề chính (VD: "Hộp bị móp", "Giao sai màu", "Da khô sau dùng").
+4. action_needed: true nếu đánh giá từ 1-3 sao hoặc có lời lẽ phàn nàn gay gắt.
+5. qa_knowledge: Rút ra một "Kinh nghiệm CSKH" ngắn gọn để dạy cho Chatbot. VD: "Review than phiền móp hộp → Kinh nghiệm: Giải thích do vận chuyển và đề nghị đổi hàng."
 
-Trả về ĐÚNG định dạng JSON theo schema yêu cầu.
+Trả về JSON thuần với đúng 5 trường:
+{
+  "sentiment": "Tích cực" | "Bình thường" | "Tiêu cực",
+  "key_issue": "<vấn đề cốt lõi hoặc 'Không có vấn đề'>",
+  "sentiment_tag": "<nhãn ngắn ≤ 4 từ>",
+  "action_needed": true | false,
+  "qa_knowledge": "<kinh nghiệm CSKH>"
+}
+"""
+
+REVIEW_AUTO_REPLY_PROMPT = """
+Bạn là chuyên gia Chăm sóc Khách hàng của shop mỹ phẩm GIAO FARA trên Shopee.
+Dựa trên đánh giá của khách, hãy soạn phản hồi phù hợp.
+
+THÔNG TIN ĐÁNH GIÁ:
+- Khách hàng: {customer_name}
+- Sản phẩm: {product_id}
+- Số sao: {rating}/5
+- Nội dung: "{review_text}"
+
+QUY TẮC SOẠN PHẢN HỒI:
+
+Nếu đánh giá TÍCH CỰC (4-5 sao):
+- public_reply: Cảm ơn chân thành, thân thiện, khuyến khích mua lại và giới thiệu bạn bè (≤ 80 từ)
+- inbox_message: null (không cần nhắn riêng)
+
+Nếu đánh giá TIÊU CỰC (1-3 sao):
+- public_reply: Xin lỗi công khai, thừa nhận đúng vấn đề khách nêu, mời khách nhắn tin vào inbox shop để được hỗ trợ nhanh nhất (≤ 80 từ)
+- inbox_message: Tin nhắn riêng gửi thẳng cho khách — xin lỗi chân thành, đề xuất giải pháp cụ thể phù hợp với vấn đề (hoàn tiền / đổi hàng / gửi lại / tặng voucher bù), kèm lời mời liên hệ để shop xử lý ngay (≤ 120 từ)
+
+TÔNG GIỌNG: Chân thành, ấm áp, chuyên nghiệp — phong cách shop mỹ phẩm Việt Nam.
+
+Trả về JSON thuần (không markdown):
+{{
+  "public_reply": "<chuỗi phản hồi công khai>",
+  "inbox_message": "<chuỗi tin nhắn riêng hoặc null>"
+}}
 """
 
 CONTENT_SCRIPT_PROMPT = """

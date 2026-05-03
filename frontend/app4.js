@@ -4,6 +4,26 @@
    ===================================================================== */
 
 /* =====================================================================
+   0. PRODUCT CATALOG — 11 SKU đầy đủ (dùng cho search filter + form review)
+   ===================================================================== */
+const PRODUCT_CATALOG = [
+  { id: 'P001', sku: 'GF-LGLOSS-M01',       name: 'Son Bóng GIAO FARA (Mã 01-08)',                      category: 'Son môi',       price: 39000  },
+  { id: 'P001', sku: 'GF-LGLOSS-M04',       name: 'Son Bóng GIAO FARA (Mã 04)',                         category: 'Son môi',       price: 39000  },
+  { id: 'P002', sku: 'GF-MLIPSTICK-M09',    name: 'Son Kem Lì GIAO FARA Siêu Lì Mịn (Mã 09-16)',        category: 'Son môi',       price: 39000  },
+  { id: 'P003', sku: 'GF-SPOWDER-TN',       name: 'Phấn Phủ Bột GIAO FARA Kềm Dầu Tự Nhiên',           category: 'Phấn phủ',      price: 129000 },
+  { id: 'P004', sku: 'GF-CO1-ML-SPOWDER',   name: 'Combo Kem Lì GIAO FARA và Phấn Phủ Bột',            category: 'Combo',         price: 159000 },
+  { id: 'P006', sku: 'GF-POWDER-18K',       name: 'Phấn Phủ Bột GIAO FARA Kềm Dầu (Mini)',             category: 'Phấn phủ',      price: 18000  },
+  { id: 'P007', sku: 'GF-LIPSET-06',        name: 'Set Son Kem Lì 6 Thỏi',                              category: 'Set / Bundle',  price: 114000 },
+  { id: 'P008', sku: 'GF-MKP-COMBO6',       name: 'Bộ Trang Điểm 6 Món Cơ Bản',                        category: 'Set / Bundle',  price: 74000  },
+  { id: 'P009', sku: 'GF-TOOL-BRUSH13',     name: 'Bộ Cọ Trang Điểm 13 Món Lông Mềm',                  category: 'Phụ kiện',      price: 87000  },
+  { id: 'P010', sku: 'GF-TOOL-CURLER',      name: 'Kẹp Bấm Mi Chuyên Dụng Tự Nhiên',                   category: 'Phụ kiện',      price: 54000  },
+  { id: 'P011', sku: 'HL-CLEANSER-80G',     name: 'Kem Rửa Mặt Hada Labo Advanced Nourish 80g',         category: 'Chăm sóc da',   price: 180000 },
+];
+
+// State cho review product filter
+let _reviewProductFilter = null; // null = tất cả | { id, name } = lọc theo sản phẩm
+
+/* =====================================================================
    1. MOCK DATA
    ===================================================================== */
 const MOCK = {
@@ -165,15 +185,7 @@ const MOCK = {
   review_tags_pos: ['Giao siêu nhanh', 'Màu đẹp chuẩn ảnh', 'Tư vấn nhiệt tình'],
   review_tags_neg: ['Hộp bị móp khi ship', 'Giao sai màu son', 'Da hơi khô sau dùng'],
 
-  reviews: [
-    { product_id: 'P011', author: 'lan_thao_hcm',   date: 'Hôm qua',       rating: 2, text: 'Kem rửa mặt dùng 3 ngày mặt nổi mụn li ti, da đang ổn mà dùng thêm vào thì hỏng. Không biết có phải do sản phẩm không nhưng thôi dừng an toàn hơn.', tag: { type: 'neg', label: 'Chất lượng SP' } },
-    { product_id: 'P011', author: 'user_khanh99',   date: 'Hôm qua',       rating: 1, text: 'Da mình khô nhưng xài kem này xong thấy khô và căng rát hơn hẳn. Shop tư vấn mình da khô dùng được mà sao lại vậy? Muốn đổi hàng.', tag: { type: 'neg', label: 'Chất lượng SP' } },
-    { product_id: 'P011', author: 'phuong_bt',       date: '2 ngày trước',  rating: 2, text: 'Hộp bị móp khi nhận hàng, nắp bị nứt một góc. May mà sản phẩm bên trong chưa bị hỏng nhưng lo lắng về vệ sinh.', tag: { type: 'neg', label: 'Đóng gói / Vận chuyển' } },
-    { product_id: 'P002', author: 'beautylove_hk',  date: 'Hôm qua',       rating: 1, text: 'Son khô môi kinh khủng, dùng 1 tiếng là bong tróc cả lớp son. Màu cũng bay nhanh hơn mình tưởng, không lì như quảng cáo.', tag: { type: 'neg', label: 'Chất lượng SP' } },
-    { product_id: 'P002', author: 'minhnga_saigon', date: '2 ngày trước',  rating: 2, text: 'Đặt màu 12 mà nhận về khác màu hoàn toàn, inbox shop 2 ngày không ai trả lời. Cảm giác bị lừa.', tag: { type: 'neg', label: 'Giao sai sản phẩm' } },
-    { product_id: 'P003', author: 'thanhthao_nt',   date: '3 ngày trước',  rating: 2, text: 'Phấn kềm dầu ghi vậy nhưng mình da dầu dùng xong 2 tiếng là đổ dầu hết rồi. Có thể không hợp với da dầu nhiều quá.', tag: { type: 'neg', label: 'Chất lượng SP' } },
-    { product_id: 'P001', author: 'nguyentuan123',  date: '3 ngày trước',  rating: 5, text: 'Son bóng màu đẹp lắm, xài mượt không bết. Shop đóng gói cẩn thận, ship nhanh. Mình sẽ mua thêm cho bạn bè.', tag: { type: 'pos', label: 'Chất lượng SP' } },
-  ],
+  reviews: [],  // Được load từ DB qua loadReviewsFromAPI() khi khởi động
 
   // Media & Ads
   ads_kpi: { budget_week: 15000000, spent: 8200000, revenue: 64000000, roas: 7.8 },
@@ -1120,15 +1132,54 @@ function renderCompetitor() {
 // ===== Reviews Page =====
 function renderReviews() {
   const k = MOCK.reviews_kpi;
+
+  // Lọc reviews theo sản phẩm đang chọn
+  const filteredReviews = _reviewProductFilter
+    ? MOCK.reviews.filter(r => r.product_id === _reviewProductFilter.id)
+    : MOCK.reviews;
+
+  const filterLabel = _reviewProductFilter ? _reviewProductFilter.name : '';
+
   return `
-    <div style="margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-      <label style="font-size:0.85rem;font-weight:600;">🔍 Lọc theo sản phẩm:</label>
-      <select class="settings-input" style="max-width:280px;">
-        <option>Tất cả sản phẩm</option>
-        <option>Son Kem Lì GIAO FARA</option>
-        <option>Phấn Phủ Bột GIAO FARA</option>
-        <option>Kem Rửa Mặt Hada Labo 80g</option>
-      </select>
+    <!-- ── Search bar lọc sản phẩm ── -->
+    <div style="margin-bottom:16px;position:relative;">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <label style="font-size:0.85rem;font-weight:600;white-space:nowrap;">🔍 Lọc theo sản phẩm:</label>
+        <div style="position:relative;flex:1;max-width:380px;">
+          <input
+            id="reviewProductSearch"
+            type="text"
+            class="settings-input"
+            placeholder="Gõ tên hoặc mã SKU để tìm sản phẩm..."
+            value="${filterLabel}"
+            autocomplete="off"
+            oninput="_onReviewSearchInput(this.value)"
+            onfocus="_onReviewSearchFocus(this.value)"
+            onblur="_onReviewSearchBlur()"
+            style="width:100%;padding-right:32px;"
+          />
+          ${_reviewProductFilter ? `
+          <button onclick="_clearReviewFilter()" title="Xóa bộ lọc"
+            style="position:absolute;right:8px;top:50%;transform:translateY(-50%);
+                   background:none;border:none;cursor:pointer;font-size:1rem;color:var(--text-muted);line-height:1;">✕</button>
+          ` : `
+          <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:0.8rem;color:var(--text-muted);pointer-events:none;">▾</span>
+          `}
+          <!-- Suggestion dropdown -->
+          <div id="reviewProductSuggestions"
+            style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:999;
+                   background:var(--bg-card);border:1.5px solid var(--accent-indigo);border-radius:10px;
+                   box-shadow:0 8px 24px rgba(0,0,0,0.15);overflow:hidden;max-height:280px;overflow-y:auto;">
+          </div>
+        </div>
+        ${_reviewProductFilter ? `
+        <span style="font-size:0.78rem;color:var(--accent-indigo);background:var(--accent-indigo-bg,#eef2ff);
+              padding:4px 10px;border-radius:10px;font-weight:600;">
+          ${filteredReviews.length} review · ${_reviewProductFilter.id}
+        </span>` : `
+        <span style="font-size:0.78rem;color:var(--text-muted);">Tất cả ${MOCK.reviews.length} reviews</span>
+        `}
+      </div>
     </div>
 
     <div class="grid-2">
@@ -1148,7 +1199,7 @@ function renderReviews() {
           <div class="rating-bar-row"><div class="rating-bar-label">😐</div><div class="rating-bar-track"><div class="rating-bar-fill" style="width:${k.neutral}%;background:#f59e0b;"></div></div><div class="rating-bar-count">${k.neutral}%</div></div>
           <div class="rating-bar-row"><div class="rating-bar-label">😡</div><div class="rating-bar-track"><div class="rating-bar-fill" style="width:${k.negative}%;background:#ef4444;"></div></div><div class="rating-bar-count">${k.negative}%</div></div>
         </div>
-        <div style="margin-top:14px;display:flex;gap:6px;flex-wrap:wrap;">
+        <div data-sentiment-tags style="margin-top:14px;display:flex;gap:6px;flex-wrap:wrap;">
           ${MOCK.review_tags_pos.map(t => `<span class="tag-item" style="background:var(--accent-emerald-bg);color:var(--accent-emerald);">✅ ${t}</span>`).join('')}
           ${MOCK.review_tags_neg.map(t => `<span class="tag-item" style="background:var(--accent-rose-bg);color:var(--accent-rose);">❌ ${t}</span>`).join('')}
         </div>
@@ -1156,27 +1207,196 @@ function renderReviews() {
     </div>
 
     <div class="content-card" style="margin-top:20px;">
-      <div class="content-card-title">⭐ Reviews Nổi Bật</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div class="content-card-title" style="margin:0;">⭐ Reviews Nổi Bật</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:0.78rem;color:var(--text-muted);">
+          <span style="width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;"></span>Đã phản hồi
+          <span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block;margin-left:6px;"></span>Chờ duyệt
+          <span style="width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;margin-left:6px;"></span>Chưa có
+        </div>
+      </div>
+      ${filteredReviews.length === 0 ? `
+        <div style="text-align:center;padding:40px 20px;color:var(--text-muted);">
+          <div style="font-size:2rem;margin-bottom:8px;">📭</div>
+          <div style="font-weight:600;">Không có review nào cho sản phẩm này</div>
+          <div style="font-size:0.8rem;margin-top:4px;">Thử chọn sản phẩm khác hoặc xóa bộ lọc</div>
+        </div>` : ''}
       <div class="grid-2" style="gap:14px;">
-        ${MOCK.reviews.map(r => `
+        ${filteredReviews.map(r => {
+          const ar = r.auto_reply;
+          // Xác định trạng thái auto-reply
+          const replyStatus = ar
+            ? (ar.status === 'approved' || ar.reply_type === 'positive' ? 'done'
+               : ar.status === 'pending' ? 'pending' : 'none')
+            : 'none';
+          const replyStatusBadge = replyStatus === 'done'
+            ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;color:#10b981;background:rgba(16,185,129,0.1);padding:2px 8px;border-radius:10px;">✅ Đã phản hồi</span>`
+            : replyStatus === 'pending'
+            ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;color:#f59e0b;background:rgba(245,158,11,0.1);padding:2px 8px;border-radius:10px;">⏳ Chờ duyệt</span>`
+            : `<span style="font-size:0.7rem;color:var(--text-muted);">—</span>`;
+
+          // Nội dung phần auto-reply mở rộng bên dưới review card
+          const autoReplySection = ar ? `
+            <div class="review-auto-reply-panel" style="margin-top:12px;border-top:1px solid var(--border-primary);padding-top:10px;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;cursor:pointer;" onclick="this.parentElement.querySelector('.review-reply-body').classList.toggle('hidden')">
+                <span style="font-size:0.72rem;font-weight:700;color:var(--accent-indigo);">💬 Phản hồi AI đã soạn</span>
+                <span style="font-size:0.65rem;color:var(--text-muted);">(nhấn để xem/ẩn)</span>
+              </div>
+              <div class="review-reply-body">
+                <div style="background:var(--bg-glass);border-radius:8px;padding:10px;font-size:0.78rem;color:var(--text-secondary);line-height:1.6;margin-bottom:6px;border-left:3px solid ${ar.reply_type==='positive'?'#10b981':'#f59e0b'};">
+                  <div style="font-size:0.67rem;font-weight:700;color:var(--text-muted);margin-bottom:4px;">📢 PHẢN HỒI CÔNG KHAI (Review section)</div>
+                  "${ar.public_reply}"
+                </div>
+                ${ar.inbox_message ? `
+                <div style="background:rgba(99,102,241,0.06);border-radius:8px;padding:10px;font-size:0.78rem;color:var(--text-secondary);line-height:1.6;border-left:3px solid var(--accent-indigo);">
+                  <div style="font-size:0.67rem;font-weight:700;color:var(--accent-indigo);margin-bottom:4px;">📬 TIN NHẮN RIÊNG (Inbox → Tin nhắn cần duyệt)</div>
+                  "${ar.inbox_message}"
+                  ${ar.inbox_queued ? `<div style="margin-top:6px;font-size:0.67rem;color:var(--accent-indigo);font-weight:700;">✓ Đã đưa vào Hộp Thư · ID: ${r.author}</div>` : ''}
+                </div>` : ''}
+                ${replyStatus === 'pending' ? `
+                <div style="display:flex;gap:6px;margin-top:8px;">
+                  <button class="btn-approve" style="font-size:0.72rem;padding:5px 12px;flex:1;" data-action="approve-review-reply" data-author="${r.author}">✅ Duyệt & Gửi</button>
+                  <button class="btn-sug-detail" style="font-size:0.72rem;padding:5px 12px;" data-action="edit-review-reply" data-author="${r.author}">✏️ Sửa</button>
+                </div>` : ''}
+              </div>
+            </div>` : '';
+
+          return `
           <div class="review-card">
             <div class="review-card-header">
               <strong class="review-card-author">${r.author}</strong>
               <span class="review-card-date">${r.date}</span>
             </div>
-            <div class="star-display" style="color:var(--accent-amber);">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+              <div class="star-display" style="color:var(--accent-amber);">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+              ${replyStatusBadge}
+            </div>
             <p class="review-card-text">${r.text}</p>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
               <span class="tag-item" style="background:${r.tag.type==='pos'?'var(--accent-emerald-bg)':'var(--accent-rose-bg)'};color:${r.tag.type==='pos'?'var(--accent-emerald)':'var(--accent-rose)'};">
                 ${r.tag.type==='pos'?'Điểm khen':'Vấn đề'}: ${r.tag.label}
               </span>
-              ${r.rating <= 3 ? `<button class="btn-sug-detail" data-action="ai-reply" data-author="${r.author}">${ICON.brain} AI soạn phản hồi</button>` : ''}
+              ${!ar ? `<button class="btn-sug-detail" data-action="ai-reply" data-author="${r.author}">${ICON.brain} AI soạn phản hồi</button>` : ''}
             </div>
-          </div>
-        `).join('')}
+            ${autoReplySection}
+          </div>`;
+        }).join('')}
       </div>
     </div>
   `;
+}
+
+// ===== Review Product Search Logic =====
+let _reviewSearchBlurTimer = null;
+
+function _onReviewSearchInput(query) {
+  _showReviewSuggestions(query);
+}
+
+function _onReviewSearchFocus(query) {
+  _showReviewSuggestions(query);
+}
+
+function _onReviewSearchBlur() {
+  // Delay để click suggestion kịp kích hoạt trước khi ẩn
+  _reviewSearchBlurTimer = setTimeout(() => {
+    const el = document.getElementById('reviewProductSuggestions');
+    if (el) el.style.display = 'none';
+  }, 200);
+}
+
+function _showReviewSuggestions(query) {
+  const el = document.getElementById('reviewProductSuggestions');
+  if (!el) return;
+
+  const kw = (query || '').toLowerCase().trim();
+
+  // Deduplicate theo product_id để không hiện 2 dòng cho cùng 1 sản phẩm
+  const seen = new Set();
+  const matches = PRODUCT_CATALOG.filter(p => {
+    if (seen.has(p.id)) return false;
+    const hit = !kw
+      || p.name.toLowerCase().includes(kw)
+      || p.id.toLowerCase().includes(kw)
+      || p.sku.toLowerCase().includes(kw)
+      || p.category.toLowerCase().includes(kw);
+    if (hit) { seen.add(p.id); return true; }
+    return false;
+  });
+
+  if (!matches.length) {
+    el.innerHTML = `<div style="padding:12px 16px;font-size:0.82rem;color:var(--text-muted);">Không tìm thấy sản phẩm phù hợp</div>`;
+    el.style.display = 'block';
+    return;
+  }
+
+  // Thêm dòng "Tất cả sản phẩm" ở đầu nếu đang có filter
+  const allRow = _reviewProductFilter
+    ? `<div onclick="_selectReviewProduct(null)" style="
+          padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;
+          border-bottom:1px solid var(--border-primary);font-size:0.82rem;color:var(--text-muted);
+          transition:background 0.15s;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background=''">
+        ✕ Xóa bộ lọc — hiện tất cả sản phẩm
+      </div>` : '';
+
+  el.innerHTML = allRow + matches.map(p => {
+    const reviewCount = MOCK.reviews.filter(r => r.product_id === p.id).length;
+    const isActive = _reviewProductFilter && _reviewProductFilter.id === p.id;
+    return `
+      <div onclick="_selectReviewProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}')"
+        style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;
+               border-bottom:1px solid var(--border-primary);
+               background:${isActive ? 'var(--accent-indigo-bg,#eef2ff)' : ''};
+               transition:background 0.15s;"
+        onmouseover="this.style.background='var(--bg-secondary)'"
+        onmouseout="this.style.background='${isActive ? 'var(--accent-indigo-bg,#eef2ff)' : ''}'">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:0.83rem;font-weight:${isActive ? '700' : '600'};
+                      color:${isActive ? 'var(--accent-indigo)' : 'var(--text-primary)'};
+                      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            ${isActive ? '✓ ' : ''}${p.name}
+          </div>
+          <div style="font-size:0.7rem;color:var(--text-muted);margin-top:1px;">${p.id} · ${p.category} · ${p.sku}</div>
+        </div>
+        ${reviewCount > 0 ? `<span style="font-size:0.7rem;background:var(--accent-rose-bg);color:var(--accent-rose);
+          padding:2px 7px;border-radius:8px;white-space:nowrap;flex-shrink:0;">${reviewCount} review</span>` : ''}
+      </div>`;
+  }).join('');
+
+  el.style.display = 'block';
+}
+
+function _selectReviewProduct(productId, productName) {
+  clearTimeout(_reviewSearchBlurTimer);
+  // Ẩn dropdown
+  const el = document.getElementById('reviewProductSuggestions');
+  if (el) el.style.display = 'none';
+
+  if (!productId) {
+    _reviewProductFilter = null;
+  } else {
+    _reviewProductFilter = { id: productId, name: productName };
+  }
+
+  // Re-render trang reviews
+  if (typeof _origNavigate === 'function') {
+    _origNavigate('reviews');
+  } else if (typeof navigate === 'function') {
+    navigate('reviews');
+  }
+  // Đặt lại focus + giá trị input sau re-render
+  requestAnimationFrame(() => {
+    const inp = document.getElementById('reviewProductSearch');
+    if (inp) {
+      inp.value = _reviewProductFilter ? _reviewProductFilter.name : '';
+      inp.focus();
+    }
+    if (typeof injectReviewForm === 'function') injectReviewForm();
+  });
+}
+
+function _clearReviewFilter() {
+  _selectReviewProduct(null);
 }
 
 // ===== Media & Ads Page =====

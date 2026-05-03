@@ -1,5 +1,6 @@
 import os
 import json
+import asyncio
 import datetime
 from fastapi import HTTPException
 from google.genai import types
@@ -255,11 +256,15 @@ async def chat_with_history_service(db, customer_id: str, user_text: str, brand_
         except Exception:
             pass
 
-    # BƯỚC 4: Truy xuất thêm từ Vector DB (RAG)
+    # BƯỚC 4: Truy xuất từ Vector DB (RAG) — 3 collection chạy SONG SONG
+    # ChromaDB .query() là synchronous → dùng run_in_executor để không block event loop
     _policy_col, _product_col, _resolved_qa_col = _get_cols()
-    policy_hits = _policy_col.query(query_texts=[user_text], n_results=1)
-    product_hits = _product_col.query(query_texts=[user_text], n_results=1)
-    qa_hits = _resolved_qa_col.query(query_texts=[user_text], n_results=1)
+    loop = asyncio.get_running_loop()
+    policy_hits, product_hits, qa_hits = await asyncio.gather(
+        loop.run_in_executor(None, lambda: _policy_col.query(query_texts=[user_text], n_results=1)),
+        loop.run_in_executor(None, lambda: _product_col.query(query_texts=[user_text], n_results=1)),
+        loop.run_in_executor(None, lambda: _resolved_qa_col.query(query_texts=[user_text], n_results=1)),
+    )
 
     def get_valid_hits(hits):
         if hits and hits.get('documents') and len(hits['documents'][0]) > 0:
@@ -288,7 +293,9 @@ async def chat_with_history_service(db, customer_id: str, user_text: str, brand_
         response = await client.aio.models.generate_content(
             model="gemini-flash-latest",
             contents=[user_prompt, f"Tin nhắn mới nhất của khách: {user_text}"],
-            config={"response_mime_type": "application/json"}
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+            ),
         )
     except Exception as gemini_err:
         err_str = str(gemini_err)
@@ -314,7 +321,9 @@ async def chat_with_history_service(db, customer_id: str, user_text: str, brand_
         if isinstance(ai_data, list):
             ai_data = ai_data[0] if len(ai_data) > 0 else {}
     except Exception as e:
-        print(f"[chat_with_history] Lỗi phân giải JSON từ Gemini: {str(e)}")
+        # Log raw text để dễ chẩn đoán (truncation, bad JSON, v.v.)
+        raw_preview = (response.text or "")[:300]
+        print(f"[chat_with_history] Lỗi phân giải JSON: {str(e)} | raw preview: {raw_preview!r}")
         ai_data = {
             "suggested_reply": "Dạ, em đang gặp chút gián đoạn, anh/chị đợi em giây lát nhé.",
             "confidence_score": 0.0,

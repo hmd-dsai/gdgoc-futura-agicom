@@ -363,6 +363,12 @@ async function loadReviewsFromAPI() {
       // Gộp: DB reviews đứng đầu, sau đó mock reviews
       MOCK.reviews = [...dbReviews, ...MOCK.reviews.filter((r) => !r.fromDB)];
 
+      // Load auto-replies và gắn vào từng review
+      await loadReviewRepliesFromAPI();
+
+      // Cập nhật sentiment stats thực từ DB (không await để không chặn render)
+      loadReviewSentimentStats();
+
       showToast(`📥 Đã tải ${data.total_fetched} review từ database`, 'info');
 
       // Re-render nếu đang ở trang reviews (dùng _origNavigate để tránh vòng lặp)
@@ -379,27 +385,244 @@ async function loadReviewsFromAPI() {
   }
 }
 
+/**
+ * Tải danh sách auto-replies từ /api/review-replies và gắn vào MOCK.reviews.
+ * Đồng thời sync các inbox message tiêu cực vào MOCK.conversations nếu chưa có.
+ */
+async function loadReviewRepliesFromAPI() {
+  try {
+    const data = await apiCall('/api/review-replies?status=all&limit=50');
+    if (!data || !data.data || !data.data.length) return;
+
+    data.data.forEach(reply => {
+      // Tìm review tương ứng trong MOCK theo customer_name
+      const review = MOCK.reviews.find(r => r.author === reply.customer_name);
+      if (review && !review.auto_reply) {
+        review.auto_reply = {
+          public_reply: reply.public_reply,
+          inbox_message: reply.inbox_message,
+          reply_type: reply.reply_type,
+          status: reply.status,
+          inbox_queued: reply.reply_type === 'negative' && !!reply.inbox_message,
+          _db_id: reply.id,
+        };
+      }
+
+      // Sync inbox message vào hộp thư nếu review tiêu cực và chưa có conversation
+      if (reply.reply_type === 'negative' && reply.inbox_message) {
+        const existingConv = MOCK.conversations.find(c => c.id === reply.customer_name || c.name === reply.customer_name);
+        if (!existingConv) {
+          _syncReviewInboxToConversations(
+            { customer_name: reply.customer_name, product_id: reply.product_id, rating: reply.rating, review_text: '' },
+            { inbox_message: reply.inbox_message, inbox_queued: true }
+          );
+        }
+      }
+    });
+  } catch (err) {
+    console.warn('[Agicom] Không thể tải review-replies:', err.message);
+  }
+}
+
+/**
+ * Tải thống kê sentiment thực từ /api/reviews/sentiment-stats
+ * và cập nhật MOCK.reviews_kpi + MOCK.review_tags_pos/neg.
+ * Nếu backend offline hoặc chưa có data → giữ nguyên mock values.
+ */
+async function loadReviewSentimentStats(productId = null) {
+  try {
+    const url = productId
+      ? `/api/reviews/sentiment-stats?product_id=${encodeURIComponent(productId)}`
+      : '/api/reviews/sentiment-stats';
+    const data = await apiCall(url);
+    if (!data || data.total === 0) return; // Chưa có data thực → giữ mock
+
+    // Cập nhật phần trăm sentiment
+    MOCK.reviews_kpi.positive = data.positive_pct;
+    MOCK.reviews_kpi.neutral  = data.neutral_pct;
+    MOCK.reviews_kpi.negative = data.negative_pct;
+
+    // Cập nhật tags từ DB
+    if (data.tags_positive && data.tags_positive.length > 0) {
+      MOCK.review_tags_pos = data.tags_positive.map(t => t.tag);
+    }
+    if (data.tags_negative && data.tags_negative.length > 0) {
+      MOCK.review_tags_neg = data.tags_negative.map(t => t.tag);
+    }
+
+    // Re-render panel nếu đang ở trang reviews
+    if (typeof currentPage !== 'undefined' && currentPage === 'reviews') {
+      const sentimentPanel = document.querySelector('.rating-bars');
+      if (sentimentPanel) {
+        // Cập nhật các bar fill mà không cần re-render toàn trang
+        const bars = sentimentPanel.querySelectorAll('.rating-bar-fill');
+        const counts = sentimentPanel.querySelectorAll('.rating-bar-count');
+        const vals = [data.positive_pct, data.neutral_pct, data.negative_pct];
+        bars.forEach((bar, i) => { bar.style.width = vals[i] + '%'; });
+        counts.forEach((el, i) => { el.textContent = vals[i] + '%'; });
+
+        // Cập nhật tags container (nằm liền sau .rating-bars)
+        const tagsContainer = sentimentPanel.parentElement.querySelector('[data-sentiment-tags]');
+        if (tagsContainer) {
+          tagsContainer.innerHTML =
+            MOCK.review_tags_pos.map(t => `<span class="tag-item" style="background:var(--accent-emerald-bg);color:var(--accent-emerald);">✅ ${t}</span>`).join('') +
+            MOCK.review_tags_neg.map(t => `<span class="tag-item" style="background:var(--accent-rose-bg);color:var(--accent-rose);">❌ ${t}</span>`).join('');
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[Agicom] sentiment-stats không khả dụng:', err.message);
+  }
+}
+
 async function submitReviewToAPI(formData) {
   // Sync ngay vào MOCK để Crisis panel luôn có dữ liệu (kể cả khi backend offline)
   _syncReviewToMock(formData);
 
   try {
     const result = await apiCall('/learn-from-review', 'POST', formData, 90000); // LLM call
-    showToast('✅ Review đã gửi! AI đang phân tích và học hỏi từ dữ liệu này.', 'success');
+    const rating = parseInt(formData.rating) || 3;
+    const autoReply = result?.auto_reply;
+
+    if (autoReply?.public_reply) {
+      // Cập nhật review vừa thêm trong MOCK với dữ liệu auto_reply từ backend
+      const mockReview = MOCK.reviews.find(r => r._isDemo && r.product_id === formData.product_id);
+      if (mockReview) {
+        mockReview.auto_reply = autoReply;
+      }
+
+      if (rating >= 4) {
+        showToast('✅ Review tích cực! AI đã soạn lời cảm ơn tự động.', 'success');
+      } else {
+        showToast('✅ Review đã ghi nhận! AI đã soạn phản hồi xin lỗi công khai + tin nhắn inbox.', 'success');
+        // Sync tin nhắn inbox vào hộp thư chatbot để chờ duyệt
+        if (autoReply.inbox_queued && autoReply.inbox_message) {
+          _syncReviewInboxToConversations(formData, autoReply);
+        }
+      }
+    } else {
+      showToast('✅ Review đã gửi! AI đang phân tích và học hỏi từ dữ liệu này.', 'success');
+    }
+
     setTimeout(loadReviewsFromAPI, 1500);
+    // Refresh sentiment stats sau khi review mới được xử lý
+    setTimeout(loadReviewSentimentStats, 2000);
     // Nếu review tiêu cực → nhắc chuyển sang Crisis Center
-    if (parseInt(formData.rating) <= 3) {
+    if (rating <= 3) {
       setTimeout(() => _alertCrisisFromReview(formData), 1800);
+    }
+    // Re-render trang reviews nếu đang ở đó
+    if (typeof currentPage !== 'undefined' && currentPage === 'reviews') {
+      setTimeout(() => _origNavigate('reviews'), 500);
     }
     return result;
   } catch (err) {
     // Kể cả backend offline, MOCK đã được cập nhật — vẫn thông báo thành công cho demo
-    if (parseInt(formData.rating) <= 3) {
-      showToast('🔴 Review tiêu cực đã ghi nhận (Demo) — kiểm tra Quản trị Khủng hoảng!', 'danger');
+    const rating = parseInt(formData.rating) || 3;
+    if (rating <= 3) {
+      // Demo mode: sync tin nhắn inbox giả lập vào hộp thư
+      const demoReply = {
+        public_reply: `[Demo] GIAO FARA xin lỗi bạn ${formData.customer_name} vì trải nghiệm chưa tốt. Vui lòng inbox shop để được hỗ trợ ngay!`,
+        inbox_message: `[Demo] Chào bạn ${formData.customer_name}, shop xin lỗi về vấn đề bạn gặp phải. Shop muốn hỗ trợ bù đắp cho bạn — bạn có thể chia sẻ thêm chi tiết để shop xử lý ngay không ạ?`,
+        reply_type: 'negative',
+        inbox_queued: true,
+        status: 'pending',
+      };
+      const mockReview = MOCK.reviews.find(r => r._isDemo && r.product_id === formData.product_id);
+      if (mockReview) mockReview.auto_reply = demoReply;
+      _syncReviewInboxToConversations(formData, demoReply);
+      showToast('🔴 Review tiêu cực đã ghi nhận (Demo) — Tin nhắn inbox đã đưa vào Hộp Thư chờ duyệt!', 'danger');
       setTimeout(() => _alertCrisisFromReview(formData), 600);
     } else {
       showToast('✅ Review đã lưu (Demo Mode — Backend offline)', 'info');
     }
+  }
+}
+
+/**
+ * Đưa tin nhắn inbox do AI soạn từ review tiêu cực vào MOCK.conversations
+ * với status 'pending' để xuất hiện trong mục "Tin nhắn cần duyệt" của Chatbot.
+ * Kèm lịch sử mua hàng nếu có trong CustomerProfile.
+ */
+function _syncReviewInboxToConversations(formData, autoReply) {
+  if (typeof MOCK === 'undefined') return;
+  const customerId = formData.customer_name || 'Khách Review';
+  const now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  const rating = parseInt(formData.rating) || 1;
+
+  // Tìm conversation hiện có hoặc tạo mới
+  let conv = MOCK.conversations.find(c => c.id === customerId || c.name === customerId);
+  if (!conv) {
+    conv = {
+      id: customerId,
+      name: customerId,
+      avatar: customerId.charAt(0).toUpperCase(),
+      time: now,
+      status: 'pending',
+      unread: 1,
+      preview: `[Review ${rating}★] ${(formData.review_text || '').substring(0, 50)}...`,
+      category: 'Review',
+      sentiment: 20,   // tiêu cực
+      wait_min: 1,
+      priority: 1,
+      ltv: 0, orders: 0,
+      platform: 'Review',
+      angry: rating <= 2,
+      vip: false,
+      returning: false,
+      customer: {
+        note: `Review ${rating}★ — ${formData.product_id || 'Sản phẩm'} · Cần phản hồi inbox`,
+        risk: rating <= 2 ? 'high' : 'medium',
+        churn: rating <= 2 ? '70%' : '40%',
+        purchases: [],
+      }
+    };
+    MOCK.conversations.unshift(conv);
+  } else {
+    // Cập nhật conversation đã có
+    conv.status = 'pending';
+    conv.unread = (conv.unread || 0) + 1;
+    conv.preview = `[Review ${rating}★] ${(formData.review_text || '').substring(0, 50)}...`;
+    conv.time = now;
+    MOCK.conversations = [conv, ...MOCK.conversations.filter(c => c !== conv)];
+  }
+
+  // Thêm tin nhắn vào lịch sử hội thoại
+  if (!MOCK.chat_messages[customerId]) MOCK.chat_messages[customerId] = [];
+  // Tin nhắn khách (nội dung review)
+  MOCK.chat_messages[customerId].push({
+    from: 'customer',
+    time: now,
+    text: `[Review ${rating}★ — ${formData.product_id}] ${formData.review_text || ''}`,
+  });
+  // Nháp AI — cần duyệt trước khi gửi
+  MOCK.chat_messages[customerId] = MOCK.chat_messages[customerId].filter(
+    m => m.from !== 'ai_thinking' && m.from !== 'ai_draft'
+  );
+  MOCK.chat_messages[customerId].push(
+    {
+      from: 'ai_thinking',
+      text: 'AI phân tích review và soạn tin nhắn xin lỗi + đề xuất giải pháp...',
+      context: [
+        `Rating: ${rating}★`,
+        `Sản phẩm: ${formData.product_id}`,
+        'Loại: Phản hồi review tiêu cực',
+        'is_safe: ⏳ Chờ duyệt trước khi inbox',
+      ],
+    },
+    { from: 'ai_draft', text: autoReply.inbox_message, confidence: 88 }
+  );
+
+  // Cập nhật badge số tin nhắn cần duyệt trong sidebar
+  const pendingCount = MOCK.conversations.filter(c => c.status === 'escalate' || c.status === 'pending').length;
+  const chatBadge = document.querySelector('.nav-child-item[data-page="chat"] .nav-item-badge');
+  if (chatBadge) chatBadge.textContent = pendingCount;
+
+  showToast(`📬 Tin nhắn inbox cho ${customerId} đã vào Hộp Thư · Chờ duyệt`, 'info');
+
+  // Nếu đang ở trang chat → re-render để inbox hiển thị ngay
+  if (typeof currentPage !== 'undefined' && currentPage === 'chat' && typeof navigate === 'function') {
+    setTimeout(() => navigate('chat'), 300);
   }
 }
 
@@ -1741,9 +1964,12 @@ function injectReviewForm() {
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
       <div class="settings-field">
-        <label class="settings-label">ID Sản phẩm</label>
-        <input id="rev_product_id" class="settings-input" value="P011"
-          placeholder="VD: P009, P011, GF-LGLOSS-M01">
+        <label class="settings-label">Sản phẩm</label>
+        <select id="rev_product_id" class="settings-input">
+          ${(typeof PRODUCT_CATALOG !== 'undefined' ? PRODUCT_CATALOG : []).map(p =>
+            `<option value="${p.id}" ${p.id==='P011'?'selected':''}>${p.id} · ${p.name}</option>`
+          ).join('')}
+        </select>
       </div>
       <div class="settings-field">
         <label class="settings-label">Tên khách hàng</label>
@@ -3721,6 +3947,44 @@ document.addEventListener('click', async function (e) {
     if (!msgText) { showToast('⚠️ Vui lòng nhập tin nhắn', 'warning'); return; }
     showToast('✅ Đã gửi tin nhắn tới khách!', 'success');
     if (inputEl) inputEl.value = '';
+    return;
+  }
+
+  // ── Duyệt & Gửi phản hồi review (từ review card) ──
+  if (action === 'approve-review-reply') {
+    const author = btn.dataset.author;
+    if (!author) return;
+    // Cập nhật MOCK ngay (optimistic)
+    const review = typeof MOCK !== 'undefined' ? MOCK.reviews.find(r => r.author === author) : null;
+    if (review && review.auto_reply) {
+      review.auto_reply.status = 'approved';
+    }
+    // Cập nhật backend nếu có _db_id
+    const dbId = review?.auto_reply?._db_id;
+    if (dbId && _backendConnected) {
+      apiCall(`/api/review-replies/${dbId}/approve`, 'PATCH').catch(() => {});
+    }
+    // Đánh dấu conversation đã được gửi
+    if (typeof MOCK !== 'undefined') {
+      const conv = MOCK.conversations.find(c => c.id === author || c.name === author);
+      if (conv) {
+        conv.status = 'auto';
+        // Chuyển ai_draft → ai_sent trong lịch sử chat
+        const msgs = MOCK.chat_messages[author] || [];
+        const draftIdx = msgs.findIndex(m => m.from === 'ai_draft');
+        if (draftIdx >= 0) {
+          const draftText = msgs[draftIdx].text;
+          msgs.splice(draftIdx - 1, 2); // Xóa ai_thinking + ai_draft
+          const now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+          msgs.push({ from: 'ai_sent', time: now, text: draftText });
+        }
+      }
+    }
+    showToast(`✅ Đã duyệt & gửi phản hồi inbox tới ${author}!`, 'success');
+    // Re-render trang reviews
+    if (typeof currentPage !== 'undefined' && currentPage === 'reviews') {
+      setTimeout(() => _origNavigate('reviews'), 300);
+    }
     return;
   }
 });
