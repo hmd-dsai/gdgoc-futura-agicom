@@ -3,8 +3,9 @@ import json
 import hashlib
 import os
 import re
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Depends, Security
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import APIKeyHeader
 from google.genai import types
 
 # Nhập các thành phần từ file khác
@@ -66,6 +67,9 @@ PRODUCT_ALIASES: dict
 PRODUCT_NAMES:   dict
 PRODUCT_ALIASES, PRODUCT_NAMES = _build_product_catalog()
 
+if not os.getenv("ADMIN_API_KEY"):
+    print("[startup] WARNING: ADMIN_API_KEY is not set — all protected endpoints will return 500. Set this env var on Render.")
+
 init_db()
 
 # Auto-seed vector DB nếu rỗng (xảy ra sau mỗi cold start của Render vì dùng EphemeralClient)
@@ -117,6 +121,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ---------------------------------------------------------------------------
+# API Key authentication
+# Protect admin/write endpoints with X-API-Key header.
+# Set ADMIN_API_KEY env var on Render (or .env locally).
+# If unset the dependency raises 500 so misconfigured deploys fail loudly.
+# ---------------------------------------------------------------------------
+_api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+async def require_api_key(api_key: str = Security(_api_key_header)):
+    expected = os.getenv("ADMIN_API_KEY")
+    if not expected:
+        raise HTTPException(status_code=500, detail="Server misconfiguration: ADMIN_API_KEY env var is not set.")
+    if not api_key or api_key != expected:
+        raise HTTPException(status_code=401, detail="Unauthorized: invalid or missing X-API-Key header.")
+
 @app.get("/")
 async def root():
     """Health check endpoint cho Render"""
@@ -127,7 +146,7 @@ async def health_check():
     """Health check endpoint"""
     return {"status": "healthy"}
 
-@app.post("/act-and-learn")
+@app.post("/act-and-learn", dependencies=[Depends(require_api_key)])
 async def human_approval_flow(approval: ProposalApproval):
     """
     ACT → HUMAN APPROVAL → LEARN
@@ -283,7 +302,7 @@ async def human_approval_flow(approval: ProposalApproval):
     finally:
         db.close()
 
-@app.post("/slow-track-strategy")
+@app.post("/slow-track-strategy", dependencies=[Depends(require_api_key)])
 async def process_market_strategy(product: ProductRequest):
     try:
         # Inject personalization into the prompt
@@ -355,7 +374,7 @@ async def process_market_strategy(product: ProductRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/learn-feedback")
+@app.post("/learn-feedback", dependencies=[Depends(require_api_key)])
 async def human_feedback(customer_q: str, human_a: str):
     """API để chủ shop 'dạy' AI khi họ sửa câu trả lời trên Dashboard"""
     return await learn_from_human_service(customer_q, human_a)
@@ -418,7 +437,7 @@ async def get_daily_summary(archive: bool = Query(False, description="Nếu True
     finally:
         db.close()
 
-@app.post("/export-daily-summary")
+@app.post("/export-daily-summary", dependencies=[Depends(require_api_key)])
 async def export_and_archive_daily_summary():
     return await get_daily_summary(archive=True)
 
@@ -601,7 +620,7 @@ def _classify_issue(key_issue: str, review_text: str) -> str:
     return "general"
 
 
-@app.post("/learn-from-review")
+@app.post("/learn-from-review", dependencies=[Depends(require_api_key)])
 async def process_and_learn_review(review: ReviewData):
     import asyncio
     try:
@@ -811,7 +830,7 @@ async def get_review_replies(status: str = "pending", limit: int = 30):
         db.close()
 
 
-@app.patch("/api/review-replies/{reply_id}/approve")
+@app.patch("/api/review-replies/{reply_id}/approve", dependencies=[Depends(require_api_key)])
 async def approve_review_reply(reply_id: int):
     """Duyệt phản hồi review — đổi status từ pending → approved."""
     db = SessionLocal()
@@ -1257,7 +1276,7 @@ async def get_crisis_plan(product_id: str):
         db.close()
 
 
-@app.patch("/api/crisis-action/{action_id}")
+@app.patch("/api/crisis-action/{action_id}", dependencies=[Depends(require_api_key)])
 async def update_crisis_action_status(action_id: str, update: ActionStatusUpdate):
     """Cập nhật trạng thái một action (pending → done / skipped / pending)."""
     if update.status not in ("pending", "done", "skipped"):
@@ -1318,7 +1337,7 @@ async def process_chat_with_history(data: ChatSessionInput):
     finally:
         db.close()
 
-@app.get("/api/chat-messages/{customer_id}")
+@app.get("/api/chat-messages/{customer_id}", dependencies=[Depends(require_api_key)])
 async def get_chat_messages_endpoint(customer_id: str, limit: int = 50):
     """Lấy lịch sử chat để frontend replay lại sau khi reload trang."""
     db = SessionLocal()
@@ -1351,7 +1370,7 @@ async def get_chat_messages_endpoint(customer_id: str, limit: int = 50):
         db.close()
 
 
-@app.delete("/chat/{customer_id}")
+@app.delete("/chat/{customer_id}", dependencies=[Depends(require_api_key)])
 async def delete_chat_history(customer_id: str):
     db = SessionLocal()
     try:
@@ -1385,7 +1404,7 @@ def _deserialize_notes(raw: str | None) -> str | None:
     return raw  # fallback: plain text cũ
 
 
-@app.get("/api/customer-profile/{customer_id}")
+@app.get("/api/customer-profile/{customer_id}", dependencies=[Depends(require_api_key)])
 async def get_customer_profile(customer_id: str):
     """Trả về hồ sơ khách hàng; tự tạo mới nếu chưa tồn tại."""
     db = SessionLocal()
@@ -1411,7 +1430,7 @@ async def get_customer_profile(customer_id: str):
         db.close()
 
 
-@app.patch("/api/customer-profile/{customer_id}")
+@app.patch("/api/customer-profile/{customer_id}", dependencies=[Depends(require_api_key)])
 async def update_customer_profile(customer_id: str, payload: dict):
     """Cập nhật một phần hồ sơ khách hàng (churn_probability, emotion_index, v.v.)."""
     db = SessionLocal()
@@ -1603,7 +1622,7 @@ async def get_content_suggestions():
         db.close()
 
 
-@app.patch("/api/content-suggestions/{suggestion_id}/status")
+@app.patch("/api/content-suggestions/{suggestion_id}/status", dependencies=[Depends(require_api_key)])
 async def update_content_suggestion_status(suggestion_id: str, body: dict):
     """
     Cập nhật trạng thái đề xuất content: pending | saved | scheduled | ignored.
@@ -1655,7 +1674,7 @@ async def update_content_suggestion_status(suggestion_id: str, body: dict):
         db.close()
 
 
-@app.get("/api/customers")
+@app.get("/api/customers", dependencies=[Depends(require_api_key)])
 async def list_customers():
     """
     Liệt kê tất cả khách hàng có tin nhắn trong DB, kèm thông tin
@@ -2148,7 +2167,7 @@ async def improve_content_script(req: ScriptImproveRequest):
 
 # ─── Task #29: Lưu kịch bản vào ContentSuggestion ────────────────────────────
 
-@app.patch("/api/content-suggestions/{suggestion_id}/save-script")
+@app.patch("/api/content-suggestions/{suggestion_id}/save-script", dependencies=[Depends(require_api_key)])
 async def save_script_to_suggestion(suggestion_id: str, body: dict):
     """
     Lưu JSON kịch bản đã tạo vào ContentSuggestion tương ứng.
@@ -2177,7 +2196,7 @@ async def save_script_to_suggestion(suggestion_id: str, body: dict):
 
 # ─── Task #30: Tạo ContentSuggestion mới từ kịch bản thủ công ────────────────
 
-@app.post("/api/content-suggestions")
+@app.post("/api/content-suggestions", dependencies=[Depends(require_api_key)])
 async def create_content_suggestion(body: dict):
     """
     Tạo ContentSuggestion mới từ kịch bản đã tạo thủ công (nút "Thêm vào Đề xuất AI").
@@ -2241,7 +2260,7 @@ async def create_content_suggestion(body: dict):
         db.close()
 
 
-@app.post("/system/reset-all")
+@app.post("/system/reset-all", dependencies=[Depends(require_api_key)])
 async def reset_all_data():
     db = SessionLocal()
     try:
@@ -2294,7 +2313,7 @@ async def reset_all_data():
         db.close()
 
 
-@app.post("/system/seed-crisis-demo")
+@app.post("/system/seed-crisis-demo", dependencies=[Depends(require_api_key)])
 async def seed_crisis_demo_endpoint():
     """
     Chèn dữ liệu khủng hoảng mẫu (6 review tiêu cực + 2 RiskManager tasks + 3 chat logs)
