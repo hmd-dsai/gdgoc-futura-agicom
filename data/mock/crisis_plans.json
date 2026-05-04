@@ -1,0 +1,58 @@
+{
+  "crisis_plans": [
+    {
+      "plan_id": "plan_P002_1714600000",
+      "product_id": "P002",
+      "root_cause_summary": "Son Kem Lì GIAO FARA (P002) ghi nhận 2 review tiêu cực liên tiếp: lỗi vòi bơm không ra màu + giao sai màu. Nguyên nhân gốc: (1) Lô hàng nhập gần nhất có tỉ lệ lỗi cao hơn bình thường, (2) Quy trình đóng gói chưa kiểm tra kỹ variant trước khi ship.",
+      "urgency": "high",
+      "crisis_snapshot": "{\"neg_review_count\": 2, \"risk_task_count\": 1, \"chat_signal_count\": 1}",
+      "actions": [
+        {
+          "action_id": "act_P002_0_1714600000",
+          "type": "immediate",
+          "category": "apology",
+          "title": "Liên hệ xin lỗi 2 khách hàng bị ảnh hưởng",
+          "detail": "Inbox trực tiếp cho l*****a và minhnga_saigon: xin lỗi, đề xuất đổi hàng miễn phí hoặc hoàn tiền 100% + voucher 20% đơn tiếp theo.",
+          "draft_message": "Chào bạn, shop GIAO FARA xin lỗi chân thành về sự cố sản phẩm. Shop muốn gửi bạn 1 sản phẩm mới hoàn toàn miễn phí + voucher giảm 20% cho đơn tiếp theo. Bạn reply để shop xử lý ngay nhé ạ!",
+          "status": "pending"
+        },
+        {
+          "action_id": "act_P002_1_1714600000",
+          "type": "immediate",
+          "category": "quality_check",
+          "title": "Kiểm tra lô hàng son kem lì hiện tại",
+          "detail": "Đối chiếu batch code trên đáy hộp với lô nhập gần nhất. Test ngẫu nhiên 10 sản phẩm xem vòi bơm có hoạt động bình thường không.",
+          "draft_message": null,
+          "status": "pending"
+        },
+        {
+          "action_id": "act_P002_2_1714600000",
+          "type": "immediate",
+          "category": "escalate",
+          "title": "Liên hệ nhà cung cấp về lỗi vòi bơm",
+          "detail": "Gửi report kèm ảnh/video lỗi cho NCC, yêu cầu kiểm tra QC batch mới nhất và cam kết đổi toàn bộ lô lỗi.",
+          "draft_message": null,
+          "status": "pending"
+        },
+        {
+          "action_id": "act_P002_3_1714600000",
+          "type": "mid_term",
+          "category": "logistics",
+          "title": "Cải thiện quy trình kiểm hàng trước khi ship",
+          "detail": "Thêm bước check variant (mã màu) và test vòi bơm nhanh trước khi đóng gói. Training nhân viên kho về cách nhận dạng variant son.",
+          "draft_message": null,
+          "status": "pending"
+        },
+        {
+          "action_id": "act_P002_4_1714600000",
+          "type": "mid_term",
+          "category": "marketing",
+          "title": "Đăng video hướng dẫn sử dụng vòi bơm",
+          "detail": "Quay TikTok 15s hướng dẫn cách vặn/bơm son đúng cách. Ghim vào listing và gửi cho khách mới mua.",
+          "draft_message": null,
+          "status": "pending"
+        }
+      ]
+    }
+  ]
+}

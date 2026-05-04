@@ -1,0 +1,16 @@
+{
+  "__schema_version": "1.0",
+  "__description": "Archived daily summary reports for SQL daily_summary_archive table (DailySummaryArchive ORM). Created by /export-daily-summary endpoint. Seeded to show historical report data in the dashboard on fresh install.",
+  "daily_summary_archives": [
+    {
+      "report_date": "<string: ISO date, e.g. 2026-05-02>",
+      "risk_status": "<string: 'critical' | 'warning' | 'stable'>",
+      "risk_tasks_json": "<list: [{product_id, instruction, status}] — RiskManager tasks active on that day>",
+      "pricing_tasks_json": "<list: [{product_id, instruction, status}] — Pricing tasks>",
+      "content_tasks_json": "<list: [{product_id, instruction, status}] — Content tasks>",
+      "insights_json": "<list: [string] — key insights extracted from chat/review that day>",
+      "total_tasks": "<int: sum of all task counts>",
+      "total_insights": "<int: number of insights>"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "learned_qa_entries": [
+    {
+      "doc_id": "rev_REV_003_hộp_móp",
+      "document": "Q: Hộp sản phẩm bị móp khi nhận hàng có sao không? A: Nếu sản phẩm bên trong còn nguyên seal và không bị biến dạng thì vẫn sử dụng bình thường ạ. Trường hợp hộp bị móp là do quá trình vận chuyển, shop đã cải thiện đóng gói 2 lớp bọt khí. Nếu bạn muốn đổi hộp mới, vui lòng inbox kèm ảnh để shop hỗ trợ miễn phí.",
+      "source": "review"
+    },
+    {
+      "doc_id": "rev_REV_SON_002_voi_bom",
+      "document": "Q: Son kem lì vặn mãi không ra màu phải làm sao? A: Trường hợp vòi bơm bị kẹt, bạn thử xoay nhẹ nắp 3-4 vòng rồi bấm/vặn lại. Nếu vẫn không ra, đây là lỗi sản phẩm — shop sẽ đổi mới miễn phí trong 7 ngày. Bạn inbox kèm video ngắn để shop xử lý trong 24h.",
+      "source": "review"
+    },
+    {
+      "doc_id": "chat_learn_001_guardian",
+      "document": "Q: Sữa rửa mặt Hada Labo có phải hàng Guardian chính hãng không? A: Dạ bên shop nhập từ nhà phân phối chính hãng Guardian Việt Nam, có đầy đủ tem phụ tiếng Việt, mã vạch check được và hoá đơn nguồn gốc. Bạn có thể quét mã vạch trên hộp để verify auth trên app Guardian nhé.",
+      "source": "chat"
+    },
+    {
+      "doc_id": "chat_learn_002_tone_da",
+      "document": "Q: Da vàng nên chọn mã son bóng nào? A: Với da vàng ấm (đa số da người Việt), shop tư vấn mã 03 (đỏ cam) hoặc mã 06 (đỏ đô) — hai màu này tôn da và nổi bật nhất. Tránh mã 04 (hồng đào) vì sẽ hơi nhợt trên da vàng.",
+      "source": "chat"
+    }
+  ]
+}

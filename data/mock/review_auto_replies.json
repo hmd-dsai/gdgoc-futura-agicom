@@ -1,0 +1,37 @@
+{
+  "review_auto_replies": [
+    {
+      "review_log_id": 1,
+      "customer_name": "m*****9",
+      "product_id": "P011",
+      "rating": 5,
+      "public_reply": "Cảm ơn bạn đã tin tưởng và ủng hộ shop ạ! Rất vui khi sản phẩm phù hợp với da bạn. Chúc bạn luôn có làn da mềm mịn nhé! 💕",
+      "inbox_message": null,
+      "reply_type": "positive",
+      "status": "approved",
+      "hours_ago": 20
+    },
+    {
+      "review_log_id": 3,
+      "customer_name": "nguyenvana12",
+      "product_id": "P011",
+      "rating": 4,
+      "public_reply": "Cảm ơn bạn đã phản hồi ạ! Shop rất tiếc về tình trạng hộp bị móp khi vận chuyển. Shop đã ghi nhận và sẽ cải thiện đóng gói chắc chắn hơn ạ.",
+      "inbox_message": "Chào bạn nguyenvana12, shop xin lỗi về sự cố hộp bị móp. Nếu bạn muốn shop gửi bù 1 hộp mới nguyên vẹn, vui lòng reply tin nhắn này nhé ạ!",
+      "reply_type": "negative",
+      "status": "pending",
+      "hours_ago": 18
+    },
+    {
+      "review_log_id": 6,
+      "customer_name": "l*****a",
+      "product_id": "P002",
+      "rating": 2,
+      "public_reply": "Shop thành thật xin lỗi bạn về sự cố lỗi vòi bơm ạ! Shop đã liên hệ bộ phận kỹ thuật kiểm tra lô hàng. Bạn vui lòng inbox shop để được hỗ trợ đổi sản phẩm mới hoặc hoàn tiền ngay nhé!",
+      "inbox_message": "Chào bạn, shop rất xin lỗi vì sự bất tiện này. Shop muốn gửi bạn 1 sản phẩm mới + voucher giảm 20% cho đơn tiếp theo như lời xin lỗi. Bạn reply để shop xử lý ngay trong hôm nay nhé ạ!",
+      "reply_type": "negative",
+      "status": "pending",
+      "hours_ago": 10
+    }
+  ]
+}

@@ -24,7 +24,21 @@
       "estimated_production": "1 buổi chụp + 2 tiếng edit video",
       "angle": "Model thật 3 tông da (sáng, trung, ngăm) swipe đủ 8 màu — caption 'Tông da bạn hợp màu nào?'",
       "source": "content_task",
-      "source_product_id": "P001"
+      "source_product_id": "P001",
+      "script_json": {
+        "emotional": {
+          "hook": "Bạn có biết sai màu son có thể khiến da bạn xỉn đi 2 tông không?",
+          "body": "Son Bóng GIAO FARA có 8 mã màu, mỗi mã được thiết kế riêng cho từng tông da Việt. Mã 03 đỏ cam — tôn da vàng ấm. Mã 06 đỏ đô — da ngăm cũng xinh. Mã 01 hồng baby — da sáng cực chuẩn.",
+          "cta": "Comment tông da bạn, mình tư vấn màu hợp nhất nhé!",
+          "hashtags": ["#sonbong", "#giaofara", "#tongsondep", "#makeupvietnam"]
+        },
+        "rational": {
+          "hook": "8 mã son bóng, chọn thế nào cho đúng?",
+          "body": "Bảng phân loại nhanh theo tông da: Da sáng → mã 01, 04, 07. Da trung bình → mã 02, 03, 05. Da ngăm → mã 03, 06, 08. Chất son bóng mịn, dưỡng môi, giữ màu 4-6 tiếng.",
+          "cta": "Xem swipe 8 màu trên môi thật tại video này!",
+          "hashtags": ["#reviewson", "#sonbonggiaofara", "#bangmau"]
+        }
+      }
     },
     {
       "suggestion_id": "cs-002",

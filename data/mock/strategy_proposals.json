@@ -1,0 +1,30 @@
+{
+  "strategy_proposals": [
+    {
+      "proposal_id": "PROP-P001-001",
+      "product_id": "P001",
+      "product_name": "Son Bóng GIAO FARA",
+      "proposed_price": 37000.0,
+      "expected_margin_percent": 42.5,
+      "pricing_reasoning": "Đối thủ 'Mỹ Phẩm X' đang bán giá 35.000đ nhưng không có combo. Giảm giá nhẹ xuống 37.000đ kết hợp voucher mua 2 giảm 10% sẽ giữ chân khách mà vẫn bảo vệ biên lợi nhuận. Tỉ lệ chuyển đổi dự kiến tăng 12%.",
+      "content_update_suggestion": "Cập nhật banner listing nhấn mạnh 'Mua 2 giảm 10% — Combo son bóng mix & match'. Thêm video swipe 8 màu trên TikTok để tăng nhận diện.",
+      "urgency_level": "medium",
+      "action_required": true,
+      "status": "pending",
+      "hours_ago": 6
+    },
+    {
+      "proposal_id": "PROP-P011-001",
+      "product_id": "P011",
+      "product_name": "Kem Rửa Mặt Hada Labo 80g",
+      "proposed_price": 89000.0,
+      "expected_margin_percent": 35.0,
+      "pricing_reasoning": "Sản phẩm đang bán chạy nhất danh mục skincare, rating 4.9. Có thể tăng giá 5.000đ mà không ảnh hưởng conversion do brand trust cao. Biên lợi nhuận tăng từ 30% lên 35%.",
+      "content_update_suggestion": "Thêm badge 'Bestseller #1 Skincare' vào listing. Đăng review video từ khách hàng thật trên TikTok.",
+      "urgency_level": "low",
+      "action_required": true,
+      "status": "approved",
+      "hours_ago": 48
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
-  "__schema_version": "2.0",
-  "__description": "Product reviews for SQL review_logs table, grouped by product. Mirrors teammate's review_mock_data.json structure. seed_demo.py flattens reviews_list into individual ReviewLog rows: customer.username_masked → customer_name, ai_analysis.sentiment + key_aspects → ai_insight. Use review_merge_data.py (in Agicom/data/) to upsert new reviews by review_id.",
+  "__schema_version": "2.1",
+  "__description": "Product reviews for SQL review_logs table, grouped by product. Mirrors teammate's review_mock_data.json structure. seed_demo.py flattens reviews_list into individual ReviewLog rows: customer.username_masked → customer_name, ai_analysis.sentiment + key_aspects → ai_insight. v2.1 adds top-level sentiment/key_issue/sentiment_tag fields that map directly to ReviewLog columns for sentiment stats UI.",
   "review_logs": [
     {
       "product_id": "<string: must match a product_id in products.json>",
@@ -36,7 +36,10 @@
             ],
             "requires_customer_service": "<bool>",
             "service_trigger_reason": "<string: reason if requires_customer_service=true, else ''>"
-          }
+          },
+          "sentiment": "<string: 'Tích cực' | 'Bình thường' | 'Tiêu cực' — maps to ReviewLog.sentiment>",
+          "key_issue": "<string: core issue in ≤ 8 words, or 'Không có vấn đề' — maps to ReviewLog.key_issue>",
+          "sentiment_tag": "<string: short label ≤ 4 words for UI tag display — maps to ReviewLog.sentiment_tag>"
         }
       ]
     }

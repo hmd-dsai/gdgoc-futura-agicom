@@ -1,0 +1,41 @@
+{
+  "daily_summary_archives": [
+    {
+      "report_date": "2026-05-02",
+      "risk_status": "warning",
+      "risk_tasks_json": [
+        {"product_id": "P002", "instruction": "Kiểm tra lô son kem lì lỗi vòi bơm", "status": "pending"}
+      ],
+      "pricing_tasks_json": [
+        {"product_id": "P001", "instruction": "Đối thủ giảm giá son bóng xuống 35k", "status": "pending"}
+      ],
+      "content_tasks_json": [
+        {"product_id": "P001", "instruction": "Tạo video swipe 8 màu son bóng cho TikTok", "status": "pending"}
+      ],
+      "insights_json": [
+        "22 câu hỏi tư vấn màu son bóng — cần bảng màu trực quan",
+        "2 khiếu nại lỗi vòi bơm son kem lì — kiểm tra lô hàng",
+        "Khách hỏi nhiều về nguồn gốc Hada Labo — cần badge chính hãng"
+      ],
+      "total_tasks": 3,
+      "total_insights": 3
+    },
+    {
+      "report_date": "2026-05-01",
+      "risk_status": "stable",
+      "risk_tasks_json": [],
+      "pricing_tasks_json": [
+        {"product_id": "P001", "instruction": "Theo dõi giá đối thủ son bóng", "status": "completed"}
+      ],
+      "content_tasks_json": [
+        {"product_id": "P003", "instruction": "Hướng dẫn chọn tông phấn phủ", "status": "saved"}
+      ],
+      "insights_json": [
+        "14 câu hỏi về chọn tông phấn phủ theo da — tiềm năng content",
+        "Tổng review mới: 3 (2 tích cực, 1 trung lập)"
+      ],
+      "total_tasks": 2,
+      "total_insights": 2
+    }
+  ]
+}

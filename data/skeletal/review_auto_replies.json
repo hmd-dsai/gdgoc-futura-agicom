@@ -1,0 +1,17 @@
+{
+  "__schema_version": "1.0",
+  "__description": "AI-generated reply drafts for SQL review_auto_replies table (ReviewAutoReply ORM). Created by /learn-from-review endpoint. Seeded to pre-populate the review reply queue on fresh install. review_log_id references the position (1-based) of the review in the seeded ReviewLog table.",
+  "review_auto_replies": [
+    {
+      "review_log_id": "<int: references ReviewLog.id — position in seeded data>",
+      "customer_name": "<string: masked customer name from the review>",
+      "product_id": "<string: must match products.json>",
+      "rating": "<int: 1–5 — the star rating of the original review>",
+      "public_reply": "<string: shop's public response visible on platform — polite, brand-toned>",
+      "inbox_message": "<string|null: private DM to customer — only for rating ≤ 3, null for positive>",
+      "reply_type": "<string: 'positive' | 'negative'>",
+      "status": "<string: 'pending' | 'approved' | 'sent'>",
+      "hours_ago": "<int: 1–48>"
+    }
+  ]
+}
