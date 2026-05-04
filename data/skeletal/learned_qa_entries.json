@@ -1,0 +1,11 @@
+{
+  "__schema_version": "1.0",
+  "__description": "Learned Q&A knowledge entries for SQL learned_qa_entries table (LearnedQAEntry ORM) and ChromaDB resolved_qa_col replay. Created by /learn-from-review and /learn-feedback endpoints. Seeded to provide baseline learned knowledge on fresh install. doc_id must be unique across the system.",
+  "learned_qa_entries": [
+    {
+      "doc_id": "<string: unique ID used in ChromaDB, format: rev_{review_id}_{topic} or chat_learn_{seq}_{topic}>",
+      "document": "<string: full Q&A text in format 'Q: ... A: ...' — this is what gets embedded in ChromaDB>",
+      "source": "<string: 'review' | 'chat' — indicates which endpoint created this entry>"
+    }
+  ]
+}

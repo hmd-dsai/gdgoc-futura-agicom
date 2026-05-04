@@ -1,12 +1,14 @@
 {
-  "__schema_version": "1.0",
-  "__description": "AI-to-human action items for SQL coordination_tasks table (CoordinationTask ORM). These are tasks the AI flags for human specialists. target_agent must be one of: RiskManager, Pricing, Content.",
+  "__schema_version": "1.1",
+  "__description": "AI-to-human action items for SQL coordination_tasks table (CoordinationTask ORM). These are tasks the AI flags for human specialists. target_agent must be one of: RiskManager, Pricing, Content. v1.1 adds signal_count and issue_type for deduplication.",
   "tasks": [
     {
       "target_agent": "<string: 'RiskManager' | 'Pricing' | 'Content'>",
       "product_id": "<string: related product_id from products.json>",
       "instruction": "<string: specific, actionable instruction for the human agent — include numbers and deadlines where relevant>",
-      "status": "<string: 'pending' | 'completed' | 'archived'>"
+      "status": "<string: 'pending' | 'completed' | 'archived'>",
+      "signal_count": "<int: number of signals (reviews/chats) merged into this task, default 1>",
+      "issue_type": "<string: 'quality' | 'shipping' | 'price' | 'wrong_item' | 'general' — category for deduplication>"
     }
   ]
 }

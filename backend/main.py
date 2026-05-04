@@ -25,9 +25,13 @@ from services import (
     chat_with_history_service,
     maybe_summarize_chat,
 )
-from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog, ReviewAutoReply, ContentSuggestion, CustomerProfile, get_or_create_customer_profile, StrategyProposalLog, LearnedQAEntry, CrisisPlan, CrisisAction
+from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog, ReviewAutoReply, ContentSuggestion, CustomerProfile, get_or_create_customer_profile, StrategyProposalLog, LearnedQAEntry, CrisisPlan, CrisisAction, ChatSummary
 import config as _cfg
-from seed_demo import seed_vector_db, seed_sql_db, seed_content_suggestions, seed_customer_profiles, seed_crisis_demo
+from seed_demo import (
+    seed_vector_db, seed_sql_db, seed_content_suggestions, seed_customer_profiles,
+    seed_crisis_demo, seed_strategy_proposals, seed_review_auto_replies,
+    seed_crisis_plans, seed_learned_qa, seed_chat_summaries, seed_daily_archives,
+)
 
 # ---------------------------------------------------------------------------
 # Product catalog — built once at startup from data/catalog/product_catalog.json.
@@ -2245,20 +2249,19 @@ async def reset_all_data():
         db.query(DB_ChatMessage).delete()
         db.query(ChatLog).delete()
         db.query(CoordinationTask).delete()
+        db.query(ReviewAutoReply).delete()
         db.query(ReviewLog).delete()
         db.query(ContentSuggestion).delete()
         db.query(CustomerProfile).delete()
         db.query(StrategyProposalLog).delete()
-        db.query(LearnedQAEntry).delete()   # Xóa kiến thức học được — đồng bộ với ChromaDB reset bên dưới
-        db.query(CrisisAction).delete()    # Xóa actions trước (FK-like dependency trên plan_id)
+        db.query(LearnedQAEntry).delete()
+        db.query(CrisisAction).delete()
         db.query(CrisisPlan).delete()
-        db.query(ReviewAutoReply).delete() # Xóa draft phản hồi để đồng bộ với ReviewLog đã xóa
+        db.query(ChatSummary).delete()
+        db.query(DailySummaryArchive).delete()
         db.commit()
 
         # 2. Xóa và tạo lại các Collections trong Vector DB.
-        #    QUAN TRỌNG: Phải cập nhật lại module globals sau khi delete để services.py
-        #    luôn nhận đúng collection mới, tránh lỗi "Collection đã bị xóa".
-        #    strategy_learnings_db cũng được reset để lịch sử phê duyệt đồng bộ với SQL.
         for col_name in ["policy_db", "product_db", "resolved_qa_db", "strategy_learnings_db"]:
             try:
                 _cfg.chroma_client.delete_collection(col_name)
@@ -2275,7 +2278,13 @@ async def reset_all_data():
         seed_sql_db(db)
         seed_content_suggestions(db)
         seed_customer_profiles(db)
-        seed_crisis_demo(db)   # Seed tín hiệu khủng hoảng mẫu cho Crisis Center
+        seed_crisis_demo(db)
+        seed_strategy_proposals(db)
+        seed_review_auto_replies(db)
+        seed_crisis_plans(db)
+        seed_learned_qa(db)
+        seed_chat_summaries(db)
+        seed_daily_archives(db)
 
         return {"status": "success", "message": "Hệ thống đã được reset và nạp lại toàn bộ dữ liệu nền thành công."}
     except Exception as e:

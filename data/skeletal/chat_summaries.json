@@ -1,0 +1,12 @@
+{
+  "__schema_version": "1.0",
+  "__description": "Chat conversation summaries for SQL chat_summaries table (ChatSummary ORM). Created/updated automatically when message count hits multiples of 10. Seeded to provide pre-existing summaries for demo customers. customer_id must match chat_messages.json and customer_profiles.json.",
+  "chat_summaries": [
+    {
+      "customer_id": "<string: must match customer_profiles.json>",
+      "summary_text": "<string: condensed summary of the conversation so far — key topics, requests, issues>",
+      "summarized_up_to_id": "<int: ChatMessage.id of last message included in this summary>",
+      "total_messages_at_update": "<int: total message count when summary was last updated>"
+    }
+  ]
+}

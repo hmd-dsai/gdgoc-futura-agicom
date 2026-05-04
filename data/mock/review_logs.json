@@ -37,7 +37,10 @@
             ],
             "requires_customer_service": false,
             "service_trigger_reason": ""
-          }
+          },
+          "sentiment": "Tích cực",
+          "key_issue": "Không có vấn đề",
+          "sentiment_tag": "Giao hàng nhanh"
         },
         {
           "review_id": "REV_002",
@@ -59,7 +62,10 @@
             ],
             "requires_customer_service": false,
             "service_trigger_reason": ""
-          }
+          },
+          "sentiment": "Tích cực",
+          "key_issue": "Không có vấn đề",
+          "sentiment_tag": "Hàng chính hãng"
         },
         {
           "review_id": "REV_003",
@@ -80,7 +86,10 @@
             ],
             "requires_customer_service": true,
             "service_trigger_reason": "Khách phàn nàn về tình trạng hộp móp khi vận chuyển"
-          }
+          },
+          "sentiment": "Bình thường",
+          "key_issue": "Hộp móp do vận chuyển",
+          "sentiment_tag": "Hộp bị móp"
         },
         {
           "review_id": "REV_004",
@@ -102,7 +111,10 @@
             ],
             "requires_customer_service": false,
             "service_trigger_reason": ""
-          }
+          },
+          "sentiment": "Tích cực",
+          "key_issue": "Không có vấn đề",
+          "sentiment_tag": "Giá tốt"
         }
       ]
     },
@@ -143,7 +155,10 @@
             ],
             "requires_customer_service": false,
             "service_trigger_reason": ""
-          }
+          },
+          "sentiment": "Tích cực",
+          "key_issue": "Không có vấn đề",
+          "sentiment_tag": "Màu đẹp tôn da"
         },
         {
           "review_id": "REV_SON_002",
@@ -165,7 +180,10 @@
             ],
             "requires_customer_service": true,
             "service_trigger_reason": "Sản phẩm lỗi và khách hàng phàn nàn về dịch vụ phản hồi chậm"
-          }
+          },
+          "sentiment": "Tiêu cực",
+          "key_issue": "Lỗi vòi bơm, không phản hồi",
+          "sentiment_tag": "Lỗi sản phẩm"
         }
       ]
     },
@@ -204,7 +222,10 @@
             ],
             "requires_customer_service": false,
             "service_trigger_reason": ""
-          }
+          },
+          "sentiment": "Bình thường",
+          "key_issue": "Hạt phấn to hơn kỳ vọng",
+          "sentiment_tag": "Hạt phấn to"
         },
         {
           "review_id": "REV_PHAN_002",
@@ -226,7 +247,10 @@
             ],
             "requires_customer_service": true,
             "service_trigger_reason": "Giao sai biến thể (variant) sản phẩm cho khách hàng"
-          }
+          },
+          "sentiment": "Tiêu cực",
+          "key_issue": "Giao sai tông màu",
+          "sentiment_tag": "Giao sai hàng"
         }
       ]
     }
