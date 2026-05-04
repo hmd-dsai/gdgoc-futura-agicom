@@ -28,6 +28,25 @@ const API_BASE = window.AGICOM_API_BASE || 'http://localhost:8000';
 
 let _backendConnected = false;
 
+// ── Admin API Key ─────────────────────────────────────────────────────────────
+// Lưu vào localStorage để tồn tại qua các lần reload.
+// Được đọc ở đây một lần; thay đổi runtime qua saveAdminApiKey().
+let _adminApiKey = (() => {
+  try { return localStorage.getItem('agicom_admin_api_key') || ''; } catch (_) { return ''; }
+})();
+
+/** Cập nhật key trong bộ nhớ và lưu vào localStorage. */
+function saveAdminApiKey(key) {
+  _adminApiKey = (key || '').trim();
+  try { localStorage.setItem('agicom_admin_api_key', _adminApiKey); } catch (_) {}
+}
+
+/** Xóa key hoàn toàn. */
+function clearAdminApiKey() {
+  _adminApiKey = '';
+  try { localStorage.removeItem('agicom_admin_api_key'); } catch (_) {}
+}
+
 /* ──────────────────────────────────────────────────────────────────────
    CHAT SESSION STATS — Theo dõi realtime trong phiên làm việc
    ────────────────────────────────────────────────────────────────────── */
@@ -94,9 +113,12 @@ async function apiCall(endpoint, method = 'GET', body = null, timeoutMs = 20000)
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
+  const headers = { 'Content-Type': 'application/json' };
+  if (_adminApiKey) headers['X-API-Key'] = _adminApiKey;
+
   const opts = {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     signal: controller.signal,
   };
   if (body) opts.body = JSON.stringify(body);
@@ -349,14 +371,17 @@ async function loadReviewsFromAPI() {
     const data = await apiCall('/api/reviews?limit=20');
     if (data && data.data && data.data.length > 0) {
       const dbReviews = data.data.map((r) => ({
+        db_id: r.id,
         author: r.customer_name || 'Ẩn danh',
         date: new Date(r.timestamp).toLocaleDateString('vi-VN'),
         rating: r.rating,
         text: r.review_text,
+        product_id: r.product_id,
+        product_name: r.product_name || r.product_id || '',
         tag:
-          r.rating >= 4
-            ? { type: 'pos', label: r.ai_insight || 'Phản hồi tích cực' }
-            : { type: 'neg', label: r.ai_insight || 'Cần cải thiện' },
+          r.sentiment === 'Tích cực' || r.rating >= 4
+            ? { type: 'pos', label: r.sentiment_tag || r.ai_insight || 'Phản hồi tích cực' }
+            : { type: 'neg', label: r.sentiment_tag || r.ai_insight || 'Cần cải thiện' },
         fromDB: true,
       }));
 
@@ -395,8 +420,9 @@ async function loadReviewRepliesFromAPI() {
     if (!data || !data.data || !data.data.length) return;
 
     data.data.forEach(reply => {
-      // Tìm review tương ứng trong MOCK theo customer_name
-      const review = MOCK.reviews.find(r => r.author === reply.customer_name);
+      // Tìm review theo db_id trước, fallback sang customer_name
+      const review = MOCK.reviews.find(r => r.db_id === reply.review_log_id)
+        || MOCK.reviews.find(r => r.author === reply.customer_name);
       if (review && !review.auto_reply) {
         review.auto_reply = {
           public_reply: reply.public_reply,
@@ -442,6 +468,10 @@ async function loadReviewSentimentStats(productId = null) {
     MOCK.reviews_kpi.neutral  = data.neutral_pct;
     MOCK.reviews_kpi.negative = data.negative_pct;
 
+    // Cập nhật rating + count nếu backend trả về
+    if (data.avg_rating !== undefined) MOCK.reviews_kpi.rating = data.avg_rating;
+    if (data.review_count !== undefined) MOCK.reviews_kpi.count = data.review_count;
+
     // Cập nhật tags từ DB
     if (data.tags_positive && data.tags_positive.length > 0) {
       MOCK.review_tags_pos = data.tags_positive.map(t => t.tag);
@@ -452,6 +482,12 @@ async function loadReviewSentimentStats(productId = null) {
 
     // Re-render panel nếu đang ở trang reviews
     if (typeof currentPage !== 'undefined' && currentPage === 'reviews') {
+      // Patch KPI rating card
+      const ratingEl = document.querySelector('.content-card [style*="3.5rem"]');
+      if (ratingEl) ratingEl.textContent = MOCK.reviews_kpi.rating;
+      const countEl = document.querySelector('.content-card [style*="Đánh giá"]');
+      if (countEl) countEl.textContent = `${MOCK.reviews_kpi.count.toLocaleString()} Đánh giá`;
+
       const sentimentPanel = document.querySelector('.rating-bars');
       if (sentimentPanel) {
         // Cập nhật các bar fill mà không cần re-render toàn trang

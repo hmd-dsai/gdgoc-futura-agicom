@@ -1267,6 +1267,7 @@ function renderReviews() {
               <strong class="review-card-author">${r.author}</strong>
               <span class="review-card-date">${r.date}</span>
             </div>
+            ${r.product_name ? `<div style="font-size:0.72rem;color:var(--accent-indigo);font-weight:600;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.product_name}">📦 ${r.product_name}</div>` : ''}
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
               <div class="star-display" style="color:var(--accent-amber);">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
               ${replyStatusBadge}
@@ -1276,7 +1277,7 @@ function renderReviews() {
               <span class="tag-item" style="background:${r.tag.type==='pos'?'var(--accent-emerald-bg)':'var(--accent-rose-bg)'};color:${r.tag.type==='pos'?'var(--accent-emerald)':'var(--accent-rose)'};">
                 ${r.tag.type==='pos'?'Điểm khen':'Vấn đề'}: ${r.tag.label}
               </span>
-              ${!ar ? `<button class="btn-sug-detail" data-action="ai-reply" data-author="${r.author}">${ICON.brain} AI soạn phản hồi</button>` : ''}
+              ${!ar ? `<button class="btn-sug-detail" data-action="ai-reply" data-author="${r.author}" data-db-id="${r.db_id || ''}">${ICON.brain} AI soạn phản hồi</button>` : ''}
             </div>
             ${autoReplySection}
           </div>`;
@@ -1384,6 +1385,12 @@ function _selectReviewProduct(productId, productName) {
   } else if (typeof navigate === 'function') {
     navigate('reviews');
   }
+
+  // Cập nhật stats (rating, count, sentiment bars) cho sản phẩm đang chọn
+  if (typeof loadReviewSentimentStats === 'function') {
+    loadReviewSentimentStats(productId || null);
+  }
+
   // Đặt lại focus + giá trị input sau re-render
   requestAnimationFrame(() => {
     const inp = document.getElementById('reviewProductSearch');
@@ -1946,7 +1953,45 @@ function renderSettingsTab() {
     `;
   }
   if (currentSettingsTab === 'team') {
+    const _keySet = typeof _adminApiKey !== 'undefined' && _adminApiKey.length > 0;
+    const _keyPreview = _keySet ? _adminApiKey.slice(0, 4) + '••••••••' + _adminApiKey.slice(-4) : '';
     return `
+      <!-- ── API Key Card ── -->
+      <div class="content-card" style="margin-bottom:16px;border:1.5px solid ${_keySet ? 'var(--accent-emerald)' : 'var(--accent-amber)'};">
+        <div class="content-card-title">🔑 Admin API Key</div>
+        <p style="font-size:0.82rem;color:var(--text-muted);margin:0 0 14px;">
+          Key này được gửi kèm header <code>X-API-Key</code> với mọi request cần quyền admin
+          (reset dữ liệu, duyệt phản hồi, xem hồ sơ khách...).
+          Lấy giá trị từ biến môi trường <code>ADMIN_API_KEY</code> trên Render.
+        </p>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <div style="position:relative;flex:1;min-width:220px;">
+            <input
+              id="adminApiKeyInput"
+              type="password"
+              class="settings-input"
+              placeholder="${_keySet ? _keyPreview : 'Nhập Admin API Key...'}"
+              autocomplete="new-password"
+              style="width:100%;padding-right:40px;"
+            />
+            <button
+              onclick="(function(){const inp=document.getElementById('adminApiKeyInput');inp.type=inp.type==='password'?'text':'password';})()"
+              title="Hiện/ẩn key"
+              style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;color:var(--text-muted);">👁</button>
+          </div>
+          <button class="btn-approve" onclick="_saveApiKeyFromInput()" style="white-space:nowrap;">💾 Lưu Key</button>
+          ${_keySet ? `<button class="btn-modal-cancel" onclick="_clearApiKey()" style="white-space:nowrap;">🗑 Xóa Key</button>` : ''}
+        </div>
+        <div style="margin-top:10px;display:flex;align-items:center;gap:8px;font-size:0.8rem;">
+          ${_keySet
+            ? `<span style="color:var(--accent-emerald);font-weight:700;">✅ Key đã được lưu</span>
+               <span style="color:var(--text-muted);">(${_keyPreview})</span>
+               <button onclick="_testApiKey()" class="btn-sug-detail" style="font-size:0.72rem;padding:3px 10px;margin-left:4px;">🔍 Kiểm tra kết nối</button>`
+            : `<span style="color:var(--accent-amber);font-weight:700;">⚠️ Chưa có key — các tính năng admin sẽ bị từ chối (401)</span>`
+          }
+        </div>
+      </div>
+
       <div class="content-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
           <div class="content-card-title" style="margin:0;">👥 Thành viên (${MOCK.team_members.length})</div>
@@ -4142,13 +4187,55 @@ function initEvents() {
   document.getElementById('pageContent').addEventListener('click', handlePageClick);
 }
 
+// ── Admin API Key helpers (gọi từ Settings tab) ───────────────────────────────
+
+function _saveApiKeyFromInput() {
+  const inp = document.getElementById('adminApiKeyInput');
+  const val = (inp ? inp.value : '').trim();
+  if (!val) {
+    showToast('Vui lòng nhập API key trước khi lưu.', 'warning');
+    return;
+  }
+  if (typeof saveAdminApiKey === 'function') saveAdminApiKey(val);
+  showToast('✅ API key đã được lưu! Tất cả request admin sẽ dùng key này.', 'success');
+  // Re-render tab để cập nhật badge trạng thái
+  const tabContent = document.getElementById('settingsTabContent');
+  if (tabContent && typeof renderSettingsTab === 'function') tabContent.innerHTML = renderSettingsTab();
+}
+
+function _clearApiKey() {
+  if (typeof clearAdminApiKey === 'function') clearAdminApiKey();
+  showToast('🗑 Đã xóa API key.', 'info');
+  const tabContent = document.getElementById('settingsTabContent');
+  if (tabContent && typeof renderSettingsTab === 'function') tabContent.innerHTML = renderSettingsTab();
+}
+
+async function _testApiKey() {
+  if (typeof _adminApiKey === 'undefined' || !_adminApiKey) {
+    showToast('Chưa có key để kiểm tra.', 'warning');
+    return;
+  }
+  try {
+    showToast('⏳ Đang kiểm tra key...', 'info');
+    // /api/customers là endpoint protected đơn giản, không có side-effects
+    await apiCall('/api/customers');
+    showToast('✅ Key hợp lệ — backend xác thực thành công!', 'success');
+  } catch (err) {
+    if (err.message && err.message.includes('401')) {
+      showToast('❌ Key không hợp lệ — backend trả về 401. Kiểm tra lại ADMIN_API_KEY trên Render.', 'error');
+    } else {
+      showToast('⚠️ Không thể kết nối backend: ' + err.message, 'warning');
+    }
+  }
+}
+
 function activateGuidance(cmd) {
   document.getElementById('guidanceActiveCmd').style.display = 'flex';
   document.getElementById('guidanceActiveCmdText').textContent = cmd;
   showToast(`AI đã nhận chỉ thị: "${cmd.substring(0, 50)}${cmd.length>50?'...':''}"`, 'success');
 }
 
-function handlePageClick(e) {
+async function handlePageClick(e) {
   // ── Ưu tiên: Các nút dùng class (chat inbox buttons) ──
   const chatBtn = e.target.closest(
     '.btn-chat-accept, .btn-chat-edit, .btn-chat-send-edited, .btn-chat-cancel-edit'
@@ -4266,7 +4353,36 @@ function handlePageClick(e) {
       openFeedbackModal(id);
     } else if (action === 'ai-reply') {
       const author = target.dataset.author;
-      showToast(`AI đang soạn phản hồi cho ${author}... Sẽ hiển thị trong inbox khi sẵn sàng`, 'info');
+      const dbId = target.dataset.dbId;
+      if (!dbId || !_backendConnected) {
+        showToast('Không thể soạn phản hồi: review chưa đồng bộ với server.', 'warning');
+        return;
+      }
+      target.disabled = true;
+      target.textContent = '⏳ Đang soạn...';
+      try {
+        const result = await apiCall(`/api/review-replies/generate/${dbId}`, 'POST');
+        if (result && result.auto_reply) {
+          // Gắn auto_reply vào MOCK.reviews để card re-render có dữ liệu
+          const review = MOCK.reviews.find(r => r.author === author);
+          if (review) {
+            review.auto_reply = {
+              public_reply: result.auto_reply.public_reply,
+              inbox_message: result.auto_reply.inbox_message,
+              reply_type: result.auto_reply.reply_type,
+              status: result.auto_reply.status,
+              _db_id: result.auto_reply.id,
+              inbox_queued: result.auto_reply.reply_type === 'negative' && !!result.auto_reply.inbox_message,
+            };
+          }
+          showToast(`✅ Đã soạn phản hồi cho ${author}!`, 'success');
+          if (typeof _origNavigate === 'function') setTimeout(() => _origNavigate('reviews'), 300);
+        }
+      } catch (err) {
+        showToast('Lỗi khi soạn phản hồi: ' + err.message, 'error');
+        target.disabled = false;
+        target.innerHTML = `${ICON.brain} AI soạn phản hồi`;
+      }
     } else if (action === 'deny-chat') {
       // Xóa nháp AI, thêm thông báo hệ thống, re-render
       const msgs = MOCK.chat_messages[currentChatId] || [];

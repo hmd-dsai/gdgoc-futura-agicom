@@ -12,6 +12,17 @@
       "hours_ago": 20
     },
     {
+      "review_log_id": 2,
+      "customer_name": "t*****h",
+      "product_id": "P011",
+      "rating": 5,
+      "public_reply": "Cảm ơn bạn đã ủng hộ Hada Labo chính hãng Guardian bên shop nhé! Da khô mà chịu được sản phẩm này thì tuyệt vời lắm ạ. Hẹn gặp lại bạn trong đơn tiếp theo! 🌸",
+      "inbox_message": null,
+      "reply_type": "positive",
+      "status": "approved",
+      "hours_ago": 18
+    },
+    {
       "review_log_id": 3,
       "customer_name": "nguyenvana12",
       "product_id": "P011",
@@ -23,6 +34,28 @@
       "hours_ago": 18
     },
     {
+      "review_log_id": 4,
+      "customer_name": "lananh_beauty",
+      "product_id": "P011",
+      "rating": 5,
+      "public_reply": "Cảm ơn bạn lananh_beauty đã check auth kỹ và chia sẻ trải nghiệm ạ! Chúc bạn săn được nhiều sale xịn nữa nhé 🎉",
+      "inbox_message": null,
+      "reply_type": "positive",
+      "status": "approved",
+      "hours_ago": 16
+    },
+    {
+      "review_log_id": 5,
+      "customer_name": "h*****g",
+      "product_id": "P002",
+      "rating": 5,
+      "public_reply": "Cảm ơn bạn đã yêu thích Son Kem Lì GIAO FARA ạ! Màu 01 đỏ thuần mà được khen tôn da thì shop mừng lắm. Hẹn gặp bạn ở đơn tiếp theo nhé! 💋",
+      "inbox_message": null,
+      "reply_type": "positive",
+      "status": "approved",
+      "hours_ago": 14
+    },
+    {
       "review_log_id": 6,
       "customer_name": "l*****a",
       "product_id": "P002",
@@ -32,6 +65,28 @@
       "reply_type": "negative",
       "status": "pending",
       "hours_ago": 10
+    },
+    {
+      "review_log_id": 7,
+      "customer_name": "k*****i",
+      "product_id": "P003",
+      "rating": 4,
+      "public_reply": "Cảm ơn bạn đã đánh giá Phấn Phủ GIAO FARA ạ! Shop ghi nhận góp ý về hạt phấn và sẽ xem xét cải tiến formula. Bạn có thể dùng cọ mịn để tán đều hơn nhé!",
+      "inbox_message": null,
+      "reply_type": "positive",
+      "status": "approved",
+      "hours_ago": 12
+    },
+    {
+      "review_log_id": 8,
+      "customer_name": "p*****u",
+      "product_id": "P003",
+      "rating": 3,
+      "public_reply": "Shop thành thật xin lỗi bạn vì đã giao nhầm tông màu ạ! Đây hoàn toàn là lỗi của shop trong khâu đóng gói. Shop sẽ gửi đúng tông Tự Nhiên cho bạn miễn phí trong hôm nay, bạn không cần trả lại hàng nhé!",
+      "inbox_message": "Chào bạn p*****u, shop xin lỗi vì đã giao nhầm tông màu phấn phủ. Shop sẽ gửi ngay tông Tự Nhiên đúng yêu cầu của bạn — ship miễn phí, giữ lại tông sáng làm quà cũng được ạ. Shop sẽ liên hệ xác nhận địa chỉ để gửi bù trong ngày hôm nay nhé!",
+      "reply_type": "negative",
+      "status": "pending",
+      "hours_ago": 8
     }
   ]
 }

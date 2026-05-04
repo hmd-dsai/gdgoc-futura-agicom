@@ -313,14 +313,26 @@ def seed_strategy_proposals(db):
 
 
 def seed_review_auto_replies(db):
-    """Seed review auto-reply drafts from mock data."""
+    """Seed review auto-reply drafts from mock data.
+
+    review_log_id in the JSON is a 1-based positional index into the seeded
+    ReviewLog rows (ordered by id ascending). We resolve it to the real DB id
+    here so references are always correct regardless of auto-increment state.
+    """
     print("[8/9] Đang seed phản hồi review tự động (ReviewAutoReply)...")
     now = datetime.datetime.utcnow()
 
+    # Build positional index: position 1 → first ReviewLog.id inserted, etc.
+    seeded_reviews = db.query(ReviewLog).order_by(ReviewLog.id.asc()).all()
+    id_map = {i + 1: r.id for i, r in enumerate(seeded_reviews)}
+
     data = _load("review_auto_replies.json")
-    replies = [
-        ReviewAutoReply(
-            review_log_id=item["review_log_id"],
+    replies = []
+    for item in data["review_auto_replies"]:
+        pos = item["review_log_id"]
+        real_id = id_map.get(pos, pos)  # fallback to raw value if out of range
+        replies.append(ReviewAutoReply(
+            review_log_id=real_id,
             customer_name=item["customer_name"],
             product_id=item["product_id"],
             rating=item["rating"],
@@ -329,9 +341,7 @@ def seed_review_auto_replies(db):
             reply_type=item["reply_type"],
             status=item["status"],
             created_at=now - datetime.timedelta(hours=item.get("hours_ago", 12)),
-        )
-        for item in data["review_auto_replies"]
-    ]
+        ))
     db.add_all(replies)
     db.commit()
     print(f"  → {len(replies)} review auto-replies")

@@ -850,26 +850,124 @@ async def approve_review_reply(reply_id: int):
         db.close()
 
 
+@app.post("/api/review-replies/generate/{review_id}", dependencies=[Depends(require_api_key)])
+async def generate_reply_for_review(review_id: int):
+    """
+    Sinh phản hồi AI cho một ReviewLog đã tồn tại trong DB.
+    Nếu đã có ReviewAutoReply thì trả về cái cũ, không gọi LLM lại.
+    """
+    db = SessionLocal()
+    try:
+        review = db.query(ReviewLog).filter(ReviewLog.id == review_id).first()
+        if not review:
+            raise HTTPException(status_code=404, detail=f"Không tìm thấy review #{review_id}")
+
+        # Trả về reply đã có nếu tồn tại
+        existing = db.query(ReviewAutoReply).filter(
+            ReviewAutoReply.review_log_id == review_id
+        ).first()
+        if existing:
+            return {
+                "status": "existing",
+                "review_log_id": review_id,
+                "auto_reply": {
+                    "id": existing.id,
+                    "public_reply": existing.public_reply,
+                    "inbox_message": existing.inbox_message,
+                    "reply_type": existing.reply_type,
+                    "status": existing.status,
+                },
+            }
+
+        # Gọi LLM để tạo phản hồi mới
+        reply_prompt = REVIEW_AUTO_REPLY_PROMPT.format(
+            customer_name=review.customer_name,
+            product_id=review.product_id,
+            rating=review.rating,
+            review_text=review.review_text,
+        )
+        response = await client.aio.models.generate_content(
+            model="gemini-flash-latest",
+            contents=[reply_prompt],
+            config=types.GenerateContentConfig(response_mime_type="application/json"),
+        )
+        auto_reply_data: dict = {"public_reply": None, "inbox_message": None}
+        try:
+            clean = response.text.replace("```json", "").replace("```", "").strip()
+            auto_reply_data = json.loads(clean)
+        except Exception:
+            pass
+
+        if not auto_reply_data.get("public_reply"):
+            raise HTTPException(status_code=500, detail="LLM không trả về phản hồi hợp lệ")
+
+        reply_type = "positive" if review.rating >= 4 else "negative"
+        new_reply = ReviewAutoReply(
+            review_log_id=review_id,
+            customer_name=review.customer_name,
+            product_id=review.product_id,
+            rating=review.rating,
+            public_reply=auto_reply_data["public_reply"],
+            inbox_message=auto_reply_data.get("inbox_message"),
+            reply_type=reply_type,
+            status="pending",
+        )
+        db.add(new_reply)
+        db.commit()
+        db.refresh(new_reply)
+
+        return {
+            "status": "generated",
+            "review_log_id": review_id,
+            "auto_reply": {
+                "id": new_reply.id,
+                "public_reply": new_reply.public_reply,
+                "inbox_message": new_reply.inbox_message,
+                "reply_type": new_reply.reply_type,
+                "status": new_reply.status,
+            },
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
 @app.get("/api/reviews")
 async def get_all_reviews(product_id: str = None, limit: int = 20):
     """
     API dùng để kéo dữ liệu Review từ Database ra cho Frontend hiển thị.
     Nếu truyền product_id thì chỉ lấy review của sản phẩm đó.
+    Trả về thêm product_name (tra từ PRODUCT_NAMES catalog) để frontend hiển thị trên card.
     """
     db = SessionLocal()
     try:
         query = db.query(ReviewLog)
-        
-        # Lọc theo sản phẩm nếu Frontend có truyền product_id
         if product_id:
             query = query.filter(ReviewLog.product_id == product_id)
-            
-        # Sắp xếp mới nhất đưa lên đầu
         reviews = query.order_by(ReviewLog.timestamp.desc()).limit(limit).all()
-        
+
+        def _serialize(r):
+            return {
+                "id": r.id,
+                "product_id": r.product_id,
+                "product_name": PRODUCT_NAMES.get(r.product_id, r.product_id),
+                "rating": r.rating,
+                "review_text": r.review_text,
+                "customer_name": r.customer_name,
+                "ai_insight": r.ai_insight,
+                "sentiment": r.sentiment,
+                "key_issue": r.key_issue,
+                "sentiment_tag": r.sentiment_tag,
+                "timestamp": r.timestamp.isoformat() if r.timestamp else None,
+            }
+
         return {
             "total_fetched": len(reviews),
-            "data": reviews
+            "data": [_serialize(r) for r in reviews],
         }
     finally:
         db.close()
@@ -892,9 +990,19 @@ async def get_sentiment_stats(product_id: str = None):
         reviews = query.all()
         total = len(reviews)
 
+        # avg_rating uses ALL reviews for the product, not just those with sentiment
+        all_query = db.query(ReviewLog)
+        if product_id:
+            all_query = all_query.filter(ReviewLog.product_id == product_id)
+        all_reviews = all_query.all()
+        review_count = len(all_reviews)
+        avg_rating = round(sum(r.rating for r in all_reviews) / review_count, 1) if review_count else 0
+
         if total == 0:
             return {
                 "total": 0,
+                "avg_rating": avg_rating,
+                "review_count": review_count,
                 "positive_pct": 0,
                 "neutral_pct": 0,
                 "negative_pct": 0,
@@ -919,6 +1027,8 @@ async def get_sentiment_stats(product_id: str = None):
 
         return {
             "total": total,
+            "avg_rating": avg_rating,
+            "review_count": review_count,
             "positive_pct": round(counts["Tích cực"] / total * 100, 1),
             "neutral_pct": round(counts["Bình thường"] / total * 100, 1),
             "negative_pct": round(counts["Tiêu cực"] / total * 100, 1),
