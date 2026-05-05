@@ -7,17 +7,17 @@
    0. PRODUCT CATALOG — 11 SKU đầy đủ (dùng cho search filter + form review)
    ===================================================================== */
 const PRODUCT_CATALOG = [
-  { id: 'P001', sku: 'GF-LGLOSS-M01',       name: 'Son Bóng GIAO FARA (Mã 01-08)',                      category: 'Son môi',       price: 309000  },
-  { id: 'P001', sku: 'GF-LGLOSS-M04',       name: 'Son Bóng GIAO FARA (Mã 04)',                         category: 'Son môi',       price: 309000  },
-  { id: 'P002', sku: 'GF-MLIPSTICK-M09',    name: 'Son Kem Lì GIAO FARA Siêu Lì Mịn (Mã 09-16)',        category: 'Son môi',       price: 299000  },
-  { id: 'P003', sku: 'GF-SPOWDER-TN',       name: 'Phấn Phủ Bột GIAO FARA Kềm Dầu Tự Nhiên',           category: 'Phấn phủ',      price: 129000 },
-  { id: 'P004', sku: 'GF-CO1-ML-SPOWDER',   name: 'Combo Kem Lì GIAO FARA và Phấn Phủ Bột',            category: 'Combo',         price: 379000 },
-  { id: 'P006', sku: 'GF-POWDER-18K',       name: 'Phấn Phủ Bột GIAO FARA Kềm Dầu (Mini)',             category: 'Phấn phủ',      price: 59000  },
-  { id: 'P007', sku: 'GF-LIPSET-06',        name: 'Set Son Kem Lì 6 Thỏi',                              category: 'Set / Bundle',  price: 234000 },
-  { id: 'P008', sku: 'GF-MKP-COMBO6',       name: 'Bộ Trang Điểm 6 Món Cơ Bản',                        category: 'Set / Bundle',  price: 289000  },
-  { id: 'P009', sku: 'GF-TOOL-BRUSH13',     name: 'Bộ Cọ Trang Điểm 13 Món Lông Mềm',                  category: 'Phụ kiện',      price: 89000  },
-  { id: 'P010', sku: 'GF-TOOL-CURLER',      name: 'Kẹp Bấm Mi Chuyên Dụng Tự Nhiên',                   category: 'Phụ kiện',      price: 19000  },
-  { id: 'P011', sku: 'HL-CLEANSER-80G',     name: 'Kem Rửa Mặt Hada Labo Advanced Nourish 80g',         category: 'Chăm sóc da',   price: 69000 },
+  { id: 'P001', sku: 'GF-LGLOSS-M01', name: 'Son Bóng GIAO FARA (Mã 01-08)', category: 'Son môi', price: 309000 },
+  { id: 'P001', sku: 'GF-LGLOSS-M04', name: 'Son Bóng GIAO FARA (Mã 04)', category: 'Son môi', price: 309000 },
+  { id: 'P002', sku: 'GF-MLIPSTICK-M09', name: 'Son Kem Lì GIAO FARA Siêu Lì Mịn (Mã 09-16)', category: 'Son môi', price: 299000 },
+  { id: 'P003', sku: 'GF-SPOWDER-TN', name: 'Phấn Phủ Bột GIAO FARA Kềm Dầu Tự Nhiên', category: 'Phấn phủ', price: 129000 },
+  { id: 'P004', sku: 'GF-CO1-ML-SPOWDER', name: 'Combo Kem Lì GIAO FARA và Phấn Phủ Bột', category: 'Combo', price: 379000 },
+  { id: 'P006', sku: 'GF-POWDER-18K', name: 'Phấn Phủ Bột GIAO FARA Kềm Dầu (Mini)', category: 'Phấn phủ', price: 59000 },
+  { id: 'P007', sku: 'GF-LIPSET-06', name: 'Set Son Kem Lì 6 Thỏi', category: 'Set / Bundle', price: 234000 },
+  { id: 'P008', sku: 'GF-MKP-COMBO6', name: 'Bộ Trang Điểm 6 Món Cơ Bản', category: 'Set / Bundle', price: 289000 },
+  { id: 'P009', sku: 'GF-TOOL-BRUSH13', name: 'Bộ Cọ Trang Điểm 13 Món Lông Mềm', category: 'Phụ kiện', price: 89000 },
+  { id: 'P010', sku: 'GF-TOOL-CURLER', name: 'Kẹp Bấm Mi Chuyên Dụng Tự Nhiên', category: 'Phụ kiện', price: 19000 },
+  { id: 'P011', sku: 'HL-CLEANSER-80G', name: 'Kem Rửa Mặt Hada Labo Advanced Nourish 80g', category: 'Chăm sóc da', price: 69000 },
 ];
 
 // State cho review product filter
@@ -203,42 +203,42 @@ const MOCK = {
       id: 'sug-001', type: 'price', status: 'pending', time: '5 phút trước',
       title: 'Định giá cao hơn đối thủ 5% — Son Kem Lì GIAO FARA rating 4.8★ vs 4.2★',
       reason: 'Rating của shop cao hơn Beauty Skin Store 0.6★. Review 4.8★ + 145 đơn/ngày cho thấy khách sẵn sàng trả giá cao hơn để có chất lượng. Margin hiện tại 63% — còn dư địa tăng giá mà không mất khách.',
-      metrics: [{label: 'Doanh thu dự kiến', value: '+35M/tháng'}, {label: 'Margin mới', value: '64%'}, {label: 'Giá đề xuất', value: '315.000đ'}],
+      metrics: [{ label: 'Doanh thu dự kiến', value: '+35M/tháng' }, { label: 'Margin mới', value: '64%' }, { label: 'Giá đề xuất', value: '315.000đ' }],
       confidence: 84
     },
     {
       id: 'sug-002', type: 'content', status: 'pending', time: '12 phút trước',
       title: 'Video swatches màu son trên 3 tone da — giảm 60% câu hỏi màu',
       reason: '18 khách/7 ngày hỏi "màu son phù hợp tone da nào?" — tỷ lệ chốt sau hỏi màu chỉ 22% (thấp hơn TB 35%). Video swatches trực tiếp giải quyết điểm nghẽn này.',
-      metrics: [{label: 'CR dự kiến tăng', value: '+13%'}, {label: 'Câu hỏi giảm', value: '-60%'}, {label: 'Thời gian tư vấn', value: '-40%'}],
+      metrics: [{ label: 'CR dự kiến tăng', value: '+13%' }, { label: 'Câu hỏi giảm', value: '-60%' }, { label: 'Thời gian tư vấn', value: '-40%' }],
       confidence: 91
     },
     {
       id: 'sug-003', type: 'promo', status: 'pending', time: '1 giờ trước',
       title: 'Flash Sale Son Bóng Mã 04 + 07 — xả tồn 38 cái trong 72h',
       reason: 'Mã 04 và 07 tồn 72 ngày — xu hướng màu nude và đỏ đô đang chiếm ưu thế. Giảm 15% + bundle với Son Kem Lì giúp xả kho mà vẫn bảo vệ margin tổng.',
-      metrics: [{label: 'Thu hồi vốn', value: '~10M'}, {label: 'Margin gộp', value: '42%'}, {label: 'SKU xả', value: '38 thỏi'}],
+      metrics: [{ label: 'Thu hồi vốn', value: '~10M' }, { label: 'Margin gộp', value: '42%' }, { label: 'SKU xả', value: '38 thỏi' }],
       confidence: 79
     },
     {
       id: 'sug-004', type: 'ads', status: 'approved', time: '2 giờ trước',
       title: 'Tăng budget Son Kem Lì TikTok Video +35%',
       reason: 'ROAS 12.1x duy trì 5 ngày liên tiếp — đang trong mùa mua sắm 5/5. Scale ngay trước khi hết thời điểm vàng.',
-      metrics: [{label: 'Doanh thu dự kiến', value: '+15M'}, {label: 'ROAS dự báo', value: '10.8x'}],
+      metrics: [{ label: 'Doanh thu dự kiến', value: '+15M' }, { label: 'ROAS dự báo', value: '10.8x' }],
       confidence: 93
     },
     {
       id: 'sug-005', type: 'cs', status: 'approved', time: '3 giờ trước',
       title: 'Proactive outreach 5 khách VIP quan tâm Combo P004',
       reason: '5 khách VIP đã xem Combo P004 (Son + Phấn) > 3 lần nhưng chưa chốt. Gửi voucher 30k kèm swatch video — tỷ lệ chốt dự kiến 45%.',
-      metrics: [{label: 'Khách target', value: '5 VIP'}, {label: 'CR dự kiến', value: '45%'}, {label: 'Doanh thu tiềm năng', value: '~1.7M'}],
+      metrics: [{ label: 'Khách target', value: '5 VIP' }, { label: 'CR dự kiến', value: '45%' }, { label: 'Doanh thu tiềm năng', value: '~1.7M' }],
       confidence: 83
     },
     {
       id: 'sug-006', type: 'price', status: 'rejected', time: 'Hôm qua',
       title: 'Giảm giá Kem Rửa Mặt Hada Labo xuống 65k để cạnh tranh Hasaki',
       reason: 'Hasaki đang bán 65k — giảm xuống 65k có thể tăng volume.',
-      metrics: [{label: 'Doanh thu', value: '+3M'}, {label: 'Margin', value: '53%'}],
+      metrics: [{ label: 'Doanh thu', value: '+3M' }, { label: 'Margin', value: '53%' }],
       confidence: 58,
       rejection_reason: 'Hasaki bán 65k là xả hàng date ngắn. Hàng của shop date xa, giữ giá 69k để giữ định vị thương hiệu.'
     }
@@ -430,7 +430,7 @@ MOCK.products_detail = [
 
 MOCK.content_suggestions_generated = [
   {
-    id: 'cs-001', priority: 'high', status: 'pending', type: 'tiktok_30s',
+    id: 'cs-mock-001', priority: 'high', status: 'pending', type: 'tiktok_30s',
     title: 'Video swatches Son Kem Lì GIAO FARA — 8 màu trên 3 tone da thực tế',
     platform: 'TikTok + Shopee Video',
     source_product_id: 'P002',
@@ -442,7 +442,7 @@ MOCK.content_suggestions_generated = [
     angle: 'Test thực tế: 3 người mẫu tone da sáng / vàng trung / ngăm tối — quẹt trực tiếp, quay cận chi tiết để khách chọn màu không sai'
   },
   {
-    id: 'cs-002', priority: 'high', status: 'pending', type: 'tiktok_60s',
+    id: 'cs-mock-002', priority: 'high', status: 'pending', type: 'tiktok_60s',
     title: '"Phấn Phủ GIAO FARA da dầu dùng được không?" — FAQ + Video test 8 tiếng',
     platform: 'Blog + TikTok',
     source_product_id: 'P003',
@@ -454,7 +454,7 @@ MOCK.content_suggestions_generated = [
     angle: 'Test thực tế: đánh phấn 8h sáng, check da lúc 12h và 4h chiều — chụp ảnh macro và video gần để khách thấy thực tế'
   },
   {
-    id: 'cs-003', priority: 'high', status: 'pending', type: 'tiktok_60s',
+    id: 'cs-mock-003', priority: 'high', status: 'pending', type: 'tiktok_60s',
     title: '"Kem Rửa Mặt Hada Labo có purging không?" — Giải thích khoa học + timeline',
     platform: 'Blog + TikTok',
     source_product_id: 'P011',
@@ -466,7 +466,7 @@ MOCK.content_suggestions_generated = [
     angle: 'Giải thích rõ purging vs dị ứng thật: timeline, triệu chứng, cách phân biệt — đính kèm thành phần an toàn của Hada Labo'
   },
   {
-    id: 'cs-004', priority: 'medium', status: 'pending', type: 'facebook_post',
+    id: 'cs-mock-004', priority: 'medium', status: 'pending', type: 'facebook_post',
     title: '"Bảng giá sỉ GIAO FARA chính thức" — Dành cho spa, salon, đại lý',
     platform: 'Website + Zalo OA',
     source_product_id: '',
@@ -478,7 +478,7 @@ MOCK.content_suggestions_generated = [
     angle: 'Tạo landing page riêng với bảng giá sỉ theo bậc (10/20/50 thỏi), form đặt hàng và hotline Zalo riêng cho đại lý'
   },
   {
-    id: 'cs-005', priority: 'medium', status: 'saved', type: 'tiktok_30s',
+    id: 'cs-mock-005', priority: 'medium', status: 'saved', type: 'tiktok_30s',
     title: '"Son GIAO FARA có an toàn không?" — Video review thành phần + chứng nhận',
     platform: 'TikTok + Shopee Video',
     source_product_id: 'P001',
@@ -549,13 +549,13 @@ let currentProductDescSku = 'GF-MLIPSTICK-M09';
    ===================================================================== */
 const fmt = {
   currency: (v) => {
-    if (v >= 1e9) return (v/1e9).toFixed(1).replace('.0','') + 'B';
-    if (v >= 1e6) return (v/1e6).toFixed(1).replace('.0','') + 'M';
-    if (v >= 1e3) return (v/1e3).toFixed(0) + 'K';
+    if (v >= 1e9) return (v / 1e9).toFixed(1).replace('.0', '') + 'B';
+    if (v >= 1e6) return (v / 1e6).toFixed(1).replace('.0', '') + 'M';
+    if (v >= 1e3) return (v / 1e3).toFixed(0) + 'K';
     return v.toString();
   },
   vnd: (v) => v.toLocaleString('vi-VN') + 'đ',
-  percent: (v, sign=true) => (sign && v > 0 ? '+' : '') + v + '%'
+  percent: (v, sign = true) => (sign && v > 0 ? '+' : '') + v + '%'
 };
 
 const ICON = {
@@ -568,13 +568,13 @@ const ICON = {
   bolt: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M13 2L3 14h7v8l10-12h-7z"/></svg>'
 };
 
-function sparkline(data, color='#eab308') {
+function sparkline(data, color = '#eab308') {
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min || 1;
   return '<div class="sparkline">' + data.map(v => {
     const h = Math.max(4, Math.round(((v - min) / range) * 32) + 8);
-    return '<div class="sparkline-bar" style="height:' + h + 'px;background:' + color + ';opacity:' + (0.5 + h/80).toFixed(2) + ';"></div>';
+    return '<div class="sparkline-bar" style="height:' + h + 'px;background:' + color + ';opacity:' + (0.5 + h / 80).toFixed(2) + ';"></div>';
   }).join('') + '</div>';
 }
 
@@ -592,14 +592,14 @@ function confBar(pct) {
 /* =====================================================================
    3. TOAST / MODAL / SLIDEOVER / SCAN
    ===================================================================== */
-function showToast(msg, type='success') {
+function showToast(msg, type = 'success') {
   const c = document.getElementById('toastContainer');
   const el = document.createElement('div');
   el.className = `toast toast-${type}`;
   const icons = { success: '✅', warning: '⚠️', info: 'ℹ️', danger: '🚫' };
   el.innerHTML = `<span class="toast-icon">${icons[type] || '✅'}</span><span class="toast-message">${msg}</span>`;
   c.appendChild(el);
-  setTimeout(() => { el.classList.add('removing'); setTimeout(()=>el.remove(), 300); }, 3500);
+  setTimeout(() => { el.classList.add('removing'); setTimeout(() => el.remove(), 300); }, 3500);
 }
 
 let pendingFeedbackId = null;
@@ -714,17 +714,17 @@ function renderCrisisBannerHTML() {
       + 'box-shadow:0 0 20px rgba(239,68,68,0.25);">'
       + '<div style="font-size:1.4rem;flex-shrink:0;">🚨</div>'
       + '<div style="flex:1;min-width:0;">'
-      +   '<div style="color:#fca5a5;font-size:0.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Orchestrator · MỨC ĐỎ · ' + cr.detected_at + '</div>'
-      +   '<div style="color:#fff;font-weight:800;font-size:0.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
-      +     cr.product + ' — ' + cr.affected_customers + ' khách · Severity <span style="color:#f87171;">' + cr.severity_score + '/100</span>'
-      +     ' · Rủi ro <span style="color:#f87171;">' + fmt.currency(cr.revenue_at_risk) + 'đ</span>'
-      +   '</div>'
-      +   '<div style="display:flex;gap:12px;margin-top:4px;flex-wrap:wrap;">' + signals + '</div>'
+      + '<div style="color:#fca5a5;font-size:0.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Orchestrator · MỨC ĐỎ · ' + cr.detected_at + '</div>'
+      + '<div style="color:#fff;font-weight:800;font-size:0.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
+      + cr.product + ' — ' + cr.affected_customers + ' khách · Severity <span style="color:#f87171;">' + cr.severity_score + '/100</span>'
+      + ' · Rủi ro <span style="color:#f87171;">' + fmt.currency(cr.revenue_at_risk) + 'đ</span>'
+      + '</div>'
+      + '<div style="display:flex;gap:12px;margin-top:4px;flex-wrap:wrap;">' + signals + '</div>'
       + '</div>'
       + '<button class="btn-crisis-view" data-crisis="' + cr.id + '" '
-      +   'style="flex-shrink:0;background:#ef4444;color:white;border:none;padding:8px 16px;'
-      +   'border-radius:8px;font-weight:700;cursor:pointer;font-size:0.8rem;white-space:nowrap;">'
-      +   '🔥 Xử lý →'
+      + 'style="flex-shrink:0;background:#ef4444;color:white;border:none;padding:8px 16px;'
+      + 'border-radius:8px;font-weight:700;cursor:pointer;font-size:0.8rem;white-space:nowrap;">'
+      + '🔥 Xử lý →'
       + '</button>'
       + '</div>';
   }).join('');
@@ -839,7 +839,7 @@ function renderDashboard() {
           </div>
         </div>
         <div class="donut-legend">
-          ${MOCK.platforms.filter(p=>p.connected).map(p => `
+          ${MOCK.platforms.filter(p => p.connected).map(p => `
             <div class="donut-legend-item">
               <span class="legend-dot" style="background:${p.color};"></span>
               <span>${p.name}</span><strong>${p.share}%</strong>
@@ -851,7 +851,7 @@ function renderDashboard() {
       <div class="content-card">
         <div class="content-card-title">Doanh Thu vs Mục Tiêu (Tháng này)</div>
         <div class="h-bars">
-          ${MOCK.platforms.filter(p=>p.connected).map(p => `
+          ${MOCK.platforms.filter(p => p.connected).map(p => `
             <div class="h-bar-item">
               <div class="h-bar-label">${p.name}</div>
               <div class="h-bar-track"><div class="h-bar-fill" style="width:${p.target_pct}%; background:${p.color};"></div></div>
@@ -874,28 +874,28 @@ let currentSugType = 'all';
 function renderAISuggestions() {
   return `
     <div class="ai-sug-tabs">
-      <button class="ai-sug-tab ${currentSugTab==='all'?'active':''}" data-tab="all">Tất cả <span class="ai-sug-tab-count">${MOCK.suggestions.length}</span></button>
-      <button class="ai-sug-tab ${currentSugTab==='pending'?'active':''}" data-tab="pending">⏳ Chờ duyệt <span class="ai-sug-tab-count" style="background:var(--accent-amber-bg);color:var(--accent-amber);">${MOCK.suggestions.filter(s=>s.status==='pending').length}</span></button>
-      <button class="ai-sug-tab ${currentSugTab==='approved'?'active':''}" data-tab="approved">✅ Đã duyệt <span class="ai-sug-tab-count" style="background:var(--accent-emerald-bg);color:var(--accent-emerald);">${MOCK.suggestions.filter(s=>s.status==='approved').length}</span></button>
-      <button class="ai-sug-tab ${currentSugTab==='rejected'?'active':''}" data-tab="rejected">❌ Đã từ chối <span class="ai-sug-tab-count" style="background:var(--accent-rose-bg);color:var(--accent-rose);">${MOCK.suggestions.filter(s=>s.status==='rejected').length}</span></button>
+      <button class="ai-sug-tab ${currentSugTab === 'all' ? 'active' : ''}" data-tab="all">Tất cả <span class="ai-sug-tab-count">${MOCK.suggestions.length}</span></button>
+      <button class="ai-sug-tab ${currentSugTab === 'pending' ? 'active' : ''}" data-tab="pending">⏳ Chờ duyệt <span class="ai-sug-tab-count" style="background:var(--accent-amber-bg);color:var(--accent-amber);">${MOCK.suggestions.filter(s => s.status === 'pending').length}</span></button>
+      <button class="ai-sug-tab ${currentSugTab === 'approved' ? 'active' : ''}" data-tab="approved">✅ Đã duyệt <span class="ai-sug-tab-count" style="background:var(--accent-emerald-bg);color:var(--accent-emerald);">${MOCK.suggestions.filter(s => s.status === 'approved').length}</span></button>
+      <button class="ai-sug-tab ${currentSugTab === 'rejected' ? 'active' : ''}" data-tab="rejected">❌ Đã từ chối <span class="ai-sug-tab-count" style="background:var(--accent-rose-bg);color:var(--accent-rose);">${MOCK.suggestions.filter(s => s.status === 'rejected').length}</span></button>
     </div>
 
     <div class="ai-sug-sub-filters">
       <span style="font-size:0.8rem;color:var(--text-muted);font-weight:600;">Loại:</span>
-      <button class="ai-sug-tab small ${currentSugType==='all'?'active':''}" data-type="all">Tất cả</button>
-      <button class="ai-sug-tab small ${currentSugType==='price'?'active':''}" data-type="price">💰 Giá</button>
-      <button class="ai-sug-tab small ${currentSugType==='content'?'active':''}" data-type="content">📝 Nội dung</button>
-      <button class="ai-sug-tab small ${currentSugType==='promo'?'active':''}" data-type="promo">🎁 Khuyến mãi</button>
-      <button class="ai-sug-tab small ${currentSugType==='cs'?'active':''}" data-type="cs">💬 CSKH</button>
-      <button class="ai-sug-tab small ${currentSugType==='ads'?'active':''}" data-type="ads">📢 Quảng cáo</button>
+      <button class="ai-sug-tab small ${currentSugType === 'all' ? 'active' : ''}" data-type="all">Tất cả</button>
+      <button class="ai-sug-tab small ${currentSugType === 'price' ? 'active' : ''}" data-type="price">💰 Giá</button>
+      <button class="ai-sug-tab small ${currentSugType === 'content' ? 'active' : ''}" data-type="content">📝 Nội dung</button>
+      <button class="ai-sug-tab small ${currentSugType === 'promo' ? 'active' : ''}" data-type="promo">🎁 Khuyến mãi</button>
+      <button class="ai-sug-tab small ${currentSugType === 'cs' ? 'active' : ''}" data-type="cs">💬 CSKH</button>
+      <button class="ai-sug-tab small ${currentSugType === 'ads' ? 'active' : ''}" data-type="ads">📢 Quảng cáo</button>
     </div>
 
     <div class="ai-sug-list">
       ${MOCK.suggestions.filter(s => {
-        if (currentSugTab !== 'all' && s.status !== currentSugTab) return false;
-        if (currentSugType !== 'all' && s.type !== currentSugType) return false;
-        return true;
-      }).map(s => renderSugCard(s)).join('') || `<div style="padding:40px;text-align:center;color:var(--text-muted);">Không có đề xuất nào trong mục này.</div>`}
+    if (currentSugTab !== 'all' && s.status !== currentSugTab) return false;
+    if (currentSugType !== 'all' && s.type !== currentSugType) return false;
+    return true;
+  }).map(s => renderSugCard(s)).join('') || `<div style="padding:40px;text-align:center;color:var(--text-muted);">Không có đề xuất nào trong mục này.</div>`}
     </div>
   `;
 }
@@ -914,7 +914,7 @@ function renderSugCard(s) {
       <div class="sug-card-header">
         <span class="sug-type-badge" style="background:${typeMeta.color}22; color:${typeMeta.color};">${typeMeta.label}</span>
         <span class="sug-time">${s.time}</span>
-        ${s.status !== 'pending' ? `<span class="sug-status" style="color:${s.status==='approved'?'var(--accent-emerald)':'var(--accent-rose)'};margin-left:auto;">${s.status==='approved'?'✅ Đã duyệt':'❌ Đã từ chối'}</span>` : ''}
+        ${s.status !== 'pending' ? `<span class="sug-status" style="color:${s.status === 'approved' ? 'var(--accent-emerald)' : 'var(--accent-rose)'};margin-left:auto;">${s.status === 'approved' ? '✅ Đã duyệt' : '❌ Đã từ chối'}</span>` : ''}
       </div>
       <div class="sug-title">${s.title}</div>
       <div class="sug-reason">${s.reason}</div>
@@ -947,23 +947,23 @@ function renderRevenue() {
         <div class="content-card-title">Doanh Thu 7 Ngày Qua (theo sàn)</div>
         <div class="bar-chart" style="display:flex;gap:12px;align-items:flex-end;height:240px;padding:20px 8px 8px;">
           ${MOCK.revenue_7d.map(d => {
-            const total = d.shopee + d.tiki + d.website;
-            const totalH = (total/max)*100;
-            const sH = (d.shopee/total)*totalH;
-            const tH = (d.tiki/total)*totalH;
-            const wH = (d.website/total)*totalH;
-            return `
+    const total = d.shopee + d.tiki + d.website;
+    const totalH = (total / max) * 100;
+    const sH = (d.shopee / total) * totalH;
+    const tH = (d.tiki / total) * totalH;
+    const wH = (d.website / total) * totalH;
+    return `
               <div class="bar-col" style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
                 <div class="bar-value" style="font-size:0.7rem;color:var(--text-muted);margin-bottom:4px;font-weight:700;">${total}M</div>
                 <div style="width:100%;height:${totalH}%;display:flex;flex-direction:column;border-radius:6px 6px 0 0;overflow:hidden;">
-                  <div style="background:#10b981;height:${(d.shopee/total)*100}%;" title="Shopee: ${d.shopee}M"></div>
-                  <div style="background:#f59e0b;height:${(d.tiki/total)*100}%;" title="Tiki: ${d.tiki}M"></div>
-                  <div style="background:#0ea5e9;height:${(d.website/total)*100}%;" title="Website: ${d.website}M"></div>
+                  <div style="background:#10b981;height:${(d.shopee / total) * 100}%;" title="Shopee: ${d.shopee}M"></div>
+                  <div style="background:#f59e0b;height:${(d.tiki / total) * 100}%;" title="Tiki: ${d.tiki}M"></div>
+                  <div style="background:#0ea5e9;height:${(d.website / total) * 100}%;" title="Website: ${d.website}M"></div>
                 </div>
                 <div class="bar-label" style="font-size:0.75rem;color:var(--text-muted);margin-top:6px;">${d.day}</div>
               </div>
             `;
-          }).join('')}
+  }).join('')}
         </div>
         <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;font-size:0.75rem;">
           <span><span class="legend-dot" style="background:#10b981;"></span> Shopee</span>
@@ -978,14 +978,14 @@ function renderRevenue() {
           <thead><tr><th style="text-align:left;">Hạng mục</th><th style="text-align:right;">Giá trị</th><th style="text-align:right;">Trend</th></tr></thead>
           <tbody>
             ${MOCK.pnl.map(p => {
-              const trendColor = p.trend==='up'?'var(--accent-emerald)':p.trend==='down'?'var(--accent-rose)':'var(--text-muted)';
-              const trendLabel = p.trend==='up'?`↑${p.change}%`:p.trend==='down'?`~${p.change}%`:p.change>0?`~${p.change}%`:'-';
-              return `<tr ${p.highlight?'style="background:var(--accent-emerald-bg);font-weight:700;"':p.italic?'style="font-style:italic;color:var(--text-muted);"':''}>
-                <td>${p.label}${p.margin?` <span style="color:var(--accent-emerald);font-size:0.75rem;">(Margin ${p.margin}%)</span>`:''}</td>
+    const trendColor = p.trend === 'up' ? 'var(--accent-emerald)' : p.trend === 'down' ? 'var(--accent-rose)' : 'var(--text-muted)';
+    const trendLabel = p.trend === 'up' ? `↑${p.change}%` : p.trend === 'down' ? `~${p.change}%` : p.change > 0 ? `~${p.change}%` : '-';
+    return `<tr ${p.highlight ? 'style="background:var(--accent-emerald-bg);font-weight:700;"' : p.italic ? 'style="font-style:italic;color:var(--text-muted);"' : ''}>
+                <td>${p.label}${p.margin ? ` <span style="color:var(--accent-emerald);font-size:0.75rem;">(Margin ${p.margin}%)</span>` : ''}</td>
                 <td style="text-align:right;">${fmt.vnd(p.value)}</td>
                 <td style="text-align:right;color:${trendColor};">${trendLabel}</td>
               </tr>`;
-            }).join('')}
+  }).join('')}
           </tbody>
         </table>
       </div>
@@ -1028,7 +1028,7 @@ function renderInventory() {
           <thead><tr><th>Sản phẩm</th><th>SL</th><th>Turnover</th></tr></thead>
           <tbody>
             ${MOCK.inventory_low.map(i => `
-              <tr><td>${i.sku}</td><td style="color:var(--accent-rose);font-weight:700;">${i.qty}</td><td style="color:${i.days<=4?'var(--accent-rose)':'var(--accent-amber)'};">${i.days} ngày</td></tr>
+              <tr><td>${i.sku}</td><td style="color:var(--accent-rose);font-weight:700;">${i.qty}</td><td style="color:${i.days <= 4 ? 'var(--accent-rose)' : 'var(--accent-amber)'};">${i.days} ngày</td></tr>
             `).join('')}
           </tbody>
         </table>
@@ -1063,13 +1063,13 @@ function renderCompetitor() {
   const max = Math.max(...data.history);
   const min = Math.min(...data.history);
   const range = max - min || 1;
-  const points = data.history.map((v, i) => `${(i/(data.history.length-1))*100},${100 - ((v-min)/range)*80 - 10}`).join(' ');
+  const points = data.history.map((v, i) => `${(i / (data.history.length - 1)) * 100},${100 - ((v - min) / range) * 80 - 10}`).join(' ');
 
   return `
     <div style="margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
       <label style="font-size:0.85rem;font-weight:600;">📦 Chọn sản phẩm theo dõi:</label>
       <select id="compProductSelect" class="settings-input" style="max-width:280px;">
-        ${MOCK.competitor_products.map(p => `<option ${p===currentCompetitorProduct?'selected':''}>${p}</option>`).join('')}
+        ${MOCK.competitor_products.map(p => `<option ${p === currentCompetitorProduct ? 'selected' : ''}>${p}</option>`).join('')}
       </select>
       <button class="btn-approve" style="margin-left:auto;">+ Theo dõi đối thủ mới</button>
     </div>
@@ -1095,11 +1095,11 @@ function renderCompetitor() {
         <div class="content-card-title">📈 Lịch sử giá 7 ngày — ${currentCompetitorProduct}</div>
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100%;height:160px;background:var(--bg-glass);border-radius:8px;padding:8px;box-sizing:border-box;">
           <polyline fill="none" stroke="#eab308" stroke-width="1.2" points="${points}"/>
-          ${data.history.map((v,i) => `<circle cx="${(i/(data.history.length-1))*100}" cy="${100 - ((v-min)/range)*80 - 10}" r="1.2" fill="#eab308"/>`).join('')}
+          ${data.history.map((v, i) => `<circle cx="${(i / (data.history.length - 1)) * 100}" cy="${100 - ((v - min) / range) * 80 - 10}" r="1.2" fill="#eab308"/>`).join('')}
         </svg>
         <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-muted);margin-top:6px;">
           <span>7 ngày trước (${fmt.vnd(data.history[0])})</span>
-          <span>Hôm nay (${fmt.vnd(data.history[data.history.length-1])})</span>
+          <span>Hôm nay (${fmt.vnd(data.history[data.history.length - 1])})</span>
         </div>
       </div>
     </div>
@@ -1110,16 +1110,16 @@ function renderCompetitor() {
         <thead><tr><th>Shop</th><th style="text-align:right;">Giá cũ</th><th style="text-align:right;">Giá mới</th><th style="text-align:right;">Khoảng cách với bạn</th><th>AI Đánh giá</th></tr></thead>
         <tbody>
           ${data.shops.map((s, i) => {
-            const isMe = i === 0;
-            const gapColor = s.gap < -3 ? 'var(--accent-rose)' : s.gap < 0 ? 'var(--accent-amber)' : 'var(--accent-emerald)';
-            return `<tr ${isMe?'style="background:var(--accent-amber-bg);font-weight:700;"':''}>
-              <td>${isMe?'⭐ ':''}${s.name}</td>
-              <td style="text-align:right;">${s.old?fmt.vnd(s.old):'-'}</td>
+    const isMe = i === 0;
+    const gapColor = s.gap < -3 ? 'var(--accent-rose)' : s.gap < 0 ? 'var(--accent-amber)' : 'var(--accent-emerald)';
+    return `<tr ${isMe ? 'style="background:var(--accent-amber-bg);font-weight:700;"' : ''}>
+              <td>${isMe ? '⭐ ' : ''}${s.name}</td>
+              <td style="text-align:right;">${s.old ? fmt.vnd(s.old) : '-'}</td>
               <td style="text-align:right;font-weight:700;">${fmt.vnd(s.new)}</td>
-              <td style="text-align:right;color:${isMe?'var(--text-muted)':gapColor};">${isMe?'-':(s.gap>0?'+':'')+s.gap+'%'}</td>
-              <td>${isMe?'<em>Shop của bạn</em>':s.gap < -3?'<span style="color:var(--accent-rose);">⚠ Cạnh tranh mạnh</span>':s.gap < 0?'<span style="color:var(--accent-amber);">Theo dõi</span>':'<span style="color:var(--accent-emerald);">An toàn</span>'}</td>
+              <td style="text-align:right;color:${isMe ? 'var(--text-muted)' : gapColor};">${isMe ? '-' : (s.gap > 0 ? '+' : '') + s.gap + '%'}</td>
+              <td>${isMe ? '<em>Shop của bạn</em>' : s.gap < -3 ? '<span style="color:var(--accent-rose);">⚠ Cạnh tranh mạnh</span>' : s.gap < 0 ? '<span style="color:var(--accent-amber);">Theo dõi</span>' : '<span style="color:var(--accent-emerald);">An toàn</span>'}</td>
             </tr>`;
-          }).join('')}
+  }).join('')}
         </tbody>
       </table>
       <div style="margin-top:12px;padding:12px;background:var(--accent-amber-bg);border-radius:8px;font-size:0.85rem;">
@@ -1223,27 +1223,27 @@ function renderReviews() {
         </div>` : ''}
       <div class="grid-2" style="gap:14px;">
         ${filteredReviews.map(r => {
-          const ar = r.auto_reply;
-          // Xác định trạng thái auto-reply
-          const replyStatus = ar
-            ? (ar.status === 'approved' || ar.reply_type === 'positive' ? 'done'
-               : ar.status === 'pending' ? 'pending' : 'none')
-            : 'none';
-          const replyStatusBadge = replyStatus === 'done'
-            ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;color:#10b981;background:rgba(16,185,129,0.1);padding:2px 8px;border-radius:10px;">✅ Đã phản hồi</span>`
-            : replyStatus === 'pending'
-            ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;color:#f59e0b;background:rgba(245,158,11,0.1);padding:2px 8px;border-radius:10px;">⏳ Chờ duyệt</span>`
-            : `<span style="font-size:0.7rem;color:var(--text-muted);">—</span>`;
+    const ar = r.auto_reply;
+    // Xác định trạng thái auto-reply
+    const replyStatus = ar
+      ? (ar.status === 'approved' || ar.reply_type === 'positive' ? 'done'
+        : ar.status === 'pending' ? 'pending' : 'none')
+      : 'none';
+    const replyStatusBadge = replyStatus === 'done'
+      ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;color:#10b981;background:rgba(16,185,129,0.1);padding:2px 8px;border-radius:10px;">✅ Đã phản hồi</span>`
+      : replyStatus === 'pending'
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;color:#f59e0b;background:rgba(245,158,11,0.1);padding:2px 8px;border-radius:10px;">⏳ Chờ duyệt</span>`
+        : `<span style="font-size:0.7rem;color:var(--text-muted);">—</span>`;
 
-          // Nội dung phần auto-reply mở rộng bên dưới review card
-          const autoReplySection = ar ? `
+    // Nội dung phần auto-reply mở rộng bên dưới review card
+    const autoReplySection = ar ? `
             <div class="review-auto-reply-panel" style="margin-top:12px;border-top:1px solid var(--border-primary);padding-top:10px;">
               <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;cursor:pointer;" onclick="this.parentElement.querySelector('.review-reply-body').classList.toggle('hidden')">
                 <span style="font-size:0.72rem;font-weight:700;color:var(--accent-indigo);">💬 Phản hồi AI đã soạn</span>
                 <span style="font-size:0.65rem;color:var(--text-muted);">(nhấn để xem/ẩn)</span>
               </div>
               <div class="review-reply-body">
-                <div style="background:var(--bg-glass);border-radius:8px;padding:10px;font-size:0.78rem;color:var(--text-secondary);line-height:1.6;margin-bottom:6px;border-left:3px solid ${ar.reply_type==='positive'?'#10b981':'#f59e0b'};">
+                <div style="background:var(--bg-glass);border-radius:8px;padding:10px;font-size:0.78rem;color:var(--text-secondary);line-height:1.6;margin-bottom:6px;border-left:3px solid ${ar.reply_type === 'positive' ? '#10b981' : '#f59e0b'};">
                   <div style="font-size:0.67rem;font-weight:700;color:var(--text-muted);margin-bottom:4px;">📢 PHẢN HỒI CÔNG KHAI (Review section)</div>
                   "${ar.public_reply}"
                 </div>
@@ -1261,7 +1261,7 @@ function renderReviews() {
               </div>
             </div>` : '';
 
-          return `
+    return `
           <div class="review-card">
             <div class="review-card-header">
               <strong class="review-card-author">${r.author}</strong>
@@ -1269,19 +1269,19 @@ function renderReviews() {
             </div>
             ${r.product_name ? `<div style="font-size:0.72rem;color:var(--accent-indigo);font-weight:600;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.product_name}">📦 ${r.product_name}</div>` : ''}
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-              <div class="star-display" style="color:var(--accent-amber);">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+              <div class="star-display" style="color:var(--accent-amber);">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
               ${replyStatusBadge}
             </div>
             <p class="review-card-text">${r.text}</p>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
-              <span class="tag-item" style="background:${r.tag.type==='pos'?'var(--accent-emerald-bg)':'var(--accent-rose-bg)'};color:${r.tag.type==='pos'?'var(--accent-emerald)':'var(--accent-rose)'};">
-                ${r.tag.type==='pos'?'Điểm khen':'Vấn đề'}: ${r.tag.label}
+              <span class="tag-item" style="background:${r.tag.type === 'pos' ? 'var(--accent-emerald-bg)' : 'var(--accent-rose-bg)'};color:${r.tag.type === 'pos' ? 'var(--accent-emerald)' : 'var(--accent-rose)'};">
+                ${r.tag.type === 'pos' ? 'Điểm khen' : 'Vấn đề'}: ${r.tag.label}
               </span>
               ${!ar ? `<button class="btn-sug-detail" data-action="ai-reply" data-author="${r.author}" data-db-id="${r.db_id || ''}">${ICON.brain} AI soạn phản hồi</button>` : ''}
             </div>
             ${autoReplySection}
           </div>`;
-        }).join('')}
+  }).join('')}
       </div>
     </div>
   `;
@@ -1426,23 +1426,23 @@ function renderMedia() {
         <thead><tr><th>Campaign</th><th>Kênh</th><th style="text-align:right;">Chi phí</th><th style="text-align:right;">Chuyển đổi</th><th style="text-align:right;">ROAS</th><th>AI Action</th></tr></thead>
         <tbody>
           ${MOCK.ads_campaigns.map(c => {
-            const aMap = {
-              scale: { color:'#10b981', bg:'var(--accent-emerald-bg)', label:'⬆ Tự Build Scale budget' },
-              maintain: { color:'#0ea5e9', bg:'rgba(14,165,233,0.15)', label:'→ Duy trì' },
-              cut: { color:'#ef4444', bg:'var(--accent-rose-bg)', label:'⬇ Tự Cắt giảm' }
-            }[c.action];
-            return `<tr>
+    const aMap = {
+      scale: { color: '#10b981', bg: 'var(--accent-emerald-bg)', label: '⬆ Tự Build Scale budget' },
+      maintain: { color: '#0ea5e9', bg: 'rgba(14,165,233,0.15)', label: '→ Duy trì' },
+      cut: { color: '#ef4444', bg: 'var(--accent-rose-bg)', label: '⬇ Tự Cắt giảm' }
+    }[c.action];
+    return `<tr>
               <td><strong>${c.name}</strong></td>
               <td>${c.channel}</td>
               <td style="text-align:right;">${fmt.vnd(c.cost)}</td>
               <td style="text-align:right;">${c.conv} đơn</td>
-              <td style="text-align:right;font-weight:700;color:${c.roas>=3?'var(--accent-emerald)':'var(--accent-rose)'};">${c.roas}x</td>
+              <td style="text-align:right;font-weight:700;color:${c.roas >= 3 ? 'var(--accent-emerald)' : 'var(--accent-rose)'};">${c.roas}x</td>
               <td>
                 <span class="table-badge" style="background:${aMap.bg};color:${aMap.color};cursor:help;" title="${c.ai_reason}">${aMap.label}</span>
                 <div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;">${c.ai_reason}</div>
               </td>
             </tr>`;
-          }).join('')}
+  }).join('')}
         </tbody>
       </table>
     </div>
@@ -1477,8 +1477,8 @@ function sentimentBar(score) {
 }
 
 function priorityDot(p) {
-  const map = {0:'#ef4444',1:'#f59e0b',2:'#10b981',3:'#0ea5e9'};
-  const lbl = {0:'Khẩn',1:'Cao',2:'TB',3:'Thấp'};
+  const map = { 0: '#ef4444', 1: '#f59e0b', 2: '#10b981', 3: '#0ea5e9' };
+  const lbl = { 0: 'Khẩn', 1: 'Cao', 2: 'TB', 3: 'Thấp' };
   return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.65rem;font-weight:700;color:${map[p]};">
     <span style="width:6px;height:6px;border-radius:50%;background:${map[p]};display:inline-block;"></span>${lbl[p]}
   </span>`;
@@ -1504,8 +1504,8 @@ function renderChat() {
   const messages = MOCK.chat_messages[currentChatId] || [];
   const filtered = chatFilter === 'all' ? MOCK.conversations
     : chatFilter === 'pending' ? MOCK.conversations.filter(c => c.status === 'pending')
-    : chatFilter === 'escalate' ? MOCK.conversations.filter(c => c.status === 'escalate')
-    : MOCK.conversations.filter(c => c.status === 'auto');
+      : chatFilter === 'escalate' ? MOCK.conversations.filter(c => c.status === 'escalate')
+        : MOCK.conversations.filter(c => c.status === 'auto');
 
   return `
     <!-- ── Top KPI Strip ── -->
@@ -1540,18 +1540,18 @@ function renderChat() {
         <div style="padding:14px 16px;border-bottom:1px solid var(--border-primary);">
           <div style="font-weight:700;font-size:0.9rem;margin-bottom:10px;">Hộp Thư — Smart AI</div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;">
-            ${['all','escalate','pending','auto'].map(f => {
-              const lMap = {all:'Tất cả',escalate:'🔴 Khẩn',pending:'🟡 Chờ duyệt',auto:'✅ Tự động'};
-              const cnt = f==='all'?MOCK.conversations.length:MOCK.conversations.filter(c=>c.status===f).length;
-              return `<button class="ai-sug-tab small ${chatFilter===f?'active':''}" data-chatfilter="${f}" style="font-size:0.7rem;padding:4px 8px;">${lMap[f]} ${cnt}</button>`;
-            }).join('')}
+            ${['all', 'escalate', 'pending', 'auto'].map(f => {
+    const lMap = { all: 'Tất cả', escalate: '🔴 Khẩn', pending: '🟡 Chờ duyệt', auto: '✅ Tự động' };
+    const cnt = f === 'all' ? MOCK.conversations.length : MOCK.conversations.filter(c => c.status === f).length;
+    return `<button class="ai-sug-tab small ${chatFilter === f ? 'active' : ''}" data-chatfilter="${f}" style="font-size:0.7rem;padding:4px 8px;">${lMap[f]} ${cnt}</button>`;
+  }).join('')}
           </div>
         </div>
         <div style="overflow-y:auto;flex:1;">
           ${filtered.map(c => {
-            const urgentColor = c.priority===0?'var(--accent-rose)':c.priority===1?'var(--accent-amber)':'transparent';
-            return `
-            <div class="chat-conv-item ${c.id===currentChatId?'active':''}" data-conv="${c.id}"
+    const urgentColor = c.priority === 0 ? 'var(--accent-rose)' : c.priority === 1 ? 'var(--accent-amber)' : 'transparent';
+    return `
+            <div class="chat-conv-item ${c.id === currentChatId ? 'active' : ''}" data-conv="${c.id}"
                  style="border-left:3px solid ${urgentColor};padding:12px 12px 10px;">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;">
                 <div style="display:flex;gap:8px;align-items:flex-start;flex:1;min-width:0;">
@@ -1559,8 +1559,8 @@ function renderChat() {
                   <div style="flex:1;min-width:0;">
                     <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
                       <span style="font-weight:700;font-size:0.83rem;">${c.name}</span>
-                      ${c.vip?'<span title="VIP" style="color:var(--accent-amber);font-size:0.7rem;">⭐</span>':''}
-                      ${c.returning?'<span title="Khách quen" style="font-size:0.65rem;color:var(--accent-blue);background:rgba(14,165,233,0.1);padding:1px 4px;border-radius:3px;">QUEN</span>':''}
+                      ${c.vip ? '<span title="VIP" style="color:var(--accent-amber);font-size:0.7rem;">⭐</span>' : ''}
+                      ${c.returning ? '<span title="Khách quen" style="font-size:0.65rem;color:var(--accent-blue);background:rgba(14,165,233,0.1);padding:1px 4px;border-radius:3px;">QUEN</span>' : ''}
                     </div>
                     <div style="font-size:0.75rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">${c.preview}</div>
                     <div style="display:flex;gap:6px;align-items:center;margin-top:4px;flex-wrap:wrap;">
@@ -1571,13 +1571,13 @@ function renderChat() {
                 </div>
                 <div style="text-align:right;flex-shrink:0;margin-left:6px;">
                   <div style="font-size:0.7rem;color:var(--text-muted);">${c.time}</div>
-                  ${c.wait_min>0?`<div style="font-size:0.65rem;font-weight:700;color:${c.wait_min>45?'var(--accent-rose)':'var(--accent-amber)'};">⏱ ${c.wait_min}p</div>`:''}
-                  ${c.unread?`<div style="width:8px;height:8px;border-radius:50%;background:var(--accent-rose);margin:4px 0 0 auto;"></div>`:''}
+                  ${c.wait_min > 0 ? `<div style="font-size:0.65rem;font-weight:700;color:${c.wait_min > 45 ? 'var(--accent-rose)' : 'var(--accent-amber)'};">⏱ ${c.wait_min}p</div>` : ''}
+                  ${c.unread ? `<div style="width:8px;height:8px;border-radius:50%;background:var(--accent-rose);margin:4px 0 0 auto;"></div>` : ''}
                 </div>
               </div>
               <div style="margin-top:6px;">${sentimentBar(c.sentiment)}</div>
             </div>`;
-          }).join('')}
+  }).join('')}
         </div>
       </div>
 
@@ -1588,13 +1588,13 @@ function renderChat() {
           <div style="display:flex;justify-content:space-between;align-items:center;">
             <div>
               <div style="font-weight:700;font-size:0.95rem;">${conv.name}
-                ${conv.vip?'<span style="color:var(--accent-amber);font-size:0.75rem;">⭐ VIP</span>':''}
-                ${conv.angry?'<span style="color:var(--accent-rose);font-size:0.75rem;">😡 Cảm xúc tiêu cực</span>':''}
+                ${conv.vip ? '<span style="color:var(--accent-amber);font-size:0.75rem;">⭐ VIP</span>' : ''}
+                ${conv.angry ? '<span style="color:var(--accent-rose);font-size:0.75rem;">😡 Cảm xúc tiêu cực</span>' : ''}
               </div>
               <div style="display:flex;gap:12px;margin-top:2px;font-size:0.72rem;color:var(--text-muted);">
                 <span>📦 ${conv.platform}</span>
                 <span>🏷 ${conv.category}</span>
-                ${conv.wait_min>0?`<span style="color:${conv.wait_min>45?'var(--accent-rose)':'var(--accent-amber)'};">⏱ Chờ ${conv.wait_min} phút</span>`:'<span style="color:var(--accent-emerald);">✅ Đã phản hồi</span>'}
+                ${conv.wait_min > 0 ? `<span style="color:${conv.wait_min > 45 ? 'var(--accent-rose)' : 'var(--accent-amber)'};">⏱ Chờ ${conv.wait_min} phút</span>` : '<span style="color:var(--accent-emerald);">✅ Đã phản hồi</span>'}
               </div>
             </div>
             <div style="display:flex;gap:6px;">
@@ -1607,26 +1607,26 @@ function renderChat() {
         <!-- Messages -->
         <div class="chat-detail-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;">
           ${messages.map(m => {
-            if (m.from === 'customer') {
-              return `<div style="align-self:flex-start;max-width:85%;">
+    if (m.from === 'customer') {
+      return `<div style="align-self:flex-start;max-width:85%;">
                 <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:4px;">${conv.name} · ${m.time}</div>
                 <div class="chat-bubble" style="background:#f1f5f9;padding:10px 14px;border-radius:0 12px 12px 12px;">${m.text}</div>
               </div>`;
-            }
-            if (m.from === 'ai_thinking') {
-              return `<div style="background:linear-gradient(135deg,rgba(234,179,8,0.08),rgba(234,179,8,0.03));padding:12px 14px;border-radius:10px;border-left:3px solid var(--accent-amber);">
+    }
+    if (m.from === 'ai_thinking') {
+      return `<div style="background:linear-gradient(135deg,rgba(234,179,8,0.08),rgba(234,179,8,0.03));padding:12px 14px;border-radius:10px;border-left:3px solid var(--accent-amber);">
                 <div style="font-weight:700;color:var(--accent-indigo);font-size:0.8rem;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
                   ${ICON.brain} <span>Context AI đang phân tích</span>
                 </div>
-                ${m.context?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
-                  ${m.context.map(cx=>`<div style="font-size:0.72rem;color:var(--text-secondary);padding:3px 6px;background:rgba(255,255,255,0.6);border-radius:4px;">${cx}</div>`).join('')}
-                </div>`:''}
+                ${m.context ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                  ${m.context.map(cx => `<div style="font-size:0.72rem;color:var(--text-secondary);padding:3px 6px;background:rgba(255,255,255,0.6);border-radius:4px;">${cx}</div>`).join('')}
+                </div>`: ''}
               </div>`;
-            }
-            if (m.from === 'ai_draft') {
-              if (chatDraftEditMode) {
-                // ── CHẾ ĐỘ CHỈNH SỬA ──
-                return `<div style="background:rgba(99,102,241,0.07);padding:14px;border-radius:10px;border-left:3px solid var(--accent-indigo);">
+    }
+    if (m.from === 'ai_draft') {
+      if (chatDraftEditMode) {
+        // ── CHẾ ĐỘ CHỈNH SỬA ──
+        return `<div style="background:rgba(99,102,241,0.07);padding:14px;border-radius:10px;border-left:3px solid var(--accent-indigo);">
                   <div style="font-weight:700;font-size:0.78rem;color:var(--accent-indigo);margin-bottom:8px;">
                     ✏️ Đang chỉnh sửa nháp AI — Sửa xong nhấn Gửi
                   </div>
@@ -1638,12 +1638,12 @@ function renderChat() {
                     <button class="btn-chat-cancel-edit btn-modal-cancel" style="padding:8px 14px;">✕ Hủy</button>
                   </div>
                 </div>`;
-              }
-              // ── CHẾ ĐỘ XEM THƯỜNG ──
-              return `<div style="background:var(--accent-emerald-bg);padding:14px;border-radius:10px;border-left:3px solid var(--accent-emerald);">
+      }
+      // ── CHẾ ĐỘ XEM THƯỜNG ──
+      return `<div style="background:var(--accent-emerald-bg);padding:14px;border-radius:10px;border-left:3px solid var(--accent-emerald);">
                 <div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:0.78rem;color:var(--accent-emerald);margin-bottom:8px;">
                   <span>🤖 NHÁP AI — Chờ duyệt</span>
-                  ${m.confidence?`<span style="background:var(--accent-emerald);color:white;padding:2px 8px;border-radius:10px;font-size:0.7rem;">Confidence ${m.confidence}%</span>`:''}
+                  ${m.confidence ? `<span style="background:var(--accent-emerald);color:white;padding:2px 8px;border-radius:10px;font-size:0.7rem;">Confidence ${m.confidence}%</span>` : ''}
                 </div>
                 <div style="color:var(--text-primary);line-height:1.6;margin-bottom:12px;font-size:0.88rem;">${m.text}</div>
                 <div style="display:flex;gap:8px;">
@@ -1652,50 +1652,50 @@ function renderChat() {
                   <button class="btn-chat-deny" data-action="deny-chat" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border-primary);background:var(--bg-glass);cursor:pointer;font-size:0.85rem;">❌</button>
                 </div>
               </div>`;
-            }
-            if (m.from === 'ai_sent') {
-              // Badge hiển thị confidence + trạng thái tự động gửi
-              const _conf = (m.confidence !== undefined && m.confidence !== null) ? m.confidence : null;
-              const _isSafe = m.is_safe;
-              let _metaBadge = '';
-              if (_conf !== null || _isSafe !== null) {
-                _metaBadge = `<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;justify-content:flex-end;">` +
-                  (_conf !== null
-                    ? `<span style="font-size:0.67rem;padding:2px 6px;border-radius:4px;
+    }
+    if (m.from === 'ai_sent') {
+      // Badge hiển thị confidence + trạng thái tự động gửi
+      const _conf = (m.confidence !== undefined && m.confidence !== null) ? m.confidence : null;
+      const _isSafe = m.is_safe;
+      let _metaBadge = '';
+      if (_conf !== null || _isSafe !== null) {
+        _metaBadge = `<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;justify-content:flex-end;">` +
+          (_conf !== null
+            ? `<span style="font-size:0.67rem;padding:2px 6px;border-radius:4px;
                         background:${_conf >= 70 ? 'var(--accent-emerald-bg)' : 'var(--accent-rose-bg)'};
                         color:${_conf >= 70 ? 'var(--accent-emerald)' : 'var(--accent-rose)'};">
                         🎯 Confidence: ${_conf}%</span>`
-                    : '') +
-                  (_isSafe === true
-                    ? `<span style="font-size:0.67rem;padding:2px 6px;border-radius:4px;
+            : '') +
+          (_isSafe === true
+            ? `<span style="font-size:0.67rem;padding:2px 6px;border-radius:4px;
                         background:var(--accent-emerald-bg);color:var(--accent-emerald);">
                         ✅ Được gửi tự động</span>`
-                    : (_isSafe === null || _isSafe === undefined)
-                      ? ''
-                      : '') +
-                  `</div>`;
-              }
-              return `<div style="align-self:flex-end;max-width:85%;">
+            : (_isSafe === null || _isSafe === undefined)
+              ? ''
+              : '') +
+          `</div>`;
+      }
+      return `<div style="align-self:flex-end;max-width:85%;">
                 <div style="font-size:0.7rem;color:var(--accent-emerald);margin-bottom:4px;text-align:right;">
-                  🤖 AI Agent · ${m.time}${m.edited?' · ✏ Đã chỉnh sửa':''}
+                  🤖 AI Agent · ${m.time}${m.edited ? ' · ✏ Đã chỉnh sửa' : ''}
                 </div>
                 <div class="chat-bubble" style="background:var(--accent-emerald-bg);padding:10px 14px;border-radius:12px 0 12px 12px;border:1px solid var(--accent-emerald)40;">
                   ${m.text}
                   ${_metaBadge}
                 </div>
               </div>`;
-            }
-            if (m.from === 'shop_owner') {
-              return `<div style="align-self:flex-end;max-width:85%;">
+    }
+    if (m.from === 'shop_owner') {
+      return `<div style="align-self:flex-end;max-width:85%;">
                 <div style="font-size:0.7rem;color:var(--accent-indigo);margin-bottom:4px;text-align:right;">👤 Chủ shop · ${m.time}</div>
                 <div class="chat-bubble" style="background:rgba(99,102,241,0.1);padding:10px 14px;border-radius:12px 0 12px 12px;border:1px solid rgba(99,102,241,0.3);">${m.text}</div>
               </div>`;
-            }
-            if (m.from === 'system') {
-              return `<div style="background:var(--accent-rose-bg);padding:10px 14px;border-radius:8px;font-size:0.82rem;color:var(--accent-rose);font-weight:600;">${m.text}</div>`;
-            }
-            return '';
-          }).join('')}
+    }
+    if (m.from === 'system') {
+      return `<div style="background:var(--accent-rose-bg);padding:10px 14px;border-radius:8px;font-size:0.82rem;color:var(--accent-rose);font-weight:600;">${m.text}</div>`;
+    }
+    return '';
+  }).join('')}
         </div>
 
         <!-- Input -->
@@ -1705,7 +1705,7 @@ function renderChat() {
             <button class="btn-approve" data-action="chat-send-msg" style="white-space:nowrap;">Gửi →</button>
           </div>
           <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
-            ${['Xin lỗi + hỗ trợ đổi trả','Tư vấn chọn màu','Báo giá sỉ','Xác nhận đơn hàng'].map(t=>`<button class="guidance-tag" data-chattemplate="${t}" style="font-size:0.7rem;padding:4px 8px;">${t}</button>`).join('')}
+            ${['Xin lỗi + hỗ trợ đổi trả', 'Tư vấn chọn màu', 'Báo giá sỉ', 'Xác nhận đơn hàng'].map(t => `<button class="guidance-tag" data-chattemplate="${t}" style="font-size:0.7rem;padding:4px 8px;">${t}</button>`).join('')}
           </div>
         </div>
       </div>
@@ -1731,11 +1731,11 @@ function renderChat() {
                 <div style="font-size:0.68rem;color:var(--text-muted);">Tổng chi tiêu</div>
               </div>
               <div style="background:var(--bg-glass);border-radius:8px;padding:8px;text-align:center;">
-                <div style="font-size:1rem;font-weight:800;color:${conv.customer.risk==='high'?'var(--accent-rose)':conv.customer.risk==='medium'?'var(--accent-amber)':'var(--accent-emerald)'};">${conv.customer.churn}</div>
+                <div style="font-size:1rem;font-weight:800;color:${conv.customer.risk === 'high' ? 'var(--accent-rose)' : conv.customer.risk === 'medium' ? 'var(--accent-amber)' : 'var(--accent-emerald)'};">${conv.customer.churn}</div>
                 <div style="font-size:0.68rem;color:var(--text-muted);">Xác suất rời bỏ</div>
               </div>
             </div>
-            <div style="font-size:0.75rem;padding:8px;background:${conv.customer.risk==='high'?'var(--accent-rose-bg)':conv.customer.risk==='medium'?'var(--accent-amber-bg)':'var(--accent-emerald-bg)'};border-radius:6px;color:${conv.customer.risk==='high'?'var(--accent-rose)':conv.customer.risk==='medium'?'var(--accent-amber)':'var(--accent-emerald)'};">
+            <div style="font-size:0.75rem;padding:8px;background:${conv.customer.risk === 'high' ? 'var(--accent-rose-bg)' : conv.customer.risk === 'medium' ? 'var(--accent-amber-bg)' : 'var(--accent-emerald-bg)'};border-radius:6px;color:${conv.customer.risk === 'high' ? 'var(--accent-rose)' : conv.customer.risk === 'medium' ? 'var(--accent-amber)' : 'var(--accent-emerald)'};">
               ${ICON.brain} ${conv.customer.note}
             </div>
           </div>
@@ -1758,7 +1758,7 @@ function renderChat() {
         <!-- AI Recommended Action -->
         <div class="content-card" style="padding:14px;border-color:var(--accent-amber);">
           <div style="font-weight:700;font-size:0.82rem;color:var(--accent-indigo);margin-bottom:10px;">${ICON.brain} Hành động AI đề xuất</div>
-          ${conv.status==='escalate'?`
+          ${conv.status === 'escalate' ? `
             <div style="font-size:0.8rem;line-height:1.6;">
               <div style="color:var(--accent-rose);font-weight:700;margin-bottom:6px;">🚨 Cần xử lý ngay</div>
               <div style="color:var(--text-secondary);">1. Xác nhận đơn hàng và kiểm tra lỗi</div>
@@ -1767,12 +1767,12 @@ function renderChat() {
               <div style="color:var(--text-secondary);">4. Gắn tag "Lỗi lô hàng" để theo dõi</div>
             </div>
             <button class="btn-approve" style="width:100%;margin-top:10px;">Áp dụng kịch bản xử lý</button>
-          `:conv.status==='pending'?`
+          `: conv.status === 'pending' ? `
             <div style="font-size:0.8rem;line-height:1.6;color:var(--text-secondary);">
               Đề xuất tối ưu doanh thu từ khách VIP:<br>Giảm 5% + tặng kèm mút tán phấn → margin vẫn giữ 55%
             </div>
             <button class="btn-approve" style="width:100%;margin-top:10px;">Dùng đề xuất AI</button>
-          `:`
+          `: `
             <div style="font-size:0.8rem;color:var(--text-secondary);">Cuộc hội thoại đang được xử lý tốt. Không cần can thiệp.</div>
           `}
         </div>
@@ -1786,13 +1786,13 @@ function renderChat() {
         <span style="font-size:0.75rem;color:var(--text-muted);">Từ 847 cuộc hội thoại</span>
       </div>
       <div style="display:flex;flex-direction:column;gap:0;">
-        ${MOCK.chat_clusters.map((cl,i) => `
-          <div style="display:flex;align-items:center;gap:14px;padding:12px 0;${i<MOCK.chat_clusters.length-1?'border-bottom:1px solid var(--border-primary);':''}">
+        ${MOCK.chat_clusters.map((cl, i) => `
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 0;${i < MOCK.chat_clusters.length - 1 ? 'border-bottom:1px solid var(--border-primary);' : ''}">
             <div style="font-size:1.2rem;flex-shrink:0;">${cl.icon}</div>
             <div style="flex:1;">
               <div style="display:flex;align-items:center;gap:8px;">
                 <strong style="font-size:0.88rem;">${cl.label}</strong>
-                <span style="background:${cl.urgent?'var(--accent-rose-bg)':'var(--accent-amber-bg)'};color:${cl.urgent?'var(--accent-rose)':'var(--accent-amber)'};font-size:0.68rem;font-weight:700;padding:2px 6px;border-radius:4px;">${cl.count} khách</span>
+                <span style="background:${cl.urgent ? 'var(--accent-rose-bg)' : 'var(--accent-amber-bg)'};color:${cl.urgent ? 'var(--accent-rose)' : 'var(--accent-amber)'};font-size:0.68rem;font-weight:700;padding:2px 6px;border-radius:4px;">${cl.count} khách</span>
               </div>
               <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">Impact: ${cl.impact}</div>
             </div>
@@ -1812,8 +1812,8 @@ function renderChat() {
         <button class="btn-approve">Gửi tất cả</button>
       </div>
       <div style="display:flex;flex-direction:column;gap:0;">
-        ${MOCK.proactive_targets.map((t,i) => `
-          <div style="display:flex;align-items:center;gap:14px;padding:12px 0;${i<MOCK.proactive_targets.length-1?'border-bottom:1px solid var(--border-primary);':''}">
+        ${MOCK.proactive_targets.map((t, i) => `
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 0;${i < MOCK.proactive_targets.length - 1 ? 'border-bottom:1px solid var(--border-primary);' : ''}">
             <div style="width:36px;height:36px;border-radius:50%;background:var(--accent-indigo-bg);color:var(--accent-indigo);display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">${t.name[0]}</div>
             <div style="flex:1;">
               <div style="font-weight:700;font-size:0.85rem;">${t.name}</div>
@@ -1864,10 +1864,10 @@ let currentSettingsTab = 'business';
 function renderSettings() {
   return `
     <div class="settings-tabs">
-      <button class="settings-tab ${currentSettingsTab==='business'?'active':''}" data-stab="business">🏢 Thông tin doanh nghiệp</button>
-      <button class="settings-tab ${currentSettingsTab==='ai'?'active':''}" data-stab="ai">${ICON.brain} Cấu hình AI Agent</button>
-      <button class="settings-tab ${currentSettingsTab==='platforms'?'active':''}" data-stab="platforms">🔗 Kết nối sàn</button>
-      <button class="settings-tab ${currentSettingsTab==='team'?'active':''}" data-stab="team">👥 Phân quyền & Bảo mật</button>
+      <button class="settings-tab ${currentSettingsTab === 'business' ? 'active' : ''}" data-stab="business">🏢 Thông tin doanh nghiệp</button>
+      <button class="settings-tab ${currentSettingsTab === 'ai' ? 'active' : ''}" data-stab="ai">${ICON.brain} Cấu hình AI Agent</button>
+      <button class="settings-tab ${currentSettingsTab === 'platforms' ? 'active' : ''}" data-stab="platforms">🔗 Kết nối sàn</button>
+      <button class="settings-tab ${currentSettingsTab === 'team' ? 'active' : ''}" data-stab="team">👥 Phân quyền & Bảo mật</button>
     </div>
     <div id="settingsTabContent">${renderSettingsTab()}</div>
   `;
@@ -1930,7 +1930,7 @@ function renderSettingsTab() {
                 <div style="width:40px;height:40px;border-radius:8px;background:${p.color}22;color:${p.color};display:flex;align-items:center;justify-content:center;font-weight:800;">${p.name[0]}</div>
                 <strong>${p.name}</strong>
               </div>
-              <span class="status-badge" style="background:${p.connected?'var(--accent-emerald-bg)':'var(--accent-amber-bg)'};color:${p.connected?'var(--accent-emerald)':'var(--accent-amber)'};">${p.connected?'Đã kết nối':'Chưa kết nối'}</span>
+              <span class="status-badge" style="background:${p.connected ? 'var(--accent-emerald-bg)' : 'var(--accent-amber-bg)'};color:${p.connected ? 'var(--accent-emerald)' : 'var(--accent-amber)'};">${p.connected ? 'Đã kết nối' : 'Chưa kết nối'}</span>
             </div>
             ${p.connected ? `
               <div class="platform-details" style="font-size:0.8rem;color:var(--text-muted);line-height:1.8;">
@@ -1984,11 +1984,11 @@ function renderSettingsTab() {
         </div>
         <div style="margin-top:10px;display:flex;align-items:center;gap:8px;font-size:0.8rem;">
           ${_keySet
-            ? `<span style="color:var(--accent-emerald);font-weight:700;">✅ Key đã được lưu</span>
+        ? `<span style="color:var(--accent-emerald);font-weight:700;">✅ Key đã được lưu</span>
                <span style="color:var(--text-muted);">(${_keyPreview})</span>
                <button onclick="_testApiKey()" class="btn-sug-detail" style="font-size:0.72rem;padding:3px 10px;margin-left:4px;">🔍 Kiểm tra kết nối</button>`
-            : `<span style="color:var(--accent-amber);font-weight:700;">⚠️ Chưa có key — các tính năng admin sẽ bị từ chối (401)</span>`
-          }
+        : `<span style="color:var(--accent-amber);font-weight:700;">⚠️ Chưa có key — các tính năng admin sẽ bị từ chối (401)</span>`
+      }
         </div>
       </div>
 
@@ -2003,7 +2003,7 @@ function renderSettingsTab() {
             ${MOCK.team_members.map(m => `<tr>
               <td><strong>${m.name}</strong></td>
               <td>${m.email}</td>
-              <td><span class="table-badge" style="background:${m.role==='Admin'?'var(--accent-rose-bg)':m.role==='Vận hành'?'var(--accent-amber-bg)':'var(--bg-glass)'};color:${m.role==='Admin'?'var(--accent-rose)':m.role==='Vận hành'?'var(--accent-amber)':'var(--text-muted)'};">${m.role}</span></td>
+              <td><span class="table-badge" style="background:${m.role === 'Admin' ? 'var(--accent-rose-bg)' : m.role === 'Vận hành' ? 'var(--accent-amber-bg)' : 'var(--bg-glass)'};color:${m.role === 'Admin' ? 'var(--accent-rose)' : m.role === 'Vận hành' ? 'var(--accent-amber)' : 'var(--text-muted)'};">${m.role}</span></td>
               <td><button class="btn-modal-cancel">Sửa</button></td>
             </tr>`).join('')}
           </tbody>
@@ -2014,16 +2014,16 @@ function renderSettingsTab() {
         <div class="content-card-title">📜 Lịch sử hoạt động AI 7 ngày gần nhất</div>
         <div class="activity-timeline">
           ${MOCK.recent_activity.map(a => {
-            const sColor = a.status==='approved'?'var(--accent-emerald)':a.status==='rejected'?'var(--accent-rose)':'var(--accent-amber)';
-            return `<div class="activity-item">
+        const sColor = a.status === 'approved' ? 'var(--accent-emerald)' : a.status === 'rejected' ? 'var(--accent-rose)' : 'var(--accent-amber)';
+        return `<div class="activity-item">
               <div class="activity-dot" style="background:${sColor};"></div>
               <div style="flex:1;">
                 <div style="font-weight:600;font-size:0.85rem;">${a.action}</div>
                 <div class="activity-time">${a.user} · ${a.time} trước</div>
               </div>
-              <span class="status-badge" style="background:${sColor}22;color:${sColor};">${a.status==='approved'?'Duyệt':a.status==='rejected'?'Từ chối':'Chờ duyệt'}</span>
+              <span class="status-badge" style="background:${sColor}22;color:${sColor};">${a.status === 'approved' ? 'Duyệt' : a.status === 'rejected' ? 'Từ chối' : 'Chờ duyệt'}</span>
             </div>`;
-          }).join('')}
+      }).join('')}
         </div>
       </div>
     `;
@@ -2049,9 +2049,9 @@ function renderAIPerformance() {
           ${MOCK.ai_perf_by_agent.map(a => `<tr>
             <td><strong>${a.icon} ${a.name}</strong></td>
             <td style="text-align:right;">${a.total}</td>
-            <td style="text-align:right;color:${a.approved>=80?'var(--accent-emerald)':a.approved>=70?'var(--accent-amber)':'var(--accent-rose)'};font-weight:700;">${a.approved}%</td>
+            <td style="text-align:right;color:${a.approved >= 80 ? 'var(--accent-emerald)' : a.approved >= 70 ? 'var(--accent-amber)' : 'var(--accent-rose)'};font-weight:700;">${a.approved}%</td>
             <td>${a.result}</td>
-            <td>${a.trend==='up'?'<span style="color:var(--accent-emerald);">↑ Cải thiện</span>':'<span style="color:var(--text-muted);">→ Ổn định</span>'}</td>
+            <td>${a.trend === 'up' ? '<span style="color:var(--accent-emerald);">↑ Cải thiện</span>' : '<span style="color:var(--text-muted);">→ Ổn định</span>'}</td>
           </tr>`).join('')}
         </tbody>
       </table>
@@ -2064,7 +2064,7 @@ function renderAIPerformance() {
           <div class="bar-col" style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
             <div class="bar-value" style="font-size:0.75rem;color:var(--text-muted);margin-bottom:4px;font-weight:700;">${v}%</div>
             <div class="bar-fill" style="width:100%;height:${v}%;background:linear-gradient(180deg,#10b981 0%,#34d399 100%);border-radius:6px 6px 0 0;"></div>
-            <div class="bar-label" style="font-size:0.7rem;color:var(--text-muted);margin-top:6px;">T${i+1}</div>
+            <div class="bar-label" style="font-size:0.7rem;color:var(--text-muted);margin-top:6px;">T${i + 1}</div>
           </div>
         `).join('')}
       </div>
@@ -2099,8 +2099,8 @@ function stubPage(title, icon, desc, comingSoon) {
 function renderMarketOverview() {
   const trends = MOCK.market_trends;
   const gaps = MOCK.competitor_gaps;
-  const totalChatSignals = trends.reduce((s,t) => s + t.chatbot_count, 0);
-  const totalReviewSignals = trends.reduce((s,t) => s + t.review_count, 0);
+  const totalChatSignals = trends.reduce((s, t) => s + t.chatbot_count, 0);
+  const totalReviewSignals = trends.reduce((s, t) => s + t.review_count, 0);
   const highPrioOpps = trends.filter(t => t.sentiment_pct.negative > 40 || t.trend_pct > 20).length;
 
   function sentBar(neg, neu, pos) {
@@ -2131,7 +2131,7 @@ function renderMarketOverview() {
   // Build opportunities from trends (intersecting chatbot + review)
   const opportunities = trends
     .filter(t => t.chatbot_count > 5)
-    .sort((a,b) => (b.chatbot_count + b.review_count) - (a.chatbot_count + a.review_count))
+    .sort((a, b) => (b.chatbot_count + b.review_count) - (a.chatbot_count + a.review_count))
     .slice(0, 3);
 
   const oppCards = [
@@ -2172,7 +2172,7 @@ function renderMarketOverview() {
   // ---- SECTION 1: Industry Trend Cards ----
   html += '<div style="margin-bottom:8px;font-size:0.82rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">📈 Xu hướng ngành hàng — Top 5 chủ đề nóng</div>';
   html += '<div class="grid-2" style="gap:16px;margin-bottom:24px;">';
-  trends.forEach(function(t, i) {
+  trends.forEach(function (t, i) {
     html += '<div style="background:var(--bg-primary);border:1px solid var(--border-primary);border-radius:12px;padding:16px;position:relative;">';
     html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">';
     html += '<div><div style="font-size:0.9rem;font-weight:700;color:var(--text-primary);margin-bottom:4px;">' + t.topic + '</div>';
@@ -2203,11 +2203,11 @@ function renderMarketOverview() {
   html += '<div class="content-card" style="margin-bottom:20px;">';
   html += '<div class="content-card-title">⚡ Gap Analysis — Những gì đối thủ có mà mình chưa có</div>';
   html += '<div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:16px;">Phát hiện từ so sánh câu hỏi chatbot với năng lực hiện tại của đối thủ</div>';
-  gaps.forEach(function(g, i) {
+  gaps.forEach(function (g, i) {
     const typeColor = g.gap_type === 'content' ? '#6366f1' : g.gap_type === 'business' ? '#f59e0b' : '#10b981';
     const typeBg = g.gap_type === 'content' ? '#eef2ff' : g.gap_type === 'business' ? '#fffbeb' : '#f0fdf4';
     const typeLabel = g.gap_type === 'content' ? 'Content' : g.gap_type === 'business' ? 'Kinh doanh' : 'Chính sách';
-    html += '<div style="display:flex;align-items:center;gap:14px;padding:14px 0;' + (i < gaps.length-1 ? 'border-bottom:1px solid var(--border-primary);' : '') + '">';
+    html += '<div style="display:flex;align-items:center;gap:14px;padding:14px 0;' + (i < gaps.length - 1 ? 'border-bottom:1px solid var(--border-primary);' : '') + '">';
     html += '<div style="width:40px;height:40px;border-radius:10px;background:' + typeBg + ';display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">' + (g.gap_type === 'content' ? '📹' : g.gap_type === 'business' ? '💼' : '📋') + '</div>';
     html += '<div style="flex:1;">';
     html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><strong style="font-size:0.88rem;">' + g.feature + '</strong>';
@@ -2226,7 +2226,7 @@ function renderMarketOverview() {
   html += '<div class="content-card" style="margin-bottom:20px;">';
   html += '<div class="content-card-title">🎯 Cơ hội thị trường — Đề xuất hành động ưu tiên</div>';
   html += '<div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:16px;">Mỗi cơ hội được tổng hợp từ <strong>2 nguồn dữ liệu độc lập</strong> — chatbot + review — để đảm bảo độ tin cậy cao</div>';
-  oppCards.forEach(function(opp, i) {
+  oppCards.forEach(function (opp, i) {
     const scoreColor = opp.score > 85 ? '#ef4444' : opp.score > 70 ? '#f59e0b' : '#10b981';
     const scoreBg = opp.score > 85 ? '#fef2f2' : opp.score > 70 ? '#fffbeb' : '#f0fdf4';
     html += '<div style="border:1px solid var(--border-primary);border-radius:12px;padding:16px;margin-bottom:12px;position:relative;">';
@@ -2235,7 +2235,7 @@ function renderMarketOverview() {
     html += '<div style="font-size:0.92rem;font-weight:700;color:var(--text-primary);margin-bottom:10px;">' + opp.title + '</div>';
     // Two signals side by side
     html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">';
-    [opp.signal1, opp.signal2].forEach(function(sig) {
+    [opp.signal1, opp.signal2].forEach(function (sig) {
       html += '<div style="background:var(--bg-secondary);border-radius:8px;padding:10px;border-left:3px solid ' + sig.color + ';">';
       html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">';
       html += '<span style="font-size:0.9rem;">' + sig.icon + '</span>';
@@ -2270,19 +2270,19 @@ function renderChatSentiment() {
     + '<div>'
     + '<div style="font-size:0.85rem;font-weight:700;margin-bottom:12px;color:var(--text-muted);">Phân bổ cảm xúc theo ngày</div>'
     + '<div class="bar-chart" style="display:flex;gap:10px;align-items:flex-end;height:160px;padding:16px 0 0;">'
-    + ['T2','T3','T4','T5','T6','T7','CN'].map((d,i) => {
-        // can't use template literals inside string concat in Python PYEOF - handled differently
-        return ''; // placeholder
-      }).join('')
+    + ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((d, i) => {
+      // can't use template literals inside string concat in Python PYEOF - handled differently
+      return ''; // placeholder
+    }).join('')
     + '</div></div>'
     + '<div>'
     + '<div style="font-size:0.85rem;font-weight:700;margin-bottom:12px;color:var(--text-muted);">Top từ khoá cảm xúc</div>'
-    + ['tuyệt vời (89)','nhanh (67)','chất lượng (54)','lỗi (23)','chậm (18)','hỏng (12)'].map((w,i) =>
-        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
-        + '<span style="font-size:0.8rem;flex:1;">' + w + '</span>'
-        + '<div style="width:' + (i<3?'60':'25') + '%;height:6px;background:' + (i<3?'#10b981':'#ef4444') + ';border-radius:3px;"></div>'
-        + '</div>'
-      ).join('')
+    + ['tuyệt vời (89)', 'nhanh (67)', 'chất lượng (54)', 'lỗi (23)', 'chậm (18)', 'hỏng (12)'].map((w, i) =>
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+      + '<span style="font-size:0.8rem;flex:1;">' + w + '</span>'
+      + '<div style="width:' + (i < 3 ? '60' : '25') + '%;height:6px;background:' + (i < 3 ? '#10b981' : '#ef4444') + ';border-radius:3px;"></div>'
+      + '</div>'
+    ).join('')
     + '</div></div>'
     + '</div>'
     + renderReviews();
@@ -2292,32 +2292,32 @@ function renderChatReport() {
   return '<div class="content-card" style="margin-bottom:20px;">'
     + '<div class="content-card-title">📊 Báo cáo thắc mắc & vấn đề thường gặp — AI tổng hợp từ chat</div>'
     + insights.map(i =>
-        '<div class="alert-item">'
-        + '<div class="alert-icon">' + i.icon + '</div>'
-        + '<div class="alert-content"><div class="alert-text"><strong>' + i.title + '</strong></div>'
-        + '<div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;">' + i.detail + '</div></div>'
-        + (i.cta ? '<button class="alert-cta">' + i.cta + ' →</button>' : '')
-        + '</div>'
-      ).join('')
+      '<div class="alert-item">'
+      + '<div class="alert-icon">' + i.icon + '</div>'
+      + '<div class="alert-content"><div class="alert-text"><strong>' + i.title + '</strong></div>'
+      + '<div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;">' + i.detail + '</div></div>'
+      + (i.cta ? '<button class="alert-cta">' + i.cta + ' →</button>' : '')
+      + '</div>'
+    ).join('')
     + '</div>';
 }
 function renderChatInsights() {
   return '<div class="content-card" style="margin-bottom:20px;">'
     + '<div class="content-card-title">' + ICON.brain + ' Tổng hợp vấn đề từ Chatbot — Pattern Detection</div>'
     + '<div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:16px;">AI phân tích ' + MOCK.ai_today.chats_handled + ' cuộc hội thoại trong 7 ngày, phát hiện các pattern quan trọng:</div>'
-    + MOCK.chat_clusters.map((cl,i) =>
-        '<div style="display:flex;align-items:center;gap:14px;padding:12px 0;' + (i<MOCK.chat_clusters.length-1?'border-bottom:1px solid var(--border-primary);':'') + '">'
-        + '<div style="font-size:1.2rem;">' + cl.icon + '</div>'
-        + '<div style="flex:1;">'
-        +   '<div style="display:flex;align-items:center;gap:8px;"><strong style="font-size:0.88rem;">' + cl.label + '</strong>'
-        +   '<span style="background:' + (cl.urgent?'var(--accent-rose-bg)':'var(--accent-amber-bg)') + ';color:' + (cl.urgent?'var(--accent-rose)':'var(--accent-amber)') + ';font-size:0.68rem;font-weight:700;padding:2px 6px;border-radius:4px;">' + cl.count + ' khách</span></div>'
-        +   '<div style="font-size:0.78rem;color:var(--text-muted);">Impact: ' + cl.impact + '</div>'
-        + '</div>'
-        + '<div style="text-align:right;">'
-        +   '<div style="font-size:0.75rem;color:var(--accent-indigo);font-weight:600;margin-bottom:4px;">→ ' + cl.action + '</div>'
-        +   '<button class="alert-cta">Xử lý ngay</button>'
-        + '</div></div>'
-      ).join('')
+    + MOCK.chat_clusters.map((cl, i) =>
+      '<div style="display:flex;align-items:center;gap:14px;padding:12px 0;' + (i < MOCK.chat_clusters.length - 1 ? 'border-bottom:1px solid var(--border-primary);' : '') + '">'
+      + '<div style="font-size:1.2rem;">' + cl.icon + '</div>'
+      + '<div style="flex:1;">'
+      + '<div style="display:flex;align-items:center;gap:8px;"><strong style="font-size:0.88rem;">' + cl.label + '</strong>'
+      + '<span style="background:' + (cl.urgent ? 'var(--accent-rose-bg)' : 'var(--accent-amber-bg)') + ';color:' + (cl.urgent ? 'var(--accent-rose)' : 'var(--accent-amber)') + ';font-size:0.68rem;font-weight:700;padding:2px 6px;border-radius:4px;">' + cl.count + ' khách</span></div>'
+      + '<div style="font-size:0.78rem;color:var(--text-muted);">Impact: ' + cl.impact + '</div>'
+      + '</div>'
+      + '<div style="text-align:right;">'
+      + '<div style="font-size:0.75rem;color:var(--accent-indigo);font-weight:600;margin-bottom:4px;">→ ' + cl.action + '</div>'
+      + '<button class="alert-cta">Xử lý ngay</button>'
+      + '</div></div>'
+    ).join('')
     + '</div>';
 }
 function renderContentSuggestions() {
@@ -2325,18 +2325,18 @@ function renderContentSuggestions() {
 
   // Tab bar chung cho cả 2 tab
   var tabBar = '<div style="display:flex;gap:6px;margin-bottom:20px;padding:4px;background:var(--bg-glass);border-radius:12px;border:1px solid var(--border-primary);max-width:fit-content;">'
-    + ['suggestions','script'].map(function(t) {
-        var isActive = t === activeTab;
-        var label = t === 'suggestions' ? '📋 Đề xuất AI' : '🎬 Tạo Script Video';
-        return '<button data-cs-tab="' + t + '" style="padding:9px 20px;border-radius:9px;font-size:0.82rem;font-weight:' + (isActive ? '700' : '600') + ';cursor:pointer;border:none;background:' + (isActive ? 'linear-gradient(135deg,#d97706,#eab308)' : 'transparent') + ';color:' + (isActive ? '#1a0800' : 'var(--text-secondary)') + ';transition:all 0.2s;">'
-          + label + (t === 'script' && isActive ? '' : '') + '</button>';
-      }).join('')
+    + ['suggestions', 'script'].map(function (t) {
+      var isActive = t === activeTab;
+      var label = t === 'suggestions' ? '📋 Đề xuất AI' : '🎬 Tạo Script Video';
+      return '<button data-cs-tab="' + t + '" style="padding:9px 20px;border-radius:9px;font-size:0.82rem;font-weight:' + (isActive ? '700' : '600') + ';cursor:pointer;border:none;background:' + (isActive ? 'linear-gradient(135deg,#d97706,#eab308)' : 'transparent') + ';color:' + (isActive ? '#1a0800' : 'var(--text-secondary)') + ';transition:all 0.2s;">'
+        + label + (t === 'script' && isActive ? '' : '') + '</button>';
+    }).join('')
     + '</div>';
 
   // Gắn sự kiện cho tab buttons sau khi DOM sẵn sàng
-  setTimeout(function() {
-    document.querySelectorAll('[data-cs-tab]').forEach(function(btn) {
-      btn.onclick = function() {
+  setTimeout(function () {
+    document.querySelectorAll('[data-cs-tab]').forEach(function (btn) {
+      btn.onclick = function () {
         window._csTab = btn.dataset.csTab;
         navigate('content-suggestions');
       };
@@ -2347,6 +2347,9 @@ function renderContentSuggestions() {
   if (activeTab === 'script') {
     return tabBar + renderContentAgent();
   }
+
+  // Khởi tạo lại Map mỗi khi render danh sách để xóa data cũ (FIX STALE DATA)
+  window._suggestionsMap = {};
 
   // Tab Đề xuất AI (nội dung gốc bên dưới)
   const sugs = MOCK.content_suggestions_generated;
@@ -2386,15 +2389,15 @@ function renderContentSuggestions() {
       + '<div style="font-size:0.58rem;color:' + c + ';">score</div></div>';
   }
 
-  const scheduled = sugs.filter(function(s) { return s.status === 'scheduled'; });
-  const ignored   = sugs.filter(function(s) { return s.status === 'ignored'; });
-  const visible   = sugs.filter(function(s) { return s.status !== 'ignored'; });
+  const scheduled = sugs.filter(function (s) { return s.status === 'scheduled'; });
+  const ignored = sugs.filter(function (s) { return s.status === 'ignored'; });
+  const visible = sugs.filter(function (s) { return s.status !== 'ignored'; });
 
   // ---- SUMMARY HEADER ----
   let html = '<div class="content-card" style="margin-bottom:20px;">'
     + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">'
     + '<div><div class="content-card-title" style="margin-bottom:4px;">✍️ Đề xuất Content — AI phân tích đa nguồn</div>'
-    + '<div style="font-size:0.8rem;color:var(--text-muted);">Phân tích ' + clusters.reduce(function(s,c){return s+c.count;},0) + ' câu hỏi chatbot + ' + MOCK.reviews.length + ' reviews → ' + pending.length + ' nội dung cần tạo gấp</div>'
+    + '<div style="font-size:0.8rem;color:var(--text-muted);">Phân tích ' + clusters.reduce(function (s, c) { return s + c.count; }, 0) + ' câu hỏi chatbot + ' + MOCK.reviews.length + ' reviews → ' + pending.length + ' nội dung cần tạo gấp</div>'
     + '</div>'
     + '<div style="display:flex;gap:10px;flex-wrap:wrap;">'
     + '<div style="text-align:center;padding:10px 14px;background:#fef2f2;border-radius:8px;"><div style="font-size:1.4rem;font-weight:800;color:#ef4444;">' + pending.length + '</div><div style="font-size:0.68rem;color:#ef4444;">Chờ tạo</div></div>'
@@ -2418,14 +2421,14 @@ function renderContentSuggestions() {
     + '</tr></thead><tbody>';
 
   // Xây gap analysis từ MOCK.chat_clusters + reviews + inventory (động)
-  var gapData = (MOCK.chat_clusters || []).map(function(cl) {
+  var gapData = (MOCK.chat_clusters || []).map(function (cl) {
     var kw0 = cl.label.toLowerCase().split(' ')[0];
-    var negRevs = (MOCK.reviews || []).filter(function(r) {
+    var negRevs = (MOCK.reviews || []).filter(function (r) {
       return r.rating <= 3 && ((r.text || '').toLowerCase().includes(kw0) ||
         (r.product_id || '').toLowerCase().includes(kw0));
     });
-    var matchedInv = inv.find(function(c) {
-      return c.topic && c.topic.toLowerCase().split('/').some(function(t) {
+    var matchedInv = inv.find(function (c) {
+      return c.topic && c.topic.toLowerCase().split('/').some(function (t) {
         return cl.label.toLowerCase().includes(t.trim()) || t.trim().includes(kw0);
       });
     });
@@ -2441,11 +2444,11 @@ function renderContentSuggestions() {
     };
   });
 
-  gapData.forEach(function(row) {
+  gapData.forEach(function (row) {
     var sentColor = row.neg > 50 ? '#ef4444' : row.neg > 20 ? '#f59e0b' : '#10b981';
     // Tìm suggestion khớp để liên kết nút "Tạo ngay"
     var kw = row.topic.toLowerCase().split(' ')[0];
-    var matchSug = (MOCK.content_suggestions_generated || []).find(function(s) {
+    var matchSug = (MOCK.content_suggestions_generated || []).find(function (s) {
       return s.status !== 'ignored' && (s.title || '').toLowerCase().includes(kw);
     });
     html += '<tr style="border-bottom:1px solid var(--border-primary);">';
@@ -2461,7 +2464,7 @@ function renderContentSuggestions() {
       html += '<td style="text-align:center;padding:10px;"><span style="font-size:0.72rem;color:#10b981;font-weight:700;">🗓 Đã lên lịch</span></td>';
     } else {
       var onclickFn = matchSug
-        ? 'scheduleSuggestion(\'' + matchSug.id.replace(/'/g,"\\'") + '\')'
+        ? 'scheduleSuggestion(\'' + matchSug.id.replace(/'/g, "\\'") + '\')'
         : 'showToast(\'Tạo đề xuất AI trước để lên lịch\', \'info\')';
       html += '<td style="padding:10px 12px;"><span style="background:#fef2f2;color:#ef4444;font-size:0.72rem;font-weight:700;padding:3px 8px;border-radius:6px;">❌ Thiếu</span><div style="font-size:0.68rem;color:var(--text-muted);margin-top:2px;">' + row.content_gap + '</div></td>';
       html += '<td style="text-align:center;padding:10px;"><button class="alert-cta" onclick="' + onclickFn + '">Lên lịch</button></td>';
@@ -2474,8 +2477,8 @@ function renderContentSuggestions() {
   html += '<div style="margin-bottom:8px;font-size:0.82rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">🤖 Đề xuất AI — Ưu tiên theo Combined Signal Score</div>';
 
   // Tách thành 2 nhóm: live backend vs demo
-  var liveSugs = visible.filter(function(s){ return s._fromBackend || s._fromDailySummary; });
-  var demoSugs = visible.filter(function(s){ return !s._fromBackend && !s._fromDailySummary; });
+  var liveSugs = visible.filter(function (s) { return s._fromBackend || s._fromDailySummary; });
+  var demoSugs = visible.filter(function (s) { return !s._fromBackend && !s._fromDailySummary; });
 
   function renderSugCard(sug) {
     var tLabel = typeLabel[sug.type] || sug.type;
@@ -2491,16 +2494,16 @@ function renderContentSuggestions() {
     var legacyCtMap = { video: 'tiktok_30s', blog_faq: 'facebook_post', comparison: 'tiktok_30s', guide: 'facebook_post' };
     var platformMap = { TikTok: 'tiktok_30s', Facebook: 'facebook_post', Shopee: 'shopee_video', Instagram: 'reels_30s' };
     var TEXT_POST_TYPES = ['facebook_post', 'caption_instagram'];
-    var ALL_CONTENT_TYPES = ['tiktok_15s','tiktok_30s','tiktok_60s','reels_30s','reels_60s','youtube_short','shopee_video','facebook_post','caption_instagram'];
+    var ALL_CONTENT_TYPES = ['tiktok_15s', 'tiktok_30s', 'tiktok_60s', 'reels_30s', 'reels_60s', 'youtube_short', 'shopee_video', 'facebook_post', 'caption_instagram'];
     var mappedCt = ALL_CONTENT_TYPES.indexOf(sug.type) >= 0 ? sug.type
-                 : platformMap[(sug.platform||'').split(' ')[0]]
-                 || legacyCtMap[sug.type] || 'tiktok_30s';
+      : platformMap[(sug.platform || '').split(' ')[0]]
+      || legacyCtMap[sug.type] || 'tiktok_30s';
     var productId = sug.source_product_id || sug.product_id || '';
 
     // Border theo trạng thái
     var borderColor = sug.status === 'scheduled' ? '#10b981'
-                    : sug.status === 'saved' ? '#f59e0b'
-                    : isHigh ? '#fca5a5' : 'var(--border-primary)';
+      : sug.status === 'saved' ? '#f59e0b'
+        : isHigh ? '#fca5a5' : 'var(--border-primary)';
 
     var out = '<div style="background:var(--bg-primary);border:1px solid ' + borderColor + ';border-radius:12px;padding:16px;margin-bottom:14px;">';
     out += '<div style="display:flex;align-items:flex-start;gap:14px;">';
@@ -2513,8 +2516,8 @@ function renderContentSuggestions() {
       'P008': 'Bộ 6 Món', 'P009': 'Bộ Cọ 13 Món', 'P011': 'Kem Rửa Mặt',
     };
     var productName = productId
-      ? (((window._ca||{}).catalogProducts||[]).find(function(p){ return p.product_id === productId; }) || {}).short_name
-        || pidShortNames[productId] || productId
+      ? (((window._ca || {}).catalogProducts || []).find(function (p) { return p.product_id === productId; }) || {}).short_name
+      || pidShortNames[productId] || productId
       : null;
 
     // Title + badges
@@ -2523,26 +2526,26 @@ function renderContentSuggestions() {
     out += '<span style="background:' + tBg + ';color:' + tColor + ';font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;">' + tLabel + '</span>';
     out += '<span style="background:#f1f5f9;color:#64748b;font-size:0.68rem;padding:2px 8px;border-radius:10px;">' + sug.platform + '</span>';
     if (productName) out += '<span style="background:rgba(234,179,8,0.08);color:#b45309;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;border:1px solid rgba(234,179,8,0.2);">📦 ' + productName + '</span>';
-    if (sug.status === 'saved')     out += '<span style="background:#fffbeb;color:#f59e0b;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;">📌 Đã lưu</span>';
+    if (sug.status === 'saved') out += '<span style="background:#fffbeb;color:#f59e0b;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;">📌 Đã lưu</span>';
     if (sug.status === 'scheduled') out += '<span style="background:#f0fdf4;color:#10b981;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;">🗓 Đã lên lịch</span>';
-    if (sug.has_script)             out += '<span style="background:rgba(16,185,129,0.08);color:#059669;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;border:1px solid rgba(16,185,129,0.2);">📋 Có kịch bản</span>';
+    if (sug.has_script) out += '<span style="background:rgba(16,185,129,0.08);color:#059669;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;border:1px solid rgba(16,185,129,0.2);">📋 Có kịch bản</span>';
     out += '</div>';
     // Two signals
     out += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">';
     out += '<div style="background:#eef2ff;border-radius:8px;padding:10px;">';
     out += '<div style="font-size:0.7rem;font-weight:700;color:#6366f1;margin-bottom:4px;">💬 Tín hiệu Chatbot</div>';
-    out += '<div style="font-size:0.78rem;font-weight:700;color:var(--text-primary);">' + ((sug.chatbot_signal||{}).count || 0) + ' câu hỏi</div>';
-    out += '<div style="font-size:0.72rem;color:var(--text-muted);">' + ((sug.chatbot_signal||{}).topic || '') + '</div>';
-    out += '<div style="margin-top:6px;">' + ((sug.chatbot_signal||{}).sample_questions || []).slice(0,2).map(function(q) {
+    out += '<div style="font-size:0.78rem;font-weight:700;color:var(--text-primary);">' + ((sug.chatbot_signal || {}).count || 0) + ' câu hỏi</div>';
+    out += '<div style="font-size:0.72rem;color:var(--text-muted);">' + ((sug.chatbot_signal || {}).topic || '') + '</div>';
+    out += '<div style="margin-top:6px;">' + ((sug.chatbot_signal || {}).sample_questions || []).slice(0, 2).map(function (q) {
       return '<div style="font-size:0.68rem;color:#6366f1;padding:2px 0;">› "' + q + '"</div>';
     }).join('') + '</div>';
     out += '</div>';
-    if (((sug.review_signal||{}).count || 0) > 0) {
+    if (((sug.review_signal || {}).count || 0) > 0) {
       out += '<div style="background:#f0fdf4;border-radius:8px;padding:10px;">';
       out += '<div style="font-size:0.7rem;font-weight:700;color:#10b981;margin-bottom:4px;">⭐ Tín hiệu Review</div>';
-      out += '<div style="font-size:0.78rem;font-weight:700;color:var(--text-primary);">' + (sug.review_signal||{}).count + ' đánh giá</div>';
-      out += '<div style="font-size:0.72rem;color:var(--text-muted);">' + ((sug.review_signal||{}).neg_pct || 0) + '% lo ngại về chủ đề này</div>';
-      out += '<div style="margin-top:6px;">' + ((sug.review_signal||{}).sample_reviews || []).slice(0,2).map(function(r) {
+      out += '<div style="font-size:0.78rem;font-weight:700;color:var(--text-primary);">' + (sug.review_signal || {}).count + ' đánh giá</div>';
+      out += '<div style="font-size:0.72rem;color:var(--text-muted);">' + ((sug.review_signal || {}).neg_pct || 0) + '% lo ngại về chủ đề này</div>';
+      out += '<div style="margin-top:6px;">' + ((sug.review_signal || {}).sample_reviews || []).slice(0, 2).map(function (r) {
         return '<div style="font-size:0.68rem;color:#10b981;padding:2px 0;">› "' + r + '"</div>';
       }).join('') + '</div>';
       out += '</div>';
@@ -2598,7 +2601,7 @@ function renderContentSuggestions() {
       + '<span style="display:inline-flex;align-items:center;gap:5px;background:#dcfce7;color:#15803d;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;">● LIVE — Từ dữ liệu thực</span>'
       + '<span style="font-size:0.75rem;color:var(--text-muted);">' + liveSugs.length + ' đề xuất từ backend</span>'
       + '</div>';
-    liveSugs.forEach(function(sug) { html += renderSugCard(sug); });
+    liveSugs.forEach(function (sug) { html += renderSugCard(sug); });
   }
 
   // ---- Render DEMO suggestions ----
@@ -2607,7 +2610,7 @@ function renderContentSuggestions() {
       + '<span style="display:inline-flex;align-items:center;gap:5px;background:#f1f5f9;color:#64748b;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;">📋 Demo — Dữ liệu mẫu</span>'
       + '<span style="font-size:0.75rem;color:var(--text-muted);">' + demoSugs.length + ' đề xuất minh họa · không phản ánh dữ liệu thực</span>'
       + '</div>';
-    demoSugs.forEach(function(sug) { html += renderSugCard(sug); });
+    demoSugs.forEach(function (sug) { html += renderSugCard(sug); });
   }
 
   if (liveSugs.length === 0 && demoSugs.length === 0) {
@@ -2629,9 +2632,9 @@ function renderContentSuggestions() {
   // Past performance
   html += '<div class="content-card" style="margin-bottom:0;">';
   html += '<div class="content-card-title" style="font-size:0.88rem;">📊 Hiệu quả Content đã xuất bản</div>';
-  inv.forEach(function(item, i) {
+  inv.forEach(function (item, i) {
     const typeEmoji = item.type === 'video' ? '🎬' : item.type === 'blog' ? '📝' : '❓';
-    html += '<div style="padding:10px 0;' + (i < inv.length-1 ? 'border-bottom:1px solid var(--border-primary);' : '') + '">';
+    html += '<div style="padding:10px 0;' + (i < inv.length - 1 ? 'border-bottom:1px solid var(--border-primary);' : '') + '">';
     html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">';
     html += '<span>' + typeEmoji + '</span><strong style="font-size:0.82rem;">' + item.title + '</strong></div>';
     html += '<div style="display:flex;gap:12px;">';
@@ -2645,29 +2648,37 @@ function renderContentSuggestions() {
   // Content calendar — xây từ pending/saved/scheduled suggestions
   html += '<div class="content-card" style="margin-bottom:0;">';
   html += '<div class="content-card-title" style="font-size:0.88rem;">🗓 Lịch Content đề xuất</div>';
-  var calHighPrio = sugs.filter(function(s){return s.status==='pending'&&s.priority==='high';}).slice(0,3);
-  var calMedPrio  = sugs.filter(function(s){return s.status==='pending'&&s.priority==='medium';}).slice(0,2);
-  var calSaved    = sugs.filter(function(s){return s.status==='saved';}).slice(0,2);
-  var calScheduled = sugs.filter(function(s){return s.status==='scheduled';}).slice(0,3);
+  var calHighPrio = sugs.filter(function (s) { return s.status === 'pending' && s.priority === 'high'; }).slice(0, 3);
+  var calMedPrio = sugs.filter(function (s) { return s.status === 'pending' && s.priority === 'medium'; }).slice(0, 2);
+  var calSaved = sugs.filter(function (s) { return s.status === 'saved'; }).slice(0, 2);
+  var calScheduled = sugs.filter(function (s) { return s.status === 'scheduled'; }).slice(0, 3);
   var calItems = [
-    { week: 'Tuần này (ưu tiên cao 🔴)', sugs: calHighPrio, color: '#ef4444', bg: '#fef2f2',
-      fallback: '(Chưa có đề xuất cao — nhấn "Tạo từ báo cáo" để thêm)' },
-    { week: '2 tuần tới', sugs: calMedPrio, color: '#f59e0b', bg: '#fffbeb',
-      fallback: '(Chưa có đề xuất ưu tiên vừa)' },
-    { week: 'Đã lưu 📌', sugs: calSaved, color: '#f59e0b', bg: '#fffbeb',
-      fallback: calSaved.length===0 ? '(Chưa có item nào đã lưu)' : null },
-    { week: 'Đã lên lịch ✅', sugs: calScheduled, color: '#10b981', bg: '#f0fdf4',
-      fallback: calScheduled.length===0 ? '(Chưa lên lịch item nào)' : null }
-  ].filter(function(c){ return !(c.sugs.length===0 && !c.fallback); });
-  calItems.forEach(function(cal) {
+    {
+      week: 'Tuần này (ưu tiên cao 🔴)', sugs: calHighPrio, color: '#ef4444', bg: '#fef2f2',
+      fallback: '(Chưa có đề xuất cao — nhấn "Tạo từ báo cáo" để thêm)'
+    },
+    {
+      week: '2 tuần tới', sugs: calMedPrio, color: '#f59e0b', bg: '#fffbeb',
+      fallback: '(Chưa có đề xuất ưu tiên vừa)'
+    },
+    {
+      week: 'Đã lưu 📌', sugs: calSaved, color: '#f59e0b', bg: '#fffbeb',
+      fallback: calSaved.length === 0 ? '(Chưa có item nào đã lưu)' : null
+    },
+    {
+      week: 'Đã lên lịch ✅', sugs: calScheduled, color: '#10b981', bg: '#f0fdf4',
+      fallback: calScheduled.length === 0 ? '(Chưa lên lịch item nào)' : null
+    }
+  ].filter(function (c) { return !(c.sugs.length === 0 && !c.fallback); });
+  calItems.forEach(function (cal) {
     html += '<div style="margin-bottom:12px;">';
     html += '<div style="font-size:0.72rem;font-weight:700;background:' + cal.bg + ';color:' + cal.color + ';padding:4px 10px;border-radius:6px;display:inline-block;margin-bottom:6px;">' + cal.week + '</div>';
     if (cal.sugs.length === 0) {
       html += '<div style="font-size:0.75rem;color:var(--text-muted);padding:4px 0;">' + cal.fallback + '</div>';
     } else {
-      cal.sugs.forEach(function(s) {
-        var label = (s.title||'').length > 50 ? (s.title||'').substring(0,50) + '…' : (s.title||'');
-        var sid2 = (s.id||'').replace(/'/g,"\\'");
+      cal.sugs.forEach(function (s) {
+        var label = (s.title || '').length > 50 ? (s.title || '').substring(0, 50) + '…' : (s.title || '');
+        var sid2 = (s.id || '').replace(/'/g, "\\'");
         html += '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:0.78rem;">';
         html += '<div style="width:6px;height:6px;border-radius:50%;background:' + cal.color + ';flex-shrink:0;"></div>';
         html += '<span style="flex:1;">' + label + '</span>';
@@ -2687,17 +2698,17 @@ function renderContentSuggestions() {
 
 function renderProductDescriptions() {
   const prods = MOCK.products_detail;
-  const prod = prods.find(function(p) { return p.sku === currentProductDescSku; }) || prods[0];
+  const prod = prods.find(function (p) { return p.sku === currentProductDescSku; }) || prods[0];
 
   // Build AI recommendations for the selected product
   function buildRecs(p) {
     const recs = [];
     // Find top chatbot topics not in description
-    p.chatbot_questions.forEach(function(q) {
-      const inDesc = p.description_key_points.some(function(kp) {
+    p.chatbot_questions.forEach(function (q) {
+      const inDesc = p.description_key_points.some(function (kp) {
         return q.topic.toLowerCase().includes(kp.toLowerCase()) || kp.toLowerCase().includes(q.topic.toLowerCase());
       });
-      const feat = p.review_features.find(function(f) { return f.feature.toLowerCase().includes(q.topic.split(' ')[0].toLowerCase()); });
+      const feat = p.review_features.find(function (f) { return f.feature.toLowerCase().includes(q.topic.split(' ')[0].toLowerCase()); });
       if (!inDesc && q.count >= 8) {
         const type = feat && feat.negative > feat.positive ? 'EXPAND' : 'ADD';
         recs.push({
@@ -2716,9 +2727,9 @@ function renderProductDescriptions() {
       }
     });
     // Check for mismatch: description highlights something but reviews are negative about it
-    p.review_features.forEach(function(f) {
+    p.review_features.forEach(function (f) {
       if (f.negative > f.positive && f.negative >= 8) {
-        const inDesc = p.description_key_points.some(function(kp) {
+        const inDesc = p.description_key_points.some(function (kp) {
           return f.feature.toLowerCase().includes(kp.toLowerCase());
         });
         if (inDesc) {
@@ -2736,7 +2747,7 @@ function renderProductDescriptions() {
         }
       }
     });
-    return recs.sort(function(a,b) { return (b.chatbot_count + b.review_mentions) - (a.chatbot_count + a.review_mentions); });
+    return recs.sort(function (a, b) { return (b.chatbot_count + b.review_mentions) - (a.chatbot_count + a.review_mentions); });
   }
 
   const recs = buildRecs(prod);
@@ -2768,16 +2779,16 @@ function renderProductDescriptions() {
   html += '<div class="content-card-title" style="margin-bottom:12px;">📝 Tối ưu mô tả sản phẩm với AI</div>';
   html += '<div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:14px;">Phân tích câu hỏi chatbot + đánh giá review để tìm điểm mù trong mô tả sản phẩm</div>';
   html += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
-  prods.forEach(function(p) {
+  prods.forEach(function (p) {
     const active = p.sku === currentProductDescSku;
     html += '<button onclick="currentProductDescSku=\'' + p.sku + '\';navigate(\'product-descriptions\')" style="padding:8px 14px;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;border:1.5px solid ' + (active ? 'var(--accent-indigo)' : 'var(--border-primary)') + ';background:' + (active ? 'var(--accent-indigo-bg,#eef2ff)' : 'var(--bg-secondary)') + ';color:' + (active ? 'var(--accent-indigo)' : 'var(--text-secondary)') + ';">' + p.name + '</button>';
   });
   html += '</div></div>';
 
   // ---- SUMMARY STATS ----
-  const totalChatQ = prod.chatbot_questions.reduce(function(s,q) { return s + q.count; }, 0);
-  const totalRevFeat = prod.review_features.reduce(function(s,f) { return s + f.mentions; }, 0);
-  const negSignals = prod.review_features.filter(function(f) { return f.negative > f.positive; }).length;
+  const totalChatQ = prod.chatbot_questions.reduce(function (s, q) { return s + q.count; }, 0);
+  const totalRevFeat = prod.review_features.reduce(function (s, f) { return s + f.mentions; }, 0);
+  const negSignals = prod.review_features.filter(function (f) { return f.negative > f.positive; }).length;
   html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">';
   const stats = [
     { label: 'Câu hỏi chatbot', value: totalChatQ, sub: '7 ngày qua', color: '#6366f1', bg: '#eef2ff' },
@@ -2785,7 +2796,7 @@ function renderProductDescriptions() {
     { label: 'Điểm mù trong mô tả', value: recs.length, sub: 'cần cập nhật', color: '#ef4444', bg: '#fef2f2' },
     { label: 'Tính năng lo ngại', value: negSignals, sub: 'review tiêu cực > tích cực', color: '#f59e0b', bg: '#fffbeb' }
   ];
-  stats.forEach(function(s) {
+  stats.forEach(function (s) {
     html += '<div style="background:' + s.bg + ';border-radius:12px;padding:14px;text-align:center;">';
     html += '<div style="font-size:1.6rem;font-weight:800;color:' + s.color + ';">' + s.value + '</div>';
     html += '<div style="font-size:0.75rem;font-weight:700;color:' + s.color + ';">' + s.label + '</div>';
@@ -2798,9 +2809,9 @@ function renderProductDescriptions() {
   html += '<div class="content-card" style="margin-bottom:20px;">';
   html += '<div class="content-card-title">🗂 Ma trận ưu tiên tính năng — ' + prod.name + '</div>';
   html += '<div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:14px;">Kích thước bar = mức độ quan tâm. Màu = cảm xúc khách hàng về tính năng đó</div>';
-  const allFeats = prod.review_features.slice().sort(function(a,b) { return b.mentions - a.mentions; });
-  const maxMentions = Math.max.apply(null, allFeats.map(function(f) { return f.mentions; }));
-  allFeats.forEach(function(f) {
+  const allFeats = prod.review_features.slice().sort(function (a, b) { return b.mentions - a.mentions; });
+  const maxMentions = Math.max.apply(null, allFeats.map(function (f) { return f.mentions; }));
+  allFeats.forEach(function (f) {
     const pct = Math.round((f.mentions / maxMentions) * 100);
     const posRatio = f.mentions > 0 ? f.positive / f.mentions : 0;
     const barColor = posRatio > 0.7 ? '#10b981' : posRatio > 0.4 ? '#f59e0b' : '#ef4444';
@@ -2835,15 +2846,15 @@ function renderProductDescriptions() {
   html += '<div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;">Mô tả HIỆN TẠI</div>';
   html += '<div style="background:var(--bg-secondary);border-radius:8px;padding:14px;font-size:0.82rem;color:var(--text-secondary);line-height:1.6;border-left:3px solid var(--border-primary);">' + prod.description_current + '</div>';
   html += '<div style="margin-top:10px;"><div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;">Điểm nhấn hiện tại:</div>';
-  html += prod.description_key_points.map(function(kp) {
+  html += prod.description_key_points.map(function (kp) {
     return '<span style="background:var(--bg-secondary);border:1px solid var(--border-primary);font-size:0.72rem;padding:3px 8px;border-radius:10px;margin:2px;display:inline-block;">✓ ' + kp + '</span>';
   }).join('');
   html += '</div></div>';
   // What customers actually ask about
   html += '<div>';
   html += '<div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;">Khách hỏi NHIỀU NHẤT</div>';
-  prod.chatbot_questions.sort(function(a,b) { return b.count - a.count; }).forEach(function(q) {
-    const inDesc = prod.description_key_points.some(function(kp) {
+  prod.chatbot_questions.sort(function (a, b) { return b.count - a.count; }).forEach(function (q) {
+    const inDesc = prod.description_key_points.some(function (kp) {
       return q.topic.toLowerCase().includes(kp.toLowerCase()) || kp.toLowerCase().includes(q.topic.split(' ')[0].toLowerCase());
     });
     html += '<div style="display:flex;align-items:center;gap:8px;padding:8px;margin-bottom:6px;border-radius:8px;background:' + (inDesc ? '#f0fdf4' : '#fef2f2') + ';">';
@@ -2867,10 +2878,10 @@ function renderProductDescriptions() {
   if (recs.length === 0) {
     html += '<div style="text-align:center;padding:24px;color:var(--text-muted);">✅ Mô tả sản phẩm đang đầy đủ — không có khoảng trống lớn nào</div>';
   } else {
-    recs.forEach(function(rec, i) {
+    recs.forEach(function (rec, i) {
       html += '<div style="border:1px solid var(--border-primary);border-radius:12px;padding:14px;margin-bottom:12px;">';
       html += '<div style="display:flex;align-items:flex-start;gap:12px;">';
-      html += '<div style="width:36px;height:36px;border-radius:8px;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--accent-indigo);flex-shrink:0;">' + (i+1) + '</div>';
+      html += '<div style="width:36px;height:36px;border-radius:8px;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--accent-indigo);flex-shrink:0;">' + (i + 1) + '</div>';
       html += '<div style="flex:1;">';
       html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">';
       html += actionBadge(rec.action);
@@ -2909,7 +2920,7 @@ function renderProductDescriptions() {
   html += '<div>';
   html += '<div style="font-size:0.75rem;font-weight:700;color:#ef4444;margin-bottom:8px;text-transform:uppercase;">⬛ Mô tả TRƯỚC — Thiếu thông tin quan trọng</div>';
   html += '<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:14px;font-size:0.82rem;color:#7f1d1d;line-height:1.7;">' + prod.description_current + '</div>';
-  html += '<div style="margin-top:8px;font-size:0.72rem;color:#ef4444;">❌ ' + recs.length + ' điểm thiếu — ' + prod.chatbot_questions.filter(function(q){return q.count>=8;}).length + ' câu hỏi phổ biến chưa được trả lời trước</div>';
+  html += '<div style="margin-top:8px;font-size:0.72rem;color:#ef4444;">❌ ' + recs.length + ' điểm thiếu — ' + prod.chatbot_questions.filter(function (q) { return q.count >= 8; }).length + ' câu hỏi phổ biến chưa được trả lời trước</div>';
   html += '</div>';
 
   // After (AI-enhanced)
@@ -2918,14 +2929,14 @@ function renderProductDescriptions() {
 
   // Build enhanced description
   let enhanced = prod.description_current;
-  recs.slice(0, 2).forEach(function(rec) {
+  recs.slice(0, 2).forEach(function (rec) {
     if (rec.action === 'ADD') enhanced += ' | ' + rec.section + ': [AI sẽ điền thông số cụ thể dựa trên specs thực tế]';
     if (rec.action === 'EXPAND') enhanced += ' | ' + rec.section + ': [AI tái viết với cam kết + thông số kỹ thuật rõ ràng]';
   });
 
   html += '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:14px;font-size:0.82rem;color:#064e3b;line-height:1.7;">' + enhanced + '</div>';
   html += '<div style="margin-top:8px;">';
-  recs.slice(0, 3).forEach(function(rec) {
+  recs.slice(0, 3).forEach(function (rec) {
     html += '<div style="font-size:0.7rem;color:#10b981;padding:2px 0;">✅ Thêm mục: <strong>' + rec.section + '</strong> (dự kiến giảm ' + rec.chatbot_count + ' câu hỏi/tuần)</div>';
   });
   html += '</div>';
@@ -2993,12 +3004,12 @@ function caScriptFromSuggId(sid) {
   var sug = (window._suggestionsMap || {})[sid];
   if (!sug) { showToast('Không tìm được đề xuất', 'warning'); return; }
   var TEXT_POST_TYPES = ['facebook_post', 'caption_instagram'];
-  var ALL_CT = ['tiktok_15s','tiktok_30s','tiktok_60s','reels_30s','reels_60s','youtube_short','shopee_video','facebook_post','caption_instagram'];
+  var ALL_CT = ['tiktok_15s', 'tiktok_30s', 'tiktok_60s', 'reels_30s', 'reels_60s', 'youtube_short', 'shopee_video', 'facebook_post', 'caption_instagram'];
   var legacyCtMap = { video: 'tiktok_30s', blog_faq: 'facebook_post', comparison: 'tiktok_30s', guide: 'facebook_post' };
   var platformMap = { TikTok: 'tiktok_30s', Facebook: 'facebook_post', Shopee: 'shopee_video', Instagram: 'reels_30s' };
   var mappedCt = ALL_CT.indexOf(sug.type) >= 0 ? sug.type
-               : platformMap[(sug.platform||'').split(' ')[0]]
-               || legacyCtMap[sug.type] || 'tiktok_30s';
+    : platformMap[(sug.platform || '').split(' ')[0]]
+    || legacyCtMap[sug.type] || 'tiktok_30s';
   caPrefillFromSuggestion(sug.source_product_id || sug.product_id || '', mappedCt, sug.angle || '', sug.id || '');
 }
 
@@ -3008,10 +3019,10 @@ function caScriptFromSuggId(sid) {
  */
 function caPrefillFromSuggestion(productId, contentType, angle, suggestionId) {
   window._ca._prefill = {
-    product_id:          productId   || '',
-    content_type:        contentType || 'tiktok_30s',
+    product_id: productId || '',
+    content_type: contentType || 'tiktok_30s',
     custom_instructions: angle ? 'Góc tiếp cận đề xuất: ' + angle : '',
-    suggestion_id:       suggestionId || null,
+    suggestion_id: suggestionId || null,
   };
   window._ca.step = 1;
   window._csTab = 'script';
@@ -3028,10 +3039,12 @@ function caReset() {
   if (window._ca.pollTimer) clearInterval(window._ca.pollTimer);
   // Giữ cache catalog khi reset để không cần reload
   var cachedProducts = window._ca.catalogProducts;
-  window._ca = { step: 1, jobId: null, pollTimer: null, intel: null, scripts: [],
+  window._ca = {
+    step: 1, jobId: null, pollTimer: null, intel: null, scripts: [],
     activeVariant: 'emotional', filmingGuide: null, filmingScript: null,
     catalogProducts: cachedProducts, _selectedProduct: null, _selectedUsps: null, _lastRequest: null,
-    _sourceSuggestionId: null, _prefill: null };
+    _sourceSuggestionId: null, _prefill: null
+  };
 }
 
 function renderContentAgent() {
@@ -3040,7 +3053,7 @@ function renderContentAgent() {
 
   var step = window._ca.step;
 
-  var stepsHtml = ['Phân tích sản phẩm','Xem USP & Đối tượng','Tạo kịch bản','Hướng dẫn quay phim'].map(function(s, i) {
+  var stepsHtml = ['Phân tích sản phẩm', 'Xem USP & Đối tượng', 'Tạo kịch bản', 'Hướng dẫn quay phim'].map(function (s, i) {
     var num = i + 1;
     var active = step === num ? 'style="color:var(--accent-amber);border-color:var(--accent-amber);background:rgba(234,179,8,0.12);"' : (step > num ? 'style="color:var(--accent-emerald);border-color:var(--accent-emerald);background:rgba(16,185,129,0.1);"' : '');
     var icon = step > num ? '✓' : num;
@@ -3056,22 +3069,22 @@ function renderContentAgent() {
     // Render products đã cache hoặc placeholder
     var products = window._ca.catalogProducts || [];
     var productOptions = products.length
-      ? products.map(function(p) {
-          return '<option value="' + p.product_id + '" data-name="' + p.name + '" data-usp="' + encodeURIComponent(JSON.stringify(p.usp||[])) + '" data-price="' + p.price + '">'
-            + p.short_name + ' — ' + (p.price ? Number(p.price).toLocaleString('vi-VN') + 'đ' : '') + '</option>';
-        }).join('')
+      ? products.map(function (p) {
+        return '<option value="' + p.product_id + '" data-name="' + p.name + '" data-usp="' + encodeURIComponent(JSON.stringify(p.usp || [])) + '" data-price="' + p.price + '">'
+          + p.short_name + ' — ' + (p.price ? Number(p.price).toLocaleString('vi-VN') + 'đ' : '') + '</option>';
+      }).join('')
       : '<option value="">⏳ Đang tải danh sách sản phẩm...</option>';
 
     // Render USP checkboxes nếu đã có sản phẩm được chọn
     var selectedProduct = window._ca._selectedProduct || (products[0] || null);
     var uspList = selectedProduct ? (selectedProduct.usp || []) : [];
     var uspCheckboxes = uspList.length
-      ? uspList.map(function(u, i) {
-          var checked = !window._ca._selectedUsps || window._ca._selectedUsps.indexOf(u) !== -1 ? 'checked' : '';
-          return '<label style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--bg-glass);border-radius:8px;cursor:pointer;font-size:0.8rem;color:var(--text-secondary);line-height:1.4;">'
-            + '<input type="checkbox" data-usp-item="' + i + '" value="' + encodeURIComponent(u) + '" ' + checked + ' style="margin-top:2px;accent-color:#d97706;flex-shrink:0;">'
-            + '<span>' + u + '</span></label>';
-        }).join('')
+      ? uspList.map(function (u, i) {
+        var checked = !window._ca._selectedUsps || window._ca._selectedUsps.indexOf(u) !== -1 ? 'checked' : '';
+        return '<label style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--bg-glass);border-radius:8px;cursor:pointer;font-size:0.8rem;color:var(--text-secondary);line-height:1.4;">'
+          + '<input type="checkbox" data-usp-item="' + i + '" value="' + encodeURIComponent(u) + '" ' + checked + ' style="margin-top:2px;accent-color:#d97706;flex-shrink:0;">'
+          + '<span>' + u + '</span></label>';
+      }).join('')
       : '<div style="font-size:0.8rem;color:var(--text-muted);padding:8px;">Chọn sản phẩm để xem USP</div>';
 
     bodyHtml = '<div class="content-card" style="max-width:740px;margin:0 auto;">'
@@ -3140,7 +3153,7 @@ function renderContentAgent() {
       + '🚀 Phân tích & Tạo Content Script'
       + '</button></div>';
 
-  // ── Step 2: Analyzing ──
+    // ── Step 2: Analyzing ──
   } else if (step === 2) {
     var pct = window._ca.progress || 10;
     var stepLabel = window._ca.stepLabel || 'Đang khởi động...';
@@ -3154,7 +3167,7 @@ function renderContentAgent() {
       + '<div style="margin-top:24px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;" id="caProgressSteps"></div>'
       + '</div>';
 
-  // ── Step 3: Intel results ──
+    // ── Step 3: Intel results ──
   } else if (step === 3) {
     var intel = window._ca.intel || {};
     var usps = intel.usp || [];
@@ -3164,23 +3177,23 @@ function renderContentAgent() {
     var format = intel.recommended_content_format || '';
     var key_msg = intel.key_message || '';
 
-    var uspHtml = usps.map(function(u) {
+    var uspHtml = usps.map(function (u) {
       return '<div style="display:flex;gap:10px;padding:12px;background:var(--bg-glass);border-radius:10px;border:1px solid var(--border-primary);">'
-        + '<div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#d97706,#eab308);color:#1a0800;font-weight:800;font-size:0.75rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + (u.rank||'•') + '</div>'
-        + '<div><div style="font-weight:700;font-size:0.88rem;color:var(--text-primary);margin-bottom:3px;">' + (u.point||'') + '</div>'
-        + '<div style="font-size:0.78rem;color:var(--text-muted);">💬 ' + (u.evidence||'') + '</div></div></div>';
+        + '<div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#d97706,#eab308);color:#1a0800;font-weight:800;font-size:0.75rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + (u.rank || '•') + '</div>'
+        + '<div><div style="font-weight:700;font-size:0.88rem;color:var(--text-primary);margin-bottom:3px;">' + (u.point || '') + '</div>'
+        + '<div style="font-size:0.78rem;color:var(--text-muted);">💬 ' + (u.evidence || '') + '</div></div></div>';
     }).join('');
 
-    var audienceHtml = audience.map(function(a) {
+    var audienceHtml = audience.map(function (a) {
       return '<div style="padding:14px;background:var(--bg-glass);border-radius:10px;border:1px solid var(--border-primary);">'
         + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
         + '<div style="font-size:1.2rem;">👤</div>'
-        + '<div><div style="font-weight:700;font-size:0.88rem;color:var(--text-primary);">' + (a.persona||'') + '</div>'
-        + '<div style="font-size:0.72rem;color:var(--accent-amber);">' + (a.age_range||'') + '</div></div></div>'
+        + '<div><div style="font-weight:700;font-size:0.88rem;color:var(--text-primary);">' + (a.persona || '') + '</div>'
+        + '<div style="font-size:0.72rem;color:var(--accent-amber);">' + (a.age_range || '') + '</div></div></div>'
         + '<div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.7;">'
-        + '😤 <b>Pain:</b> ' + (a.pain_point||'') + '<br>'
-        + '💡 <b>Trigger:</b> ' + (a.buying_trigger||'') + '<br>'
-        + '🎬 <b>Content:</b> ' + (a.preferred_content||'') + '</div></div>';
+        + '😤 <b>Pain:</b> ' + (a.pain_point || '') + '<br>'
+        + '💡 <b>Trigger:</b> ' + (a.buying_trigger || '') + '<br>'
+        + '🎬 <b>Content:</b> ' + (a.preferred_content || '') + '</div></div>';
     }).join('');
 
     bodyHtml = '<div style="display:flex;flex-direction:column;gap:20px;">'
@@ -3212,16 +3225,16 @@ function renderContentAgent() {
       + '<button id="caResetBtn" style="padding:13px 20px;background:var(--bg-glass);color:var(--text-secondary);font-size:0.85rem;border:1px solid var(--border-primary);border-radius:12px;cursor:pointer;">↺ Phân tích lại</button>'
       + '</div></div>';
 
-  // ── Step 4: Scripts ──
+    // ── Step 4: Scripts ──
   } else if (step === 4) {
     var scripts = window._ca.scripts || [];
     var activeVariant = window._ca.activeVariant || 'emotional';
-    var script = scripts.find(function(s) { return s.variant === activeVariant; }) || scripts[0];
+    var script = scripts.find(function (s) { return s.variant === activeVariant; }) || scripts[0];
 
     var variantLabels = { emotional: '❤️ Cảm xúc', informational: '📊 Thông tin', humor: '😄 Hài hước' };
-    var variantTabs = ['emotional','informational','humor'].map(function(v) {
+    var variantTabs = ['emotional', 'informational', 'humor'].map(function (v) {
       var isActive = v === activeVariant;
-      return '<button data-ca-variant="' + v + '" style="flex:1;padding:10px;border-radius:10px;font-weight:700;font-size:0.82rem;cursor:pointer;border:' + (isActive ? '2px solid var(--accent-amber)' : '1.5px solid var(--border-primary)') + ';background:' + (isActive ? 'rgba(234,179,8,0.12)' : 'var(--bg-glass)') + ';color:' + (isActive ? 'var(--accent-amber)' : 'var(--text-secondary)') + ';">' + (variantLabels[v]||v) + '</button>';
+      return '<button data-ca-variant="' + v + '" style="flex:1;padding:10px;border-radius:10px;font-weight:700;font-size:0.82rem;cursor:pointer;border:' + (isActive ? '2px solid var(--accent-amber)' : '1.5px solid var(--border-primary)') + ';background:' + (isActive ? 'rgba(234,179,8,0.12)' : 'var(--bg-glass)') + ';color:' + (isActive ? 'var(--accent-amber)' : 'var(--text-secondary)') + ';">' + (variantLabels[v] || v) + '</button>';
     }).join('');
 
     // Detect from actual script fields — never trust window._ca.is_text_post alone,
@@ -3231,7 +3244,7 @@ function renderContentAgent() {
     var isTextPost = script
       ? (typeof script.body !== 'undefined' && !Array.isArray(script.timeline) && !script.scenes)
       : (window._ca.is_text_post || false);
-    var tagsHtml = script && script.hashtags ? script.hashtags.map(function(h) {
+    var tagsHtml = script && script.hashtags ? script.hashtags.map(function (h) {
       return '<span style="padding:4px 10px;background:rgba(14,165,233,0.12);color:#38bdf8;border-radius:20px;font-size:0.75rem;font-weight:600;">' + h + '</span>';
     }).join('') : '';
 
@@ -3242,16 +3255,16 @@ function renderContentAgent() {
       // ── TEXT POST layout (Facebook / Instagram caption) ──
       scriptCardHtml = '<div class="content-card">'
         + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;">'
-        + '<div class="content-card-title" style="margin-bottom:0;">📘 Bài đăng — ' + (variantLabels[activeVariant]||activeVariant) + '</div>'
+        + '<div class="content-card-title" style="margin-bottom:0;">📘 Bài đăng — ' + (variantLabels[activeVariant] || activeVariant) + '</div>'
         + '</div>'
         + (script.body ? '<div style="background:var(--bg-glass);border-radius:10px;padding:14px;font-size:0.88rem;color:var(--text-primary);line-height:1.7;white-space:pre-wrap;margin-bottom:12px;">' + script.body + '</div>' : '')
         + (script.cta ? '<div style="padding:12px;background:rgba(217,119,6,0.08);border-radius:10px;border-left:3px solid #d97706;margin-bottom:12px;">'
-            + '<span style="font-size:0.75rem;font-weight:800;color:#d97706;text-transform:uppercase;">Call to Action</span>'
-            + '<div style="font-size:0.88rem;color:var(--text-primary);margin-top:4px;">' + script.cta + '</div></div>' : '')
+          + '<span style="font-size:0.75rem;font-weight:800;color:#d97706;text-transform:uppercase;">Call to Action</span>'
+          + '<div style="font-size:0.88rem;color:var(--text-primary);margin-top:4px;">' + script.cta + '</div></div>' : '')
         + (tagsHtml ? '<div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">' + tagsHtml + '</div>' : '')
         + (script.caption_post ? '<div style="padding:12px;background:rgba(99,102,241,0.06);border-radius:10px;border:1px solid rgba(99,102,241,0.15);">'
-            + '<div style="font-size:0.7rem;font-weight:700;color:#818cf8;margin-bottom:6px;text-transform:uppercase;">📋 Caption hoàn chỉnh — sẵn sàng đăng</div>'
-            + '<div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.65;white-space:pre-wrap;">' + script.caption_post + '</div></div>' : '')
+          + '<div style="font-size:0.7rem;font-weight:700;color:#818cf8;margin-bottom:6px;text-transform:uppercase;">📋 Caption hoàn chỉnh — sẵn sàng đăng</div>'
+          + '<div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.65;white-space:pre-wrap;">' + script.caption_post + '</div></div>' : '')
         + '</div>';
     } else {
       // ── VIDEO SCRIPT layout — UGC TikTok skeletal format ──
@@ -3260,9 +3273,9 @@ function renderContentAgent() {
       var setupHtml = '';
       if (script.style || script.scene_setup || script.subject) {
         setupHtml = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">';
-        if (script.style)       setupHtml += '<div style="background:rgba(99,102,241,0.07);border-radius:8px;padding:8px 10px;"><div style="font-size:0.65rem;font-weight:800;color:#818cf8;text-transform:uppercase;margin-bottom:3px;">🎭 Style</div><div style="font-size:0.78rem;color:var(--text-primary);line-height:1.4;">' + script.style + '</div></div>';
+        if (script.style) setupHtml += '<div style="background:rgba(99,102,241,0.07);border-radius:8px;padding:8px 10px;"><div style="font-size:0.65rem;font-weight:800;color:#818cf8;text-transform:uppercase;margin-bottom:3px;">🎭 Style</div><div style="font-size:0.78rem;color:var(--text-primary);line-height:1.4;">' + script.style + '</div></div>';
         if (script.scene_setup) setupHtml += '<div style="background:rgba(16,185,129,0.07);border-radius:8px;padding:8px 10px;"><div style="font-size:0.65rem;font-weight:800;color:#10b981;text-transform:uppercase;margin-bottom:3px;">🏠 Scene Setup</div><div style="font-size:0.78rem;color:var(--text-primary);line-height:1.4;">' + script.scene_setup + '</div></div>';
-        if (script.subject)     setupHtml += '<div style="background:rgba(234,179,8,0.07);border-radius:8px;padding:8px 10px;"><div style="font-size:0.65rem;font-weight:800;color:#d97706;text-transform:uppercase;margin-bottom:3px;">🧍 Subject</div><div style="font-size:0.78rem;color:var(--text-primary);line-height:1.4;">' + script.subject + '</div></div>';
+        if (script.subject) setupHtml += '<div style="background:rgba(234,179,8,0.07);border-radius:8px;padding:8px 10px;"><div style="font-size:0.65rem;font-weight:800;color:#d97706;text-transform:uppercase;margin-bottom:3px;">🧍 Subject</div><div style="font-size:0.78rem;color:var(--text-primary);line-height:1.4;">' + script.subject + '</div></div>';
         setupHtml += '</div>';
       }
 
@@ -3271,14 +3284,14 @@ function renderContentAgent() {
       var shotColors = { 'Hook Shot': '#ef4444', 'Reveal': '#6366f1', 'Demo Shot': '#0ea5e9', 'Proof Shot': '#10b981', 'CTA Shot': '#d97706' };
       if (Array.isArray(script.timeline) && script.timeline.length > 0) {
         timelineHtml = '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">';
-        script.timeline.forEach(function(seg) {
+        script.timeline.forEach(function (seg) {
           var shotType = seg.shot_type || '';
           var borderColor = shotColors[shotType] || '#6366f1';
           var bgColor = borderColor + '0d'; // ~5% opacity hex
           timelineHtml += '<div style="border-left:3px solid ' + borderColor + ';border-radius:0 10px 10px 0;background:var(--bg-glass);padding:12px 14px;">';
           // Timecode + Shot type header
           timelineHtml += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">';
-          timelineHtml += '<code style="background:rgba(0,0,0,0.06);color:var(--text-primary);font-size:0.75rem;font-weight:700;padding:2px 8px;border-radius:6px;letter-spacing:0.04em;">' + (seg.timecode||'') + '</code>';
+          timelineHtml += '<code style="background:rgba(0,0,0,0.06);color:var(--text-primary);font-size:0.75rem;font-weight:700;padding:2px 8px;border-radius:6px;letter-spacing:0.04em;">' + (seg.timecode || '') + '</code>';
           timelineHtml += '<span style="font-size:0.72rem;font-weight:800;color:' + borderColor + ';text-transform:uppercase;letter-spacing:0.03em;">' + shotType + '</span>';
           timelineHtml += '</div>';
           // Action
@@ -3289,7 +3302,7 @@ function renderContentAgent() {
           if (seg.performance_note || seg.lighting) {
             timelineHtml += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">';
             if (seg.performance_note) timelineHtml += '<div style="font-size:0.72rem;color:#818cf8;">🎭 ' + seg.performance_note + '</div>';
-            if (seg.lighting)         timelineHtml += '<div style="font-size:0.72rem;color:#f59e0b;">💡 ' + seg.lighting + '</div>';
+            if (seg.lighting) timelineHtml += '<div style="font-size:0.72rem;color:#f59e0b;">💡 ' + seg.lighting + '</div>';
             timelineHtml += '</div>';
           }
           timelineHtml += '</div>';
@@ -3300,13 +3313,13 @@ function renderContentAgent() {
         var legacyColors = { hook: '#ef4444', body: '#0ea5e9', proof: '#10b981', cta: '#d97706' };
         var legacyLabels = { hook: 'HOOK', body: 'NỘI DUNG', proof: 'BẰNG CHỨNG', cta: 'CTA' };
         timelineHtml = '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">';
-        script.scenes.forEach(function(scene) {
+        script.scenes.forEach(function (scene) {
           var c = legacyColors[scene.type] || '#6366f1';
           timelineHtml += '<div style="display:flex;gap:14px;padding:12px 14px;background:var(--bg-glass);border-radius:10px;border-left:3px solid ' + c + ';">'
-            + '<div style="flex-shrink:0;text-align:center;min-width:52px;"><div style="font-size:0.65rem;font-weight:800;color:' + c + ';text-transform:uppercase;">' + (legacyLabels[scene.type]||scene.type) + '</div><div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">' + (scene.time_range||'') + '</div></div>'
-            + '<div style="flex:1;"><div style="font-size:0.83rem;color:var(--text-primary);margin-bottom:5px;line-height:1.5;">🎙 ' + (scene.voiceover||'') + '</div>'
-            + '<div style="font-size:0.78rem;color:var(--accent-amber);margin-bottom:3px;">📝 ' + (scene.caption||'') + '</div>'
-            + '<div style="font-size:0.74rem;color:var(--text-muted);">🎥 ' + (scene.visual_note||'') + '</div>'
+            + '<div style="flex-shrink:0;text-align:center;min-width:52px;"><div style="font-size:0.65rem;font-weight:800;color:' + c + ';text-transform:uppercase;">' + (legacyLabels[scene.type] || scene.type) + '</div><div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">' + (scene.time_range || '') + '</div></div>'
+            + '<div style="flex:1;"><div style="font-size:0.83rem;color:var(--text-primary);margin-bottom:5px;line-height:1.5;">🎙 ' + (scene.voiceover || '') + '</div>'
+            + '<div style="font-size:0.78rem;color:var(--accent-amber);margin-bottom:3px;">📝 ' + (scene.caption || '') + '</div>'
+            + '<div style="font-size:0.74rem;color:var(--text-muted);">🎥 ' + (scene.visual_note || '') + '</div>'
             + '</div></div>';
         });
         timelineHtml += '</div>';
@@ -3315,15 +3328,15 @@ function renderContentAgent() {
       // ── Camera / Framing / Performance / Lighting strip ──
       var techHtml = '';
       var techFields = [
-        { key: 'camera',      icon: '📷', label: 'Camera' },
-        { key: 'framing',     icon: '🔲', label: 'Framing' },
+        { key: 'camera', icon: '📷', label: 'Camera' },
+        { key: 'framing', icon: '🔲', label: 'Framing' },
         { key: 'performance', icon: '🎭', label: 'Performance' },
-        { key: 'lighting',    icon: '💡', label: 'Lighting' },
+        { key: 'lighting', icon: '💡', label: 'Lighting' },
       ];
-      var techItems = techFields.filter(function(f) { return script[f.key]; });
+      var techItems = techFields.filter(function (f) { return script[f.key]; });
       if (techItems.length > 0) {
         techHtml = '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;">';
-        techItems.forEach(function(f) {
+        techItems.forEach(function (f) {
           techHtml += '<div style="background:var(--bg-glass);border-radius:8px;padding:8px 10px;border:1px solid var(--border-primary);">'
             + '<div style="font-size:0.65rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">' + f.icon + ' ' + f.label + '</div>'
             + '<div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.4;">' + script[f.key] + '</div>'
@@ -3334,7 +3347,7 @@ function renderContentAgent() {
 
       scriptCardHtml = '<div class="content-card">'
         + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px;">'
-        + '<div class="content-card-title" style="margin-bottom:0;">🎬 Kịch bản — ' + (variantLabels[activeVariant]||activeVariant) + '</div>'
+        + '<div class="content-card-title" style="margin-bottom:0;">🎬 Kịch bản — ' + (variantLabels[activeVariant] || activeVariant) + '</div>'
         + '</div>'
         + setupHtml
         + timelineHtml
@@ -3374,22 +3387,22 @@ function renderContentAgent() {
       + '</div></div>'
       + '</div>';
 
-  // ── Step 5: Filming guide ──
+    // ── Step 5: Filming guide ──
   } else if (step === 5) {
     var guide = window._ca.filmingGuide || {};
     var filmScenes = guide.scenes || [];
 
-    var filmScenesHtml = filmScenes.map(function(s) {
-      var propsHtml = (s.props||[]).map(function(p){ return '<span style="padding:3px 8px;background:rgba(234,179,8,0.1);color:var(--accent-amber);border-radius:6px;font-size:0.72rem;">' + p + '</span>'; }).join('');
+    var filmScenesHtml = filmScenes.map(function (s) {
+      var propsHtml = (s.props || []).map(function (p) { return '<span style="padding:3px 8px;background:rgba(234,179,8,0.1);color:var(--accent-amber);border-radius:6px;font-size:0.72rem;">' + p + '</span>'; }).join('');
       return '<div style="padding:14px;background:var(--bg-glass);border-radius:12px;border:1px solid var(--border-primary);">'
         + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
-        + '<div style="font-weight:800;font-size:0.88rem;color:var(--text-primary);">Cảnh ' + (s.scene_no||'') + ' — ' + (s.duration||'') + '</div>'
+        + '<div style="font-weight:800;font-size:0.88rem;color:var(--text-primary);">Cảnh ' + (s.scene_no || '') + ' — ' + (s.duration || '') + '</div>'
         + '</div>'
         + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.8rem;margin-bottom:10px;">'
-        + '<div style="padding:8px;background:rgba(14,165,233,0.07);border-radius:8px;"><span style="color:#38bdf8;font-weight:700;">⚙️ Setup:</span><br><span style="color:var(--text-secondary);">' + (s.setup||'') + '</span></div>'
-        + '<div style="padding:8px;background:rgba(234,179,8,0.07);border-radius:8px;"><span style="color:var(--accent-amber);font-weight:700;">💡 Ánh sáng:</span><br><span style="color:var(--text-secondary);">' + (s.lighting||'') + '</span></div>'
-        + '<div style="padding:8px;background:rgba(16,185,129,0.07);border-radius:8px;"><span style="color:var(--accent-emerald);font-weight:700;">📐 Góc quay:</span><br><span style="color:var(--text-secondary);">' + (s.angle||'') + '</span></div>'
-        + '<div style="padding:8px;background:rgba(99,102,241,0.07);border-radius:8px;"><span style="color:#818cf8;font-weight:700;">💼 Props:</span><br><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">' + (propsHtml||'<span style="color:var(--text-muted);">Không cần</span>') + '</div></div>'
+        + '<div style="padding:8px;background:rgba(14,165,233,0.07);border-radius:8px;"><span style="color:#38bdf8;font-weight:700;">⚙️ Setup:</span><br><span style="color:var(--text-secondary);">' + (s.setup || '') + '</span></div>'
+        + '<div style="padding:8px;background:rgba(234,179,8,0.07);border-radius:8px;"><span style="color:var(--accent-amber);font-weight:700;">💡 Ánh sáng:</span><br><span style="color:var(--text-secondary);">' + (s.lighting || '') + '</span></div>'
+        + '<div style="padding:8px;background:rgba(16,185,129,0.07);border-radius:8px;"><span style="color:var(--accent-emerald);font-weight:700;">📐 Góc quay:</span><br><span style="color:var(--text-secondary);">' + (s.angle || '') + '</span></div>'
+        + '<div style="padding:8px;background:rgba(99,102,241,0.07);border-radius:8px;"><span style="color:#818cf8;font-weight:700;">💼 Props:</span><br><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">' + (propsHtml || '<span style="color:var(--text-muted);">Không cần</span>') + '</div></div>'
         + '</div>'
         + (s.tip ? '<div style="padding:8px 12px;background:rgba(239,68,68,0.07);border-radius:8px;border-left:2px solid #ef4444;font-size:0.8rem;color:var(--text-secondary);">💡 <b style="color:#f87171;">Tip:</b> ' + s.tip + '</div>' : '')
         + '</div>';
@@ -3406,7 +3419,7 @@ function renderContentAgent() {
       + '</div>';
   }
 
-  setTimeout(function() { initContentAgentEvents(); }, 60);
+  setTimeout(function () { initContentAgentEvents(); }, 60);
 
   return '<div style="display:flex;flex-direction:column;gap:20px;">'
     + '<div style="padding:14px 18px;background:linear-gradient(135deg,rgba(234,179,8,0.07),rgba(217,119,6,0.04));border-radius:12px;border:1px solid rgba(234,179,8,0.18);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">'
@@ -3425,17 +3438,17 @@ function renderContentAgent() {
 // Map SKU → canonical P-ID để prefill từ suggestions hoạt động dù offline.
 function _mockToCatalogProducts() {
   var skuToPid = {
-    'GF-LGLOSS-M01':      'P001',
-    'GF-MLIPSTICK-M09':   'P002',
-    'GF-SPOWDER-TN':      'P003',
-    'GF-CO1-ML-SPOWDER':  'P004',
-    'GF-POWDER-18K':      'P006',
-    'GF-LIPSET-06':       'P007',
-    'GF-MKP-COMBO6':      'P008',
-    'GF-BRUSH-13':        'P009',
-    'HL-CLEANSER-80G':    'P011',
+    'GF-LGLOSS-M01': 'P001',
+    'GF-MLIPSTICK-M09': 'P002',
+    'GF-SPOWDER-TN': 'P003',
+    'GF-CO1-ML-SPOWDER': 'P004',
+    'GF-POWDER-18K': 'P006',
+    'GF-LIPSET-06': 'P007',
+    'GF-MKP-COMBO6': 'P008',
+    'GF-BRUSH-13': 'P009',
+    'HL-CLEANSER-80G': 'P011',
   };
-  return (MOCK.products_detail || []).map(function(p, i) {
+  return (MOCK.products_detail || []).map(function (p, i) {
     var pid = skuToPid[p.sku] || p.sku || ('MOCK-' + i);
     return {
       product_id: pid,
@@ -3460,29 +3473,29 @@ function initContentAgentEvents() {
 
     // Song song: thử lấy từ backend để override (nếu backend đang chạy)
     fetch(API_BASE + '/api/content-agent/products')
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
         if (data.products && data.products.length > 0) {
           window._ca.catalogProducts = data.products;
           if (window._ca.step === 1) { navContentScript(); }
         }
-      }).catch(function() { /* giữ mock */ });
+      }).catch(function () { /* giữ mock */ });
   }
 
   // ── Khi chọn sản phẩm → cập nhật USP checkboxes ──
   var productSelect = document.getElementById('caProductSelect');
   if (productSelect) {
-    productSelect.onchange = function() {
+    productSelect.onchange = function () {
       var selectedId = productSelect.value;
       var products = window._ca.catalogProducts || [];
-      var p = products.find(function(x) { return x.product_id === selectedId; });
+      var p = products.find(function (x) { return x.product_id === selectedId; });
       window._ca._selectedProduct = p || null;
       window._ca._selectedUsps = null; // reset selection
       // Re-render chỉ phần USP checkboxes
       var container = document.getElementById('caUspCheckboxes');
       if (container && p) {
         var uspList = p.usp || [];
-        container.innerHTML = uspList.map(function(u, i) {
+        container.innerHTML = uspList.map(function (u, i) {
           return '<label style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--bg-glass);border-radius:8px;cursor:pointer;font-size:0.8rem;color:var(--text-secondary);line-height:1.4;">'
             + '<input type="checkbox" data-usp-item="' + i + '" value="' + encodeURIComponent(u) + '" checked style="margin-top:2px;accent-color:#d97706;flex-shrink:0;">'
             + '<span>' + u + '</span></label>';
@@ -3494,40 +3507,48 @@ function initContentAgentEvents() {
   // ── Áp dụng prefill từ "Tạo script" trong Đề xuất AI ──
   var prefill = window._ca._prefill;
   if (prefill) {
-    // Chọn sản phẩm theo product_id
     var productSelectEl2 = document.getElementById('caProductSelect');
-    if (productSelectEl2 && prefill.product_id) {
-      // Thử chọn theo value, nếu không khớp thì thử chứa chuỗi
-      var opts = Array.from(productSelectEl2.options);
-      var match = opts.find(function(o) { return o.value === prefill.product_id; })
-                || opts.find(function(o) { return o.value.indexOf(prefill.product_id) !== -1; });
-      if (match) {
-        productSelectEl2.value = match.value;
-        productSelectEl2.dispatchEvent(new Event('change'));
+    // Kiểm tra select đã có option thực hay chưa (tránh áp dụng vào placeholder rỗng).
+    // Khi catalog chưa load xong, select chỉ có 1 option value="" — match sẽ fail
+    // và _prefill bị null trước khi catalog-populated re-render xảy ra.
+    // Fix: chỉ apply (và null _prefill) khi có ít nhất 1 option có value thực.
+    var hasRealOptions = productSelectEl2 && Array.from(productSelectEl2.options).some(function (o) { return o.value !== ''; });
+
+    if (hasRealOptions) {
+      // Chọn sản phẩm theo product_id
+      if (prefill.product_id) {
+        var opts = Array.from(productSelectEl2.options);
+        var match = opts.find(function (o) { return o.value === prefill.product_id; })
+          || opts.find(function (o) { return o.value.indexOf(prefill.product_id) !== -1; });
+        if (match) {
+          productSelectEl2.value = match.value;
+          productSelectEl2.dispatchEvent(new Event('change'));
+        }
       }
+      // Chọn content type
+      var ctEl = document.getElementById('caContentType');
+      if (ctEl && prefill.content_type) ctEl.value = prefill.content_type;
+      // Điền custom instructions từ góc tiếp cận đề xuất
+      var instrEl = document.getElementById('caCustomInstructions');
+      if (instrEl && prefill.custom_instructions) instrEl.value = prefill.custom_instructions;
+      // Lưu suggestion ID gốc để nút "Lưu kịch bản" biết đề xuất nào cần cập nhật
+      window._ca._sourceSuggestionId = prefill.suggestion_id || null;
+      // Xoá prefill sau khi đã áp dụng với options thực
+      window._ca._prefill = null;
     }
-    // Chọn content type
-    var ctEl = document.getElementById('caContentType');
-    if (ctEl && prefill.content_type) ctEl.value = prefill.content_type;
-    // Điền custom instructions từ góc tiếp cận đề xuất
-    var instrEl = document.getElementById('caCustomInstructions');
-    if (instrEl && prefill.custom_instructions) instrEl.value = prefill.custom_instructions;
-    // Lưu suggestion ID gốc để nút "Lưu kịch bản" biết đề xuất nào cần cập nhật
-    window._ca._sourceSuggestionId = prefill.suggestion_id || null;
-    // Xoá prefill sau khi đã áp dụng
-    window._ca._prefill = null;
+    // Nếu chưa có options thực: giữ _prefill để render tiếp theo (sau khi catalog load) thử lại
   }
 
   // ── Nút Phân tích & Tạo Script ──
   var analyzeBtn = document.getElementById('caAnalyzeBtn');
   if (analyzeBtn) {
-    analyzeBtn.onclick = function() {
+    analyzeBtn.onclick = function () {
       var products = window._ca.catalogProducts || [];
       var productSelectEl = document.getElementById('caProductSelect');
       var selectedId = productSelectEl ? productSelectEl.value : '';
       if (!selectedId) { showToast('Vui lòng chọn sản phẩm', 'warning'); return; }
 
-      var selectedProduct = products.find(function(x) { return x.product_id === selectedId; }) || {};
+      var selectedProduct = products.find(function (x) { return x.product_id === selectedId; }) || {};
       var contentType = (document.getElementById('caContentType') || {}).value || 'tiktok_30s';
       var brandTone = (document.getElementById('caBrandTone') || {}).value || 'Trẻ trung, vui vẻ, gần gũi';
       var targetAudience = (document.getElementById('caTargetAudience') || {}).value || '';
@@ -3535,7 +3556,7 @@ function initContentAgentEvents() {
 
       // Lấy USP được tick
       var checkedBoxes = document.querySelectorAll('[data-usp-item]:checked');
-      var selectedUsps = Array.from(checkedBoxes).map(function(cb) { return decodeURIComponent(cb.value); });
+      var selectedUsps = Array.from(checkedBoxes).map(function (cb) { return decodeURIComponent(cb.value); });
       if (!selectedUsps.length) {
         selectedUsps = selectedProduct.usp || [];
       }
@@ -3558,38 +3579,38 @@ function initContentAgentEvents() {
 
   var genBtn = document.getElementById('caGenScriptBtn');
   if (genBtn) {
-    genBtn.onclick = function() { caGenerateScripts(); };
+    genBtn.onclick = function () { caGenerateScripts(); };
   }
 
   var resetBtn = document.getElementById('caResetBtn');
-  if (resetBtn) { resetBtn.onclick = function() { caReset(); navContentScript(); }; }
+  if (resetBtn) { resetBtn.onclick = function () { caReset(); navContentScript(); }; }
 
   var filmBtn = document.getElementById('caFilmingBtn');
   if (filmBtn) {
-    filmBtn.onclick = function() { caGetFilmingGuide(); };
+    filmBtn.onclick = function () { caGetFilmingGuide(); };
   }
 
   var backBtn = document.getElementById('caBackBtn');
-  if (backBtn) { backBtn.onclick = function() { window._ca.step = 3; navContentScript(); }; }
+  if (backBtn) { backBtn.onclick = function () { window._ca.step = 3; navContentScript(); }; }
 
   var backScriptBtn = document.getElementById('caBackScript');
-  if (backScriptBtn) { backScriptBtn.onclick = function() { window._ca.step = 4; navContentScript(); }; }
+  if (backScriptBtn) { backScriptBtn.onclick = function () { window._ca.step = 4; navContentScript(); }; }
 
   var feedbackBtn = document.getElementById('caFeedbackBtn');
   if (feedbackBtn) {
-    feedbackBtn.onclick = function() {
-      var text = (document.getElementById('caFeedbackText')||{}).value || '';
+    feedbackBtn.onclick = function () {
+      var text = (document.getElementById('caFeedbackText') || {}).value || '';
       if (!text.trim()) { showToast('Vui lòng nhập phản hồi cụ thể', 'warning'); return; }
       caImproveScript(text);
     };
   }
 
   var saveScriptBtn = document.getElementById('caSaveScriptBtn');
-  if (saveScriptBtn) { saveScriptBtn.onclick = function() { caSaveScript(); }; }
+  if (saveScriptBtn) { saveScriptBtn.onclick = function () { caSaveScript(); }; }
 
   // Variant tab buttons
-  document.querySelectorAll('[data-ca-variant]').forEach(function(btn) {
-    btn.onclick = function() {
+  document.querySelectorAll('[data-ca-variant]').forEach(function (btn) {
+    btn.onclick = function () {
       window._ca.activeVariant = btn.dataset.caVariant;
       navContentScript();
     };
@@ -3614,8 +3635,8 @@ function caStartAnalysis(req) {
     { pct: 55, label: 'Xác định chân dung khách hàng mục tiêu...', delay: 1400 },
     { pct: 80, label: 'Đang tạo 3 phiên bản kịch bản...', delay: 2200 },
   ];
-  progressSteps.forEach(function(s) {
-    setTimeout(function() {
+  progressSteps.forEach(function (s) {
+    setTimeout(function () {
       window._ca.progress = s.pct; window._ca.stepLabel = s.label;
       var bar = document.getElementById('caProgressBar');
       var pctEl = document.getElementById('caProgressPct');
@@ -3630,7 +3651,7 @@ function caStartAnalysis(req) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(req),
-  }).then(function(r) { return r.json(); }).then(function(data) {
+  }).then(function (r) { return r.json(); }).then(function (data) {
     if (data.intel) {
       window._ca.intel = data.intel;
       // ── Bước 2: Gọi /generate-script để lấy 3 phiên bản script ──
@@ -3639,7 +3660,7 @@ function caStartAnalysis(req) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(req),
-      }).then(function(r2) { return r2.json(); }).then(function(scriptData) {
+      }).then(function (r2) { return r2.json(); }).then(function (scriptData) {
         window._ca.scripts = scriptData.scripts || [];
         window._ca.is_text_post = scriptData.is_text_post || false;
         window._ca.activeVariant = 'emotional';
@@ -3647,13 +3668,13 @@ function caStartAnalysis(req) {
         window._ca.step = 4;
         navContentScript();
         var label = window._ca.is_text_post ? 'bài đăng văn bản' : 'kịch bản';
-        showToast('✅ Đã tạo ' + (scriptData.scripts||[]).length + ' phiên bản ' + label + '!', 'success');
-      }).catch(function() { caSimulateScripts(); });
+        showToast('✅ Đã tạo ' + (scriptData.scripts || []).length + ' phiên bản ' + label + '!', 'success');
+      }).catch(function () { caSimulateScripts(); });
     } else {
       showToast('Lỗi phân tích: ' + (data.detail || 'Không có dữ liệu'), 'danger');
       caReset(); navContentScript();
     }
-  }).catch(function() {
+  }).catch(function () {
     // Fallback: simulate nếu backend chưa sẵn sàng
     caSimulateAnalysis();
   });
@@ -3663,36 +3684,36 @@ function caPollJob(jobId) {
   var progressMap = { scraping: 20, analyzing: 60, done: 100 };
   var labelMap = { scraping: 'Đang lấy dữ liệu sản phẩm...', analyzing: 'AI đang phân tích USP & đối tượng...', done: 'Hoàn tất phân tích!' };
 
-  window._ca.pollTimer = setInterval(function() {
+  window._ca.pollTimer = setInterval(function () {
     fetch(API_BASE + '/api/v1/content-agent/jobs/' + jobId)
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var pct = progressMap[data.step] || (window._ca.progress + 10);
-      var lbl = labelMap[data.step] || data.step || 'Đang xử lý...';
-      window._ca.progress = Math.min(pct, 95);
-      window._ca.stepLabel = lbl;
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var pct = progressMap[data.step] || (window._ca.progress + 10);
+        var lbl = labelMap[data.step] || data.step || 'Đang xử lý...';
+        window._ca.progress = Math.min(pct, 95);
+        window._ca.stepLabel = lbl;
 
-      var bar = document.getElementById('caProgressBar');
-      var pctEl = document.getElementById('caProgressPct');
-      var lblEl = document.getElementById('caStepLabel');
-      if (bar) bar.style.width = window._ca.progress + '%';
-      if (pctEl) pctEl.textContent = window._ca.progress + '%';
-      if (lblEl) lblEl.textContent = lbl;
+        var bar = document.getElementById('caProgressBar');
+        var pctEl = document.getElementById('caProgressPct');
+        var lblEl = document.getElementById('caStepLabel');
+        if (bar) bar.style.width = window._ca.progress + '%';
+        if (pctEl) pctEl.textContent = window._ca.progress + '%';
+        if (lblEl) lblEl.textContent = lbl;
 
-      if (data.status === 'done' && data.result) {
-        clearInterval(window._ca.pollTimer); window._ca.pollTimer = null;
-        window._ca.intel = data.result;
-        window._ca.intelId = jobId;
-        window._ca.progress = 100;
-        window._ca.step = 3;
-        navContentScript();
-        showToast('✅ Phân tích xong! AI phát hiện ' + (window._ca.intel.usp||[]).length + ' USP và ' + (window._ca.intel.audience||[]).length + ' nhóm khách hàng', 'success');
-      } else if (data.status === 'error') {
-        clearInterval(window._ca.pollTimer); window._ca.pollTimer = null;
-        showToast('Lỗi phân tích: ' + (data.error||'Unknown error'), 'danger');
-        caReset(); navContentScript();
-      }
-    }).catch(function() { /* keep polling */ });
+        if (data.status === 'done' && data.result) {
+          clearInterval(window._ca.pollTimer); window._ca.pollTimer = null;
+          window._ca.intel = data.result;
+          window._ca.intelId = jobId;
+          window._ca.progress = 100;
+          window._ca.step = 3;
+          navContentScript();
+          showToast('✅ Phân tích xong! AI phát hiện ' + (window._ca.intel.usp || []).length + ' USP và ' + (window._ca.intel.audience || []).length + ' nhóm khách hàng', 'success');
+        } else if (data.status === 'error') {
+          clearInterval(window._ca.pollTimer); window._ca.pollTimer = null;
+          showToast('Lỗi phân tích: ' + (data.error || 'Unknown error'), 'danger');
+          caReset(); navContentScript();
+        }
+      }).catch(function () { /* keep polling */ });
   }, 1500);
 }
 
@@ -3704,8 +3725,8 @@ function caSimulateAnalysis() {
     { pct: 70, label: 'Xác định USP & đối tượng khách hàng...', delay: 2400 },
     { pct: 90, label: 'Hoàn thiện phân tích...', delay: 3200 },
   ];
-  steps.forEach(function(s) {
-    setTimeout(function() {
+  steps.forEach(function (s) {
+    setTimeout(function () {
       window._ca.progress = s.pct; window._ca.stepLabel = s.label;
       var bar = document.getElementById('caProgressBar');
       var pctEl = document.getElementById('caProgressPct');
@@ -3715,7 +3736,7 @@ function caSimulateAnalysis() {
       if (lblEl) lblEl.textContent = s.label;
     }, s.delay);
   });
-  setTimeout(function() {
+  setTimeout(function () {
     window._ca.intel = {
       usp: [
         { rank: 1, point: 'Bền màu transfer-proof cả ngày — kể cả sau ăn uống', evidence: '92% review đề cập độ bền màu vượt trội, không lem khi uống đồ nóng' },
@@ -3750,35 +3771,35 @@ function caGenerateScripts() {
     fetch(API_BASE + '/api/v1/content-agent/script/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ product_intel_id: intelId, video_length: 30, variants: ['emotional','informational','humor'], language: 'vi' })
-    }).then(function(r) { return r.json(); }).then(function(data) {
+      body: JSON.stringify({ product_intel_id: intelId, video_length: 30, variants: ['emotional', 'informational', 'humor'], language: 'vi' })
+    }).then(function (r) { return r.json(); }).then(function (data) {
       if (data.job_id) { caPollScriptJob(data.job_id); }
       else { caSimulateScripts(); }
-    }).catch(function() { caSimulateScripts(); });
+    }).catch(function () { caSimulateScripts(); });
   } else {
     caSimulateScripts();
   }
 }
 
 function caPollScriptJob(jobId) {
-  var t = setInterval(function() {
+  var t = setInterval(function () {
     fetch(API_BASE + '/api/v1/content-agent/jobs/' + jobId)
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var pct = Math.min((window._ca.progress || 10) + 15, 90);
-      window._ca.progress = pct;
-      var bar = document.getElementById('caProgressBar'); if (bar) bar.style.width = pct + '%';
-      var pctEl = document.getElementById('caProgressPct'); if (pctEl) pctEl.textContent = pct + '%';
-      if (data.status === 'done' && data.result) {
-        clearInterval(t);
-        window._ca.scripts = data.result;
-        window._ca.step = 4;
-        navContentScript();
-        showToast('✅ Đã tạo ' + data.result.length + ' kịch bản video!', 'success');
-      } else if (data.status === 'error') {
-        clearInterval(t); caSimulateScripts();
-      }
-    }).catch(function() {});
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var pct = Math.min((window._ca.progress || 10) + 15, 90);
+        window._ca.progress = pct;
+        var bar = document.getElementById('caProgressBar'); if (bar) bar.style.width = pct + '%';
+        var pctEl = document.getElementById('caProgressPct'); if (pctEl) pctEl.textContent = pct + '%';
+        if (data.status === 'done' && data.result) {
+          clearInterval(t);
+          window._ca.scripts = data.result;
+          window._ca.step = 4;
+          navContentScript();
+          showToast('✅ Đã tạo ' + data.result.length + ' kịch bản video!', 'success');
+        } else if (data.status === 'error') {
+          clearInterval(t); caSimulateScripts();
+        }
+      }).catch(function () { });
   }, 1800);
 }
 
@@ -3788,15 +3809,15 @@ function caSimulateScripts() {
     { pct: 60, label: 'Viết kịch bản thông tin...', delay: 1400 },
     { pct: 85, label: 'Viết kịch bản hài hước...', delay: 2200 },
   ];
-  steps2.forEach(function(s) {
-    setTimeout(function() {
+  steps2.forEach(function (s) {
+    setTimeout(function () {
       window._ca.progress = s.pct; window._ca.stepLabel = s.label;
       var bar = document.getElementById('caProgressBar'); if (bar) bar.style.width = s.pct + '%';
       var pctEl = document.getElementById('caProgressPct'); if (pctEl) pctEl.textContent = s.pct + '%';
       var lblEl = document.getElementById('caStepLabel'); if (lblEl) lblEl.textContent = s.label;
     }, s.delay);
   });
-  setTimeout(function() {
+  setTimeout(function () {
     window._ca.scripts = [
       {
         variant: 'emotional',
@@ -3865,7 +3886,7 @@ function caSimulateScripts() {
 
 function caGetFilmingGuide() {
   var scripts = window._ca.scripts;
-  var script = scripts.find(function(s){ return s.variant === window._ca.activeVariant; }) || scripts[0];
+  var script = scripts.find(function (s) { return s.variant === window._ca.activeVariant; }) || scripts[0];
   if (!script) { showToast('Không có kịch bản để tạo hướng dẫn quay', 'warning'); return; }
 
   // Try real API, fall back to demo
@@ -3873,22 +3894,22 @@ function caGetFilmingGuide() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ script_id: 'demo-script', variant: window._ca.activeVariant, equipment: 'phone', location: 'home' })
-  }).then(function(r) { return r.json(); }).then(function(data) {
+  }).then(function (r) { return r.json(); }).then(function (data) {
     if (data.scenes) {
       window._ca.filmingGuide = data;
       window._ca.step = 5;
       navContentScript();
     } else { caSimulateFilmingGuide(script); }
-  }).catch(function() { caSimulateFilmingGuide(script); });
+  }).catch(function () { caSimulateFilmingGuide(script); });
 }
 
 function caSimulateFilmingGuide(script) {
   // Support new timeline format; fall back to legacy scenes
   var segments = Array.isArray(script.timeline) && script.timeline.length > 0
     ? script.timeline
-    : (script.scenes || []).map(function(s) {
-        return { timecode: s.time_range, shot_type: s.type, action: s.voiceover };
-      });
+    : (script.scenes || []).map(function (s) {
+      return { timecode: s.time_range, shot_type: s.type, action: s.voiceover };
+    });
   var setups = ['Đặt điện thoại trên tripod cách 60-80cm, ngang tầm mắt', 'Cầm điện thoại tay, di chuyển chậm từ trái sang phải', 'Đặt sản phẩm trên bàn trắng, quay từ trên xuống (flat lay)'];
   var lightings = [
     script.lighting || 'Ánh sáng tự nhiên từ cửa sổ — đặt nhân vật đối diện cửa',
@@ -3897,10 +3918,10 @@ function caSimulateFilmingGuide(script) {
   ];
   var angles = ['Eye-level — thẳng mắt tạo cảm giác kết nối', 'Close-up 45° từ trên xuống — làm nổi bật sản phẩm', 'Wide shot — thu gọn toàn cảnh bối cảnh'];
   var tips = ['Giữ điện thoại bằng 2 tay và khuỷu tay tì vào người để tránh rung', 'Quay nhiều takes, chọn cái tự nhiên nhất', 'Mặc đồ tối màu để sản phẩm nổi bật hơn'];
-  var guideScenes = segments.map(function(s, i) {
+  var guideScenes = segments.map(function (s, i) {
     return {
       scene_no: i + 1,
-      duration: s.timecode || ('Segment ' + (i+1)),
+      duration: s.timecode || ('Segment ' + (i + 1)),
       setup: (script.camera || setups[i % setups.length]),
       lighting: (s.lighting || lightings[i % lightings.length]),
       angle: angles[i % angles.length],
@@ -3916,7 +3937,7 @@ function caSimulateFilmingGuide(script) {
 function caImproveScript(feedback) {
   var activeVariant = window._ca.activeVariant;
   var scripts = window._ca.scripts;
-  var script = scripts.find(function(s){ return s.variant === activeVariant; }) || scripts[0];
+  var script = scripts.find(function (s) { return s.variant === activeVariant; }) || scripts[0];
   if (!script) return;
 
   showToast('🤖 AI đang cải thiện kịch bản...', 'info');
@@ -3928,17 +3949,17 @@ function caImproveScript(feedback) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      product_id:     req.product_id    || '',
-      product_name:   req.product_name  || '',
-      content_type:   req.content_type  || 'tiktok_30s',
-      variant:        activeVariant,
+      product_id: req.product_id || '',
+      product_name: req.product_name || '',
+      content_type: req.content_type || 'tiktok_30s',
+      variant: activeVariant,
       current_script: script,
-      feedback:       feedback,
-      is_text_post:   window._ca.is_text_post || false,
+      feedback: feedback,
+      is_text_post: window._ca.is_text_post || false,
     })
-  }).then(function(r) { return r.json(); }).then(function(data) {
+  }).then(function (r) { return r.json(); }).then(function (data) {
     if (data.script) {
-      var idx = window._ca.scripts.findIndex(function(s){ return s.variant === activeVariant; });
+      var idx = window._ca.scripts.findIndex(function (s) { return s.variant === activeVariant; });
       if (idx >= 0) {
         window._ca.scripts[idx] = Object.assign({}, window._ca.scripts[idx], data.script);
       } else {
@@ -3949,7 +3970,7 @@ function caImproveScript(feedback) {
       showToast('⚠️ AI không trả về kịch bản hợp lệ', 'warning');
     }
     navContentScript();
-  }).catch(function() {
+  }).catch(function () {
     showToast('❌ Không thể kết nối backend — vui lòng thử lại', 'error');
     if (feedbackBtn) { feedbackBtn.textContent = '🔄 Cải thiện với AI'; feedbackBtn.disabled = false; }
     navContentScript();
@@ -3963,8 +3984,8 @@ function caSaveScript() {
 
   // Chỉ lưu variant đang xem — không lưu cả 3 để tránh script bị ngắn khi xem lại
   var activeVariant = window._ca.activeVariant || 'emotional';
-  var activeScript = (window._ca.scripts || []).find(function(s) { return s.variant === activeVariant; })
-                  || (window._ca.scripts || [])[0];
+  var activeScript = (window._ca.scripts || []).find(function (s) { return s.variant === activeVariant; })
+    || (window._ca.scripts || [])[0];
   var scriptToSave = JSON.stringify(activeScript ? [activeScript] : []);
 
   var sid = window._ca._sourceSuggestionId;
@@ -3972,7 +3993,7 @@ function caSaveScript() {
     // Thử cập nhật đề xuất gốc (PATCH) — dùng apiCall() để tự động đính kèm X-API-Key
     apiCall('/api/content-suggestions/' + encodeURIComponent(sid) + '/save-script', 'PATCH',
       { script_json: scriptToSave }
-    ).then(function(data) {
+    ).then(function (data) {
       if (data.status === 'ok') {
         showToast('✅ Đã cập nhật kịch bản!', 'success');
         if (btn) { btn.textContent = '✅ Đã lưu — Cập nhật tiếp'; btn.disabled = false; }
@@ -3980,7 +4001,7 @@ function caSaveScript() {
         showToast('⚠️ Lưu không thành công', 'warning');
         if (btn) { btn.textContent = '💾 Cập nhật kịch bản đã lưu'; btn.disabled = false; }
       }
-    }).catch(function(err) {
+    }).catch(function (err) {
       // 404 = đề xuất chưa có trong DB → tạo mới
       if (err && err.message && err.message.includes('404')) {
         return _caCreateNewSuggestionWithScript(btn);
@@ -3997,16 +4018,16 @@ function _caCreateNewSuggestionWithScript(btn) {
   var req = window._ca._lastRequest || {};
   // Chỉ lưu variant đang active
   var activeVariant = window._ca.activeVariant || 'emotional';
-  var activeScript = (window._ca.scripts || []).find(function(s) { return s.variant === activeVariant; })
-                  || (window._ca.scripts || [])[0];
+  var activeScript = (window._ca.scripts || []).find(function (s) { return s.variant === activeVariant; })
+    || (window._ca.scripts || [])[0];
   // Dùng apiCall() để tự động đính kèm X-API-Key
   return apiCall('/api/content-suggestions', 'POST', {
-    product_id:   req.product_id   || '',
+    product_id: req.product_id || '',
     product_name: req.product_name || 'Sản phẩm',
     content_type: req.content_type || 'tiktok_30s',
-    scripts:      activeScript ? [activeScript] : [],
+    scripts: activeScript ? [activeScript] : [],
     is_text_post: window._ca.is_text_post || false,
-  }).then(function(data) {
+  }).then(function (data) {
     if (data.status === 'ok') {
       window._ca._sourceSuggestionId = data.suggestion_id || null;
       showToast('✅ Đã lưu kịch bản vào Đề xuất AI!', 'success');
@@ -4015,7 +4036,7 @@ function _caCreateNewSuggestionWithScript(btn) {
       showToast('⚠️ Không thể lưu kịch bản', 'warning');
       if (btn) { btn.textContent = '💾 Lưu kịch bản'; btn.disabled = false; }
     }
-  }).catch(function() {
+  }).catch(function () {
     showToast('❌ Không thể kết nối backend', 'error');
     if (btn) { btn.textContent = '💾 Lưu kịch bản'; btn.disabled = false; }
   });
@@ -4026,8 +4047,8 @@ function caViewSavedScript(sid) {
   if (!sid) { showToast('Không tìm được đề xuất', 'warning'); return; }
   showToast('🔄 Đang tải kịch bản...', 'info');
   fetch(API_BASE + '/api/content-suggestions/' + encodeURIComponent(sid) + '/script')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
       if (data.status === 'ok' && Array.isArray(data.scripts) && data.scripts.length > 0) {
         window._ca.scripts = data.scripts;
         // Detect is_text_post from actual script content — not from backend flag (may be stale for old suggestions)
@@ -4037,12 +4058,12 @@ function caViewSavedScript(sid) {
           && !Array.isArray(firstScript.timeline)
           && !firstScript.scenes
         );
-        window._ca.step          = 4;
+        window._ca.step = 4;
         window._ca.activeVariant = firstScript.variant || 'emotional';
         window._ca._sourceSuggestionId = sid;
         // Gợi lại lastRequest để caImproveScript có context
         window._ca._lastRequest = window._ca._lastRequest || {
-          product_id:   data.product_id   || '',
+          product_id: data.product_id || '',
           product_name: data.product_name || '',
           content_type: data.content_type || 'tiktok_30s',
         };
@@ -4051,7 +4072,7 @@ function caViewSavedScript(sid) {
       } else {
         showToast('⚠️ Kịch bản chưa được lưu hoặc không hợp lệ', 'warning');
       }
-    }).catch(function() {
+    }).catch(function () {
       showToast('❌ Không thể tải kịch bản từ backend', 'error');
     });
 }
@@ -4097,11 +4118,11 @@ function navigate(page) {
 
 function syncSidebarActive(page) {
   // Clear active on all nav items (top-level + children)
-  document.querySelectorAll('.nav-item[data-page], .nav-child-item[data-page]').forEach(function(el) {
+  document.querySelectorAll('.nav-item[data-page], .nav-child-item[data-page]').forEach(function (el) {
     el.classList.remove('active');
   });
   // Clear group highlights
-  document.querySelectorAll('.nav-group').forEach(function(g) {
+  document.querySelectorAll('.nav-group').forEach(function (g) {
     g.classList.remove('has-active');
   });
   // Set active on matching element
@@ -4121,16 +4142,16 @@ function syncSidebarActive(page) {
    ===================================================================== */
 function initEvents() {
   // Sidebar — top-level items
-  document.querySelectorAll('.nav-item[data-page]').forEach(function(btn) {
-    btn.addEventListener('click', function() { if (btn.dataset.page) navigate(btn.dataset.page); });
+  document.querySelectorAll('.nav-item[data-page]').forEach(function (btn) {
+    btn.addEventListener('click', function () { if (btn.dataset.page) navigate(btn.dataset.page); });
   });
   // Sidebar — child items inside accordion groups
-  document.querySelectorAll('.nav-child-item[data-page]').forEach(function(btn) {
-    btn.addEventListener('click', function() { if (btn.dataset.page) navigate(btn.dataset.page); });
+  document.querySelectorAll('.nav-child-item[data-page]').forEach(function (btn) {
+    btn.addEventListener('click', function () { if (btn.dataset.page) navigate(btn.dataset.page); });
   });
   // Group header toggle
-  document.querySelectorAll('.nav-group-header').forEach(function(header) {
-    header.addEventListener('click', function() { header.closest('.nav-group').classList.toggle('open'); });
+  document.querySelectorAll('.nav-group-header').forEach(function (header) {
+    header.addEventListener('click', function () { header.closest('.nav-group').classList.toggle('open'); });
   });
 
   // Scan button
@@ -4230,7 +4251,7 @@ async function _testApiKey() {
 function activateGuidance(cmd) {
   document.getElementById('guidanceActiveCmd').style.display = 'flex';
   document.getElementById('guidanceActiveCmdText').textContent = cmd;
-  showToast(`AI đã nhận chỉ thị: "${cmd.substring(0, 50)}${cmd.length>50?'...':''}"`, 'success');
+  showToast(`AI đã nhận chỉ thị: "${cmd.substring(0, 50)}${cmd.length > 50 ? '...' : ''}"`, 'success');
 }
 
 async function handlePageClick(e) {
@@ -4248,9 +4269,11 @@ async function handlePageClick(e) {
         MOCK.chat_messages[currentChatId] = msgs.filter(m => m.from !== 'ai_draft' && m.from !== 'ai_thinking');
         MOCK.chat_messages[currentChatId].push({ from: 'ai_sent', time: now, text: draftMsg.text });
         const conv = MOCK.conversations.find(c => c.id === currentChatId);
-        if (conv) { conv.status = 'auto'; conv.unread = 0; conv.wait_min = 0;
+        if (conv) {
+          conv.status = 'auto'; conv.unread = 0; conv.wait_min = 0;
           conv.preview = draftMsg.text.substring(0, 55) + (draftMsg.text.length > 55 ? '...' : '');
-          conv.time = now; }
+          conv.time = now;
+        }
       }
       chatDraftEditMode = false;
       showToast('✅ Tin nhắn đã gửi cho khách. AI ghi nhận để học.', 'success');
@@ -4277,9 +4300,11 @@ async function handlePageClick(e) {
       MOCK.chat_messages[currentChatId] = msgs.filter(m => m.from !== 'ai_draft' && m.from !== 'ai_thinking');
       MOCK.chat_messages[currentChatId].push({ from: 'ai_sent', time: now, text: editedText, edited: true });
       const conv = MOCK.conversations.find(c => c.id === currentChatId);
-      if (conv) { conv.status = 'auto'; conv.unread = 0; conv.wait_min = 0;
+      if (conv) {
+        conv.status = 'auto'; conv.unread = 0; conv.wait_min = 0;
         conv.preview = editedText.substring(0, 55) + (editedText.length > 55 ? '...' : '');
-        conv.time = now; }
+        conv.time = now;
+      }
       chatDraftEditMode = false;
       showToast('✅ Đã gửi bản nháp đã chỉnh sửa cho khách!', 'success');
       setTimeout(() => navigate('chat'), 200);

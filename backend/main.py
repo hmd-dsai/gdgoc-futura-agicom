@@ -1772,6 +1772,16 @@ async def update_content_suggestion_status(suggestion_id: str, body: dict):
         if sug:
             sug.status = new_status
             sug.updated_at = datetime.utcnow()
+            # Bug fix: also sync type and source_product_id from the frontend payload.
+            # These fields may be stale (e.g. "guide") if the record was created by an
+            # older PATCH call that didn't send them, or by _detect_type() misclassifying
+            # a CoordinationTask. Overwrite only when a non-trivial value is provided.
+            incoming_type = body.get("type", "")
+            if incoming_type and incoming_type != "guide":
+                sug.type = incoming_type
+            incoming_pid = body.get("source_product_id", "")
+            if incoming_pid:
+                sug.source_product_id = incoming_pid
         else:
             # Tạo bản ghi tối giản để lưu trạng thái
             title = body.get("title", suggestion_id)
@@ -1792,7 +1802,8 @@ async def update_content_suggestion_status(suggestion_id: str, body: dict):
                 angle=body.get("angle", ""),
                 estimated_impact=body.get("estimated_impact", ""),
                 estimated_production=body.get("estimated_production", ""),
-                source=body.get("source", "frontend")
+                source=body.get("source", "frontend"),
+                source_product_id=body.get("source_product_id", ""),
             )
             db.add(sug)
 

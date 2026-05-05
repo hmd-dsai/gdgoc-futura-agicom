@@ -1809,7 +1809,8 @@ async function updateContentSuggestionStatus(sugId, newStatus) {
       angle: sug?.angle || '',
       estimated_impact: sug?.estimated_impact || '',
       estimated_production: sug?.estimated_production || '',
-      source: sug?._source || 'frontend'
+      source: sug?._source || 'frontend',
+      source_product_id: sug?.source_product_id || '',
     });
   } catch (_e) {
     // silent — MOCK đã được cập nhật rồi
