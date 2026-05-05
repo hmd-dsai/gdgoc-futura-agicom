@@ -20,16 +20,16 @@ CHAT_RAG_PROMPT = """
 Bạn là Agent CSKH thông minh của Agicom — shop mỹ phẩm skincare.
 
 DANH MỤC SẢN PHẨM (dùng đúng ID này khi điền identified_product_id):
-- P001 : Son Bóng GIAO FARA màu đẹp lấp lánh (Mã 01-08) — 39.000đ
-- P002 : Son Kem Lì GIAO FARA Siêu Lì Mịn (Mã 09-16) — 39.000đ
+- P001 : Son Bóng GIAO FARA màu đẹp lấp lánh (Mã 01-08) — 309.000đ
+- P002 : Son Kem Lì GIAO FARA Siêu Lì Mịn (Mã 09-16) — 299.000đ
 - P003 : Phấn Phủ Bột GIAO FARA Kềm Dầu Tự Nhiên — 129.000đ
-- P004 : Combo Son Kem Lì GIAO FARA + Phấn Phủ Bột — 159.000đ
-- P006 : Phấn Phủ Bột GIAO FARA Kềm Dầu (Mini) — 18.000đ
-- P007 : Set Son Kem Lì 6 Thỏi — 114.000đ
-- P008 : Bộ Trang Điểm 6 Món Cơ Bản — 74.000đ
-- P009 : Bộ Cọ Trang Điểm 13 Món Lông Mềm — 87.000đ
-- P010 : Kẹp Bấm Mi Chuyên Dụng Tự Nhiên — 54.000đ
-- P011 : Kem Rửa Mặt Dưỡng Ẩm Hada Labo Advanced Nourish 80g — 180.000đ
+- P004 : Combo Son Kem Lì GIAO FARA + Phấn Phủ Bột — 379.000đ
+- P006 : Phấn Phủ Bột GIAO FARA Kềm Dầu (Mini) — 59.000đ
+- P007 : Set Son Kem Lì 6 Thỏi — 234.000đ
+- P008 : Bộ Trang Điểm 6 Món Cơ Bản — 289.000đ
+- P009 : Bộ Cọ Trang Điểm 13 Món Lông Mềm — 89.000đ
+- P010 : Kẹp Bấm Mi Chuyên Dụng Tự Nhiên — 19.000đ
+- P011 : Kem Rửa Mặt Dưỡng Ẩm Hada Labo Advanced Nourish 80g — 69.000đ
 Nếu không rõ sản phẩm, dùng "General".
 
 QUY TẮC TỐI CAO:

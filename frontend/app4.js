@@ -7,17 +7,17 @@
    0. PRODUCT CATALOG — 11 SKU đầy đủ (dùng cho search filter + form review)
    ===================================================================== */
 const PRODUCT_CATALOG = [
-  { id: 'P001', sku: 'GF-LGLOSS-M01',       name: 'Son Bóng GIAO FARA (Mã 01-08)',                      category: 'Son môi',       price: 39000  },
-  { id: 'P001', sku: 'GF-LGLOSS-M04',       name: 'Son Bóng GIAO FARA (Mã 04)',                         category: 'Son môi',       price: 39000  },
-  { id: 'P002', sku: 'GF-MLIPSTICK-M09',    name: 'Son Kem Lì GIAO FARA Siêu Lì Mịn (Mã 09-16)',        category: 'Son môi',       price: 39000  },
+  { id: 'P001', sku: 'GF-LGLOSS-M01',       name: 'Son Bóng GIAO FARA (Mã 01-08)',                      category: 'Son môi',       price: 309000  },
+  { id: 'P001', sku: 'GF-LGLOSS-M04',       name: 'Son Bóng GIAO FARA (Mã 04)',                         category: 'Son môi',       price: 309000  },
+  { id: 'P002', sku: 'GF-MLIPSTICK-M09',    name: 'Son Kem Lì GIAO FARA Siêu Lì Mịn (Mã 09-16)',        category: 'Son môi',       price: 299000  },
   { id: 'P003', sku: 'GF-SPOWDER-TN',       name: 'Phấn Phủ Bột GIAO FARA Kềm Dầu Tự Nhiên',           category: 'Phấn phủ',      price: 129000 },
-  { id: 'P004', sku: 'GF-CO1-ML-SPOWDER',   name: 'Combo Kem Lì GIAO FARA và Phấn Phủ Bột',            category: 'Combo',         price: 159000 },
-  { id: 'P006', sku: 'GF-POWDER-18K',       name: 'Phấn Phủ Bột GIAO FARA Kềm Dầu (Mini)',             category: 'Phấn phủ',      price: 18000  },
-  { id: 'P007', sku: 'GF-LIPSET-06',        name: 'Set Son Kem Lì 6 Thỏi',                              category: 'Set / Bundle',  price: 114000 },
-  { id: 'P008', sku: 'GF-MKP-COMBO6',       name: 'Bộ Trang Điểm 6 Món Cơ Bản',                        category: 'Set / Bundle',  price: 74000  },
-  { id: 'P009', sku: 'GF-TOOL-BRUSH13',     name: 'Bộ Cọ Trang Điểm 13 Món Lông Mềm',                  category: 'Phụ kiện',      price: 87000  },
-  { id: 'P010', sku: 'GF-TOOL-CURLER',      name: 'Kẹp Bấm Mi Chuyên Dụng Tự Nhiên',                   category: 'Phụ kiện',      price: 54000  },
-  { id: 'P011', sku: 'HL-CLEANSER-80G',     name: 'Kem Rửa Mặt Hada Labo Advanced Nourish 80g',         category: 'Chăm sóc da',   price: 180000 },
+  { id: 'P004', sku: 'GF-CO1-ML-SPOWDER',   name: 'Combo Kem Lì GIAO FARA và Phấn Phủ Bột',            category: 'Combo',         price: 379000 },
+  { id: 'P006', sku: 'GF-POWDER-18K',       name: 'Phấn Phủ Bột GIAO FARA Kềm Dầu (Mini)',             category: 'Phấn phủ',      price: 59000  },
+  { id: 'P007', sku: 'GF-LIPSET-06',        name: 'Set Son Kem Lì 6 Thỏi',                              category: 'Set / Bundle',  price: 234000 },
+  { id: 'P008', sku: 'GF-MKP-COMBO6',       name: 'Bộ Trang Điểm 6 Món Cơ Bản',                        category: 'Set / Bundle',  price: 289000  },
+  { id: 'P009', sku: 'GF-TOOL-BRUSH13',     name: 'Bộ Cọ Trang Điểm 13 Món Lông Mềm',                  category: 'Phụ kiện',      price: 89000  },
+  { id: 'P010', sku: 'GF-TOOL-CURLER',      name: 'Kẹp Bấm Mi Chuyên Dụng Tự Nhiên',                   category: 'Phụ kiện',      price: 19000  },
+  { id: 'P011', sku: 'HL-CLEANSER-80G',     name: 'Kem Rửa Mặt Hada Labo Advanced Nourish 80g',         category: 'Chăm sóc da',   price: 69000 },
 ];
 
 // State cho review product filter
@@ -87,19 +87,19 @@ const MOCK = {
   // P&L
   pnl: [
     { label: '1. Doanh thu gộp', value: 850000000, change: 5, trend: 'up' },
-    { label: '2. Giá vốn hàng bán (COGS)', value: 610000000, change: 3, trend: 'neutral' },
+    { label: '2. Giá vốn hàng bán (COGS)', value: 340000000, change: 3, trend: 'neutral' },
     { label: '3. Phí Sàn (Shopee + TikTok)', value: 59500000, change: 7, trend: 'down' },
     { label: '4. Phí Quảng Cáo & Media', value: 42000000, change: 5, trend: 'neutral' },
     { label: '5. Phí Vận hành (Hộp, Băng keo)', value: 8500000, change: 1, trend: 'neutral' },
-    { label: 'LỢI NHUẬN RÒNG (NET)', value: 130000000, change: 8, trend: 'up', highlight: true, margin: 15.3 },
+    { label: 'LỢI NHUẬN RÒNG (NET)', value: 400000000, change: 12, trend: 'up', highlight: true, margin: 47.1 },
     { label: 'Break-even point (cần đạt/ngày)', value: 23300000, change: 0, trend: 'neutral', italic: true }
   ],
 
   margin_by_product: [
-    { name: 'Phấn Phủ Bột GIAO FARA', margin: 62, color: '#10b981' },
-    { name: 'Son Kem Lì GIAO FARA', margin: 55, color: '#10b981' },
-    { name: 'Bộ Cọ Trang Điểm 13 Món', margin: 48, color: '#f59e0b' },
-    { name: 'Kem Rửa Mặt Hada Labo 80g', margin: 22, color: '#ef4444' }
+    { name: 'Phấn Phủ Bột GIAO FARA', margin: 57, color: '#10b981' },
+    { name: 'Son Kem Lì GIAO FARA', margin: 63, color: '#10b981' },
+    { name: 'Bộ Cọ Trang Điểm 13 Món', margin: 55, color: '#f59e0b' },
+    { name: 'Kem Rửa Mặt Hada Labo 80g', margin: 56, color: '#ef4444' }
   ],
 
   // Inventory
@@ -125,7 +125,7 @@ const MOCK = {
   // Competitors
   competitors: [
     { name: 'Hasaki Beauty', activity: 'Vừa chạy Flash Sale son MAC giảm 20% — bundle deal hút khách', time: '15 phút trước', color: '#ef4444' },
-    { name: 'Beauty Skin Store', activity: 'Ra mắt Set Son + Phấn 189k (so P004: 159k)', time: '2 giờ trước', color: '#f59e0b' },
+    { name: 'Beauty Skin Store', activity: 'Ra mắt Set Son + Phấn 399k (so P004: 379k)', time: '2 giờ trước', color: '#f59e0b' },
     { name: 'Guardian', activity: 'Hada Labo 80g hết hàng trên Shopee — cơ hội chiếm market share', time: 'Hôm qua', color: '#10b981' }
   ],
 
@@ -133,12 +133,12 @@ const MOCK = {
 
   competitor_prices: {
     'Son Kem Lì GIAO FARA': {
-      history: [39000, 39000, 38000, 39000, 39000, 37000, 39000],
+      history: [299000, 299000, 280000, 299000, 299000, 275000, 299000],
       shops: [
-        { name: 'Shop Của Bạn (GIAO FARA)', old: null, new: 39000, gap: 0 },
-        { name: 'Beauty Skin Store', old: 42000, new: 37000, gap: -5.1 },
-        { name: 'Shop Mỹ Phẩm Linh', old: 40000, new: 38000, gap: -2.6 },
-        { name: 'Hasaki', old: 45000, new: 43000, gap: +10.3 }
+        { name: 'Shop Của Bạn (GIAO FARA)', old: null, new: 299000, gap: 0 },
+        { name: 'Beauty Skin Store', old: 320000, new: 289000, gap: -3.3 },
+        { name: 'Shop Mỹ Phẩm Linh', old: 310000, new: 295000, gap: -1.3 },
+        { name: 'Hasaki', old: 350000, new: 319000, gap: +6.7 }
       ]
     },
     'Phấn Phủ Bột GIAO FARA': {
@@ -151,30 +151,30 @@ const MOCK = {
       ]
     },
     'Kem Rửa Mặt Hada Labo 80g': {
-      history: [175000, 178000, 175000, 180000, 180000, 180000, 180000],
+      history: [69000, 69000, 65000, 69000, 69000, 69000, 69000],
       shops: [
-        { name: 'Shop Của Bạn (GIAO FARA)', old: null, new: 180000, gap: 0 },
-        { name: 'Guardian', old: 185000, new: 183000, gap: +1.7 },
-        { name: 'Hasaki', old: 182000, new: 179000, gap: -0.6 },
-        { name: 'Shopee Mall chính hãng', old: 190000, new: 185000, gap: +2.8 }
+        { name: 'Shop Của Bạn (GIAO FARA)', old: null, new: 69000, gap: 0 },
+        { name: 'Guardian', old: 75000, new: 72000, gap: +4.3 },
+        { name: 'Hasaki', old: 69000, new: 65000, gap: -5.8 },
+        { name: 'Shopee Mall chính hãng', old: 79000, new: 75000, gap: +8.7 }
       ]
     },
     'Set Son 6 Thỏi': {
-      history: [114000, 114000, 110000, 114000, 114000, 112000, 114000],
+      history: [234000, 234000, 220000, 234000, 234000, 230000, 234000],
       shops: [
-        { name: 'Shop Của Bạn (GIAO FARA)', old: null, new: 114000, gap: 0 },
-        { name: 'Beauty Skin Store', old: 120000, new: 115000, gap: +0.9 },
-        { name: 'Shop Mỹ Phẩm Linh', old: 118000, new: 110000, gap: -3.5 },
-        { name: 'Lazada Mall', old: 125000, new: 118000, gap: +3.5 }
+        { name: 'Shop Của Bạn (GIAO FARA)', old: null, new: 234000, gap: 0 },
+        { name: 'Beauty Skin Store', old: 250000, new: 245000, gap: +4.7 },
+        { name: 'Shop Mỹ Phẩm Linh', old: 240000, new: 225000, gap: -3.8 },
+        { name: 'Lazada Mall', old: 260000, new: 239000, gap: +2.1 }
       ]
     },
     'Bộ Cọ 13 Món': {
-      history: [87000, 87000, 85000, 87000, 87000, 87000, 87000],
+      history: [89000, 89000, 85000, 89000, 89000, 89000, 89000],
       shops: [
-        { name: 'Shop Của Bạn (GIAO FARA)', old: null, new: 87000, gap: 0 },
-        { name: 'Beauty Skin Store', old: 92000, new: 88000, gap: +1.1 },
-        { name: 'Shop Mỹ Phẩm Linh', old: 90000, new: 85000, gap: -2.3 },
-        { name: 'Shopee Mall khác', old: 95000, new: 90000, gap: +3.4 }
+        { name: 'Shop Của Bạn (GIAO FARA)', old: null, new: 89000, gap: 0 },
+        { name: 'Beauty Skin Store', old: 95000, new: 92000, gap: +3.4 },
+        { name: 'Shop Mỹ Phẩm Linh', old: 92000, new: 85000, gap: -4.5 },
+        { name: 'Shopee Mall khác', old: 99000, new: 95000, gap: +6.7 }
       ]
     }
   },
@@ -191,10 +191,10 @@ const MOCK = {
   ads_kpi: { budget_week: 15000000, spent: 8200000, revenue: 64000000, roas: 7.8 },
 
   ads_campaigns: [
-    { name: 'Phấn Phủ Bột GIAO FARA — Shopee Search', channel: 'Shopee Search', cost: 1800000, conv: 68, roas: 9.4, action: 'scale', ai_reason: 'ROAS 9.4x > ngưỡng 8x → đề xuất tăng budget 25%' },
-    { name: 'Son Kem Lì GIAO FARA — TikTok Video', channel: 'TikTok Video', cost: 1200000, conv: 145, roas: 12.1, action: 'scale', ai_reason: 'ROAS 12.1x xuất sắc — scale budget tối đa trong mùa sale' },
-    { name: 'Set Son 6 Thỏi — Facebook Ads', channel: 'Facebook Ads', cost: 900000, conv: 28, roas: 3.9, action: 'maintain', ai_reason: 'ROAS 3.9x vừa qua ngưỡng 3x — duy trì, theo dõi thêm 3 ngày' },
-    { name: 'Bộ Trang Điểm 6 Món — Shopee Discovery', channel: 'Shopee Discovery', cost: 700000, conv: 4, roas: 0.6, action: 'cut', ai_reason: 'ROAS 0.6x < 3.0x — tắt ngay, redirect budget sang Son Kem Lì' }
+    { name: 'Phấn Phủ Bột GIAO FARA — Shopee Search', channel: 'Shopee Search', cost: 1800000, conv: 131, roas: 9.4, action: 'scale', ai_reason: 'ROAS 9.4x > ngưỡng 8x → đề xuất tăng budget 25%' },
+    { name: 'Son Kem Lì GIAO FARA — TikTok Video', channel: 'TikTok Video', cost: 1200000, conv: 48, roas: 12.1, action: 'scale', ai_reason: 'ROAS 12.1x xuất sắc — scale budget tối đa trong mùa sale' },
+    { name: 'Set Son 6 Thỏi — Facebook Ads', channel: 'Facebook Ads', cost: 900000, conv: 15, roas: 3.9, action: 'maintain', ai_reason: 'ROAS 3.9x vừa qua ngưỡng 3x — duy trì, theo dõi thêm 3 ngày' },
+    { name: 'Bộ Trang Điểm 6 Món — Shopee Discovery', channel: 'Shopee Discovery', cost: 1900000, conv: 4, roas: 0.6, action: 'cut', ai_reason: 'ROAS 0.6x < 3.0x — tắt ngay, redirect budget sang Son Kem Lì' }
   ],
 
   // AI Suggestions
@@ -202,8 +202,8 @@ const MOCK = {
     {
       id: 'sug-001', type: 'price', status: 'pending', time: '5 phút trước',
       title: 'Định giá cao hơn đối thủ 5% — Son Kem Lì GIAO FARA rating 4.8★ vs 4.2★',
-      reason: 'Rating của shop cao hơn Beauty Skin Store 0.6★. Review 4.8★ + 145 đơn/ngày cho thấy khách sẵn sàng trả giá cao hơn để có chất lượng. Margin hiện tại 55% — còn dư địa tăng giá mà không mất khách.',
-      metrics: [{label: 'Doanh thu dự kiến', value: '+8M/tháng'}, {label: 'Margin mới', value: '58%'}, {label: 'Giá đề xuất', value: '41.000đ'}],
+      reason: 'Rating của shop cao hơn Beauty Skin Store 0.6★. Review 4.8★ + 145 đơn/ngày cho thấy khách sẵn sàng trả giá cao hơn để có chất lượng. Margin hiện tại 63% — còn dư địa tăng giá mà không mất khách.',
+      metrics: [{label: 'Doanh thu dự kiến', value: '+35M/tháng'}, {label: 'Margin mới', value: '64%'}, {label: 'Giá đề xuất', value: '315.000đ'}],
       confidence: 84
     },
     {
@@ -217,7 +217,7 @@ const MOCK = {
       id: 'sug-003', type: 'promo', status: 'pending', time: '1 giờ trước',
       title: 'Flash Sale Son Bóng Mã 04 + 07 — xả tồn 38 cái trong 72h',
       reason: 'Mã 04 và 07 tồn 72 ngày — xu hướng màu nude và đỏ đô đang chiếm ưu thế. Giảm 15% + bundle với Son Kem Lì giúp xả kho mà vẫn bảo vệ margin tổng.',
-      metrics: [{label: 'Thu hồi vốn', value: '~2.5M'}, {label: 'Margin gộp', value: '42%'}, {label: 'SKU xả', value: '38 thỏi'}],
+      metrics: [{label: 'Thu hồi vốn', value: '~10M'}, {label: 'Margin gộp', value: '42%'}, {label: 'SKU xả', value: '38 thỏi'}],
       confidence: 79
     },
     {
@@ -230,17 +230,17 @@ const MOCK = {
     {
       id: 'sug-005', type: 'cs', status: 'approved', time: '3 giờ trước',
       title: 'Proactive outreach 5 khách VIP quan tâm Combo P004',
-      reason: '5 khách VIP đã xem Combo P004 (Son + Phấn) > 3 lần nhưng chưa chốt. Gửi voucher 15k kèm swatch video — tỷ lệ chốt dự kiến 45%.',
-      metrics: [{label: 'Khách target', value: '5 VIP'}, {label: 'CR dự kiến', value: '45%'}, {label: 'Doanh thu tiềm năng', value: '~800k'}],
+      reason: '5 khách VIP đã xem Combo P004 (Son + Phấn) > 3 lần nhưng chưa chốt. Gửi voucher 30k kèm swatch video — tỷ lệ chốt dự kiến 45%.',
+      metrics: [{label: 'Khách target', value: '5 VIP'}, {label: 'CR dự kiến', value: '45%'}, {label: 'Doanh thu tiềm năng', value: '~1.7M'}],
       confidence: 83
     },
     {
       id: 'sug-006', type: 'price', status: 'rejected', time: 'Hôm qua',
-      title: 'Giảm giá Kem Rửa Mặt Hada Labo xuống 165k để cạnh tranh Hasaki',
-      reason: 'Hasaki đang bán 179k — giảm xuống 165k có thể tăng volume.',
-      metrics: [{label: 'Doanh thu', value: '+3M'}, {label: 'Margin', value: '8%'}],
+      title: 'Giảm giá Kem Rửa Mặt Hada Labo xuống 65k để cạnh tranh Hasaki',
+      reason: 'Hasaki đang bán 65k — giảm xuống 65k có thể tăng volume.',
+      metrics: [{label: 'Doanh thu', value: '+3M'}, {label: 'Margin', value: '53%'}],
       confidence: 58,
-      rejection_reason: 'Margin 8% sau giảm quá thấp. Hada Labo là hàng chính hãng — giữ định vị chất lượng, không phá giá.'
+      rejection_reason: 'Hasaki bán 65k là xả hàng date ngắn. Hàng của shop date xa, giữ giá 69k để giữ định vị thương hiệu.'
     }
   ],
 
@@ -253,14 +253,14 @@ const MOCK = {
     { icon: '🟡', label: 'Son Kem Lì giao sai màu / khô môi', count: 7, product_id: 'P002', impact: 'Trung bình — ảnh hưởng rating', action: 'Kiểm tra listing ảnh + xử lý khiếu nại', urgent: true },
     { icon: '🟡', label: 'Hỏi màu son phù hợp với tone da', count: 18, product_id: 'P001', impact: 'Mất ~25% cơ hội chốt đơn', action: 'Làm video swatches so sánh màu da', urgent: false },
     { icon: '🔵', label: 'Hỏi Phấn Phủ có hợp da dầu không', count: 12, product_id: 'P003', impact: 'Thấp — cần nội dung giải thích', action: 'Cập nhật mô tả cho từng loại da', urgent: false },
-    { icon: '🔵', label: 'Hỏi giá sỉ từ 5 máy trở lên', count: 12, impact: 'Cơ hội B2B mới', action: 'Tạo bảng giá sỉ chính thức', urgent: false },
+    { icon: '🔵', label: 'Hỏi giá sỉ từ 10 thỏi trở lên', count: 12, impact: 'Cơ hội B2B mới', action: 'Tạo bảng giá sỉ chính thức', urgent: false },
     { icon: '🔵', label: 'Phàn nàn hộp bị móp khi ship', count: 8, impact: 'Ảnh hưởng review', action: 'Đổi thùng carton 5 lớp (+2k/đơn)', urgent: false }
   ],
 
   // Proactive targets — khách cần chủ động nhắn
   proactive_targets: [
-    { name: 'Nguyễn Thị Bình', reason: 'Đã hỏi Combo P004 (Son + Phấn) 3 lần trong 7 ngày — chưa chốt', value: '159k tiềm năng · VIP repeat buyer', action: 'Gửi voucher 15k' },
-    { name: 'Trần Thị Mai', reason: 'Mua Son Kem Lì màu 12 tháng trước — màu 12 đang flash sale -10%', value: 'Upsell tiềm năng · 35k/đơn', action: 'Gửi thông báo sale' },
+    { name: 'Nguyễn Thị Bình', reason: 'Đã hỏi Combo P004 (Son + Phấn) 3 lần trong 7 ngày — chưa chốt', value: '379k tiềm năng · VIP repeat buyer', action: 'Gửi voucher 30k' },
+    { name: 'Trần Thị Mai', reason: 'Mua Son Kem Lì màu 12 tháng trước — màu 12 đang flash sale -10%', value: 'Upsell tiềm năng · 299k/đơn', action: 'Gửi thông báo sale' },
     { name: 'Lê Văn Thành', reason: 'Đơn hàng #GF-2241 giao 4 ngày chưa nhận — rủi ro khiếu nại', value: 'Phòng ngừa review xấu', action: 'Chủ động hỏi thăm' }
   ],
 
@@ -332,7 +332,7 @@ const MOCK = {
     { time: '5 phút', user: 'AI Agent', action: 'Đề xuất tăng giá Son Kem Lì 5% (rating cao hơn đối thủ)', status: 'pending' },
     { time: '18 phút', user: 'Nguyễn Thị Hương', action: 'Duyệt: Tăng budget Son Kem Lì TikTok +35%', status: 'approved' },
     { time: '1 giờ', user: 'AI Agent', action: 'Phản hồi khách Trần Thị Mai về màu son (auto)', status: 'approved' },
-    { time: '2 giờ', user: 'Lê Thị Minh Ngọc', action: 'Từ chối: Giảm giá Hada Labo xuống 165k', status: 'rejected' },
+    { time: '2 giờ', user: 'Lê Thị Minh Ngọc', action: 'Từ chối: Giảm giá Hada Labo xuống 65k', status: 'rejected' },
     { time: 'Hôm qua', user: 'AI Agent', action: 'Tạo báo cáo insight tuần — 5 cơ hội content mới', status: 'approved' }
   ]
 };
@@ -349,15 +349,15 @@ MOCK.content_inventory = [
 
 MOCK.products_detail = [
   {
-    sku: 'GF-MLIPSTICK-M09', name: 'Son Kem Lì GIAO FARA Siêu Lì Mịn (Mã 09-16)', category: 'Son môi', price: 39000,
-    description_current: 'Son Kem Lì GIAO FARA Siêu Lì Mịn. Màu 09-16. Finish velvet matte. Bám màu 6-8 tiếng. Khô nhanh trong 30 giây. Chất son mịn không tạo vảy. Giá 39.000đ.',
+    sku: 'GF-MLIPSTICK-M09', name: 'Son Kem Lì GIAO FARA Siêu Lì Mịn (Mã 09-16)', category: 'Son môi', price: 299000,
+    description_current: 'Son Kem Lì GIAO FARA Siêu Lì Mịn. Màu 09-16. Finish velvet matte. Bám màu 6-8 tiếng. Khô nhanh trong 30 giây. Chất son mịn không tạo vảy. Giá 299.000đ.',
     description_key_points: ['velvet matte', 'bám màu 6-8 tiếng', 'khô 30 giây', 'không tạo vảy', '8 màu'],
     usp: [
       'Lì mịn velvet chuẩn studio — bám màu 6–8 tiếng, ăn uống vẫn còn màu, không lem khẩu trang',
       'Khô trong 30 giây, không dính, không tạo vảy — hoàn hảo cho ngày bận rộn cần makeup nhanh',
       '8 màu từ nude thanh lịch đến đỏ đô quyến rũ — 1 thỏi đủ mọi mood cả tuần',
       'Chất son siêu mịn, không tạo vân khô hay bong tróc dù môi hơi thiếu nước',
-      'Giá chỉ 39.000đ — tiết kiệm 70% so với son lì ngoại nhập, chất lượng không thua kém'
+      'Giá chỉ 299.000đ — tiết kiệm 30% so với son lì ngoại nhập, chất lượng không thua kém'
     ],
     chatbot_questions: [
       { topic: 'Màu sắc / tone da', count: 18, sample: 'Màu nào phù hợp với da ngăm tối?', sentiment: 'neutral' },
@@ -401,15 +401,15 @@ MOCK.products_detail = [
     ]
   },
   {
-    sku: 'HL-CLEANSER-80G', name: 'Kem Rửa Mặt Hada Labo Advanced Nourish 80g', category: 'Chăm sóc da', price: 180000,
-    description_current: 'Kem Rửa Mặt Dưỡng Ẩm Hada Labo Advanced Nourish 80g. Hyaluronic Acid. Không cồn, không paraben. Bọt mịn sạch sâu. Hàng chính hãng nhập khẩu có hoá đơn Guardian. Giá 180.000đ.',
+    sku: 'HL-CLEANSER-80G', name: 'Kem Rửa Mặt Hada Labo Advanced Nourish 80g', category: 'Chăm sóc da', price: 69000,
+    description_current: 'Kem Rửa Mặt Dưỡng Ẩm Hada Labo Advanced Nourish 80g. Hyaluronic Acid. Không cồn, không paraben. Bọt mịn sạch sâu. Hàng chính hãng nhập khẩu có hoá đơn Guardian. Giá 69.000đ.',
     description_key_points: ['Hyaluronic Acid', 'không cồn/paraben', 'bọt mịn', 'hàng chính hãng', 'da nhạy cảm'],
     usp: [
       'Hyaluronic Acid Nhật Bản giữ ẩm 24/7 — rửa mặt xong da vẫn mềm mịn căng mướt, không khô căng',
       'Hàng chính hãng nhập khẩu, có hoá đơn Guardian — date xa, nguồn gốc 100% rõ ràng, không lo hàng giả',
       'Không chứa cồn, không paraben — êm dịu an toàn cho da nhạy cảm, da khô, da mang thai đều dùng được',
       'Bọt mịn sạch sâu không gây kích ứng — nền skincare vững chắc để serum và kem dưỡng thẩm thấu tốt hơn',
-      '180.000đ/80g dùng được 2–3 tháng — đầu tư thông minh nhất cho bước làm sạch nền tảng skincare'
+      '69.000đ/80g dùng được 2–3 tháng — đầu tư thông minh nhất cho bước làm sạch nền tảng skincare'
     ],
     chatbot_questions: [
       { topic: 'Da nhạy cảm / kích ứng', count: 14, sample: 'Da mình nhạy cảm hay bị nổi mụn dùng được không?', sentiment: 'neutral' },
@@ -1123,7 +1123,7 @@ function renderCompetitor() {
         </tbody>
       </table>
       <div style="margin-top:12px;padding:12px;background:var(--accent-amber-bg);border-radius:8px;font-size:0.85rem;">
-        ${ICON.brain} <strong>AI khuyến nghị:</strong> Hoàng Hà đang bán rẻ hơn 5%. Đề xuất giảm 4% + tặng kèm ốp Spigen để giữ margin 11%. → <a href="#" data-nav="ai-suggestions" style="color:var(--accent-indigo);font-weight:700;">Xem đề xuất chi tiết</a>
+        ${ICON.brain} <strong>AI khuyến nghị:</strong> Beauty Skin Store đang bán rẻ hơn 3.3%. Đề xuất giảm 3% + tặng kèm mút tán phấn để giữ margin 60%. → <a href="#" data-nav="ai-suggestions" style="color:var(--accent-indigo);font-weight:700;">Xem đề xuất chi tiết</a>
       </div>
     </div>
   `;
@@ -1705,7 +1705,7 @@ function renderChat() {
             <button class="btn-approve" data-action="chat-send-msg" style="white-space:nowrap;">Gửi →</button>
           </div>
           <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
-            ${['Xin lỗi + hỗ trợ đổi hàng','Gửi link bảo hành','Báo giá sỉ','Xác nhận đơn hàng'].map(t=>`<button class="guidance-tag" data-chattemplate="${t}" style="font-size:0.7rem;padding:4px 8px;">${t}</button>`).join('')}
+            ${['Xin lỗi + hỗ trợ đổi trả','Tư vấn chọn màu','Báo giá sỉ','Xác nhận đơn hàng'].map(t=>`<button class="guidance-tag" data-chattemplate="${t}" style="font-size:0.7rem;padding:4px 8px;">${t}</button>`).join('')}
           </div>
         </div>
       </div>
@@ -1769,7 +1769,7 @@ function renderChat() {
             <button class="btn-approve" style="width:100%;margin-top:10px;">Áp dụng kịch bản xử lý</button>
           `:conv.status==='pending'?`
             <div style="font-size:0.8rem;line-height:1.6;color:var(--text-secondary);">
-              Đề xuất tối ưu doanh thu từ khách VIP:<br>Giảm 4% + tặng ốp Spigen → margin vẫn giữ 11%
+              Đề xuất tối ưu doanh thu từ khách VIP:<br>Giảm 5% + tặng kèm mút tán phấn → margin vẫn giữ 55%
             </div>
             <button class="btn-approve" style="width:100%;margin-top:10px;">Dùng đề xuất AI</button>
           `:`
@@ -2136,25 +2136,25 @@ function renderMarketOverview() {
 
   const oppCards = [
     {
-      title: 'Tạo video "Test pin S24 Ultra — 72 giờ thực tế"',
-      signal1: { label: '23 câu hỏi chatbot', detail: '"Pin dùng được mấy tiếng?" — câu hỏi #1 trong 7 ngày', color: '#6366f1', icon: '💬' },
-      signal2: { label: '23 reviews lo ngại pin', detail: '74% review tiêu cực về pin khi zoom camera', color: '#10b981', icon: '⭐' },
-      action: 'Quay video TikTok + blog test thực tế 72h',
+      title: 'Tạo video "Test độ bền màu son 8 tiếng — thực tế"',
+      signal1: { label: '43 câu hỏi chatbot', detail: '"Son có bị bay màu sau khi ăn không?" — câu hỏi #1 trong 7 ngày', color: '#6366f1', icon: '💬' },
+      signal2: { label: '28 reviews lo ngại độ bền', detail: '35% review tiêu cực về việc son nhanh trôi', color: '#10b981', icon: '⭐' },
+      action: 'Quay video TikTok + Shopee Video test thực tế ăn uống',
       score: 94, impact: 'CR tăng dự kiến +8-12%'
     },
     {
-      title: 'Tạo trang giá sỉ B2B chính thức',
-      signal1: { label: '12 câu hỏi chatbot', detail: '"Lấy 5 cái có giảm không?" — xu hướng tăng 45%', color: '#6366f1', icon: '💬' },
-      signal2: { label: 'Đối thủ Hoàng Hà đã có', detail: 'Khách tham khảo Hoàng Hà vì họ có bảng giá sỉ công khai', color: '#f59e0b', icon: '⚡' },
+      title: 'Tạo trang giá sỉ B2B chính thức cho Spa/Salon',
+      signal1: { label: '8 câu hỏi chatbot', detail: '"Lấy 10 thỏi có giảm không?" — xu hướng tăng 52%', color: '#6366f1', icon: '💬' },
+      signal2: { label: 'Nhu cầu B2B chưa khai thác', detail: 'Nhiều đối thủ (Beauty Skin Store) đã có chính sách sỉ rõ ràng', color: '#f59e0b', icon: '⚡' },
       action: 'Tạo landing page giá sỉ + form liên hệ đại lý',
-      score: 78, impact: 'Mở kênh B2B +5-8 đơn/tháng'
+      score: 78, impact: 'Mở kênh B2B +10-15 đơn/tháng'
     },
     {
-      title: 'Video unbox kiểm tra tem auth chính hãng',
-      signal1: { label: '17 câu hỏi chatbot', detail: '"Hàng có auth không?" — lo ngại phổ biến nhất', color: '#6366f1', icon: '💬' },
-      signal2: { label: '12 reviews tích cực', detail: 'Khách đã mua đánh giá cao hàng auth — nên amplify', color: '#10b981', icon: '⭐' },
-      action: 'Video unbox live + thêm ảnh tem vào listing',
-      score: 71, impact: 'Tăng trust score, giảm 45% câu hỏi'
+      title: 'Video giải thích hiện tượng Purging (Hada Labo)',
+      signal1: { label: '42 câu hỏi chatbot', detail: '"Dùng bị nổi mụn là do đâu?" — lo ngại phổ biến về kích ứng', color: '#6366f1', icon: '💬' },
+      signal2: { label: '24 reviews lo ngại mụn', detail: '50% review tiêu cực nhầm lẫn purging với dị ứng', color: '#10b981', icon: '⭐' },
+      action: 'Bài blog/FAQ + Video giải thích khoa học về purging',
+      score: 71, impact: 'Giảm 30% đổi trả, tăng độ tin cậy'
     }
   ];
 

@@ -11,7 +11,7 @@
       "short_name": "Son Bóng GIAO FARA",
       "category": "Son môi",
       "brand": "GIAO FARA",
-      "price": 39000,
+      "price": 309000,
       "status": "active",
       "variants": ["GF-LGLOSS-M01", "GF-LGLOSS-M04"],
       "aliases": [
@@ -24,7 +24,7 @@
         "8 mã màu từ hồng baby đến đỏ đậm — phủ hết mọi outfit, phù hợp mọi tông da Việt",
         "Chất gloss dưỡng ẩm sâu — dùng hàng ngày không lo khô nứt, bong tróc môi",
         "Không mùi nồng, hương nhẹ dịu — thoải mái đi học, đi làm, không gây khó chịu",
-        "Chỉ 39.000đ/thỏi — rẻ hơn 1 ly trà sữa, đẹp hơn son bóng ngoại nhập cùng phân khúc"
+        "Chỉ 309.000đ/thỏi — rẻ hơn 1 ly trà sữa, đẹp hơn son bóng ngoại nhập cùng phân khúc"
       ]
     },
     {
@@ -34,7 +34,7 @@
       "short_name": "Son Kem Lì GIAO FARA",
       "category": "Son môi",
       "brand": "GIAO FARA",
-      "price": 39000,
+      "price": 299000,
       "status": "active",
       "variants": ["GF-MLIPSTICK-M09"],
       "aliases": [
@@ -47,13 +47,13 @@
         "Khô trong 30 giây, không dính, không tạo vảy — hoàn hảo cho ngày bận rộn cần makeup nhanh",
         "8 màu từ nude thanh lịch đến đỏ đô quyến rũ — 1 thỏi đủ mọi mood cả tuần",
         "Chất son siêu mịn, không tạo vân khô hay bong tróc dù môi hơi thiếu nước",
-        "Giá chỉ 39.000đ — tiết kiệm 70% so với son lì ngoại nhập, chất lượng không thua kém"
+        "Giá chỉ 299.000đ — tiết kiệm 30% so với son lì ngoại nhập, chất lượng không thua kém"
       ]
     },
     {
       "product_id": "P003",
       "sku_code": "GF-SPOWDER-TN",
-      "name": "Phấn Phủ Bột GIAO FARA Kềm Dầu Tự Nhiên",
+      "name": "Phấn Phủ Bột GIAO FARA Kiềm Dầu Tự Nhiên",
       "short_name": "Phấn Phủ Bột GIAO FARA",
       "category": "Phấn phủ",
       "brand": "GIAO FARA",
@@ -63,7 +63,7 @@
       "aliases": [
         "p003", "gf-spowder-tn", "phan phu bot giao fara", "phấn phủ bột giao fara",
         "phan phu giao fara", "phấn phủ giao fara", "setting powder giao fara",
-        "bot phan phu giao fara", "phan phu kem dau tu nhien", "phấn phủ kềm dầu"
+        "bot phan phu giao fara", "phan phu kiem dau tu nhien", "phấn phủ kiềm dầu"
       ],
       "usp": [
         "Kiềm dầu cực đỉnh 6–8 tiếng — da luôn mịn như plastic skin, không cần dặm lại giữa ngày",
@@ -80,7 +80,7 @@
       "short_name": "Combo Son + Phấn GIAO FARA",
       "category": "Combo / Set",
       "brand": "GIAO FARA",
-      "price": 159000,
+      "price": 379000,
       "status": "active",
       "variants": ["GF-CO1-ML-SPOWDER"],
       "aliases": [
@@ -89,7 +89,7 @@
         "bộ đôi son phấn", "combo giao fara"
       ],
       "usp": [
-        "Tiết kiệm ngay 50.000đ so với mua lẻ — combo xịn nhất tầm giá dưới 200k trên thị trường",
+        "Tiết kiệm ngay 50.000đ so với mua lẻ — combo xịn nhất tầm giá dưới 400k trên thị trường",
         "Bộ đôi hoàn hảo: son lì bám màu 6–8 tiếng + phấn kiềm dầu cả ngày — đủ makeup nhẹ hoàn chỉnh",
         "Lý tưởng cho người mới bắt đầu trang điểm — dễ dùng, không cần kỹ thuật, không sợ lỗi",
         "Đóng gói đẹp, sang trọng — quà tặng sinh nhật, 8/3, 20/10 không cần mua thêm hộp quà",
@@ -99,21 +99,21 @@
     {
       "product_id": "P006",
       "sku_code": "GF-POWDER-18K",
-      "name": "Phấn Phủ Bột GIAO FARA Kềm Dầu (Mini)",
+      "name": "Phấn Phủ Bột GIAO FARA Kiềm Dầu (Mini)",
       "short_name": "Phấn Phủ Mini GIAO FARA",
       "category": "Phấn phủ",
       "brand": "GIAO FARA",
-      "price": 18000,
+      "price": 59000,
       "status": "active",
       "variants": ["GF-POWDER-18K"],
       "aliases": [
-        "p006", "gf-powder-18k", "phan phu mini giao fara", "phấn phủ mini giao fara",
-        "phan phu bot 18k", "phấn phủ bột 18k", "phan phu kem dau mini",
+        "p006", "gf-powder-59k", "phan phu mini giao fara", "phấn phủ mini giao fara",
+        "phan phu bot 59k", "phấn phủ bột 59k", "phan phu kem dau mini",
         "phan phu mini", "powder mini giao fara"
       ],
       "usp": [
         "Siêu mini vừa túi xách, vừa túi quần — dặm phấn tiện lợi bất kỳ đâu không cần ví to",
-        "Chỉ 18.000đ — thử nghiệm không đau ví, ưng rồi mua size lớn mà không lo tiếc",
+        "Chỉ 59.000đ — thử nghiệm không đau ví, ưng rồi mua size lớn mà không lo tiếc",
         "Kiềm dầu hiệu quả tương đương hộp to — chất lượng không thu nhỏ theo kích thước",
         "Hoàn hảo bỏ túi gym, túi du lịch, ngăn bàn làm việc — luôn sẵn sàng dặm lại khi cần",
         "Finish Matte thực sự — da lì nhẹ, không bóng nhờn suốt cả buổi chiều bận rộn"
@@ -126,7 +126,7 @@
       "short_name": "Set Son 6 Thỏi",
       "category": "Son môi",
       "brand": "No Brand",
-      "price": 114000,
+      "price": 234000,
       "status": "active",
       "variants": ["GF-LIPSET-06"],
       "aliases": [
@@ -135,7 +135,7 @@
         "lip set 6", "set son noi dia", "set son nội địa"
       ],
       "usp": [
-        "Chỉ 19.000đ/thỏi — giá rẻ nhất phân khúc son kem lì velvet, rẻ hơn cả cốc trà đá vỉa hè",
+        "Chỉ 39.000đ/thỏi — giá rẻ nhất phân khúc son kem lì velvet, rẻ hơn cả cốc trà đá vỉa hè",
         "6 màu đa dạng từ nude thanh lịch đến đỏ đô quyến rũ — đủ thay đổi mood cả tuần không lặp",
         "Quà tặng gây ấn tượng cực kỳ tiết kiệm — sinh nhật, 8/3, 20/10, tất niên đều hợp lý",
         "Bền màu 5–7 tiếng, finish velvet matte sang chảnh — vẻ ngoài premium, giá cực bình dân",
@@ -149,7 +149,7 @@
       "short_name": "Bộ Trang Điểm 6 Món",
       "category": "Combo / Set",
       "brand": "No Brand",
-      "price": 74000,
+      "price": 289000,
       "status": "active",
       "variants": ["GF-MKP-COMBO6"],
       "aliases": [
@@ -159,7 +159,7 @@
       ],
       "usp": [
         "Trọn bộ 6 món: phấn, son, kẻ mắt, mascara, che khuyết điểm — mở hộp ra dùng ngay, không cần mua thêm gì",
-        "Chỉ 74.000đ cho cả bộ — starter kit rẻ nhất thị trường, rẻ hơn 1 thỏi son ngoại nhập lẻ bất kỳ",
+        "Chỉ 289.000đ cho cả bộ — starter kit rẻ nhất thị trường, rẻ hơn 1 thỏi son ngoại nhập lẻ bất kỳ",
         "Lý tưởng cho người mới học trang điểm — đủ để thực hành mọi bước mà không sợ lãng phí tiền",
         "Đóng hộp đẹp, tiện bảo quản — làm quà tặng bạn bè hoặc con gái mới lớn rất ý nghĩa",
         "Hoàn thiện lớp makeup nhẹ đi học, đi làm chỉ trong 5 phút — nhanh gọn, tự nhiên, tự tin"
@@ -172,7 +172,7 @@
       "short_name": "Bộ Cọ 13 Món",
       "category": "Dụng cụ làm đẹp",
       "brand": "No Brand",
-      "price": 87000,
+      "price": 89000,
       "status": "active",
       "variants": ["GF-TOOL-BRUSH13"],
       "aliases": [
@@ -195,7 +195,7 @@
       "short_name": "Kẹp Bấm Mi",
       "category": "Dụng cụ làm đẹp",
       "brand": "No Brand",
-      "price": 54000,
+      "price": 19000,
       "status": "active",
       "variants": ["GF-TOOL-CURLER"],
       "aliases": [
@@ -207,7 +207,7 @@
         "Đệm silicon êm ái, không kẹp đau, không gãy lông mi — an toàn tuyệt đối cho mi mắt nhạy cảm",
         "Cong mi tự nhiên bền 6–8 tiếng — đẹp như mi giả mà không cần tốn tiền dán mi hay thuốc uốn mi",
         "Thép không gỉ cao cấp, không rỉ sét, không biến dạng — dùng cả năm vẫn như mới",
-        "54.000đ + bảo hành 1 tháng đổi mới nếu lỗi đệm — đầu tư một lần, dùng cả năm không lo"
+        "19.000đ + bảo hành 1 tháng đổi mới nếu lỗi đệm — đầu tư một lần, dùng cả năm không lo"
       ]
     },
     {
@@ -217,7 +217,7 @@
       "short_name": "Sữa Rửa Mặt Hada Labo 80g",
       "category": "Chăm sóc da mặt",
       "brand": "Hada Labo",
-      "price": 180000,
+      "price": 69000,
       "status": "active",
       "variants": ["HL-CLEANSER-80G"],
       "aliases": [
@@ -231,7 +231,7 @@
         "Hàng chính hãng nhập khẩu, có hoá đơn Guardian — date xa, nguồn gốc 100% rõ ràng, không lo hàng giả",
         "Không chứa cồn, không paraben — êm dịu an toàn cho da nhạy cảm, da khô, da mang thai đều dùng được",
         "Bọt mịn sạch sâu không gây kích ứng — nền skincare vững chắc để serum và kem dưỡng thẩm thấu tốt hơn",
-        "180.000đ/80g dùng được 2–3 tháng — đầu tư thông minh nhất cho bước làm sạch nền tảng skincare"
+        "69.000đ/80g dùng được 2–3 tháng — đầu tư thông minh nhất cho bước làm sạch nền tảng skincare"
       ]
     }
   ]

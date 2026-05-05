@@ -3,7 +3,7 @@
     {
       "suggestion_id": "cs-001",
       "title": "Video swipe 8 màu Son Bóng GIAO FARA — 'Màu nào tôn da bạn nhất?'",
-      "type": "video",
+      "type": "tiktok_30s",
       "platform": "TikTok + Shopee Live",
       "priority": "high",
       "status": "pending",
@@ -25,25 +25,66 @@
       "angle": "Model thật 3 tông da (sáng, trung, ngăm) swipe đủ 8 màu — caption 'Tông da bạn hợp màu nào?'",
       "source": "content_task",
       "source_product_id": "P001",
-      "script_json": {
-        "emotional": {
-          "hook": "Bạn có biết sai màu son có thể khiến da bạn xỉn đi 2 tông không?",
-          "body": "Son Bóng GIAO FARA có 8 mã màu, mỗi mã được thiết kế riêng cho từng tông da Việt. Mã 03 đỏ cam — tôn da vàng ấm. Mã 06 đỏ đô — da ngăm cũng xinh. Mã 01 hồng baby — da sáng cực chuẩn.",
-          "cta": "Comment tông da bạn, mình tư vấn màu hợp nhất nhé!",
-          "hashtags": ["#sonbong", "#giaofara", "#tongsondep", "#makeupvietnam"]
-        },
-        "rational": {
-          "hook": "8 mã son bóng, chọn thế nào cho đúng?",
-          "body": "Bảng phân loại nhanh theo tông da: Da sáng → mã 01, 04, 07. Da trung bình → mã 02, 03, 05. Da ngăm → mã 03, 06, 08. Chất son bóng mịn, dưỡng môi, giữ màu 4-6 tiếng.",
-          "cta": "Xem swipe 8 màu trên môi thật tại video này!",
-          "hashtags": ["#reviewson", "#sonbonggiaofara", "#bangmau"]
+      "script_json": [
+        {
+          "variant": "emotional",
+          "style": "POV Selfie & Cinematic Close-up",
+          "scene_setup": "Phòng ngủ decor tối giản, ánh sáng nắng chiều tự nhiên qua rèm cửa (Golden Hour)",
+          "subject": "3 cô gái (da trắng, da vàng trung bình, da ngăm), mặc đồ cùng tone trắng/beige nhẹ nhàng",
+          "timeline": [
+            {
+              "timecode": "00:00–00:03",
+              "shot_type": "Hook Shot",
+              "action": "Cận cảnh đôi môi mộc khô khốc, sau đó 1 đường quẹt son GIAO FARA mã 05 lướt qua, môi căng mọng ngay lập tức.",
+              "dialogue": "Bạn không cần một lớp filter, bạn chỉ cần thỏi son này thôi.",
+              "performance_note": "Chuyển động môi mỉm cười nhẹ sau khi quẹt son, tạo cảm giác tự tin.",
+              "lighting": "Ánh sáng tự nhiên từ cửa sổ, làm nổi bật độ bóng gương của son."
+            },
+            {
+              "timecode": "00:03–00:15",
+              "shot_type": "Demo Shot",
+              "action": "Màn hình chia 3 (Split screen). Cả 3 cô gái cùng lúc quẹt son. Da trắng (mã 01), da vàng (mã 04), da ngăm (mã 08).",
+              "dialogue": "[Nhạc lo-fi nhẹ nhàng] Dù tông da nào, GIAO FARA cũng biết cách chiều lòng bạn.",
+              "performance_note": "Cả 3 nhìn nhau cười qua gương, tương tác tự nhiên, không diễn quá lố.",
+              "lighting": "Ánh sáng đồng nhất cho cả 3 khung hình để so sánh màu chân thực."
+            },
+            {
+              "timecode": "00:15–00:25",
+              "shot_type": "Proof Shot",
+              "action": "Quay cận chất son trong suốt có hạt lấp lánh nhẹ. Model chạm môi vào mu bàn tay, cho thấy độ ẩm mướt.",
+              "dialogue": "Dưỡng ẩm sâu cả ngày dài, môi cứ như ngậm nước. Đi học hay đi làm đều trong trẻo vô cùng.",
+              "performance_note": "Thao tác tay chậm, tinh tế, nhấn mạnh vào sự mềm mại của môi.",
+              "lighting": "Macro shot, tập trung vào texture son bóng lấp lánh."
+            },
+            {
+              "timecode": "00:25–00:30",
+              "shot_type": "CTA Shot",
+              "action": "Cả 3 cô gái đứng cạnh nhau cầm thỏi son. Hiện giá 309k và nút giỏ hàng.",
+              "dialogue": "Xinh đẹp chỉ với 309k. Chọn màu của riêng bạn ở giỏ hàng nhé!",
+              "performance_note": "Vẫy tay chào và chỉ tay xuống giỏ hàng góc trái.",
+              "lighting": "Ánh sáng sáng sủa, tươi tắn."
+            }
+          ],
+          "camera": "iPhone 13 Pro, quay 4K 60fps, góc quay ngang tầm mắt, thỉnh thoảng dùng ống kính macro cho môi.",
+          "framing": "Kết hợp Medium shot (3 người) và Extreme Closeup (môi).",
+          "performance": "Nhẹ nhàng, bay bổng, tạo cảm giác thỏi son là một món quà nuông chiều bản thân.",
+          "lighting": "Ánh sáng vàng ấm (warm tone), tạo cảm giác thơ mộng.",
+          "cta": "Sắm ngay GIAO FARA để môi xinh mỗi ngày!",
+          "hashtags": [
+            "#GiaoFara",
+            "#SonBong",
+            "#BeautyTips",
+            "#UGCVietnam",
+            "#MakeupTutorial"
+          ],
+          "caption_post": "Môi xinh như lớp filter chỉ sau 1 lần quẹt ✨ GIAO FARA cân mọi tông da từ trắng đến ngăm. Chỉ 309k cho một đôi môi căng mọng, tại sao không? 💖 #GiaoFara #SonBong #GlowyLips"
         }
-      }
+      ]
     },
     {
       "suggestion_id": "cs-002",
       "title": "'Son kem lì bị lỗi vòi bơm phải làm sao?' — FAQ + hướng dẫn báo lỗi",
-      "type": "blog_faq",
+      "type": "facebook_post",
       "platform": "Shopee Product Description + Zalo OA",
       "priority": "high",
       "status": "pending",
@@ -69,7 +110,7 @@
     {
       "suggestion_id": "cs-003",
       "title": "Hướng dẫn chọn tông phấn phủ bột cho da Việt — 'Đừng chọn sai màu như mình'",
-      "type": "guide",
+      "type": "tiktok_60s",
       "platform": "TikTok + Blog Shopee",
       "priority": "medium",
       "status": "saved",
