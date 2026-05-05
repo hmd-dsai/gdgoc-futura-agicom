@@ -3543,7 +3543,7 @@ function initContentAgentEvents() {
       window._ca._lastRequest = {
         product_id: selectedId,
         product_name: selectedProduct.name || selectedId,
-        product_description: selectedProduct.name || '',
+        product_description: selectedProduct.description || selectedProduct.name || '',
         usp_focus: selectedUsps,
         content_type: contentType,
         brand_tone: brandTone,
@@ -3597,6 +3597,11 @@ function initContentAgentEvents() {
 }
 
 function caStartAnalysis(req) {
+  // Guard: req null = được gọi thiếu thông tin sản phẩm
+  if (!req || !req.product_id) {
+    showToast('⚠️ Vui lòng chọn sản phẩm trước khi phân tích', 'warning');
+    return;
+  }
   // req = ContentScriptRequest object từ form
   window._ca.step = 2;
   window._ca.progress = 10;
@@ -3964,26 +3969,22 @@ function caSaveScript() {
 
   var sid = window._ca._sourceSuggestionId;
   if (sid) {
-    // Thử cập nhật đề xuất gốc (PATCH)
-    fetch(API_BASE + '/api/content-suggestions/' + encodeURIComponent(sid) + '/save-script', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ script_json: scriptToSave })
-    }).then(function(r) {
-      if (r.status === 404) {
-        // Đề xuất chưa có trong DB (chỉ có trong demo) → tạo mới
+    // Thử cập nhật đề xuất gốc (PATCH) — dùng apiCall() để tự động đính kèm X-API-Key
+    apiCall('/api/content-suggestions/' + encodeURIComponent(sid) + '/save-script', 'PATCH',
+      { script_json: scriptToSave }
+    ).then(function(data) {
+      if (data.status === 'ok') {
+        showToast('✅ Đã cập nhật kịch bản!', 'success');
+        if (btn) { btn.textContent = '✅ Đã lưu — Cập nhật tiếp'; btn.disabled = false; }
+      } else {
+        showToast('⚠️ Lưu không thành công', 'warning');
+        if (btn) { btn.textContent = '💾 Cập nhật kịch bản đã lưu'; btn.disabled = false; }
+      }
+    }).catch(function(err) {
+      // 404 = đề xuất chưa có trong DB → tạo mới
+      if (err && err.message && err.message.includes('404')) {
         return _caCreateNewSuggestionWithScript(btn);
       }
-      return r.json().then(function(data) {
-        if (data.status === 'ok') {
-          showToast('✅ Đã cập nhật kịch bản!', 'success');
-          if (btn) { btn.textContent = '✅ Đã lưu — Cập nhật tiếp'; btn.disabled = false; }
-        } else {
-          showToast('⚠️ Lưu không thành công', 'warning');
-          if (btn) { btn.textContent = '💾 Cập nhật kịch bản đã lưu'; btn.disabled = false; }
-        }
-      });
-    }).catch(function() {
       showToast('❌ Không thể kết nối backend', 'error');
       if (btn) { btn.textContent = '💾 Cập nhật kịch bản đã lưu'; btn.disabled = false; }
     });
@@ -3998,17 +3999,14 @@ function _caCreateNewSuggestionWithScript(btn) {
   var activeVariant = window._ca.activeVariant || 'emotional';
   var activeScript = (window._ca.scripts || []).find(function(s) { return s.variant === activeVariant; })
                   || (window._ca.scripts || [])[0];
-  return fetch(API_BASE + '/api/content-suggestions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      product_id:   req.product_id   || '',
-      product_name: req.product_name || 'Sản phẩm',
-      content_type: req.content_type || 'tiktok_30s',
-      scripts:      activeScript ? [activeScript] : [],
-      is_text_post: window._ca.is_text_post || false,
-    })
-  }).then(function(r) { return r.json(); }).then(function(data) {
+  // Dùng apiCall() để tự động đính kèm X-API-Key
+  return apiCall('/api/content-suggestions', 'POST', {
+    product_id:   req.product_id   || '',
+    product_name: req.product_name || 'Sản phẩm',
+    content_type: req.content_type || 'tiktok_30s',
+    scripts:      activeScript ? [activeScript] : [],
+    is_text_post: window._ca.is_text_post || false,
+  }).then(function(data) {
     if (data.status === 'ok') {
       window._ca._sourceSuggestionId = data.suggestion_id || null;
       showToast('✅ Đã lưu kịch bản vào Đề xuất AI!', 'success');

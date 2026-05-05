@@ -115,7 +115,7 @@ class ContentScriptRequest(BaseModel):
     """
     product_id: str                          # VD: "P001" — dùng để tra USP từ catalog
     product_name: str                        # Tên đầy đủ để AI hiển thị trong script
-    product_description: str                 # Mô tả sản phẩm (tự điền hoặc lấy từ catalog)
+    product_description: str = ""            # Mô tả sản phẩm (tự điền hoặc lấy từ catalog; backend fallback về catalog nếu rỗng)
     usp_focus: List[str] = []               # Các USP muốn nhấn mạnh (subset của usp[] trong catalog)
     content_type: str = "tiktok_30s"        # Xem CONTENT_TYPES
     target_audience: str = ""               # VD: "Học sinh cấp 3, thích makeup nhẹ"

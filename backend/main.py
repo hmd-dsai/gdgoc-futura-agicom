@@ -1570,40 +1570,131 @@ async def update_customer_profile(customer_id: str, payload: dict):
 async def get_content_suggestions():
     """
     Tổng hợp tín hiệu content từ CoordinationTask + ChatLog + ReviewLog.
-    Trả về danh sách đề xuất có cấu trúc để frontend hiển thị và merge với MOCK.
+
+    CENTRALIZED: Mọi suggestion đều được lưu vào bảng ContentSuggestion trước khi trả về.
+    CoordinationTask 'Content' pending được upsert vào bảng với đầy đủ metadata
+    (bao gồm source_product_id) để frontend có thể prefill đúng khi nhấn 'Tạo script'.
     """
     db = SessionLocal()
     try:
-        # 1. Lấy ContentSuggestion đã lưu/lên lịch (chưa bị ignored)
-        saved_sugs = db.query(ContentSuggestion).filter(
-            ContentSuggestion.status != "ignored"
-        ).order_by(ContentSuggestion.combined_score.desc()).all()
+        # ── Helpers (dùng cho cả upsert và serialize) ───────────────────────
+        def _detect_type(text):
+            """Return a content_type code matching CONTENT_TYPES in models.py."""
+            t = (text or "").lower()
+            if "15s" in t or "15 giây" in t:
+                return "tiktok_15s"
+            if "60s" in t or "60 giây" in t or "dài" in t:
+                return "tiktok_60s"
+            if any(k in t for k in ["reels", "instagram"]):
+                return "reels_30s"
+            if any(k in t for k in ["youtube", "yt short"]):
+                return "youtube_short"
+            if any(k in t for k in ["shopee video", "shopee"]):
+                return "shopee_video"
+            if any(k in t for k in ["facebook", "fb post", "bài đăng"]):
+                return "facebook_post"
+            if any(k in t for k in ["caption"]):
+                return "caption_instagram"
+            if any(k in t for k in ["video", "quay", "tiktok"]):
+                return "tiktok_30s"
+            return "facebook_post"
 
-        # 2. Lấy content tasks đang pending
-        content_tasks = db.query(CoordinationTask).filter(
-            CoordinationTask.target_agent == "Content",
-            CoordinationTask.status == "pending"
-        ).order_by(CoordinationTask.id.desc()).all()
+        def _platform_for(t):
+            return {
+                "tiktok_15s": "TikTok", "tiktok_30s": "TikTok", "tiktok_60s": "TikTok",
+                "reels_30s": "Instagram", "reels_60s": "Instagram",
+                "youtube_short": "YouTube",
+                "shopee_video": "Shopee",
+                "facebook_post": "Facebook",
+                "caption_instagram": "Instagram",
+            }.get(t, "TikTok")
 
-        # 3. Tín hiệu từ reviews tiêu cực (group by product)
+        # ── 1. Lấy tín hiệu phụ trợ (reviews + chat) ───────────────────────
         neg_reviews = db.query(ReviewLog).filter(
             ReviewLog.rating <= 3
         ).order_by(ReviewLog.timestamp.desc()).limit(30).all()
 
-        # 4. Tín hiệu từ chat logs gần đây
         recent_insights = db.query(ChatLog).filter(
             ChatLog.is_archived == False,
             ChatLog.insight.isnot(None)
         ).order_by(ChatLog.timestamp.desc()).limit(20).all()
 
-        suggestions = []
+        neg_by_product: dict = {}
+        for r in neg_reviews:
+            pid = r.product_id or "unknown"
+            neg_by_product.setdefault(pid, []).append(r)
 
-        # -- Từ ContentSuggestion đã lưu trong DB --
-        saved_suggestion_ids = set()
-        for s in saved_sugs:
-            saved_suggestion_ids.add(s.suggestion_id)
-            sq = []
-            sr = []
+        # ── 2. Upsert CoordinationTask "Content" pending vào DB ─────────────
+        # Lấy danh sách suggestion_id đã tồn tại (dạng task-{id}) để tránh duplicate
+        content_tasks = db.query(CoordinationTask).filter(
+            CoordinationTask.target_agent == "Content",
+            CoordinationTask.status == "pending"
+        ).order_by(CoordinationTask.id.desc()).all()
+
+        existing_task_sug_ids = set(
+            s.suggestion_id for s in
+            db.query(ContentSuggestion.suggestion_id).filter(
+                ContentSuggestion.suggestion_id.like("task-%")
+            ).all()
+        )
+
+        upserted = 0
+        for task in content_tasks:
+            task_sug_id = f"task-{task.id}"
+            if task_sug_id in existing_task_sug_ids:
+                continue  # đã có trong DB — không upsert lại
+
+            related_neg = neg_by_product.get(task.product_id or "", [])
+            sug_type    = _detect_type(task.instruction)
+            platform    = _platform_for(sug_type)
+            score       = min(99, 65 + len(related_neg) * 8 + (10 if related_neg else 0))
+            priority    = "high" if len(related_neg) >= 1 or score >= 80 else "medium"
+
+            sample_qs = json.dumps(
+                [log.customer_q[:60] for log in recent_insights[:2]],
+                ensure_ascii=False
+            )
+            sample_rs = json.dumps(
+                [(r.review_text or "")[:60] for r in related_neg[:2]],
+                ensure_ascii=False
+            )
+
+            new_sug = ContentSuggestion(
+                suggestion_id     = task_sug_id,
+                title             = (task.instruction or "")[:200],
+                type              = sug_type,
+                platform          = platform,
+                priority          = priority,
+                status            = "pending",
+                source            = "content_task",
+                source_product_id = task.product_id or "",      # ← key field cho prefill
+                combined_score    = score,
+                chatbot_count     = len(recent_insights),
+                chatbot_topic     = "Phát hiện từ báo cáo hàng ngày",
+                review_count      = len(related_neg),
+                review_neg_pct    = 100 if related_neg else 0,
+                sample_questions  = sample_qs,
+                sample_reviews    = sample_rs,
+                angle             = task.instruction or "",
+                estimated_impact  = "Giảm câu hỏi lặp lại ~30–50%",
+                estimated_production = {"tiktok_15s": "1-2 ngày", "tiktok_30s": "1-2 ngày",
+                                        "facebook_post": "2-4 giờ"}.get(sug_type, "1-2 ngày"),
+            )
+            db.add(new_sug)
+            upserted += 1
+
+        if upserted:
+            db.commit()
+            print(f"[content-suggestions] Upserted {upserted} task-sourced suggestions into DB.")
+
+        # ── 3. Lấy toàn bộ ContentSuggestion từ DB (single source of truth) ─
+        all_sugs = db.query(ContentSuggestion).filter(
+            ContentSuggestion.status != "ignored"
+        ).order_by(ContentSuggestion.combined_score.desc()).all()
+
+        suggestions = []
+        for s in all_sugs:
+            sq, sr = [], []
             try:
                 sq = json.loads(s.sample_questions or "[]")
             except Exception:
@@ -1634,83 +1725,10 @@ async def get_content_suggestions():
                 "angle": s.angle or "",
                 "estimated_impact": s.estimated_impact or "Cải thiện trải nghiệm khách hàng",
                 "estimated_production": s.estimated_production or "1-2 ngày",
-                "source_product_id": s.source_product_id or "",   # ← needed for prefill
+                "source_product_id": s.source_product_id or "",   # ← prefill product dropdown
                 "has_script": bool(s.script_json),                 # ← show "Xem script" button
                 "_fromBackend": True,
                 "_source": s.source or "db"
-            })
-
-        # -- Từ CoordinationTask target_agent=Content (chưa có trong DB) --
-        def _detect_type(text):
-            """Return a content_type code matching CONTENT_TYPES in models.py."""
-            t = (text or "").lower()
-            if "15s" in t or "15 giây" in t:
-                return "tiktok_15s"
-            if "60s" in t or "60 giây" in t or "dài" in t:
-                return "tiktok_60s"
-            if any(k in t for k in ["reels", "instagram"]):
-                return "reels_30s"
-            if any(k in t for k in ["youtube", "yt short"]):
-                return "youtube_short"
-            if any(k in t for k in ["shopee video", "shopee"]):
-                return "shopee_video"
-            if any(k in t for k in ["facebook", "fb post", "bài đăng"]):
-                return "facebook_post"
-            if any(k in t for k in ["caption"]):
-                return "caption_instagram"
-            # default short TikTok for video-related tasks
-            if any(k in t for k in ["video", "quay", "tiktok"]):
-                return "tiktok_30s"
-            # text/blog tasks → facebook_post
-            return "facebook_post"
-
-        def _platform_for(t):
-            return {
-                "tiktok_15s": "TikTok", "tiktok_30s": "TikTok", "tiktok_60s": "TikTok",
-                "reels_30s": "Instagram", "reels_60s": "Instagram",
-                "youtube_short": "YouTube",
-                "shopee_video": "Shopee",
-                "facebook_post": "Facebook",
-                "caption_instagram": "Instagram",
-            }.get(t, "TikTok")
-
-        neg_by_product = {}
-        for r in neg_reviews:
-            pid = r.product_id or "unknown"
-            neg_by_product.setdefault(pid, []).append(r)
-
-        for task in content_tasks:
-            task_sug_id = f"task-{task.id}"
-            if task_sug_id in saved_suggestion_ids:
-                continue  # đã có trong DB rồi
-
-            related_neg = neg_by_product.get(task.product_id or "", [])
-            sug_type = _detect_type(task.instruction)
-            score = min(99, 65 + len(related_neg) * 8 + (10 if related_neg else 0))
-
-            suggestions.append({
-                "id": task_sug_id,
-                "title": (task.instruction or "")[:100],
-                "type": sug_type,
-                "platform": _platform_for(sug_type),
-                "priority": "high" if len(related_neg) >= 1 or score >= 80 else "medium",
-                "status": "pending",
-                "combined_score": score,
-                "chatbot_signal": {
-                    "count": len(recent_insights),
-                    "topic": "Phát hiện từ báo cáo hàng ngày",
-                    "sample_questions": [log.customer_q[:60] for log in recent_insights[:2]]
-                },
-                "review_signal": {
-                    "count": len(related_neg),
-                    "neg_pct": 100 if related_neg else 0,
-                    "sample_reviews": [(r.review_text or "")[:60] for r in related_neg[:2]]
-                },
-                "angle": task.instruction or "",
-                "estimated_impact": f"Giảm câu hỏi lặp lại ~30–50%",
-                "estimated_production": {"video": "1-2 ngày", "blog_faq": "2-4 giờ", "comparison": "1 ngày", "guide": "3-5 giờ"}.get(sug_type, "1-2 ngày"),
-                "_fromBackend": True,
-                "_source": "content_task"
             })
 
         # Sắp xếp: đã lưu/lên lịch lên đầu, rồi theo score
@@ -1723,13 +1741,16 @@ async def get_content_suggestions():
                 "neg_review_count": len(neg_reviews),
                 "content_tasks_count": len(content_tasks),
                 "chat_signals_count": len(recent_insights),
-                "saved_in_db": len(saved_sugs)
+                "saved_in_db": len(all_sugs),
+                "upserted_this_call": upserted,
             }
         }
     except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
+
 
 
 @app.patch("/api/content-suggestions/{suggestion_id}/status", dependencies=[Depends(require_api_key)])
