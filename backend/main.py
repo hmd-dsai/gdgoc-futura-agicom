@@ -29,7 +29,7 @@ from services import (
 from database import SessionLocal, ChatLog, CoordinationTask, ChatMessage as DB_ChatMessage, save_message, init_db, DailySummaryArchive, ReviewLog, ReviewAutoReply, ContentSuggestion, CustomerProfile, get_or_create_customer_profile, StrategyProposalLog, LearnedQAEntry, CrisisPlan, CrisisAction, ChatSummary
 import config as _cfg
 from seed_demo import (
-    seed_vector_db, seed_sql_db, seed_content_suggestions, seed_customer_profiles,
+    clear_data, seed_vector_db, seed_sql_db, seed_content_suggestions, seed_customer_profiles,
     seed_crisis_demo, seed_strategy_proposals, seed_review_auto_replies,
     seed_crisis_plans, seed_learned_qa, seed_chat_summaries, seed_daily_archives,
 )
@@ -2406,36 +2406,10 @@ async def create_content_suggestion(body: dict):
 async def reset_all_data():
     db = SessionLocal()
     try:
-        # 1. Xóa toàn bộ SQL (tất cả bảng có thể reset)
-        db.query(DB_ChatMessage).delete()
-        db.query(ChatLog).delete()
-        db.query(CoordinationTask).delete()
-        db.query(ReviewAutoReply).delete()
-        db.query(ReviewLog).delete()
-        db.query(ContentSuggestion).delete()
-        db.query(CustomerProfile).delete()
-        db.query(StrategyProposalLog).delete()
-        db.query(LearnedQAEntry).delete()
-        db.query(CrisisAction).delete()
-        db.query(CrisisPlan).delete()
-        db.query(ChatSummary).delete()
-        db.query(DailySummaryArchive).delete()
-        db.commit()
-
-        # 2. Xóa và tạo lại các Collections trong Vector DB.
-        for col_name in ["policy_db", "product_db", "resolved_qa_db", "strategy_learnings_db"]:
-            try:
-                _cfg.chroma_client.delete_collection(col_name)
-            except Exception:
-                pass
-
-        _cfg.policy_col      = _cfg.chroma_client.get_or_create_collection(name="policy_db",              embedding_function=_cfg.default_ef)
-        _cfg.product_col     = _cfg.chroma_client.get_or_create_collection(name="product_db",             embedding_function=_cfg.default_ef)
-        _cfg.resolved_qa_col = _cfg.chroma_client.get_or_create_collection(name="resolved_qa_db",         embedding_function=_cfg.default_ef)
-        _cfg.strategy_col    = _cfg.chroma_client.get_or_create_collection(name="strategy_learnings_db",  embedding_function=_cfg.default_ef)
+        p_col, pr_col, qa_col = clear_data(db)
 
         # 3. Nạp lại toàn bộ dữ liệu nền từ data/mock/
-        seed_vector_db(_cfg.policy_col, _cfg.product_col, _cfg.resolved_qa_col)
+        seed_vector_db(p_col, pr_col, qa_col)
         seed_sql_db(db)
         seed_content_suggestions(db)
         seed_customer_profiles(db)

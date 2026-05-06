@@ -41,6 +41,15 @@ def clear_data(db):
     db.query(CrisisPlan).delete()
     db.query(ChatSummary).delete()
     db.query(DailySummaryArchive).delete()
+    
+    # Reset SQLite AUTOINCREMENT sequence so IDs start fresh from 1
+    if "sqlite" in str(db.get_bind().url):
+        try:
+            from sqlalchemy import text
+            db.execute(text("DELETE FROM sqlite_sequence"))
+        except Exception:
+            pass
+
     db.commit()
 
     for col_name in ["policy_db", "product_db", "resolved_qa_db", "strategy_learnings_db"]:
