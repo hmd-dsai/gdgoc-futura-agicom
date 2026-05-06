@@ -53,6 +53,34 @@
           "status": "pending"
         }
       ]
+    },
+    {
+      "plan_id": "plan_P011_demo",
+      "product_id": "P011",
+      "root_cause_summary": "Khách hàng mới (đặc biệt nhóm da khô) phản ánh tình trạng căng rát, bong tróc sau khi dùng Kem Rửa Mặt Hada Labo (P011). Nguyên nhân chủ yếu do khách sử dụng sai cách: thoa trực tiếp dạng kem đặc lên mặt thay vì tạo bọt bông kỹ trên tay trước khi rửa.",
+      "urgency": "critical",
+      "crisis_snapshot": "{\"neg_review_count\": 2, \"risk_task_count\": 1, \"chat_signal_count\": 0}",
+      "actions": [
+        {
+          "action_id": "act_P011_01", "type": "immediate", "category": "apology",
+          "title": "Inbox giải thích và hoàn tiền cho 2 khách hàng bị kích ứng",
+          "detail": "Gửi tin nhắn xin lỗi, giải thích rõ cơ chế tạo bọt của Hada Labo. Hoàn tiền 100% để xoa dịu khách hàng bị bong tróc da.",
+          "draft_message": "Dạ shop GIAO FARA xin lỗi bạn vì trải nghiệm không mong muốn ạ. Sữa rửa mặt này cần tạo bọt thật kỹ trước khi dùng để không hút ẩm ngược của da. Shop xin phép hoàn tiền 100% đơn hàng này để bạn phục hồi da nhé ạ.",
+          "status": "pending"
+        },
+        {
+          "action_id": "act_P011_02", "type": "mid_term", "category": "marketing",
+          "title": "Bổ sung ảnh 'Cảnh báo/HDSD' vào trang sản phẩm",
+          "detail": "Thiết kế 1 ảnh ghi rõ: 'BẮT BUỘC TẠO BỌT KỸ TRƯỚC KHI RỬA' đặt lên vị trí ảnh thứ 2 trong bộ ảnh listing Shopee.",
+          "draft_message": null, "status": "pending"
+        },
+        {
+          "action_id": "act_P011_03", "type": "mid_term", "category": "marketing",
+          "title": "Sản xuất Content hướng dẫn tạo bọt (Chuyển cho Content Agent)",
+          "detail": "Tạo video hướng dẫn phân biệt rửa mặt đúng/sai cách, ghim lên TikTok và Shopee Video để giáo dục khách hàng mới.",
+          "draft_message": null, "status": "pending"
+        }
+      ]
     }
   ]
 }

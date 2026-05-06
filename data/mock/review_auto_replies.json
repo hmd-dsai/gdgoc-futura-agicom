@@ -2,50 +2,6 @@
   "review_auto_replies": [
     {
       "review_log_id": 1,
-      "customer_name": "m*****9",
-      "product_id": "P011",
-      "rating": 5,
-      "public_reply": "Cảm ơn bạn đã tin tưởng và ủng hộ shop ạ! Rất vui khi sản phẩm phù hợp với da bạn. Chúc bạn luôn có làn da mềm mịn nhé! 💕",
-      "inbox_message": null,
-      "reply_type": "positive",
-      "status": "approved",
-      "hours_ago": 20
-    },
-    {
-      "review_log_id": 2,
-      "customer_name": "t*****h",
-      "product_id": "P011",
-      "rating": 5,
-      "public_reply": "Cảm ơn bạn đã ủng hộ Hada Labo chính hãng Guardian bên shop nhé! Da khô mà chịu được sản phẩm này thì tuyệt vời lắm ạ. Hẹn gặp lại bạn trong đơn tiếp theo! 🌸",
-      "inbox_message": null,
-      "reply_type": "positive",
-      "status": "approved",
-      "hours_ago": 18
-    },
-    {
-      "review_log_id": 3,
-      "customer_name": "nguyenvana12",
-      "product_id": "P011",
-      "rating": 4,
-      "public_reply": "Cảm ơn bạn đã phản hồi ạ! Shop rất tiếc về tình trạng hộp bị móp khi vận chuyển. Shop đã ghi nhận và sẽ cải thiện đóng gói chắc chắn hơn ạ.",
-      "inbox_message": "Chào bạn nguyenvana12, shop xin lỗi về sự cố hộp bị móp. Nếu bạn muốn shop gửi bù 1 hộp mới nguyên vẹn, vui lòng reply tin nhắn này nhé ạ!",
-      "reply_type": "negative",
-      "status": "pending",
-      "hours_ago": 18
-    },
-    {
-      "review_log_id": 4,
-      "customer_name": "lananh_beauty",
-      "product_id": "P011",
-      "rating": 5,
-      "public_reply": "Cảm ơn bạn lananh_beauty đã check auth kỹ và chia sẻ trải nghiệm ạ! Chúc bạn săn được nhiều sale xịn nữa nhé 🎉",
-      "inbox_message": null,
-      "reply_type": "positive",
-      "status": "approved",
-      "hours_ago": 16
-    },
-    {
-      "review_log_id": 5,
       "customer_name": "h*****g",
       "product_id": "P002",
       "rating": 5,
@@ -56,7 +12,7 @@
       "hours_ago": 14
     },
     {
-      "review_log_id": 6,
+      "review_log_id": 2,
       "customer_name": "l*****a",
       "product_id": "P002",
       "rating": 2,
@@ -67,7 +23,7 @@
       "hours_ago": 10
     },
     {
-      "review_log_id": 7,
+      "review_log_id": 3,
       "customer_name": "k*****i",
       "product_id": "P003",
       "rating": 4,
@@ -78,7 +34,7 @@
       "hours_ago": 12
     },
     {
-      "review_log_id": 8,
+      "review_log_id": 4,
       "customer_name": "p*****u",
       "product_id": "P003",
       "rating": 3,
@@ -87,6 +43,61 @@
       "reply_type": "negative",
       "status": "pending",
       "hours_ago": 8
+    },
+    {
+      "review_log_id": 5,
+      "customer_name": "ngoctram_vip",
+      "product_id": "P011",
+      "rating": 5,
+      "public_reply": "Cảm ơn bạn đã tin tưởng và ủng hộ shop ạ! Rất vui khi sản phẩm phù hợp với da bạn. Chúc bạn luôn có làn da mềm mịn nhé! 💕",
+      "inbox_message": null,
+      "reply_type": "positive",
+      "status": "approved",
+      "hours_ago": 20
+    },
+    {
+      "review_log_id": 6,
+      "customer_name": "hoamai99",
+      "product_id": "P011",
+      "rating": 5,
+      "public_reply": "Cảm ơn bạn hoamai99 đã check auth kỹ và chia sẻ trải nghiệm ạ! Chúc bạn săn được nhiều sale xịn nữa nhé 🎉",
+      "inbox_message": null,
+      "reply_type": "positive",
+      "status": "approved",
+      "hours_ago": 16
+    },
+    {
+      "review_log_id": 9,
+      "customer_name": "thanhha_12",
+      "product_id": "P011",
+      "rating": 5,
+      "public_reply": "Cảm ơn bạn đã ủng hộ Hada Labo chính hãng Guardian bên shop nhé! Da khô mà chịu được sản phẩm này thì tuyệt vời lắm ạ. Hẹn gặp lại bạn trong đơn tiếp theo! 🌸",
+      "inbox_message": null,
+      "reply_type": "positive",
+      "status": "approved",
+      "hours_ago": 18
+    },
+    {
+      "review_log_id": 11,
+      "customer_name": "phuongly9x",
+      "product_id": "P011",
+      "rating": 4,
+      "public_reply": "Cảm ơn bạn đã phản hồi ạ! Shop rất tiếc về tình trạng hộp bị móp khi vận chuyển. Shop đã ghi nhận và sẽ cải thiện đóng gói chắc chắn hơn ạ.",
+      "inbox_message": "Chào bạn phuongly9x, shop xin lỗi về sự cố hộp bị móp. Nếu bạn muốn shop gửi bù 1 hộp mới nguyên vẹn, vui lòng reply tin nhắn này nhé ạ!",
+      "reply_type": "negative",
+      "status": "pending",
+      "hours_ago": 18
+    },
+    {
+      "review_log_id": 13,
+      "customer_name": "bichthuy_new",
+      "product_id": "P011",
+      "rating": 1,
+      "public_reply": "Shop thành thật xin lỗi bạn về trải nghiệm chưa tốt ạ. Hada Labo thường rất lành tính nhưng có thể do cách tạo bọt chưa đúng hoặc da đang quá mẫn cảm. Bạn vui lòng check inbox để shop hướng dẫn kỹ hơn và hỗ trợ hoàn hàng nếu da kích ứng nhé!",
+      "inbox_message": "Chào bạn, shop rất xin lỗi vì sữa rửa mặt làm da bạn bị căng rát. Bạn có đang thoa trực tiếp kem lên mặt không ạ? Hada Labo cần tạo bọt thật kỹ trên tay rồi mới đưa lên mặt thì sẽ giữ được độ ẩm. Nếu bạn đã làm đúng mà da vẫn rát, shop xin phép hoàn tiền 100% đơn này cho bạn nhé. Đợi phản hồi từ bạn ạ!",
+      "reply_type": "negative",
+      "status": "pending",
+      "hours_ago": 2
     }
   ]
 }

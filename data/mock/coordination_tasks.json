@@ -23,6 +23,22 @@
       "status": "pending",
       "signal_count": 3,
       "issue_type": "general"
+    },
+    {
+      "target_agent": "RiskManager",
+      "product_id": "P011",
+      "instruction": "CẢNH BÁO: Ghi nhận 2 review 1 sao liên tiếp phản ánh kem rửa mặt Hada Labo (P011) gây khô rát, bong tróc da. Cần phân tích nguyên nhân: do lô hàng mới bị lỗi công thức, hay do khách (nhóm da khô) thoa trực tiếp không tạo bọt? Yêu cầu liên hệ khách gấp để thu hồi mẫu test.",
+      "status": "pending",
+      "signal_count": 2,
+      "issue_type": "quality"
+    },
+    {
+      "target_agent": "Content",
+      "product_id": "P011",
+      "instruction": "Khách hàng bị khô rát do không biết cách sử dụng sữa rửa mặt tạo bọt. Yêu cầu tạo gấp 1 video Tutorial: 'Sai lầm khiến da khô rát khi dùng Hada Labo — Hướng dẫn tạo bọt đúng chuẩn Nhật'.",
+      "status": "pending",
+      "signal_count": 2,
+      "issue_type": "general"
     }
   ]
 }

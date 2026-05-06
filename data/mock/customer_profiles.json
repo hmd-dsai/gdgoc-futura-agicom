@@ -6,25 +6,37 @@
       "emotion_index": 0.9,
       "customer_segment": "vip",
       "total_orders": 7,
-      "total_spent": 1540000,
+      "total_spent": 1648000,
       "last_purchase_date": "2026-04-25",
       "purchase_history": [
         {
           "date": "25/04/2026",
           "item": "Son Kem Lì GIAO FARA (Mã 12 + Mã 14)",
-          "value": 78000,
+          "value": 598000,
+          "status": "Hoàn tất"
+        },
+        {
+          "date": "10/04/2026",
+          "item": "Phấn Phủ Bột GIAO FARA Tự Nhiên",
+          "value": 129000,
           "status": "Hoàn tất"
         },
         {
           "date": "10/04/2026",
           "item": "Bộ Cọ Trang Điểm 13 Món",
-          "value": 87000,
+          "value": 89000,
           "status": "Hoàn tất"
         },
         {
           "date": "20/03/2026",
           "item": "Set Son Kem Lì 6 Thỏi",
-          "value": 114000,
+          "value": 234000,
+          "status": "Hoàn tất"
+        },
+        {
+          "date": "15/03/2026",
+          "item": "Son Kem Lì GIAO FARA (Mã 09 + Mã 14)",
+          "value": 598000,
           "status": "Hoàn tất"
         }
       ],
@@ -36,13 +48,13 @@
       "emotion_index": 0.12,
       "customer_segment": "at_risk",
       "total_orders": 2,
-      "total_spent": 198000,
+      "total_spent": 428000,
       "last_purchase_date": "2026-04-28",
       "purchase_history": [
         {
           "date": "28/04/2026",
           "item": "Son Kem Lì GIAO FARA Mã 01",
-          "value": 39000,
+          "value": 299000,
           "status": "Khiếu nại"
         },
         {
@@ -60,13 +72,13 @@
       "emotion_index": 0.7,
       "customer_segment": "new",
       "total_orders": 1,
-      "total_spent": 87000,
+      "total_spent": 89000,
       "last_purchase_date": "2026-04-27",
       "purchase_history": [
         {
           "date": "27/04/2026",
           "item": "Bộ Cọ Trang Điểm 13 Món",
-          "value": 87000,
+          "value": 89000,
           "status": "Hoàn tất"
         }
       ],
@@ -78,17 +90,11 @@
       "emotion_index": 0.76,
       "customer_segment": "regular",
       "total_orders": 5,
-      "total_spent": 633000,
+      "total_spent": 447000,
       "last_purchase_date": "2026-04-20",
       "purchase_history": [
         {
           "date": "20/04/2026",
-          "item": "Son Bóng GIAO FARA Mã 03 + Mã 06",
-          "value": 78000,
-          "status": "Hoàn tất"
-        },
-        {
-          "date": "02/04/2026",
           "item": "Phấn Phủ Bột GIAO FARA Tự Nhiên",
           "value": 129000,
           "status": "Hoàn tất"
@@ -96,23 +102,17 @@
         {
           "date": "15/03/2026",
           "item": "Kẹp Bấm Mi Chuyên Dụng",
-          "value": 54000,
-          "status": "Hoàn tất"
-        },
-        {
-          "date": "20/02/2026",
-          "item": "Bộ Trang Điểm 6 Món",
-          "value": 74000,
+          "value": 19000,
           "status": "Hoàn tất"
         },
         {
           "date": "10/01/2026",
           "item": "Son Kem Lì GIAO FARA Mã 09",
-          "value": 39000,
+          "value": 299000,
           "status": "Hoàn tất"
         }
       ],
-      "notes": "Mua đa dạng sản phẩm GIAO FARA, trung thành với brand. Chưa thử Hada Labo — tiềm năng upsell skincare."
+      "notes": "Mua đa dạng sản phẩm GIAO FARA. Chưa thử Hada Labo — tiềm năng upsell skincare."
     }
   ]
 }

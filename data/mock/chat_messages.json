@@ -5,19 +5,19 @@
       "messages": [
         {
           "role": "user",
-          "content": "Chào shop, mình là khách hay mua son ở đây nè."
+          "content": "shop ơi, đợt này mình ngồi điều hoà nhiều nên má bị khô căng khó chịu quá, shop có gợi ý sản phẩm gì không"
         },
         {
           "role": "assistant",
-          "content": "Dạ chào chị! Em nhận ra chị — chị hay mua son kem lì và bộ cọ bên em ạ. Lần này chị cần hỗ trợ gì không ạ?"
+          "content": "Dạ em chào chị Trâm. Da khô do điều hoà chị nên đổi sang loại sữa rửa mặt dịu nhẹ cấp ẩm ạ. Bên em đang có dòng Kem Rửa Mặt Hada Labo Advanced Nourish chuẩn Nhật dùng rất hợp cho tình trạng của chị ạ!"
         },
         {
           "role": "user",
-          "content": "Mình muốn mua thêm 2 thỏi son bóng mã 03 tặng bạn, còn hàng không shop?"
+          "content": "dùng cái đó rửa xong có bị sạch kin kít hay căng rát không em? da chị đang nhạy cảm"
         },
         {
           "role": "assistant",
-          "content": "Dạ mã 03 còn hàng ạ! Với chị là khách VIP, em giữ 2 thỏi cho chị luôn nhé. Chị có muốn ghép thêm 1 món nữa để đủ combo 3 món được giảm 10% tổng đơn không ạ?"
+          "content": "Dạ hoàn toàn không chị nha! Dòng này chứa Hyaluronic Acid chuyên cấp nước. Rửa xong da vẫn giữ được màng ẩm tự nhiên, mềm mướt lắm ạ. Chị chỉ cần nhớ lấy 1 ít ra tay, tạo bọt kỹ rồi mới massage lên mặt là da cực êm ạ."
         }
       ]
     },

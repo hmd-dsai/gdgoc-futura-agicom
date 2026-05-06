@@ -4,30 +4,6 @@
 
   "review_logs": [
     {
-      "product_id": "P011",
-      "rating": 2,
-      "review_text": "Kem rửa mặt dùng 3 ngày mặt nổi mụn li ti, da đang ổn mà dùng thêm vào thì hỏng. Không biết có phải do sản phẩm không nhưng thôi dừng dùng an toàn hơn.",
-      "customer_name": "lan_thao_hcm",
-      "ai_insight": "Tiêu cực: phản ứng da, nổi mụn | CS: Cần tư vấn và xem xét đổi trả",
-      "hours_ago": 5
-    },
-    {
-      "product_id": "P011",
-      "rating": 1,
-      "review_text": "Da mình khô nhưng xài kem này xong thấy khô và căng rát hơn hẳn. Shop tư vấn mình da khô dùng được mà sao lại vậy? Muốn đổi hàng.",
-      "customer_name": "user_khanh99",
-      "ai_insight": "Tiêu cực: da khô, căng rát | CS: Khách yêu cầu đổi hàng",
-      "hours_ago": 18
-    },
-    {
-      "product_id": "P011",
-      "rating": 2,
-      "review_text": "Hộp bị móp khi nhận hàng, nắp bị nứt một góc. May mà sản phẩm bên trong chưa bị hỏng nhưng lo lắng về vệ sinh.",
-      "customer_name": "phuong_bt",
-      "ai_insight": "Tiêu cực: đóng gói hỏng, móp méo | CS: Báo lỗi vận chuyển",
-      "hours_ago": 30
-    },
-    {
       "product_id": "P002",
       "rating": 1,
       "review_text": "Son khô môi kinh khủng, dùng 1 tiếng là bong tróc cả lớp son. Màu cũng bay nhanh hơn mình tưởng rất nhiều, không lì như quảng cáo.",
@@ -54,13 +30,6 @@
   ],
 
   "coordination_tasks": [
-    {
-      "target_agent": "RiskManager",
-      "product_id": "P011",
-      "instruction": "CẢNH BÁO: 3 review tiêu cực liên tiếp cho P011 (Kem Rửa Mặt Hada Labo) trong 48h — phản ứng da (mụn, khô rát) + đóng gói hỏng khi giao. Cần kiểm tra lô hàng hiện tại và liên hệ khách hàng bị ảnh hưởng.",
-      "status": "pending",
-      "hours_ago": 4
-    },
     {
       "target_agent": "RiskManager",
       "product_id": "P002",

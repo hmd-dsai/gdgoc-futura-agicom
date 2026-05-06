@@ -1,124 +1,6 @@
 {
   "review_logs": [
     {
-      "product_id": "P011",
-      "product_name": "Kem Rửa Mặt Dưỡng Ẩm Hada Labo Advanced Nourish Hyaluronic Acid Cleanser 80g",
-      "sku_code": "HL-CLEANSER-80G",
-      "summary_stats": {
-        "average_rating": 4.9,
-        "total_reviews": 4,
-        "rating_distribution": {
-          "5_star": 3,
-          "4_star": 1,
-          "3_star": 0,
-          "2_star": 0,
-          "1_star": 0
-        }
-      },
-      "reviews_list": [
-        {
-          "review_id": "REV_001",
-          "variant_name": "80g",
-          "customer": {
-            "username_masked": "m*****9",
-            "is_verified_buyer": true
-          },
-          "rating": 5,
-          "review_text": "Giao hàng nhanh, đóng gói cẩn thận. Sữa rửa mặt dùng rất thích, rửa xong da mềm mịn không bị khô căng. Sẽ ủng hộ shop tiếp.",
-          "has_media": true,
-          "created_at": "2024-03-15T10:30:00Z",
-          "ai_analysis": {
-            "sentiment": "positive",
-            "key_aspects": [
-              "giao hàng nhanh",
-              "đóng gói kỹ",
-              "không khô da",
-              "mềm mịn"
-            ],
-            "requires_customer_service": false,
-            "service_trigger_reason": ""
-          },
-          "sentiment": "Tích cực",
-          "key_issue": "Không có vấn đề",
-          "sentiment_tag": "Giao hàng nhanh"
-        },
-        {
-          "review_id": "REV_002",
-          "variant_name": "80g",
-          "customer": {
-            "username_masked": "t*****h",
-            "is_verified_buyer": true
-          },
-          "rating": 5,
-          "review_text": "Hàng chính hãng Guardian nên rất yên tâm. Date xa, dùng Hada Labo bấy lâu nay vẫn là chân ái cho da khô.",
-          "has_media": true,
-          "created_at": "2024-03-20T14:15:00Z",
-          "ai_analysis": {
-            "sentiment": "positive",
-            "key_aspects": [
-              "hàng chính hãng",
-              "date xa",
-              "phù hợp da khô"
-            ],
-            "requires_customer_service": false,
-            "service_trigger_reason": ""
-          },
-          "sentiment": "Tích cực",
-          "key_issue": "Không có vấn đề",
-          "sentiment_tag": "Hàng chính hãng"
-        },
-        {
-          "review_id": "REV_003",
-          "variant_name": "80g",
-          "customer": {
-            "username_masked": "nguyenvana12",
-            "is_verified_buyer": true
-          },
-          "rating": 4,
-          "review_text": "Sản phẩm tốt, nhưng hộp hơi bị móp một chút do vận chuyển. May mà bên trong không sao.",
-          "has_media": false,
-          "created_at": "2024-03-22T09:00:00Z",
-          "ai_analysis": {
-            "sentiment": "neutral",
-            "key_aspects": [
-              "chất lượng tốt",
-              "vận chuyển làm móp hộp"
-            ],
-            "requires_customer_service": true,
-            "service_trigger_reason": "Khách phàn nàn về tình trạng hộp móp khi vận chuyển"
-          },
-          "sentiment": "Bình thường",
-          "key_issue": "Hộp móp do vận chuyển",
-          "sentiment_tag": "Hộp bị móp"
-        },
-        {
-          "review_id": "REV_004",
-          "variant_name": "80g",
-          "customer": {
-            "username_masked": "lananh_beauty",
-            "is_verified_buyer": true
-          },
-          "rating": 5,
-          "review_text": "Săn sale được giá rẻ cực kỳ. Check mã vạch chuẩn auth. Cảm ơn shop nhiều nhé!",
-          "has_media": true,
-          "created_at": "2024-03-25T21:45:00Z",
-          "ai_analysis": {
-            "sentiment": "positive",
-            "key_aspects": [
-              "giá rẻ",
-              "hàng chuẩn auth",
-              "săn sale"
-            ],
-            "requires_customer_service": false,
-            "service_trigger_reason": ""
-          },
-          "sentiment": "Tích cực",
-          "key_issue": "Không có vấn đề",
-          "sentiment_tag": "Giá tốt"
-        }
-      ]
-    },
-    {
       "product_id": "P002",
       "product_name": "Son Kem Lì GIAO FARA Velvet Lip Tint",
       "summary_stats": {
@@ -251,6 +133,67 @@
           "sentiment": "Tiêu cực",
           "key_issue": "Giao sai tông màu",
           "sentiment_tag": "Giao sai hàng"
+        }
+      ]
+    },
+    {
+      "product_id": "P011",
+      "product_name": "Kem Rửa Mặt Dưỡng Ẩm Hada Labo Advanced Nourish Hyaluronic Acid Cleanser 80g",
+      "summary_stats": {
+        "average_rating": 4.1,
+        "total_reviews": 10,
+        "rating_distribution": { "5_star": 6, "4_star": 2, "3_star": 0, "2_star": 0, "1_star": 2 }
+      },
+      "reviews_list": [
+        {
+          "review_id": "REV_P011_01", "customer": {"username_masked": "ngoctram_vip", "is_verified_buyer": true},
+          "rating": 5, "review_text": "Được shop tư vấn nên mua dùng thử. Rửa xong da ẩm mịn thật sự, không hề bị khô căng dù mình ngồi điều hoà cả ngày.", "has_media": true, "created_at": "2026-05-02T10:00:00Z",
+          "sentiment": "Tích cực", "key_issue": "Không có vấn đề", "sentiment_tag": "Cấp ẩm tốt"
+        },
+        {
+          "review_id": "REV_P011_02", "customer": {"username_masked": "hoamai99", "is_verified_buyer": true},
+          "rating": 5, "review_text": "Hàng chính hãng, tạo bọt cực nhiều. Rửa xong sờ lên da mướt mát thích lắm.", "has_media": false, "created_at": "2026-05-01T10:00:00Z",
+          "sentiment": "Tích cực", "key_issue": "Không có vấn đề", "sentiment_tag": "Tạo bọt mịn"
+        },
+        {
+          "review_id": "REV_P011_03", "customer": {"username_masked": "tuyetnhi_dn", "is_verified_buyer": true},
+          "rating": 5, "review_text": "Giao hàng nhanh. Sữa rửa mặt quốc dân rồi không có gì để chê.", "has_media": false, "created_at": "2026-04-30T10:00:00Z",
+          "sentiment": "Tích cực", "key_issue": "Không có vấn đề", "sentiment_tag": "Giao hàng nhanh"
+        },
+        {
+          "review_id": "REV_P011_04", "customer": {"username_masked": "linhdan.2k", "is_verified_buyer": true},
+          "rating": 4, "review_text": "Dùng cũng ổn, cấp ẩm tốt, nhưng mùi hơi y tế một chút.", "has_media": false, "created_at": "2026-04-29T10:00:00Z",
+          "sentiment": "Bình thường", "key_issue": "Mùi hương", "sentiment_tag": "Cấp ẩm tốt"
+        },
+        {
+          "review_id": "REV_P011_05", "customer": {"username_masked": "thanhha_12", "is_verified_buyer": true},
+          "rating": 5, "review_text": "Săn sale rẻ. Mua tuýp thứ 3 rồi, chân ái cho da khô.", "has_media": false, "created_at": "2026-04-28T10:00:00Z",
+          "sentiment": "Tích cực", "key_issue": "Không có vấn đề", "sentiment_tag": "Giá tốt"
+        },
+        {
+          "review_id": "REV_P011_06", "customer": {"username_masked": "minhanh.ng", "is_verified_buyer": true},
+          "rating": 5, "review_text": "Làm sạch sâu mà không căng rát. Bọt bông mềm. Đóng gói rất kỹ.", "has_media": true, "created_at": "2026-04-27T10:00:00Z",
+          "sentiment": "Tích cực", "key_issue": "Không có vấn đề", "sentiment_tag": "Đóng gói kỹ"
+        },
+        {
+          "review_id": "REV_P011_07", "customer": {"username_masked": "phuongly9x", "is_verified_buyer": true},
+          "rating": 4, "review_text": "Chất lượng tốt, hợp da hỗn hợp. Trừ 1 sao vì hộp bị móp xíu.", "has_media": false, "created_at": "2026-04-26T10:00:00Z",
+          "sentiment": "Bình thường", "key_issue": "Hộp móp", "sentiment_tag": "Hộp móp"
+        },
+        {
+          "review_id": "REV_P011_08", "customer": {"username_masked": "quynhnhu", "is_verified_buyer": true},
+          "rating": 5, "review_text": "Tuyệt vời, da mềm xèo xèo sau khi rửa.", "has_media": false, "created_at": "2026-04-25T10:00:00Z",
+          "sentiment": "Tích cực", "key_issue": "Không có vấn đề", "sentiment_tag": "Mềm da"
+        },
+        {
+          "review_id": "REV_P011_09", "customer": {"username_masked": "bichthuy_new", "is_verified_buyer": true},
+          "rating": 1, "review_text": "Sữa rửa mặt quảng cáo cho da khô mà mình dùng xong da khô căng rát, bong tróc hai bên má. Quá thất vọng, không dám dùng tiếp.", "has_media": false, "created_at": "2026-05-03T08:00:00Z",
+          "sentiment": "Tiêu cực", "key_issue": "Da khô căng rát, bong tróc", "sentiment_tag": "Gây khô rát"
+        },
+        {
+          "review_id": "REV_P011_10", "customer": {"username_masked": "khachhang_la", "is_verified_buyer": true},
+          "rating": 1, "review_text": "Mới dùng 2 ngày mà rửa xong mặt rát quá. Da mình hỗn hợp thiên khô dùng không hợp tí nào, căng kích rất khó chịu.", "has_media": false, "created_at": "2026-05-02T15:00:00Z",
+          "sentiment": "Tiêu cực", "key_issue": "Căng kích, rát da", "sentiment_tag": "Gây rát da"
         }
       ]
     }
