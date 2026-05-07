@@ -312,6 +312,19 @@ async def chat_with_history_service(db, customer_id: str, user_text: str, brand_
                 "sensor_insight": None,
                 "_quota_exhausted": True
             }
+        if "503" in err_str or "overloaded" in err_str.lower():
+            print(f"[chat_with_history] Gemini quota exhausted: {err_str[:200]}")
+            return {
+                "suggested_reply": "Dạ hệ thống AI đang tạm thời quá tải, anh/chị vui lòng thử lại sau ít phút ạ 🙏",
+                "confidence_score": 0.0,
+                "is_safe": False,
+                "sentiment_analysis": "bình thường",
+                "identified_product_id": "General",
+                "risk_level": "Thấp",
+                "risk_category": "None",
+                "sensor_insight": None,
+                "_quota_exhausted": True
+            }
         raise  # Lỗi khác thì re-raise bình thường
 
     # Parse JSON với error handling

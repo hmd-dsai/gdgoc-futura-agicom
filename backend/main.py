@@ -372,6 +372,22 @@ async def process_market_strategy(product: ProductRequest):
             "data": strategy_result
         }
     except Exception as e:
+        err_str = str(e)
+        if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "quota" in err_str.lower() or "503" in err_str or "overloaded" in err_str.lower():
+            print(f"[slow-track-strategy] AI Error Fallback: {err_str[:200]}")
+            return {
+                "status": "success",
+                "routing_action": "No Action Needed - System Overloaded",
+                "proposal_id": f"PROP-{product.product_id}-fallback",
+                "data": {
+                    "proposed_price": 0,
+                    "expected_margin_percent": 0,
+                    "pricing_reasoning": "Hệ thống AI đang tạm thời quá tải, chưa thể phân tích chiến lược. Vui lòng thử lại sau.",
+                    "content_update_suggestion": "Chưa có đề xuất (AI Overloaded).",
+                    "urgency_level": "low",
+                    "action_required": False
+                }
+            }
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/learn-feedback", dependencies=[Depends(require_api_key)])
@@ -793,6 +809,19 @@ async def process_and_learn_review(review: ReviewData):
         }
 
     except Exception as e:
+        err_str = str(e)
+        if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "quota" in err_str.lower() or "503" in err_str or "overloaded" in err_str.lower():
+            print(f"[review] AI Error Fallback: {err_str[:200]}")
+            return {
+                "status": "success",
+                "message": "Đã lưu Review ở chế độ offline (AI Overloaded)",
+                "auto_reply": {
+                    "public_reply": "Cảm ơn bạn đã đánh giá! Shop đã ghi nhận và sẽ hỗ trợ sớm nhất.",
+                    "inbox_message": None,
+                    "reply_type": "positive" if review.rating >= 4 else "negative",
+                    "inbox_queued": False
+                }
+            }
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -1344,6 +1373,28 @@ async def generate_crisis_plan(req: CrisisPlanRequest):
 
     except Exception as e:
         db.rollback()
+        err_str = str(e)
+        if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "quota" in err_str.lower() or "503" in err_str or "overloaded" in err_str.lower():
+            print(f"[crisis-plan] AI Error Fallback: {err_str[:200]}")
+            return {
+                "plan_id": f"plan_{req.product_id}_fallback",
+                "product_id": req.product_id,
+                "root_cause_summary": "Hệ thống AI đang tạm thời quá tải, chưa thể phân tích nguyên nhân gốc rễ. Vui lòng thử lại sau.",
+                "urgency": "medium",
+                "generated_at": datetime.utcnow().isoformat(),
+                "from_cache": False,
+                "actions": [
+                    {
+                        "action_id": f"act_{req.product_id}_fb_1",
+                        "type": "immediate",
+                        "category": "monitor",
+                        "title": "Tiếp tục theo dõi phản hồi",
+                        "detail": "AI Overloaded. Hệ thống sẽ tự động phân tích lại khi tải giảm.",
+                        "draft_message": None,
+                        "status": "pending"
+                    }
+                ]
+            }
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
