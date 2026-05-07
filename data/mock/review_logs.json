@@ -178,7 +178,7 @@
         {
           "review_id": "REV_P011_07", "customer": {"username_masked": "phuongly9x", "is_verified_buyer": true},
           "rating": 4, "review_text": "Chất lượng tốt, hợp da hỗn hợp. Trừ 1 sao vì hộp bị móp xíu.", "has_media": false, "created_at": "2026-04-26T10:00:00Z",
-          "sentiment": "Bình thường", "key_issue": "Hộp móp", "sentiment_tag": "Hộp móp"
+          "sentiment": "Bình thường", "key_issue": "Hộp móp", "sentiment_tag": "Hợp da hỗn hợp"
         },
         {
           "review_id": "REV_P011_08", "customer": {"username_masked": "quynhnhu", "is_verified_buyer": true},
