@@ -2,119 +2,99 @@
 
 **Project for GDGoC Hackathon 2026 · Team FUTURA**
 
-**Agicom** is a smart E-commerce Management Dashboard powered by a **Multi-Agent AI** architecture. Instead of just being a standard chatbot, Agicom operates as a virtual staff team, helping SME beauty shop owners automate Customer Service, Pricing Strategy Proposals, Content & Video Script Creation, and Crisis Management in real-time.
+**Agicom** is a smart E-commerce Management Dashboard powered by a **Multi-Agent AI** architecture. Instead of just being a standard chatbot, Agicom operates as a virtual staff team, helping SME beauty shop owners automate Customer Service, Content & Video Script Creation, and Crisis Management in real-time.
 
 ---
 
-## 🌟 Why Agicom?
+## 🌟 Value Proposition & Target Customers (Business Strategy)
 
-SME shop owners are often overwhelmed with handling hundreds of messages, tracking competitor prices, and dealing with negative reviews. Agicom solves this problem using the **Observe → Think → Plan → Act → Learn** model:
+SME shop owners are often overwhelmed with handling hundreds of messages, tracking competitor prices, and dealing with negative reviews. 
 
-- **Automation:** AI automatically replies to customers based on shop policies & conversation context.
-- **Optimization:** Tracks market prices to propose pricing strategies that maintain profit margins.
-- **Continuous Learning:** Automatically saves AI responses edited by the shop owner into a Vector DB so the AI becomes smarter every day.
+**Our Target Customers:** Small and Medium Enterprise (SME) owners, specifically in the beauty and retail sectors, who lack the budget to hire large operational teams.
+
+**The "Pain Point":** 
+- Profit margin gets increasingly thin.
+- Too many SKUs, chats, reviews data to manage, making it hard to keep track of the quality.
+- Inability to proive customer service 24/7.
+- Promotional contents have low conversion rates.
+
+**Agicom's Value Proposition:** 
+We provide a "Virtual Staff Team" that operates 24/7. Using the **Observe → Think → Plan → Act → Learn** model, Agicom solves these problems by:
+- **Continuous Learning - Compounded Intelligence (Differentiation):** Automatically saves shop owner's approval/decline history to database for optimizing future decisions. The AI becomes smarter every day, making Agicom highly tailored to each specific shop unlike generic tools/chatbots.
+- **Autonomy (Cost Reduction):** AI automatically implement tasks (chat replying, planning...) based on shop policy and learned history.
+- **Multi-Agent Coordination:** All agents (CS, Content, RiskManager) are interconnected, able to coordinate and communicate through CoordinationTasks, completing an end-to-end workflow.
 
 ---
 
-## 🧠 Multi-Agent Architecture
+## 🧠 Multi-Agent Architecture (Technical Excellence)
 
-The system is divided into specialized Agents that communicate with each other via `CoordinationTasks` (SQLite):
+The system is designed with a highly modular architecture, ensuring high performance, stability, and easy maintenance. Agents communicate with each other via `CoordinationTasks` (SQLite/PostgreSQL).
 
 ### 1. 💬 Customer Service Agent
 - **Technology:** RAG (Retrieval-Augmented Generation) combined with ChromaDB (`policy_db`, `product_db`, `resolved_qa_db`).
-- **Task:** Reply to customer messages (Live Chat). Look up shop policies, GIAO FARA product information, and conversation history.
-- **Key Features:** Personalization based on *Customer Profiles* (churn probability, LTV). Integrates a **Safety Guardrail**: if unsafe content is detected (`is_safe == False`) or the AI is not confident (`confidence_score < 0.7`), the message is held back for the shop owner to approve. **Human-in-the-Loop**: when the shop owner edits an AI reply, the new Q&A pair is saved to `resolved_qa_db` via `/learn-feedback`.
+- **Task:** Reply to customer messages (Live Chat) using shop policies, product info, and chat history.
+- **Key Features:** 
+  - **Personalization:** Based on *Customer Profiles* (churn probability, LTV).
+  - **Safety Guardrail:** If unsafe content is detected (`is_safe == False`) or the AI is not confident (`confidence_score < 0.7`), the message is held back for the shop owner to approve. 
+  - **Human-in-the-Loop:** When the shop owner edits an AI reply, the new Q&A pair is saved via `/learn-feedback`.
 
-### 2. 💰 Pricing Agent
-- **Task:** Analyze market data (competitor prices, ratings) and internal data (inventory, minimum profit margin).
-- **Key Features:** Makes decisions to "Discount", "Increase price for positioning", or "Stand still". All decisions must ensure `min_margin_percent` (Slow Track flow). Approval history is stored in `strategy_learnings_db` for context in future decisions.
+### 2. 📝 Content & Script Agent
+- **Task:** Listen to "pain points" from repeated questions in Live Chat and 1–3 star Reviews, then generate actionable TikTok video scripts.
+- **Key Features:** 
+  - **Intel Phase:** AI analyzes USPs, competitor weaknesses, and trends.
+  - **Script Phase:** AI generates 3 script variants (Emotional / Tutorial / Social Proof) with a Filming Guide.
 
-### 3. 📝 Content & Script Agent
-- **Task:** Listen to "pain points" from repeated questions in Live Chat and 1–3 star Reviews, then generate actionable content proposals.
-- **Key Features:** Full TikTok video script pipeline in two stages:
-  1. **Intel Phase** — AI analyzes the product's USPs, competitor weaknesses, and content trends.
-  2. **Script Phase** — AI generates 3 script variants (Emotional / Tutorial / Social Proof) with a full Filming Guide.
-- Supports all 10 GIAO FARA products with USPs embedded in RAG.
-
-### 4. 🛡️ Risk & Quality Agent
+### 3. 🛡️ Risk & Quality (RiskManager) Agent
 - **Task:** Monitor all reviews and conversations.
-- **Key Features:** If toxic phrases or 1-star reviews are detected, the AI switches the system to **RED ALERT**, automatically generating a *Crisis Response Plan* (Pause Ads, pre-draft customer apology templates).
+- **Key Features:** Triggers **RED ALERT** on toxic phrases or 1-star reviews, automatically generating a *Crisis Response Plan*.
 
 ---
 
-## 🛠️ Tech Stack
+## 🚀 Go-To-Market & Implementation Roadmap
 
-- **Frontend:** HTML5, CSS3, Vanilla JavaScript (SPA architecture, no frameworks — optimized for speed).
-- **Backend:** Python 3.11, FastAPI, SQLAlchemy.
-- **Database:**
-  - *Relational DB:* PostgreSQL (Deploy) / SQLite (Local)
-  - *Vector DB:* ChromaDB `PersistentClient` — 4 collections: `policy_db`, `product_db`, `resolved_qa_db`, `strategy_learnings_db`
-- **AI Models:** Google Gemini (`gemini-2.5-flash-preview-05-20` for reasoning).
+1. **Phase 1 (Testing & Demo):** Deploy locally for 5 pilot SME beauty shops. Gather feedback to fine-tune the Vector DB learning mechanism.
+2. **Phase 2 (Launch):** Launch as a SaaS model with tiered pricing (Basic for CS only, Pro for full Multi-Agent).
+3. **Phase 3 (Scale):** Integrate directly with e-commerce platforms (Shopee, TikTok Shop) via open APIs.
+
+---
+
+## 🛠️ Tech Stack & System Stability
+
+**Hiệu năng, độ ổn định và an toàn vận hành (Performance & Stability):**
+- **Resilience & Fallbacks:** Built-in fault tolerance. If AI quotas are exhausted (429) or servers overloaded (503), the system gracefully falls back to pre-defined safe responses without crashing.
+- **Data Safety:** ChromaDB `PersistentClient` combined with SQLite/PostgreSQL backups guarantees that learned knowledge is never lost between cold starts.
+- **Safe Guardrails:** Toxic inputs or AI hallucinations are caught before reaching the user via confidence score thresholding.
+
+**Core Stack:**
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript (SPA architecture, no frameworks — optimized for speed and reliability).
+- **Backend:** Python 3.11, FastAPI, SQLAlchemy (Modular separation of concerns).
+- **Database:** PostgreSQL (Deploy) / SQLite (Local) and ChromaDB.
+- **AI Models:** Google Gemini (`gemini-flash-latest`).
 - **Deployment:** Render (Backend) & Netlify (Frontend).
 
 ---
 
 ## 🔌 Core Endpoints
 
-*(The source code contains additional experimental endpoints. Below are the main APIs currently powering the system.)*
-
 ### Chat & Customer Service
-
 | HTTP | Endpoint | Function |
 |------|----------|----------|
 | `POST` | `/chat-v3` | Live Chat: processes RAG, analyzes sentiment, returns Confidence Score |
 | `GET` | `/api/chat-messages/{customer_id}` | Fetch conversation history for a customer |
-| `DELETE` | `/chat/{customer_id}` | Clear a chat session |
 | `POST` | `/learn-feedback` | Human-in-the-loop: saves shop-owner-edited replies to ChromaDB |
 
-### Pricing & Strategy
-
+### Pricing, Content & Risk Management
 | HTTP | Endpoint | Function |
 |------|----------|----------|
 | `POST` | `/slow-track-strategy` | Push market data to AI → returns pricing strategy proposal |
-| `POST` | `/act-and-learn` | Approve/reject proposal → saves decision to `strategy_learnings_db` |
-
-### Content & Script Agent
-
-| HTTP | Endpoint | Function |
-|------|----------|----------|
-| `GET` | `/api/content-suggestions` | Fetch AI-generated content proposals (from Chats & Reviews) |
-| `PATCH` | `/api/content-suggestions/{id}/status` | Update proposal status |
-| `GET` | `/api/content-agent/products` | Product list for the Content Agent dropdown |
-| `POST` | `/api/content-agent/intel` | **Step 1:** AI analyzes Intel (USPs, competitors, trends) for a product |
-| `POST` | `/api/content-agent/generate-script` | **Step 2:** Generate video scripts (3 variants + Filming Guide) |
-| `POST` | `/api/content-agent/trigger-from-task/{task_id}` | Trigger Content Agent from a CoordinationTask |
-
-### Reviews & Quality
-
-| HTTP | Endpoint | Function |
-|------|----------|----------|
-| `POST` | `/learn-from-review` | Analyze new reviews, extract lessons → save to ChromaDB, create warning tasks if negative |
-| `GET` | `/api/reviews` | List of processed reviews |
-| `GET` | `/api/quality/overview` | Quality overview (bad reviews + toxic chats) |
-| `GET` | `/api/chatbot/features` | Chatbot feature usage statistics |
-
-### Crisis Management
-
-| HTTP | Endpoint | Function |
-|------|----------|----------|
-| `GET` | `/api/crisis-overview` | Aggregated crisis data (bad reviews + toxic chats) |
+| `GET` | `/api/content-suggestions` | Fetch AI-generated content proposals |
+| `POST` | `/api/content-agent/generate-script` | Generate video scripts (3 variants + Filming Guide) |
+| `POST` | `/learn-from-review` | Analyze new reviews, extract lessons → save to ChromaDB |
 | `POST` | `/api/crisis-plan` | Generate a Crisis Response Plan for a product |
-| `GET` | `/api/crisis-plan/{product_id}` | Fetch crisis plan by product |
-| `PATCH` | `/api/crisis-action/{action_id}` | Update status of an action item in a plan |
 
-### Reports & System
-
-| HTTP | Endpoint | Function |
-|------|----------|----------|
-| `GET` | `/daily-summary` | Export daily report |
-| `POST` | `/export-daily-summary` | Archive daily report to DB |
-| `GET` | `/health` | Health check (used by Render) |
-| `POST` | `/system/reset-all` | Reset all DB tables (dev/demo only) |
-| `POST` | `/system/seed-crisis-demo` | Load crisis demo data |
+*(Additional endpoints available in the source code.)*
 
 ---
-
 
 ## 💻 Local Setup & Run Guide
 
@@ -141,39 +121,23 @@ cp .env.example .env
 uvicorn main:app --reload --port 8000
 ```
 
-*Note: On the first run, the system automatically calls `seed_demo.py` to load GIAO FARA sample data (products, USPs, policies, chat history) into SQLite and ChromaDB. No extra commands needed.*
+*Note: On the first run, the system automatically calls `seed_demo.py` to load sample data (products, USPs, policies, chat history) into SQLite and ChromaDB.*
 
 ### 2. Frontend (HTML/JS)
 
-Because the Frontend uses pure Vanilla JS, you do not need to install Node.js or npm.
-
 1. Navigate to the `frontend/` directory.
-2. Use **Live Server** (VSCode Extension) or Python HTTP server:
+2. Run a Python HTTP server:
 ```bash
-   python -m http.server 3000
+python -m http.server 3000
 ```
-3. Access `http://localhost:3000?local=1` — the `?local=1` query flag tells `config.js` to use `http://localhost:8000` instead of the production Render URL.
+3. Access `http://localhost:3000?local=1`
 
 ---
 
 ## 🌍 Deployment Guide (Cloud)
 
-### Deploy Backend (Render)
-
-- The project includes a `render.yaml` file. Create a **Web Service** on Render and point it to the repo.
-- Add environment variables on the Render Dashboard:
-  - `GOOGLE_API_KEY` — your Gemini API key
-  - `DATABASE_URL` — Render's PostgreSQL connection string *(optional; defaults to SQLite)*
-- **ChromaDB on Render:** The system uses `PersistentClient`. On each cold start, the code auto-seeds the Vector DB and replays previously learned Q&A entries from SQL — no knowledge is lost between restarts.
-
-### Deploy Frontend (Netlify)
-
-- Point Netlify to the `frontend/` directory.
-- The `netlify.toml` and `_redirects` files are pre-configured to support SPA routing.
-- **Important:** Update `frontend/config.js` to set your Render backend domain:
-```js
-  var AGICOM_BACKEND_URL = 'https://your-service.onrender.com';
-```
+- **Backend (Render):** Uses `render.yaml`. Set `GOOGLE_API_KEY` and optionally `DATABASE_URL`. ChromaDB uses `PersistentClient` to retain knowledge.
+- **Frontend (Netlify):** Point to `frontend/`. Update `frontend/config.js` to set your Render backend domain.
 
 ---
 
@@ -182,6 +146,7 @@ Because the Frontend uses pure Vanilla JS, you do not need to install Node.js or
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `GOOGLE_API_KEY` | ✅ | Gemini API Key from Google AI Studio |
+| `ADMIN_API_KEY`  | ✅ | Required to authenticate secure admin endpoints (e.g. system resets) |
 | `DATABASE_URL` | ❌ | PostgreSQL URL (defaults to SQLite `./agicom.db`) |
 | `CHROMA_DB_DIR` | ❌ | ChromaDB storage path (defaults to `./chroma_data`) |
 | `FRONTEND_URL` | ❌ | Netlify domain to restrict CORS (defaults to `*`) |
